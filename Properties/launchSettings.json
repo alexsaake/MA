@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "ProceduralLandscapeGeneration": {
+      "commandName": "Project",
+      "nativeDebugging": true,
+      "hotReloadEnabled": false
+    }
+  }
+}
