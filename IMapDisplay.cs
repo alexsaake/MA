@@ -4,6 +4,6 @@ namespace ProceduralLandscapeGeneration
 {
     internal interface IMapDisplay
     {
-        Texture CreateNoiseTexture(int width, int height);
+        Texture CreateNoiseTexture(float[,] noiseMap);
     }
 }

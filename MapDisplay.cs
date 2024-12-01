@@ -7,16 +7,10 @@ namespace ProceduralLandscapeGeneration
 {
     internal class MapDisplay : IMapDisplay
     {
-        private IMapGenerator myMapGenerator;
-
-        public MapDisplay(IMapGenerator mapGenerator)
+        public unsafe Texture CreateNoiseTexture(float[,] noiseMap)
         {
-            myMapGenerator = mapGenerator;
-        }
-
-        public unsafe Texture CreateNoiseTexture(int width, int height)
-        {
-            float[,] noiseMap = myMapGenerator.GenerateNoiseMap(width, height);
+            int width = noiseMap.GetLength(0);
+            int height = noiseMap.GetLength(1);
 
             // Dynamic memory allocation to store pixels data (Color type)
             //Color* pixels = (Color*)malloc(width * height * sizeof(Color));

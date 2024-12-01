@@ -10,6 +10,7 @@ internal class DependencyInjectionContainer
         containerBuilder.RegisterType<GameLoop>().As<IGameLoop>();
         containerBuilder.RegisterType<Noise>().As<INoise>();
         containerBuilder.RegisterType<MapGenerator>().As<IMapGenerator>();
+        containerBuilder.RegisterType<MeshGenerator>().As<IMeshGenerator>();
         containerBuilder.RegisterType<MapDisplay>().As<IMapDisplay>();
         return containerBuilder.Build();
     }
