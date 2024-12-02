@@ -93,14 +93,19 @@ namespace ProceduralLandscapeGeneration
             {
                 for (int x = 0; x < width; x++)
                 {
-                    noiseMap[x, y] = InverseInterpolate(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
+                    noiseMap[x, y] = InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
                 }
             }
 
             return noiseMap;
         }
 
-        private static float InverseInterpolate(float lower, float upper, float value)
+        private static float Lerp(float lower, float upper, float value)
+        {
+            return (1 - value) * lower + value * upper;
+        }
+
+        private static float InverseLerp(float lower, float upper, float value)
         {
             if (value <= lower)
             {
@@ -110,8 +115,7 @@ namespace ProceduralLandscapeGeneration
             {
                 return 1;
             }
-            //TODO: Interpolate
-            return lower / upper * value;
+            return (value - lower) / (upper - lower);
         }
     }
 }

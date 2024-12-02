@@ -27,8 +27,8 @@ namespace ProceduralLandscapeGeneration
                     //mesh.normals[0] = 0;
                     //mesh.normals[1] = 1;
                     //mesh.normals[2] = 0;
-                    mesh.texcoords[0] = x / (float)width;
-                    mesh.texcoords[1] = y / (float)height;
+                    mesh.texcoords[vertexIndex * 2 + 0] = x / (float)width;
+                    mesh.texcoords[vertexIndex * 2 + 1] = y / (float)height;
 
                     if (x < width - 1 && y < height - 1)
                     {
