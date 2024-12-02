@@ -6,81 +6,93 @@ namespace ProceduralLandscapeGeneration;
 internal class GameLoop : IGameLoop
 {
     private IMapGenerator myMapGenerator;
-    private IMapDisplay myMapDisplay;
+    private IErosionSimulator myErosionSimulator;
+    private ITextureCreator myTextureCreator;
     private IMeshGenerator myMeshGenerator;
 
-    public GameLoop(IMapGenerator mapGenerator, IMapDisplay mapDisplay, IMeshGenerator meshGenerator)
+    private Model myModel;
+
+    private HeightMap? myNewHeightMap;
+    private Texture myTexture;
+
+    public GameLoop(IMapGenerator mapGenerator, IErosionSimulator erosionSimulator, ITextureCreator textureCreator, IMeshGenerator meshGenerator)
     {
         myMapGenerator = mapGenerator;
-        myMapDisplay = mapDisplay;
+        myErosionSimulator = erosionSimulator;
+        myTextureCreator = textureCreator;
         myMeshGenerator = meshGenerator;
     }
 
     public void Run()
     {
-        Task.Run(MainLoop).GetAwaiter().GetResult();
+        MainLoop();
     }
 
-    private Task MainLoop()
+    private void MainLoop()
     {
         int screenWidth = 1920;
-        int screenHeight = 1920;
+        int screenHeight = 1080;
         int width = 256;
         int height = 256;
 
         Raylib.InitWindow(screenWidth, screenHeight, "Hello, Raylib-CsLo");
 
-        float[,] noiseMap = myMapGenerator.GenerateNoiseMap(width, height);
-        Texture texture = myMapDisplay.CreateNoiseTexture(noiseMap);
+        HeightMap heightMap = myMapGenerator.GenerateHeightMap(width, height);
+        Vector3 modelPosition = new(0.0f, 0.0f, 0.0f);
 
-        // Define the camera to look into our 3d world
-        Camera3D camera = new(new(5.0f, 5.0f, 5.0f), new(0.0f, 0.0f, 0.0f), new(0.0f, 1.0f, 0.0f), 45.0f, 0);
+        UpdateModel(heightMap);
 
-        // Model drawing position
-        Vector3 position = new(0.0f, 0.0f, 0.0f);
+        myErosionSimulator.ErosionIterationFinished += OnErosionSimulationFinished;
+        Task.Run(() => myErosionSimulator.SimulateHydraulicErosion(heightMap, 200000, 1000));
 
-        Raylib.SetCameraMode(camera, CameraMode.CAMERA_ORBITAL);  // Set a orbital camera mode
+        Camera3D camera = new(new(200.0f, 400.0f, 200.0f), new(0.0f, 0.0f, 0.0f), new(0.0f, 1.0f, 0.0f), 45.0f, 0);
 
-        Raylib.SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
-                                               //--------------------------------------------------------------------------------------
+        Raylib.SetCameraMode(camera, CameraMode.CAMERA_FREE);
 
-        Model model = Raylib.LoadModelFromMesh(myMeshGenerator.GenerateTerrainMesh(noiseMap, 50));
-        unsafe
+        Raylib.SetTargetFPS(60);
+
+        while (!Raylib.WindowShouldClose())
         {
-            model.materials[0].maps[(int)Raylib.MATERIAL_MAP_DIFFUSE].texture = texture;         // Set map diffuse texture
-        }
+            if (myNewHeightMap is not null)
+            {
+                UpdateModel(myNewHeightMap);
 
-        // Main game loop
-        while (!Raylib.WindowShouldClose())    // Detect window close button or ESC key
-        {
-            // Update
-            //----------------------------------------------------------------------------------
-            Raylib.UpdateCamera(ref camera);      // Update internal camera and our camera
+                myNewHeightMap = null;
+            }
 
-            //----------------------------------------------------------------------------------
+            Raylib.UpdateCamera(ref camera);
 
-            // Draw
-            //----------------------------------------------------------------------------------
             Raylib.BeginDrawing();
 
             Raylib.ClearBackground(Raylib.SKYBLUE);
             Raylib.BeginMode3D(camera);
 
-            Raylib.DrawModel(model, position, 1.0f, Raylib.WHITE);
+            Raylib.DrawModel(myModel, modelPosition, 1.0f, Raylib.WHITE);
             Raylib.EndMode3D();
 
-            Raylib.DrawTexture(texture, screenWidth - texture.width - 20, 20, Raylib.WHITE);
-            Raylib.DrawRectangleLines(screenWidth - texture.width - 20, 20, texture.width, texture.height, Raylib.GREEN);
+            Raylib.DrawTexture(myTexture, 10, 10, Raylib.WHITE);
 
             Raylib.EndDrawing();
-            //----------------------------------------------------------------------------------
         }
 
-        Raylib.UnloadTexture(texture);
-        Raylib.UnloadModel(model);
-
         Raylib.CloseWindow();
+    }
 
-        return Task.CompletedTask;
+    private void OnErosionSimulationFinished(object? sender, HeightMap heightMap)
+    {
+        myNewHeightMap = heightMap;
+    }
+
+    private void UpdateModel(HeightMap heightMap)
+    {
+        Raylib.UnloadTexture(myTexture);
+        myTexture = myTextureCreator.CreateTexture(heightMap);
+        Mesh mesh = myMeshGenerator.GenerateTerrainMesh(heightMap, 50);
+        Raylib.UnloadModel(myModel);
+        myModel = Raylib.LoadModelFromMesh(mesh);
+        unsafe
+        {
+            myModel.materials[0].maps[(int)Raylib.MATERIAL_MAP_DIFFUSE].texture = myTexture;
+        }
     }
 }

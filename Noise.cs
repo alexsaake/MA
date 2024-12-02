@@ -16,7 +16,7 @@ namespace ProceduralLandscapeGeneration
             myNoiseGenerator = new FastNoise(seed);
         }
 
-        public float[,] GenerateNoiseMap(int width, int height, float scale, int octaves, float persistance, float lacunarity, Vector2 offset)
+        public HeightMap GenerateNoiseMap(int width, int height, float scale, int octaves, float persistance, float lacunarity, Vector2 offset)
         {
             if (lacunarity < 1)
             {
@@ -97,7 +97,7 @@ namespace ProceduralLandscapeGeneration
                 }
             }
 
-            return noiseMap;
+            return new HeightMap(noiseMap);
         }
 
         private static float Lerp(float lower, float upper, float value)

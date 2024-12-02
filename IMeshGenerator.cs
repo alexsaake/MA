@@ -4,6 +4,6 @@ namespace ProceduralLandscapeGeneration
 {
     internal interface IMeshGenerator
     {
-        Mesh GenerateTerrainMesh(float[,] noiseMap, float heightMultiplier);
+        Mesh GenerateTerrainMesh(HeightMap heightMap, float heightMultiplier);
     }
 }
