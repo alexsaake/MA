@@ -15,4 +15,17 @@
     <PackageReference Include="Raylib-CsLo" Version="4.2.0.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Shaders\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Shaders\Shader.fs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Shaders\Shader.vs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

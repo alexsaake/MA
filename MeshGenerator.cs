@@ -1,4 +1,5 @@
 ﻿using Raylib_CsLo;
+using System.Numerics;
 
 namespace ProceduralLandscapeGeneration
 {
@@ -22,11 +23,10 @@ namespace ProceduralLandscapeGeneration
                     mesh.vertices[vertexIndex * 3 + 0] = topLeftX + x;
                     mesh.vertices[vertexIndex * 3 + 1] = heightMap.Data[x, y] * heightMultiplier;
                     mesh.vertices[vertexIndex * 3 + 2] = topLeftZ - y;
-                    //mesh.normals[0] = 0;
-                    //mesh.normals[1] = 1;
-                    //mesh.normals[2] = 0;
-                    mesh.texcoords[vertexIndex * 2 + 0] = x / (float)heightMap.Width;
-                    mesh.texcoords[vertexIndex * 2 + 1] = y / (float)heightMap.Height;
+                    Vector3 normal = heightMap.GetNormal(x, y);
+                    mesh.normals[vertexIndex * 3 + 0] = normal.X;
+                    mesh.normals[vertexIndex * 3 + 1] = normal.Y;
+                    mesh.normals[vertexIndex * 3 + 2] = normal.Z;
 
                     if (x < heightMap.Width - 1 && y < heightMap.Height - 1)
                     {
@@ -53,9 +53,9 @@ namespace ProceduralLandscapeGeneration
             mesh->triangleCount = triangleCount;
 
             mesh->vertices = (float*)Raylib.MemAlloc((uint)(mesh->vertexCount * 3 * sizeof(float)));
+            mesh->normals = (float*)Raylib.MemAlloc((uint)(mesh->vertexCount * 3 * sizeof(float)));
+
             mesh->indices = (ushort*)Raylib.MemAlloc((uint)(mesh->vertexCount * 3 * sizeof(ushort)));
-            //mesh->normals = (float*)Raylib.MemAlloc((uint)(mesh->vertexCount * 3 * sizeof(float)));
-            mesh->texcoords = (float*)Raylib.MemAlloc((uint)(mesh->vertexCount * 2 * sizeof(float)));
         }
     }
 }

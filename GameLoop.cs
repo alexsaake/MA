@@ -5,15 +5,17 @@ namespace ProceduralLandscapeGeneration;
 
 internal class GameLoop : IGameLoop
 {
-    private IMapGenerator myMapGenerator;
-    private IErosionSimulator myErosionSimulator;
-    private ITextureCreator myTextureCreator;
-    private IMeshGenerator myMeshGenerator;
+    const int GLSL_VERSION = 330;
 
-    private Model myModel;
+    private readonly IMapGenerator myMapGenerator;
+    private readonly IErosionSimulator myErosionSimulator;
+    private readonly ITextureCreator myTextureCreator;
+    private readonly IMeshGenerator myMeshGenerator;
 
     private HeightMap? myNewHeightMap;
     private Texture myTexture;
+    private Model myModel;
+    private Shader myShader;
 
     public GameLoop(IMapGenerator mapGenerator, IErosionSimulator erosionSimulator, ITextureCreator textureCreator, IMeshGenerator meshGenerator)
     {
@@ -30,8 +32,8 @@ internal class GameLoop : IGameLoop
 
     private void MainLoop()
     {
-        int screenWidth = 1920;
-        int screenHeight = 1080;
+        int screenWidth = 3840;
+        int screenHeight = 2160;
         int width = 256;
         int height = 256;
 
@@ -39,6 +41,9 @@ internal class GameLoop : IGameLoop
 
         HeightMap heightMap = myMapGenerator.GenerateHeightMap(width, height);
         Vector3 modelPosition = new(0.0f, 0.0f, 0.0f);
+
+        myShader = Raylib.LoadShader(Raylib.TextFormat("Shaders/Shader.vs", GLSL_VERSION),
+            Raylib.TextFormat("Shaders/Shader.fs", GLSL_VERSION));
 
         UpdateModel(heightMap);
 
@@ -61,6 +66,11 @@ internal class GameLoop : IGameLoop
             }
 
             Raylib.UpdateCamera(ref camera);
+            Vector3 cameraPos = new(camera.position.X, camera.position.Y, camera.position.Z);
+            unsafe
+            {
+                Raylib.SetShaderValue(myShader, myShader.locs[(int)ShaderLocationIndex.SHADER_LOC_VECTOR_VIEW], cameraPos, ShaderUniformDataType.SHADER_UNIFORM_VEC3);
+            }
 
             Raylib.BeginDrawing();
 
@@ -92,7 +102,8 @@ internal class GameLoop : IGameLoop
         myModel = Raylib.LoadModelFromMesh(mesh);
         unsafe
         {
-            myModel.materials[0].maps[(int)Raylib.MATERIAL_MAP_DIFFUSE].texture = myTexture;
+            myModel.materials[0].shader = myShader;
+            //myModel.materials[0].maps[(int)Raylib.MATERIAL_MAP_DIFFUSE].texture = myTexture;
         }
     }
 }
