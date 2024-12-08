@@ -1,9 +1,10 @@
 ﻿using Raylib_CsLo;
+using System.Numerics;
 
 namespace ProceduralLandscapeGeneration
 {
     internal interface IMeshGenerator
     {
-        Mesh GenerateTerrainMesh(HeightMap heightMap, float heightMultiplier);
+        Dictionary<Vector3, Mesh> GenerateChunkMeshes(HeightMap heightMap);
     }
 }

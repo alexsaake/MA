@@ -4,16 +4,15 @@
     {
         public event EventHandler<HeightMap>? ErosionIterationFinished;
 
-        public void SimulateHydraulicErosion(HeightMap heightMap, int iterations, int callbackEachIterations)
+        public void SimulateHydraulicErosion(HeightMap heightMap)
         {
-            const int ParallelExecutions = 10;
             Random random = new Random();
             int lastCallback = 0;
 
-            for (int iteration = 0; iteration <= iterations; iteration += ParallelExecutions)
+            for (int iteration = 0; iteration <= Configuration.SimulationIterations; iteration += Configuration.ParallelExecutions)
             {
                 List<Task> parallelExecutionTasks = new List<Task>();
-                for (int parallelExecution = 0; parallelExecution < ParallelExecutions; parallelExecution++)
+                for (int parallelExecution = 0; parallelExecution < Configuration.ParallelExecutions; parallelExecution++)
                 {
                     parallelExecutionTasks.Add(Task.Run(() =>
                     {
@@ -21,14 +20,14 @@
                         waterParticle.Erode(heightMap);
                     }));
                 }
-                Task.WaitAll(parallelExecutionTasks.ToArray(), 10000);
+                Task.WaitAll(parallelExecutionTasks.ToArray());
 
-                if (iteration % callbackEachIterations == 0
+                if (iteration % Configuration.SimulationCallbackEachIterations == 0
                     && iteration != lastCallback)
                 {
                     ErosionIterationFinished?.Invoke(this, heightMap);
                     lastCallback = iteration;
-                    Console.WriteLine($"INFO: Step {iteration} of {iterations}.");
+                    Console.WriteLine($"INFO: Step {iteration} of {Configuration.SimulationIterations}.");
                 }
             }
         }

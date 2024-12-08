@@ -8,7 +8,7 @@ namespace ProceduralLandscapeGeneration
         private readonly int mySeed;
         private readonly FastNoise myNoiseGenerator;
 
-        public Noise() : this(1337) { }
+        public Noise() : this(Configuration.Seed) { }
 
         public Noise(int seed)
         {

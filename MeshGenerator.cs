@@ -5,46 +5,62 @@ namespace ProceduralLandscapeGeneration
 {
     internal class MeshGenerator : IMeshGenerator
     {
-        public unsafe Mesh GenerateTerrainMesh(HeightMap heightMap, float heightMultiplier)
+        public unsafe Dictionary<Vector3, Mesh> GenerateChunkMeshes(HeightMap heightMap)
         {
-            float topLeftX = (heightMap.Width - 1) / -2f;
-            float topLeftZ = (heightMap.Height - 1) / 2f;
+            Dictionary<Vector3, Mesh> chunkMeshes = new Dictionary<Vector3, Mesh>();
 
-            Mesh mesh = new();
-            int triangles = (heightMap.Width - 1) * (heightMap.Height - 1) * 6;
-            AllocateMeshData(&mesh, triangles);
+            int dataPerChunk = (int)Math.Sqrt(Configuration.MaximumModelVertices);
+            int xChunks = (int)MathF.Ceiling((float)heightMap.Width / dataPerChunk);
+            int yChunks = (int)MathF.Ceiling((float)heightMap.Height / dataPerChunk);
 
-            ushort vertexIndex = 0;
-
-            for (int y = 0; y < heightMap.Height; y++)
+            for (int xChunk = 0; xChunk < xChunks; xChunk++)
             {
-                for (int x = 0; x < heightMap.Width; x++)
+                for (int yChunk = 0; yChunk < yChunks; yChunk++)
                 {
-                    mesh.vertices[vertexIndex * 3 + 0] = topLeftX + x;
-                    mesh.vertices[vertexIndex * 3 + 1] = heightMap.Data[x, y] * heightMultiplier;
-                    mesh.vertices[vertexIndex * 3 + 2] = topLeftZ - y;
-                    Vector3 normal = heightMap.GetNormal(x, y);
-                    mesh.normals[vertexIndex * 3 + 0] = normal.X;
-                    mesh.normals[vertexIndex * 3 + 1] = normal.Y;
-                    mesh.normals[vertexIndex * 3 + 2] = normal.Z;
+                    HeightMap heightMapPart = heightMap.GetPart(xChunk * dataPerChunk, xChunk * dataPerChunk + dataPerChunk, yChunk * dataPerChunk, yChunk * dataPerChunk + dataPerChunk);
 
-                    if (x < heightMap.Width - 1 && y < heightMap.Height - 1)
+                    float topLeftX = (heightMapPart.Width - 1) / -2f;
+                    float topLeftZ = (heightMapPart.Height - 1) / 2f;
+
+                    Mesh mesh = new();
+                    int triangles = (heightMapPart.Width - 1) * (heightMapPart.Height - 1) * 6;
+                    AllocateMeshData(&mesh, triangles);
+
+                    ushort vertexIndex = 0;
+
+                    for (int y = 0; y < heightMapPart.Height; y++)
                     {
-                        mesh.indices[vertexIndex * 6 + 0] = vertexIndex;
-                        mesh.indices[vertexIndex * 6 + 1] = (ushort)(vertexIndex + heightMap.Width + 1);
-                        mesh.indices[vertexIndex * 6 + 2] = (ushort)(vertexIndex + heightMap.Width);
-                        mesh.indices[vertexIndex * 6 + 3] = (ushort)(vertexIndex + heightMap.Width + 1);
-                        mesh.indices[vertexIndex * 6 + 4] = vertexIndex;
-                        mesh.indices[vertexIndex * 6 + 5] = (ushort)(vertexIndex + 1);
+                        for (int x = 0; x < heightMapPart.Width; x++)
+                        {
+                            mesh.vertices[vertexIndex * 3 + 0] = topLeftX + x;
+                            mesh.vertices[vertexIndex * 3 + 1] = heightMapPart.Data[x, y] * Configuration.HeightMultiplier;
+                            mesh.vertices[vertexIndex * 3 + 2] = topLeftZ - y;
+                            Vector3 normal = heightMapPart.GetNormal(x, y);
+                            mesh.normals[vertexIndex * 3 + 0] = normal.X;
+                            mesh.normals[vertexIndex * 3 + 1] = normal.Y;
+                            mesh.normals[vertexIndex * 3 + 2] = normal.Z;
+
+                            if (x < heightMapPart.Width - 1 && y < heightMapPart.Height - 1)
+                            {
+                                mesh.indices[vertexIndex * 6 + 0] = vertexIndex;
+                                mesh.indices[vertexIndex * 6 + 1] = (ushort)(vertexIndex + heightMapPart.Width + 1);
+                                mesh.indices[vertexIndex * 6 + 2] = (ushort)(vertexIndex + heightMapPart.Width);
+                                mesh.indices[vertexIndex * 6 + 3] = (ushort)(vertexIndex + heightMapPart.Width + 1);
+                                mesh.indices[vertexIndex * 6 + 4] = vertexIndex;
+                                mesh.indices[vertexIndex * 6 + 5] = (ushort)(vertexIndex + 1);
+                            }
+
+                            vertexIndex++;
+                        }
                     }
 
-                    vertexIndex++;
+                    Raylib.UploadMesh(&mesh, false);
+
+                    chunkMeshes.Add(new Vector3(xChunk * (heightMapPart.Width - 1), 0, -yChunk * (heightMapPart.Height - 1)), mesh);
                 }
             }
 
-            Raylib.UploadMesh(&mesh, false);
-
-            return mesh;
+            return chunkMeshes;
         }
 
         private static unsafe void AllocateMeshData(Mesh* mesh, int triangleCount)
