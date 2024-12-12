@@ -9,7 +9,6 @@
         public const int ParallelExecutions = 10;
         public const int MaximumModelVertices = ushort.MaxValue + 1;
         public const int HeightMultiplier = 60;
-        public const int SimulationIterations = 2000000;
         public const int SimulationCallbackEachIterations = 1000;
     }
 }

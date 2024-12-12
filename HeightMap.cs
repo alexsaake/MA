@@ -52,5 +52,13 @@ namespace ProceduralLandscapeGeneration
 
             return new HeightMap(dataPart);
         }
+
+        public bool IsOutOfBounds(Vector2 position)
+        {
+            return (int)position.X < 0
+                    || (int)position.X > Width - 1
+                    || (int)position.Y < 0
+                    || (int)position.Y > Height - 1;
+        }
     }
 }

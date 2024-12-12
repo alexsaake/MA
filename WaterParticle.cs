@@ -32,10 +32,7 @@ namespace ProceduralLandscapeGeneration
                 myPosition += TimeStep * mySpeed;
                 mySpeed *= (1.0f - TimeStep * Friction);
 
-                if ((int)myPosition.X < 0
-                    || (int)myPosition.X > heightMap.Width - 1
-                    || (int)myPosition.Y < 0
-                    || (int)myPosition.Y > heightMap.Height - 1)
+                if (heightMap.IsOutOfBounds(myPosition))
                 {
                     break;
                 }

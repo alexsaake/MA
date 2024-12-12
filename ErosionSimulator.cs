@@ -1,22 +1,31 @@
-﻿namespace ProceduralLandscapeGeneration
+﻿using System.Numerics;
+
+namespace ProceduralLandscapeGeneration
 {
     internal class ErosionSimulator : IErosionSimulator
     {
+        private Random myRandom;
+
         public event EventHandler<HeightMap>? ErosionIterationFinished;
 
-        public void SimulateHydraulicErosion(HeightMap heightMap)
+        public ErosionSimulator()
         {
-            Random random = new Random();
+            myRandom = new Random(Configuration.Seed);
+        }
+
+        public void SimulateHydraulicErosion(HeightMap heightMap, int simulationIterations)
+        {
             int lastCallback = 0;
 
-            for (int iteration = 0; iteration <= Configuration.SimulationIterations; iteration += Configuration.ParallelExecutions)
+            for (int iteration = 0; iteration <= simulationIterations; iteration += Configuration.ParallelExecutions)
             {
                 List<Task> parallelExecutionTasks = new List<Task>();
                 for (int parallelExecution = 0; parallelExecution < Configuration.ParallelExecutions; parallelExecution++)
                 {
                     parallelExecutionTasks.Add(Task.Run(() =>
                     {
-                        WaterParticle waterParticle = new(new(random.Next(heightMap.Width), random.Next(heightMap.Height)));
+                        Vector2 newPosition = new(myRandom.Next(heightMap.Width), myRandom.Next(heightMap.Height));
+                        WaterParticle waterParticle = new(newPosition);
                         waterParticle.Erode(heightMap);
                     }));
                 }
@@ -27,9 +36,11 @@
                 {
                     ErosionIterationFinished?.Invoke(this, heightMap);
                     lastCallback = iteration;
-                    Console.WriteLine($"INFO: Step {iteration} of {Configuration.SimulationIterations}.");
+                    Console.WriteLine($"INFO: Step {iteration} of {simulationIterations}.");
                 }
             }
+
+            Console.WriteLine($"INFO: End of simulation after {simulationIterations} iterations.");
         }
     }
 }
