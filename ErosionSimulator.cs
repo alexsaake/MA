@@ -10,7 +10,7 @@ namespace ProceduralLandscapeGeneration
 
         public ErosionSimulator()
         {
-            myRandom = new Random(Configuration.Seed);
+            myRandom = Random.Shared;
         }
 
         public void SimulateHydraulicErosion(HeightMap heightMap, int simulationIterations)

@@ -3,24 +3,25 @@ using System.Numerics;
 
 namespace ProceduralLandscapeGeneration
 {
-    internal class MeshGenerator : IMeshGenerator
+    internal class MeshCreator : IMeshCreator
     {
         public unsafe Dictionary<Vector3, Mesh> GenerateChunkMeshes(HeightMap heightMap)
         {
             Dictionary<Vector3, Mesh> chunkMeshes = new Dictionary<Vector3, Mesh>();
 
-            int dataPerChunk = (int)Math.Sqrt(Configuration.MaximumModelVertices);
-            int xChunks = (int)MathF.Ceiling((float)heightMap.Width / dataPerChunk);
-            int yChunks = (int)MathF.Ceiling((float)heightMap.Height / dataPerChunk);
+            int maximumDataPerChunk = (int)Math.Sqrt(Configuration.MaximumModelVertices);
+            int xChunks = (int)MathF.Floor((float)heightMap.Width / maximumDataPerChunk);
+            int yChunks = (int)MathF.Floor((float)heightMap.Height / maximumDataPerChunk);
 
             for (int xChunk = 0; xChunk < xChunks; xChunk++)
             {
                 for (int yChunk = 0; yChunk < yChunks; yChunk++)
                 {
-                    HeightMap heightMapPart = heightMap.GetPart(xChunk * dataPerChunk, xChunk * dataPerChunk + dataPerChunk, yChunk * dataPerChunk, yChunk * dataPerChunk + dataPerChunk);
-
-                    float topLeftX = (heightMapPart.Width - 1) / -2f;
-                    float topLeftZ = (heightMapPart.Height - 1) / 2f;
+                    int currentChunkXFrom = xChunk * maximumDataPerChunk;
+                    int currentChunkXTo = xChunk * maximumDataPerChunk + maximumDataPerChunk;
+                    int currentChunkYFrom = yChunk * maximumDataPerChunk;
+                    int currentChunkYTo = yChunk * maximumDataPerChunk + maximumDataPerChunk;
+                    HeightMap heightMapPart = heightMap.GetHeightMapPart(currentChunkXFrom, currentChunkXTo, currentChunkYFrom, currentChunkYTo);
 
                     Mesh mesh = new();
                     int triangles = (heightMapPart.Width - 1) * (heightMapPart.Height - 1) * 6;
@@ -32,10 +33,10 @@ namespace ProceduralLandscapeGeneration
                     {
                         for (int x = 0; x < heightMapPart.Width; x++)
                         {
-                            mesh.vertices[vertexIndex * 3 + 0] = topLeftX + x;
-                            mesh.vertices[vertexIndex * 3 + 1] = heightMapPart.Data[x, y] * Configuration.HeightMultiplier;
-                            mesh.vertices[vertexIndex * 3 + 2] = topLeftZ - y;
-                            Vector3 normal = heightMapPart.GetNormal(x, y);
+                            mesh.vertices[vertexIndex * 3 + 0] = x;
+                            mesh.vertices[vertexIndex * 3 + 1] = y;
+                            mesh.vertices[vertexIndex * 3 + 2] = heightMapPart.Data[x, y] * Configuration.HeightMultiplier;
+                            Vector3 normal = heightMapPart.GetScaledNormal(x, y);
                             mesh.normals[vertexIndex * 3 + 0] = normal.X;
                             mesh.normals[vertexIndex * 3 + 1] = normal.Y;
                             mesh.normals[vertexIndex * 3 + 2] = normal.Z;
@@ -56,7 +57,8 @@ namespace ProceduralLandscapeGeneration
 
                     Raylib.UploadMesh(&mesh, false);
 
-                    chunkMeshes.Add(new Vector3(xChunk * (heightMapPart.Width - 1), 0, -yChunk * (heightMapPart.Height - 1)), mesh);
+                    Vector3 position = new Vector3(xChunk * (heightMapPart.Width - 1), yChunk * (heightMapPart.Height - 1), 0);
+                    chunkMeshes.Add(position, mesh);
                 }
             }
 

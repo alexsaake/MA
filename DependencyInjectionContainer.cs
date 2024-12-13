@@ -11,8 +11,8 @@ internal class DependencyInjectionContainer
         containerBuilder.RegisterType<Noise>().As<INoise>();
         containerBuilder.RegisterType<MapGenerator>().As<IMapGenerator>();
         containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>();
-        containerBuilder.RegisterType<MeshGenerator>().As<IMeshGenerator>();
-        containerBuilder.RegisterType<TextureGenerator>().As<ITextureCreator>();
+        containerBuilder.RegisterType<MeshCreator>().As<IMeshCreator>();
+        containerBuilder.RegisterType<TextureCreator>().As<ITextureCreator>();
         return containerBuilder.Build();
     }
 }

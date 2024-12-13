@@ -9,21 +9,19 @@ internal class GameLoop : IGameLoop
 
     private readonly IMapGenerator myMapGenerator;
     private readonly IErosionSimulator myErosionSimulator;
-    private readonly ITextureCreator myTextureCreator;
-    private readonly IMeshGenerator myMeshGenerator;
+    private readonly IMeshCreator myMeshCreator;
 
     private HeightMap? myNewHeightMap;
-    private Texture myTexture;
+    private RenderTexture myShadowMap;
     private Dictionary<Vector3, Model> myChunkModels;
     private Shader mySceneShader;
     private Shader myShadowMapShader;
 
-    public GameLoop(IMapGenerator mapGenerator, IErosionSimulator erosionSimulator, ITextureCreator textureCreator, IMeshGenerator meshGenerator)
+    public GameLoop(IMapGenerator mapGenerator, IErosionSimulator erosionSimulator, IMeshCreator meshCreator)
     {
         myMapGenerator = mapGenerator;
         myErosionSimulator = erosionSimulator;
-        myTextureCreator = textureCreator;
-        myMeshGenerator = meshGenerator;
+        myMeshCreator = meshCreator;
 
         myChunkModels = new Dictionary<Vector3, Model>();
     }
@@ -35,9 +33,9 @@ internal class GameLoop : IGameLoop
 
     private void MainLoop()
     {
-        int width = 512;
-        int height = 512;
-        int simulationIterations = 1000000;
+        int width = 510;
+        int height = 510;
+        int simulationIterations = 2000000;
 
         Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-CsLo");
 
@@ -50,8 +48,8 @@ internal class GameLoop : IGameLoop
 
         int lightSpaceMatrixLocation = Raylib.GetShaderLocation(mySceneShader, "lightSpaceMatrix");
         int shadowMapLocation = Raylib.GetShaderLocation(mySceneShader, "shadowMap");
-        Vector3 heightMapCenter = new(width / 4, 0, -height / 4);
-        Vector3 lightDirection = -(heightMapCenter + new Vector3(0, height / 4, height));
+        Vector3 heightMapCenter = new(width / 2, height / 2, 0);
+        Vector3 lightDirection = new Vector3(0, height, -height / 2);
         int lightDirectionLocation = Raylib.GetShaderLocation(mySceneShader, "lightDirection");
         unsafe
         {
@@ -59,42 +57,35 @@ internal class GameLoop : IGameLoop
         }
         int viewPositionLocation = Raylib.GetShaderLocation(mySceneShader, "viewPosition");
 
-        UpdateModel(heightMap);
+        Vector3 cameraPosition = heightMapCenter + new Vector3(width / 2, -height / 2, height / 2);
+        Camera3D camera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.CAMERA_PERSPECTIVE);
+        Raylib.SetCameraMode(camera, CameraMode.CAMERA_FREE);
+
+        myShadowMap = LoadShadowMapRenderTexture(ShadowMapResolution, ShadowMapResolution);
+        Vector3 lightCameraPosition = heightMapCenter - lightDirection;
+        Camera3D lightCamera = new(lightCameraPosition, heightMapCenter, Vector3.UnitZ, 550.0f, CameraProjection.CAMERA_ORTHOGRAPHIC);
+
+        InitiateModel(heightMap);
+        UpdateShadowMap(lightCamera, lightSpaceMatrixLocation, shadowMapLocation);
 
         myErosionSimulator.ErosionIterationFinished += OnErosionSimulationFinished;
         Task.Run(() => myErosionSimulator.SimulateHydraulicErosion(heightMap, simulationIterations));
-
-        Vector3 cameraPosition = heightMapCenter + new Vector3(width / 2, height, height / 2);
-        Camera3D camera = new(cameraPosition, heightMapCenter, Vector3.UnitY, 45.0f, CameraProjection.CAMERA_PERSPECTIVE);
-
-        RenderTexture shadowMap = LoadShadowMapRenderTexture(ShadowMapResolution, ShadowMapResolution);
-        Camera3D lightCamera = new(-lightDirection, heightMapCenter, Vector3.UnitY, 550.0f, CameraProjection.CAMERA_ORTHOGRAPHIC);
-
-        Raylib.SetCameraMode(camera, CameraMode.CAMERA_FREE);
 
         Raylib.SetTargetFPS(60);
 
         while (!Raylib.WindowShouldClose())
         {
-            if (myNewHeightMap is not null)
-            {
-                UpdateModel(myNewHeightMap);
 
-                myNewHeightMap = null;
-            }
 
             Raylib.BeginDrawing();
 
-            Raylib.BeginTextureMode(shadowMap);
-            Raylib.ClearBackground(Raylib.WHITE);
-            Raylib.BeginMode3D(lightCamera);
-            Matrix4x4 lightProjection = RlGl.rlGetMatrixProjection();
-            Matrix4x4 lightView = RlGl.rlGetMatrixModelview();
-            DrawScene(myShadowMapShader);
-            Raylib.EndMode3D();
-            Raylib.EndTextureMode();
-            Matrix4x4 lightSpaceMatrix = Matrix4x4.Multiply(lightProjection, lightView);
+            if (myNewHeightMap is not null)
+            {
+                UpdateModel(myNewHeightMap);
+                UpdateShadowMap(lightCamera, lightSpaceMatrixLocation, shadowMapLocation);
 
+                myNewHeightMap = null;
+            }
 
             Raylib.UpdateCamera(ref camera);
             Vector3 viewPosition = camera.position;
@@ -105,29 +96,38 @@ internal class GameLoop : IGameLoop
 
             Raylib.ClearBackground(Raylib.SKYBLUE);
 
-            Raylib.SetShaderValueMatrix(mySceneShader, lightSpaceMatrixLocation, lightSpaceMatrix);
-
-            RlGl.rlEnableShader(myShadowMapShader.id);
-            int slot = 10;
-            RlGl.rlActiveTextureSlot(slot);
-            RlGl.rlEnableTexture(shadowMap.depth.id);
-            unsafe
-            {
-                Raylib.SetShaderValueTexture(mySceneShader, shadowMapLocation, shadowMap.depth);
-                RlGl.rlSetUniform(shadowMapLocation, &slot, (int)ShaderUniformDataType.SHADER_UNIFORM_INT, 1);
-            }
-
             Raylib.BeginMode3D(camera);
             DrawScene(mySceneShader);
             Raylib.EndMode3D();
-
-            Raylib.DrawTexture(myTexture, 10, 10, Raylib.WHITE);
-            //Raylib.DrawTexture(shadowMap.depth, 600, 10, Raylib.WHITE);
 
             Raylib.EndDrawing();
         }
 
         Raylib.CloseWindow();
+    }
+
+    private void UpdateShadowMap(Camera3D lightCamera, int lightSpaceMatrixLocation, int shadowMapLocation)
+    {
+        Raylib.BeginTextureMode(myShadowMap);
+        Raylib.ClearBackground(Raylib.WHITE);
+        Raylib.BeginMode3D(lightCamera);
+        Matrix4x4 lightProjection = RlGl.rlGetMatrixProjection();
+        Matrix4x4 lightView = RlGl.rlGetMatrixModelview();
+        DrawScene(myShadowMapShader);
+        Raylib.EndMode3D();
+        Raylib.EndTextureMode();
+        Matrix4x4 lightSpaceMatrix = Matrix4x4.Multiply(lightProjection, lightView);
+        Raylib.SetShaderValueMatrix(mySceneShader, lightSpaceMatrixLocation, lightSpaceMatrix);
+
+        RlGl.rlEnableShader(myShadowMapShader.id);
+        int slot = 10;
+        RlGl.rlActiveTextureSlot(slot);
+        RlGl.rlEnableTexture(myShadowMap.depth.id);
+        unsafe
+        {
+            Raylib.SetShaderValueTexture(mySceneShader, shadowMapLocation, myShadowMap.depth);
+            RlGl.rlSetUniform(shadowMapLocation, &slot, (int)ShaderUniformDataType.SHADER_UNIFORM_INT, 1);
+        }
     }
 
     private RenderTexture LoadShadowMapRenderTexture(int width, int height)
@@ -178,24 +178,27 @@ internal class GameLoop : IGameLoop
         myNewHeightMap = heightMap;
     }
 
-    private void UpdateModel(HeightMap heightMap)
+    private void InitiateModel(HeightMap heightMap)
     {
-        Raylib.UnloadTexture(myTexture);
-        myTexture = myTextureCreator.CreateTexture(heightMap);
-        Dictionary<Vector3, Mesh> chunkMeshes = myMeshGenerator.GenerateChunkMeshes(heightMap);
+        Dictionary<Vector3, Mesh> chunkMeshes = myMeshCreator.GenerateChunkMeshes(heightMap);
         foreach (var chunkMesh in chunkMeshes)
         {
-            if (myChunkModels.TryGetValue(chunkMesh.Key, out Model value))
-            {
-                Raylib.UnloadModel(value);
-            }
+            Model newModel = Raylib.LoadModelFromMesh(chunkMesh.Value);
+
+            myChunkModels.Add(chunkMesh.Key, newModel);
+        }
+    }
+
+    private void UpdateModel(HeightMap heightMap)
+    {
+        Dictionary<Vector3, Mesh> chunkMeshes = myMeshCreator.GenerateChunkMeshes(heightMap);
+        foreach (var chunkMesh in chunkMeshes)
+        {
+            Raylib.UnloadModel(myChunkModels[chunkMesh.Key]);
 
             Model newModel = Raylib.LoadModelFromMesh(chunkMesh.Value);
 
-            if (!myChunkModels.TryAdd(chunkMesh.Key, newModel))
-            {
-                myChunkModels[chunkMesh.Key] = newModel;
-            }
+            myChunkModels[chunkMesh.Key] = newModel;
         }
     }
 }

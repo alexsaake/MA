@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace ProceduralLandscapeGeneration
 {
-    internal interface IMeshGenerator
+    internal interface IMeshCreator
     {
         Dictionary<Vector3, Mesh> GenerateChunkMeshes(HeightMap heightMap);
     }

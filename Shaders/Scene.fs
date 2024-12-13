@@ -28,7 +28,7 @@ float ShadowCalculation()
         for(int y = -1; y <= 1; ++y)
         {
             float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
-            shadow += currentDepth - bias > pcfDepth  ? 0.5 : 0.0;        
+            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
         }    
     }
     shadow /= 9.0;
@@ -42,7 +42,7 @@ float ShadowCalculation()
 void main()
 {
     vec3 lightColor = vec3(1.0);
-	float cliffSteepness = 0.97;
+	float cliffSteepness = 0.15;
 	vec3 normal = normalize(fragNormal);
 	vec3 modelColor = vec3(1.0);
 	if(normal.z < cliffSteepness)
@@ -53,7 +53,7 @@ void main()
 	else
 	{
 		float snowBorder = 40;
-		if(fragPosition.y > snowBorder)
+		if(fragPosition.z > snowBorder)
 		{
 			vec3 snowColor = vec3(0.95, 0.95, 1.0);
 			modelColor = snowColor * lightColor;
@@ -71,7 +71,6 @@ void main()
     float diff = max(dot(normal, lightDirectionNormal), 0.0);
     vec3 diffuse = diff * lightColor;
     
-    // specular
     vec3 viewDirection = normalize(viewPosition - fragPosition);
     vec3 reflectDir = reflect(-lightDirectionNormal, normal);
     float spec = pow(max(dot(viewDirection, reflectDir), 0.0), 64);

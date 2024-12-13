@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace ProceduralLandscapeGeneration
 {
-    internal class TextureGenerator : ITextureCreator
+    internal class TextureCreator : ITextureCreator
     {
         public unsafe Texture CreateTexture(HeightMap heightMap)
         {
