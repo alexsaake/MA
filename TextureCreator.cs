@@ -18,7 +18,7 @@ namespace ProceduralLandscapeGeneration
             {
                 for (int x = 0; x < heightMap.Width; x++)
                 {
-                    byte color = (byte)((heightMap.Data[x, y] + 1) * 0.5 * 255);
+                    byte color = (byte)((heightMap.Value[x, y].Height + 1) * 0.5 * 255);
                     pixels[y * heightMap.Width + x] = new Color(color, color, color, byte.MaxValue);
                 }
             }

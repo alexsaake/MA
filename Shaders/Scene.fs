@@ -2,6 +2,7 @@
 
 in vec3 fragPosition;
 in vec3 fragNormal;
+in vec4 fragColor;
 in vec4 fragPosLightSpace;
 
 uniform sampler2D shadowMap;
@@ -9,7 +10,7 @@ uniform sampler2D shadowMap;
 uniform vec3 lightDirection;
 uniform vec3 viewPosition;
 
-out vec4 FragColor;
+out vec4 TexelColor;
 
 float ShadowCalculation()
 {
@@ -42,31 +43,10 @@ float ShadowCalculation()
 void main()
 {
     vec3 lightColor = vec3(1.0);
-	float cliffSteepness = 0.15;
-	vec3 normal = normalize(fragNormal);
-	vec3 modelColor = vec3(1.0);
-	if(normal.z < cliffSteepness)
-	{
-		vec3 steepColor = vec3(0.6, 0.6, 0.6);
-		modelColor = steepColor * lightColor;
-	}
-	else
-	{
-		float snowBorder = 40;
-		if(fragPosition.z > snowBorder)
-		{
-			vec3 snowColor = vec3(0.95, 0.95, 1.0);
-			modelColor = snowColor * lightColor;
-		}
-		else
-		{
-			vec3 flatColor = vec3(0.3, 0.6, 0.3);
-			modelColor = flatColor * lightColor;
-		}
-	}
 
 	vec3 ambient = 0.01 * lightColor;
 
+	vec3 normal = normalize(fragNormal);
     vec3 lightDirectionNormal = normalize(-lightDirection);  
     float diff = max(dot(normal, lightDirectionNormal), 0.0);
     vec3 diffuse = diff * lightColor;
@@ -78,6 +58,6 @@ void main()
 
     float shadow = ShadowCalculation();
 
-    vec3 result =  (ambient + (1.0 - shadow) * (diffuse + specular)) * modelColor;
-	FragColor = vec4(result, 1.0);
+    vec3 result =  (ambient + (1.0 - shadow) * (diffuse + specular)) * fragColor.rgb;
+    TexelColor = vec4(result, 1.0);
 }

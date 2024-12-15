@@ -35,7 +35,7 @@ namespace ProceduralLandscapeGeneration
                 persistance = 1;
             }
 
-            float[,] noiseMap = new float[width, height];
+            Soil[,] noiseMap = new Soil[width, height];
 
             Random randomNumberGenerator = new Random(mySeed);
             Vector2[] octaveOffsets = new Vector2[octaves];
@@ -85,7 +85,7 @@ namespace ProceduralLandscapeGeneration
                     {
                         minNoiseHeight = noiseHeight;
                     }
-                    noiseMap[x, y] = noiseHeight;
+                    noiseMap[x, y].Height = noiseHeight;
                 }
             }
 
@@ -93,7 +93,7 @@ namespace ProceduralLandscapeGeneration
             {
                 for (int x = 0; x < width; x++)
                 {
-                    noiseMap[x, y] = InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
+                    noiseMap[x, y].Height = InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y].Height);
                 }
             }
 

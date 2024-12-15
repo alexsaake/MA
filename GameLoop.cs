@@ -33,8 +33,8 @@ internal class GameLoop : IGameLoop
 
     private void MainLoop()
     {
-        int width = 510;
-        int height = 510;
+        int width = 256;
+        int height = 256;
         int simulationIterations = 2000000;
 
         Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-CsLo");
@@ -57,7 +57,7 @@ internal class GameLoop : IGameLoop
         }
         int viewPositionLocation = Raylib.GetShaderLocation(mySceneShader, "viewPosition");
 
-        Vector3 cameraPosition = heightMapCenter + new Vector3(width / 2, -height / 2, height / 2);
+        Vector3 cameraPosition = heightMapCenter + new Vector3(width, -height, height);
         Camera3D camera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.CAMERA_PERSPECTIVE);
         Raylib.SetCameraMode(camera, CameraMode.CAMERA_FREE);
 

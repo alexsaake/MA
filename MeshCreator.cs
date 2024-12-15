@@ -35,11 +35,16 @@ namespace ProceduralLandscapeGeneration
                         {
                             mesh.vertices[vertexIndex * 3 + 0] = x;
                             mesh.vertices[vertexIndex * 3 + 1] = y;
-                            mesh.vertices[vertexIndex * 3 + 2] = heightMapPart.Data[x, y] * Configuration.HeightMultiplier;
+                            mesh.vertices[vertexIndex * 3 + 2] = heightMapPart.Value[x, y].Height * Configuration.HeightMultiplier;
                             Vector3 normal = heightMapPart.GetScaledNormal(x, y);
                             mesh.normals[vertexIndex * 3 + 0] = normal.X;
                             mesh.normals[vertexIndex * 3 + 1] = normal.Y;
                             mesh.normals[vertexIndex * 3 + 2] = normal.Z;
+                            Color color = heightMapPart.Value[x, y].Type.GetColor();
+                            mesh.colors[vertexIndex * 4 + 0] = color.r;
+                            mesh.colors[vertexIndex * 4 + 1] = color.g;
+                            mesh.colors[vertexIndex * 4 + 2] = color.b;
+                            mesh.colors[vertexIndex * 4 + 3] = color.a;
 
                             if (x < heightMapPart.Width - 1 && y < heightMapPart.Height - 1)
                             {
@@ -72,6 +77,7 @@ namespace ProceduralLandscapeGeneration
 
             mesh->vertices = (float*)Raylib.MemAlloc((uint)(mesh->vertexCount * 3 * sizeof(float)));
             mesh->normals = (float*)Raylib.MemAlloc((uint)(mesh->vertexCount * 3 * sizeof(float)));
+            mesh->colors = (byte*)Raylib.MemAlloc((uint)(mesh->vertexCount * 4 * sizeof(byte)));
 
             mesh->indices = (ushort*)Raylib.MemAlloc((uint)(mesh->vertexCount * 3 * sizeof(ushort)));
         }

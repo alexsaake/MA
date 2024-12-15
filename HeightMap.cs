@@ -4,14 +4,14 @@ namespace ProceduralLandscapeGeneration
 {
     internal class HeightMap
     {
-        public float[,] Data { get; }
+        public Soil[,] Value { get; }
 
-        public int Width => Data.GetLength(0);
-        public int Height => Data.GetLength(1);
+        public int Width => Value.GetLength(0);
+        public int Height => Value.GetLength(1);
 
-        public HeightMap(float[,] noiseMap)
+        public HeightMap(Soil[,] noiseMap)
         {
-            Data = noiseMap;
+            Value = noiseMap;
         }
 
         public Vector3 GetNormal(int x, int y)
@@ -33,8 +33,8 @@ namespace ProceduralLandscapeGeneration
             }
 
             Vector3 normal = new(
-            scale * -(Data[x + 1, y - 1] - Data[x - 1, y - 1] + 2 * (Data[x + 1, y] - Data[x - 1, y]) + Data[x + 1, y + 1] - Data[x - 1, y + 1]),
-            scale * -(Data[x - 1, y + 1] - Data[x - 1, y - 1] + 2 * (Data[x, y + 1] - Data[x, y - 1]) + Data[x + 1, y + 1] - Data[x + 1, y - 1]),
+            scale * -(Value[x + 1, y - 1].Height - Value[x - 1, y - 1].Height + 2 * (Value[x + 1, y].Height - Value[x - 1, y].Height) + Value[x + 1, y + 1].Height - Value[x - 1, y + 1].Height),
+            scale * -(Value[x - 1, y + 1].Height - Value[x - 1, y - 1].Height + 2 * (Value[x, y + 1].Height - Value[x, y - 1].Height) + Value[x + 1, y + 1].Height - Value[x + 1, y - 1].Height),
             1.0f);
             normal = Vector3.Normalize(normal);
 
@@ -43,7 +43,7 @@ namespace ProceduralLandscapeGeneration
 
         public HeightMap GetHeightMapPart(int xFrom, int xTo, int yFrom, int yTo)
         {
-            float[,] dataPart = new float[xTo - xFrom, yTo - yFrom];
+            Soil[,] dataPart = new Soil[xTo - xFrom, yTo - yFrom];
             int xSize = xTo - xFrom;
             int ySize = yTo - yFrom;
 
@@ -51,7 +51,7 @@ namespace ProceduralLandscapeGeneration
             {
                 for (int y = 0; y < ySize; y++)
                 {
-                    dataPart[x, y] = Data[x + xFrom, y + yFrom];
+                    dataPart[x, y] = Value[x + xFrom, y + yFrom];
                 }
             }
 

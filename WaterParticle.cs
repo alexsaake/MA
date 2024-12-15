@@ -37,7 +37,7 @@ namespace ProceduralLandscapeGeneration
                     break;
                 }
 
-                float maximumSediment = myVolume * mySpeed.Length() * (heightMap.Data[(int)initialPosition.X, (int)initialPosition.Y] - heightMap.Data[(int)myPosition.X, (int)myPosition.Y]);
+                float maximumSediment = myVolume * mySpeed.Length() * (heightMap.Value[(int)initialPosition.X, (int)initialPosition.Y].Height - heightMap.Value[(int)myPosition.X, (int)myPosition.Y].Height);
 
                 if (maximumSediment < 0.0f)
                 {
@@ -47,7 +47,7 @@ namespace ProceduralLandscapeGeneration
                 float sedimentDifference = maximumSediment - mySediment;
 
                 mySediment += TimeStep * DepositionRate * sedimentDifference;
-                heightMap.Data[(int)initialPosition.X, (int)initialPosition.Y] -= TimeStep * myVolume * DepositionRate * sedimentDifference;
+                heightMap.Value[(int)initialPosition.X, (int)initialPosition.Y].Height -= TimeStep * myVolume * DepositionRate * sedimentDifference;
 
                 myVolume *= (1.0f - TimeStep * EvaporationRate);
             }
