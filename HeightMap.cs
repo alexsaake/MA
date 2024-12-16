@@ -14,9 +14,9 @@ namespace ProceduralLandscapeGeneration
             Value = noiseMap;
         }
 
-        public Vector3 GetNormal(int x, int y)
+        public Vector3 GetNormal(Vector2Int position)
         {
-            return GetScaledNormal(x, y, 1);
+            return GetScaledNormal(position.X, position.Y, 1);
         }
 
         public Vector3 GetScaledNormal(int x, int y)
@@ -60,10 +60,20 @@ namespace ProceduralLandscapeGeneration
 
         public bool IsOutOfBounds(Vector2 position)
         {
-            return (int)position.X < 0
-                    || (int)position.X > Width - 1
-                    || (int)position.Y < 0
-                    || (int)position.Y > Height - 1;
+            return IsOutOfBounds((int)position.X, (int)position.Y);
+        }
+
+        public bool IsOutOfBounds(Vector2Int position)
+        {
+            return IsOutOfBounds(position.X, position.Y);
+        }
+
+        public bool IsOutOfBounds(int x, int y)
+        {
+            return x < 0
+                    || x > Width - 1
+                    || y < 0
+                    || y > Height - 1;
         }
     }
 }

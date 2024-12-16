@@ -19,6 +19,15 @@ namespace ProceduralLandscapeGeneration
 
             for (int iteration = 0; iteration <= simulationIterations; iteration += Configuration.ParallelExecutions)
             {
+                //for (int x = 0; x < heightMap.Width; x++)
+                //{
+                //    for (int y = 0; y < heightMap.Height; y++)
+                //    {
+                //        heightMap.Value[x, y].DischargeTrack = 0.0f;
+                //        heightMap.Value[x, y].MomentumTrack = Vector2.Zero;
+                //    }
+                //}
+
                 List<Task> parallelExecutionTasks = new List<Task>();
                 for (int parallelExecution = 0; parallelExecution < Configuration.ParallelExecutions; parallelExecution++)
                 {
@@ -26,13 +35,36 @@ namespace ProceduralLandscapeGeneration
                     {
                         Vector2 newPosition = new(myRandom.Next(heightMap.Width), myRandom.Next(heightMap.Height));
                         WaterParticle waterParticle = new(newPosition);
-                        waterParticle.Erode(heightMap);
+                        while (true)
+                        {
+                            if (!waterParticle.Move(heightMap))
+                            {
+                                break;
+                            }
+
+                            //waterParticle.Track(heightMap);
+
+                            if (!waterParticle.Interact(heightMap))
+                            {
+                                break;
+                            }
+                        }
                     }));
                 }
                 Task.WaitAll(parallelExecutionTasks.ToArray());
 
+                //float lRate = 0.1f;
+                //for (int x = 0; x < heightMap.Width; x++)
+                //{
+                //    for (int y = 0; y < heightMap.Height; y++)
+                //    {
+                //        heightMap.Value[x, y].Discharge += heightMap.Value[x, y].DischargeTrack * lRate;
+                //        heightMap.Value[x, y].Momentum += heightMap.Value[x, y].MomentumTrack * lRate;
+                //    }
+                //}
+
                 if (iteration % Configuration.SimulationCallbackEachIterations == 0
-                    && iteration != lastCallback)
+            && iteration != lastCallback)
                 {
                     ErosionIterationFinished?.Invoke(this, heightMap);
                     lastCallback = iteration;
