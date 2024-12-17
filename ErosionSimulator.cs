@@ -33,7 +33,7 @@ namespace ProceduralLandscapeGeneration
                 {
                     parallelExecutionTasks.Add(Task.Run(() =>
                     {
-                        Vector2 newPosition = new(myRandom.Next(heightMap.Width), myRandom.Next(heightMap.Height));
+                        Vector2 newPosition = new(myRandom.Next(heightMap.Width), myRandom.Next(heightMap.Depth));
                         WaterParticle waterParticle = new(newPosition);
                         while (true)
                         {

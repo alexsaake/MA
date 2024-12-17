@@ -7,7 +7,7 @@ namespace ProceduralLandscapeGeneration
         public Soil[,] Value { get; }
 
         public int Width => Value.GetLength(0);
-        public int Height => Value.GetLength(1);
+        public int Depth => Value.GetLength(1);
 
         public HeightMap(Soil[,] noiseMap)
         {
@@ -27,7 +27,7 @@ namespace ProceduralLandscapeGeneration
         private Vector3 GetScaledNormal(int x, int y, int scale)
         {
             if (x < 1 || x > Width - 2
-                || y < 1 || y > Height - 2)
+                || y < 1 || y > Depth - 2)
             {
                 return new Vector3(0, 0, 1);
             }
@@ -39,23 +39,6 @@ namespace ProceduralLandscapeGeneration
             normal = Vector3.Normalize(normal);
 
             return normal;
-        }
-
-        public HeightMap GetHeightMapPart(int xFrom, int xTo, int yFrom, int yTo)
-        {
-            Soil[,] dataPart = new Soil[xTo - xFrom, yTo - yFrom];
-            int xSize = xTo - xFrom;
-            int ySize = yTo - yFrom;
-
-            for (int x = 0; x < xSize; x++)
-            {
-                for (int y = 0; y < ySize; y++)
-                {
-                    dataPart[x, y] = Value[x + xFrom, y + yFrom];
-                }
-            }
-
-            return new HeightMap(dataPart);
         }
 
         public bool IsOutOfBounds(Vector2 position)
@@ -73,7 +56,7 @@ namespace ProceduralLandscapeGeneration
             return x < 0
                     || x > Width - 1
                     || y < 0
-                    || y > Height - 1;
+                    || y > Depth - 1;
         }
     }
 }

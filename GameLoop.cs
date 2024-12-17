@@ -13,7 +13,7 @@ internal class GameLoop : IGameLoop
 
     private HeightMap? myNewHeightMap;
     private RenderTexture myShadowMap;
-    private Dictionary<Vector3, Model> myChunkModels;
+    private Model myModel;
     private Shader mySceneShader;
     private Shader myShadowMapShader;
 
@@ -22,8 +22,6 @@ internal class GameLoop : IGameLoop
         myMapGenerator = mapGenerator;
         myErosionSimulator = erosionSimulator;
         myMeshCreator = meshCreator;
-
-        myChunkModels = new Dictionary<Vector3, Model>();
     }
 
     public void Run()
@@ -33,8 +31,8 @@ internal class GameLoop : IGameLoop
 
     private void MainLoop()
     {
-        int width = 256;
-        int height = 256;
+        int width = 512;
+        int height = 512;
         int simulationIterations = 2000000;
 
         Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-CsLo");
@@ -48,8 +46,8 @@ internal class GameLoop : IGameLoop
 
         int lightSpaceMatrixLocation = Raylib.GetShaderLocation(mySceneShader, "lightSpaceMatrix");
         int shadowMapLocation = Raylib.GetShaderLocation(mySceneShader, "shadowMap");
-        Vector3 heightMapCenter = new(width / 2, height / 2, 0);
-        Vector3 lightDirection = new Vector3(0, height, -height / 2);
+        Vector3 heightMapCenter = Vector3.Zero;
+        Vector3 lightDirection = new Vector3(0, 10, -10 / 2);
         int lightDirectionLocation = Raylib.GetShaderLocation(mySceneShader, "lightDirection");
         unsafe
         {
@@ -57,7 +55,7 @@ internal class GameLoop : IGameLoop
         }
         int viewPositionLocation = Raylib.GetShaderLocation(mySceneShader, "viewPosition");
 
-        Vector3 cameraPosition = heightMapCenter + new Vector3(width, -height, height);
+        Vector3 cameraPosition = heightMapCenter + new Vector3(0, -10, 10);
         Camera3D camera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.CAMERA_PERSPECTIVE);
         Raylib.SetCameraMode(camera, CameraMode.CAMERA_FREE);
 
@@ -138,7 +136,7 @@ internal class GameLoop : IGameLoop
         target.texture.width = width;
         target.texture.height = height;
 
-        if(target.id > 0)
+        if (target.id > 0)
         {
             RlGl.rlEnableFramebuffer(target.id);
 
@@ -163,14 +161,11 @@ internal class GameLoop : IGameLoop
 
     private void DrawScene(Shader shader)
     {
-        foreach (var chunkModel in myChunkModels)
+        unsafe
         {
-            unsafe
-            {
-                chunkModel.Value.materials[0].shader = shader;
-            }
-            Raylib.DrawModel(chunkModel.Value, chunkModel.Key, 1.0f, Raylib.WHITE);
+            myModel.materials[0].shader = shader;
         }
+        Raylib.DrawModel(myModel, Vector3.Zero, 1.0f, Raylib.WHITE);
     }
 
     private void OnErosionSimulationFinished(object? sender, HeightMap heightMap)
@@ -180,25 +175,14 @@ internal class GameLoop : IGameLoop
 
     private void InitiateModel(HeightMap heightMap)
     {
-        Dictionary<Vector3, Mesh> chunkMeshes = myMeshCreator.GenerateChunkMeshes(heightMap);
-        foreach (var chunkMesh in chunkMeshes)
-        {
-            Model newModel = Raylib.LoadModelFromMesh(chunkMesh.Value);
-
-            myChunkModels.Add(chunkMesh.Key, newModel);
-        }
+        Mesh mesh = myMeshCreator.CreateMesh(heightMap);
+        myModel = Raylib.LoadModelFromMesh(mesh);
     }
 
     private void UpdateModel(HeightMap heightMap)
     {
-        Dictionary<Vector3, Mesh> chunkMeshes = myMeshCreator.GenerateChunkMeshes(heightMap);
-        foreach (var chunkMesh in chunkMeshes)
-        {
-            Raylib.UnloadModel(myChunkModels[chunkMesh.Key]);
-
-            Model newModel = Raylib.LoadModelFromMesh(chunkMesh.Value);
-
-            myChunkModels[chunkMesh.Key] = newModel;
-        }
+        Raylib.UnloadModel(myModel);
+        Mesh mesh = myMeshCreator.CreateMesh(heightMap);
+        myModel = Raylib.LoadModelFromMesh(mesh);
     }
 }

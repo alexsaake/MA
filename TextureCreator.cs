@@ -12,9 +12,9 @@ namespace ProceduralLandscapeGeneration
             // Dynamic memory allocation to store pixels data (Color type)
             //Color* pixels = (Color*)malloc(width * height * sizeof(Color));
             //var pixels = stackalloc Color[width * height];
-            var pixels = new Color[heightMap.Width * heightMap.Height];
+            var pixels = new Color[heightMap.Width * heightMap.Depth];
             var h_pixels = pixels.GcPin();
-            for (int y = 0; y < heightMap.Height; y++)
+            for (int y = 0; y < heightMap.Depth; y++)
             {
                 for (int x = 0; x < heightMap.Width; x++)
                 {
@@ -27,7 +27,7 @@ namespace ProceduralLandscapeGeneration
             {
                 data = Unsafe.AsPointer(ref pixels.DangerousGetReference()),
                 width = heightMap.Width,
-                height = heightMap.Height,
+                height = heightMap.Depth,
                 format = (int)PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
                 mipmaps = 1
             };
