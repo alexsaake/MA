@@ -47,7 +47,7 @@ internal class GameLoop : IGameLoop
         int lightSpaceMatrixLocation = Raylib.GetShaderLocation(mySceneShader, "lightSpaceMatrix");
         int shadowMapLocation = Raylib.GetShaderLocation(mySceneShader, "shadowMap");
         Vector3 heightMapCenter = new Vector3(width / 2, depth / 2, 0);
-        Vector3 lightDirection = new Vector3(0, 10, -10 / 2);
+        Vector3 lightDirection = new Vector3(0, depth, -depth / 2);
         int lightDirectionLocation = Raylib.GetShaderLocation(mySceneShader, "lightDirection");
         unsafe
         {
@@ -55,7 +55,7 @@ internal class GameLoop : IGameLoop
         }
         int viewPositionLocation = Raylib.GetShaderLocation(mySceneShader, "viewPosition");
 
-        Vector3 cameraPosition = heightMapCenter + new Vector3(width, -depth, depth);
+        Vector3 cameraPosition = heightMapCenter + new Vector3(width / 2, -depth / 2, depth / 2);
         Camera3D camera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.CAMERA_PERSPECTIVE);
         Raylib.SetCameraMode(camera, CameraMode.CAMERA_FREE);
 

@@ -8,7 +8,7 @@
         public const int ScreenHeight = 1080;
         public const int ParallelExecutions = 10;
         public const int MaximumModelVertices = ushort.MaxValue;
-        public const int HeightMultiplier = 60;
-        public const int SimulationCallbackEachIterations = 100;
+        public const int HeightMultiplier = 64;
+        public const int SimulationCallbackEachIterations = 1000;
     }
 }
