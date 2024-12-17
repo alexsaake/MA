@@ -32,12 +32,12 @@ internal class GameLoop : IGameLoop
     private void MainLoop()
     {
         int width = 512;
-        int height = 512;
+        int depth = 512;
         int simulationIterations = 2000000;
 
         Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-CsLo");
 
-        HeightMap heightMap = myMapGenerator.GenerateHeightMap(width, height);
+        HeightMap heightMap = myMapGenerator.GenerateHeightMap(width, depth);
 
         mySceneShader = Raylib.LoadShader(Raylib.TextFormat("Shaders/Scene.vs", Configuration.GLSL_VERSION),
             Raylib.TextFormat("Shaders/Scene.fs", Configuration.GLSL_VERSION));
@@ -46,7 +46,7 @@ internal class GameLoop : IGameLoop
 
         int lightSpaceMatrixLocation = Raylib.GetShaderLocation(mySceneShader, "lightSpaceMatrix");
         int shadowMapLocation = Raylib.GetShaderLocation(mySceneShader, "shadowMap");
-        Vector3 heightMapCenter = Vector3.Zero;
+        Vector3 heightMapCenter = new Vector3(width / 2, depth / 2, 0);
         Vector3 lightDirection = new Vector3(0, 10, -10 / 2);
         int lightDirectionLocation = Raylib.GetShaderLocation(mySceneShader, "lightDirection");
         unsafe
@@ -55,7 +55,7 @@ internal class GameLoop : IGameLoop
         }
         int viewPositionLocation = Raylib.GetShaderLocation(mySceneShader, "viewPosition");
 
-        Vector3 cameraPosition = heightMapCenter + new Vector3(0, -10, 10);
+        Vector3 cameraPosition = heightMapCenter + new Vector3(width, -depth, depth);
         Camera3D camera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.CAMERA_PERSPECTIVE);
         Raylib.SetCameraMode(camera, CameraMode.CAMERA_FREE);
 

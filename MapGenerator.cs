@@ -11,9 +11,9 @@ namespace ProceduralLandscapeGeneration
             myNoise = noise;
         }
 
-        public HeightMap GenerateHeightMap(int width, int height)
+        public HeightMap GenerateHeightMap(int width, int depth)
         {
-            HeightMap noiseMap = myNoise.GenerateNoiseMap(width, height, 2, 8, 0.5f, 2, Vector2.Zero);
+            HeightMap noiseMap = myNoise.GenerateNoiseMap(width, depth, 2, 8, 0.5f, 2, Vector2.Zero);
 
             return noiseMap;
         }

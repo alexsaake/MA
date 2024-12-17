@@ -16,7 +16,7 @@ namespace ProceduralLandscapeGeneration
             myNoiseGenerator = new FastNoise(seed);
         }
 
-        public HeightMap GenerateNoiseMap(int width, int height, float scale, int octaves, float persistance, float lacunarity, Vector2 offset)
+        public HeightMap GenerateNoiseMap(int width, int depth, float scale, int octaves, float persistance, float lacunarity, Vector2 offset)
         {
             if (lacunarity < 1)
             {
@@ -35,7 +35,7 @@ namespace ProceduralLandscapeGeneration
                 persistance = 1;
             }
 
-            Soil[,] noiseMap = new Soil[width, height];
+            Soil[,] noiseMap = new Soil[width, depth];
 
             Random randomNumberGenerator = new Random(mySeed);
             Vector2[] octaveOffsets = new Vector2[octaves];
@@ -55,9 +55,9 @@ namespace ProceduralLandscapeGeneration
             float minNoiseHeight = float.MaxValue;
 
             float halfWidth = width / 2f;
-            float halfHeight = height / 2f;
+            float halfHeight = depth / 2f;
 
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < depth; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
@@ -89,7 +89,7 @@ namespace ProceduralLandscapeGeneration
                 }
             }
 
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < depth; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
