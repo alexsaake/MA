@@ -1,5 +1,9 @@
-﻿using Raylib_CsLo;
+﻿using Microsoft.Toolkit.HighPerformance;
+using Raylib_CsLo;
+using Raylib_CsLo.InternalHelpers;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace ProceduralLandscapeGeneration;
 
@@ -24,16 +28,16 @@ internal class GameLoop : IGameLoop
         myMeshCreator = meshCreator;
     }
 
-    public void Run()
-    {
-        MainLoop();
-    }
+    //public void Run()
+    //{
+    //    MainLoop();
+    //}
 
     private void MainLoop()
     {
         int width = 512;
         int depth = 512;
-        int simulationIterations = 2000000;
+        int simulationIterations = 600000;
 
         Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-CsLo");
 
@@ -184,5 +188,156 @@ internal class GameLoop : IGameLoop
         Raylib.UnloadModel(myModel);
         Mesh mesh = myMeshCreator.CreateMesh(heightMap);
         myModel = Raylib.LoadModelFromMesh(mesh);
+    }
+
+    private const int GOL_WIDTH = 768;
+    private const int MAX_BUFFERED_TRANSFERTS = 48;
+
+    internal struct GolUpdateSSBO
+    {
+        public uint count;
+        public GolUpdateCmd[] commands = new GolUpdateCmd[MAX_BUFFERED_TRANSFERTS];
+
+        public GolUpdateSSBO() { }
+    }
+    internal struct GolUpdateCmd
+    {
+        public uint x;         // x coordinate of the gol command
+        public uint y;         // y coordinate of the gol command
+        public uint w;         // width of the filled zone
+        public uint enabled;   // whether to enable or disable zone
+    }
+
+    public unsafe void Run()
+    {
+        // Initialization
+        //--------------------------------------------------------------------------------------
+        Raylib.InitWindow(GOL_WIDTH, GOL_WIDTH, "raylib [rlgl] example - compute shader - game of life");
+
+        Vector2 resolution = new(GOL_WIDTH, GOL_WIDTH);
+        uint brushSize = 8;
+
+        // Game of Life logic compute shader
+        string golLogicCode = Raylib.LoadFileText("Shaders/gol.glsl");
+        byte[] bytesgolLogicCode = Encoding.ASCII.GetBytes(golLogicCode);
+        sbyte[] sbytesgolLogicCode = Array.ConvertAll(bytesgolLogicCode, q => Convert.ToSByte(q));
+        sbytesgolLogicCode.GcPin();
+        uint golLogicShader = RlGl.rlCompileShader((sbyte*)Unsafe.AsPointer(ref sbytesgolLogicCode.DangerousGetReference()), RlGl.RL_COMPUTE_SHADER);
+        uint golLogicProgram = RlGl.rlLoadComputeShaderProgram(golLogicShader);
+
+        // Game of Life logic render shader
+        Shader golRenderShader = Raylib.LoadShader(null, "resources/shaders/glsl430/golrender.glsl");
+        int resUniformLoc = Raylib.GetShaderLocation(golRenderShader, "resolution");
+
+        // Game of Life transfert shader (CPU<->GPU download and upload)
+        string golTransfertCode = Raylib.LoadFileText("Shaders/goltransfert.glsl");
+        byte[] bytesgolTransfertCode = Encoding.ASCII.GetBytes(golTransfertCode);
+        sbyte[] sbytesgolTransfertCode = Array.ConvertAll(bytesgolTransfertCode, q => Convert.ToSByte(q));
+        sbytesgolTransfertCode.GcPin();
+        uint golTransfertShader = RlGl.rlCompileShader((sbyte*)Unsafe.AsPointer(ref sbytesgolTransfertCode.DangerousGetReference()), RlGl.RL_COMPUTE_SHADER);
+        uint golTransfertProgram = RlGl.rlLoadComputeShaderProgram(golTransfertShader);
+
+        // Load shader storage buffer object (SSBO), id returned
+        uint ssboA = RlGl.rlLoadShaderBuffer(GOL_WIDTH * GOL_WIDTH * sizeof(uint), null, RlGl.RL_DYNAMIC_COPY);
+        uint ssboB = RlGl.rlLoadShaderBuffer(GOL_WIDTH * GOL_WIDTH * sizeof(uint), null, RlGl.RL_DYNAMIC_COPY);
+        uint ssboTransfert = RlGl.rlLoadShaderBuffer((uint)sizeof(GolUpdateSSBO), null, RlGl.RL_DYNAMIC_COPY);
+
+        GolUpdateSSBO transfertBuffer = new();
+
+        // Create a white texture of the size of the window to update
+        // each pixel of the window using the fragment shader: golRenderShader
+        Image whiteImage = Raylib.GenImageColor(GOL_WIDTH, GOL_WIDTH, Raylib.WHITE);
+        Texture whiteTex = Raylib.LoadTextureFromImage(whiteImage);
+        Raylib.UnloadImage(whiteImage);
+        //--------------------------------------------------------------------------------------
+
+        Raylib.SetTargetFPS(60);
+
+        // Main game loop
+        while (!Raylib.WindowShouldClose())
+        {
+            // Update
+            //----------------------------------------------------------------------------------
+            brushSize += (uint)Raylib.GetMouseWheelMove();
+
+            if ((Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT) || Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_RIGHT))
+                && (transfertBuffer.count < MAX_BUFFERED_TRANSFERTS))
+            {
+                // Buffer a new command
+                transfertBuffer.commands[transfertBuffer.count].x = (uint)Raylib.GetMouseX() - brushSize / 2;
+                transfertBuffer.commands[transfertBuffer.count].y = (uint)Raylib.GetMouseY() - brushSize / 2;
+                transfertBuffer.commands[transfertBuffer.count].w = brushSize;
+                transfertBuffer.commands[transfertBuffer.count].enabled = (uint)(Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT) ? 1 : 0);
+                transfertBuffer.count++;
+            }
+            else if (transfertBuffer.count > 0)  // Process transfert buffer
+            {
+                // Send SSBO buffer to GPU
+                RlGl.rlUpdateShaderBuffer(ssboTransfert, &transfertBuffer, (uint)sizeof(GolUpdateSSBO), 0);
+
+                // Process SSBO commands on GPU
+                RlGl.rlEnableShader(golTransfertProgram);
+                RlGl.rlBindShaderBuffer(ssboA, 1);
+                RlGl.rlBindShaderBuffer(ssboTransfert, 3);
+                RlGl.rlComputeShaderDispatch(transfertBuffer.count, 1, 1); // Each GPU unit will process a command!
+                RlGl.rlDisableShader();
+
+                transfertBuffer.count = 0;
+            }
+            else
+            {
+                // Process game of life logic
+                RlGl.rlEnableShader(golLogicProgram);
+                RlGl.rlBindShaderBuffer(ssboA, 1);
+                RlGl.rlBindShaderBuffer(ssboB, 2);
+                RlGl.rlComputeShaderDispatch(GOL_WIDTH / 16, GOL_WIDTH / 16, 1);
+                RlGl.rlDisableShader();
+
+                // ssboA <-> ssboB
+                uint temp = ssboA;
+                ssboA = ssboB;
+                ssboB = temp;
+            }
+
+            RlGl.rlBindShaderBuffer(ssboA, 1);
+            Raylib.SetShaderValue(golRenderShader, resUniformLoc, &resolution, ShaderUniformDataType.SHADER_UNIFORM_VEC2);
+            //----------------------------------------------------------------------------------
+
+            // Draw
+            //----------------------------------------------------------------------------------
+            Raylib.BeginDrawing();
+
+            Raylib.ClearBackground(Raylib.BLANK);
+
+            Raylib.BeginShaderMode(golRenderShader);
+            Raylib.DrawTexture(whiteTex, 0, 0, Raylib.WHITE);
+            Raylib.EndShaderMode();
+
+            Raylib.DrawRectangleLines((int)(Raylib.GetMouseX() - brushSize / 2), (int)(Raylib.GetMouseY() - brushSize / 2), (int)brushSize, (int)brushSize, Raylib.RED);
+
+            Raylib.DrawText("Use Mouse wheel to increase/decrease brush size", 10, 10, 20, Raylib.WHITE);
+            Raylib.DrawFPS(Raylib.GetScreenWidth() - 100, 10);
+
+            Raylib.EndDrawing();
+            //----------------------------------------------------------------------------------
+        }
+
+        // De-Initialization
+        //--------------------------------------------------------------------------------------
+        // Unload shader buffers objects.
+        RlGl.rlUnloadShaderBuffer(ssboA);
+        RlGl.rlUnloadShaderBuffer(ssboB);
+        RlGl.rlUnloadShaderBuffer(ssboTransfert);
+
+        // Unload compute shader programs
+        RlGl.rlUnloadShaderProgram(golTransfertProgram);
+        RlGl.rlUnloadShaderProgram(golLogicProgram);
+
+        Raylib.UnloadTexture(whiteTex);            // Unload white texture
+        Raylib.UnloadShader(golRenderShader);      // Unload rendering fragment shader
+
+        Raylib.CloseWindow();                      // Close window and OpenGL context
+                                            //--------------------------------------------------------------------------------------
+
     }
 }

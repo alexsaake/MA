@@ -16,6 +16,15 @@
   </ItemGroup>
 
   <ItemGroup>
+	  <None Update="Shaders\gol.glsl">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Shaders\golrender.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Shaders\goltransfer.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
     <None Update="Shaders\ShadowMap.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
