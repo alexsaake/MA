@@ -1,4 +1,4 @@
-﻿using Raylib_CsLo;
+﻿using Raylib_cs;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration
@@ -34,35 +34,35 @@ namespace ProceduralLandscapeGeneration
         private unsafe void AddVertex(Mesh mesh, ref int vertexIndex, HeightMap heightMap, int x, int y)
         {
             float height = heightMap.Value[x, y].Height * Configuration.HeightMultiplier;
-            mesh.vertices[vertexIndex * 3 + 0] = x;
-            mesh.vertices[vertexIndex * 3 + 1] = y;
-            mesh.vertices[vertexIndex * 3 + 2] = height;
+            mesh.Vertices[vertexIndex * 3 + 0] = x;
+            mesh.Vertices[vertexIndex * 3 + 1] = y;
+            mesh.Vertices[vertexIndex * 3 + 2] = height;
 
 
             Vector3 normal = heightMap.GetScaledNormal(x, y);
-            mesh.normals[vertexIndex * 3 + 0] = normal.X;
-            mesh.normals[vertexIndex * 3 + 1] = normal.Y;
-            mesh.normals[vertexIndex * 3 + 2] = normal.Z;
+            mesh.Normals[vertexIndex * 3 + 0] = normal.X;
+            mesh.Normals[vertexIndex * 3 + 1] = normal.Y;
+            mesh.Normals[vertexIndex * 3 + 2] = normal.Z;
 
             Color color = heightMap.Value[x, y].Type.GetColor();
-            mesh.colors[vertexIndex * 4 + 0] = color.r;
-            mesh.colors[vertexIndex * 4 + 1] = color.g;
-            mesh.colors[vertexIndex * 4 + 2] = color.b;
-            mesh.colors[vertexIndex * 4 + 3] = color.a;
+            mesh.Colors[vertexIndex * 4 + 0] = color.R;
+            mesh.Colors[vertexIndex * 4 + 1] = color.G;
+            mesh.Colors[vertexIndex * 4 + 2] = color.B;
+            mesh.Colors[vertexIndex * 4 + 3] = color.A;
 
             vertexIndex++;
         }
 
         private static unsafe void AllocateMeshData(Mesh* mesh, int triangleCount)
         {
-            mesh->vertexCount = triangleCount * 3;
-            mesh->triangleCount = triangleCount;
+            mesh->VertexCount = triangleCount * 3;
+            mesh->TriangleCount = triangleCount;
 
-            mesh->vertices = (float*)Raylib.MemAlloc((uint)(mesh->vertexCount * 3 * sizeof(float)));
-            mesh->normals = (float*)Raylib.MemAlloc((uint)(mesh->vertexCount * 3 * sizeof(float)));
-            mesh->colors = (byte*)Raylib.MemAlloc((uint)(mesh->vertexCount * 4 * sizeof(byte)));
+            mesh->Vertices = (float*)Raylib.MemAlloc((uint)(mesh->VertexCount * 3 * sizeof(float)));
+            mesh->Normals = (float*)Raylib.MemAlloc((uint)(mesh->VertexCount * 3 * sizeof(float)));
+            mesh->Colors = (byte*)Raylib.MemAlloc((uint)(mesh->VertexCount * 4 * sizeof(byte)));
 
-            mesh->indices = null;
+            mesh->Indices = null;
         }
     }
 }

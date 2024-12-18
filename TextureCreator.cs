@@ -1,19 +1,17 @@
 ﻿using Microsoft.Toolkit.HighPerformance;
-using Raylib_CsLo;
-using Raylib_CsLo.InternalHelpers;
+using Raylib_cs;
 using System.Runtime.CompilerServices;
 
 namespace ProceduralLandscapeGeneration
 {
     internal class TextureCreator : ITextureCreator
     {
-        public unsafe Texture CreateTexture(HeightMap heightMap)
+        public unsafe Texture2D CreateTexture(HeightMap heightMap)
         {
             // Dynamic memory allocation to store pixels data (Color type)
             //Color* pixels = (Color*)malloc(width * height * sizeof(Color));
             //var pixels = stackalloc Color[width * height];
             var pixels = new Color[heightMap.Width * heightMap.Depth];
-            var h_pixels = pixels.GcPin();
             for (int y = 0; y < heightMap.Depth; y++)
             {
                 for (int x = 0; x < heightMap.Width; x++)
@@ -25,13 +23,13 @@ namespace ProceduralLandscapeGeneration
 
             Image image = new()
             {
-                data = Unsafe.AsPointer(ref pixels.DangerousGetReference()),
-                width = heightMap.Width,
-                height = heightMap.Depth,
-                format = (int)PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
-                mipmaps = 1
+                Data = Unsafe.AsPointer(ref pixels.DangerousGetReference()),
+                Width = heightMap.Width,
+                Height = heightMap.Depth,
+                Format = PixelFormat.UncompressedR8G8B8A8,
+                Mipmaps = 1
             };
-            Texture texture = Raylib.LoadTextureFromImage(image);
+            Texture2D texture = Raylib.LoadTextureFromImage(image);
 
             return texture;
         }

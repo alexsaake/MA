@@ -10,6 +10,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="..\Raylib-cs\Raylib-cs\runtimes\win-x64\native\raylib.dll" Link="raylib.dll">
+      <PackagePath>runtimes/</PackagePath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="..\Raylib-cs\Raylib-cs\runtimes\win-x64\native\raylib.pdb" Link="raylib.pdb">
+      <PackagePath>runtimes/</PackagePath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Autofac" Version="8.2.0" />
     <PackageReference Include="DotnetNoise" Version="1.0.0" />
     <PackageReference Include="Microsoft.Toolkit.HighPerformance" Version="7.1.2" />
@@ -17,22 +30,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Raylib-CsLo">
-      <HintPath>Raylib-CsLo.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\Raylib-cs\Raylib-cs\Raylib-cs.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-	  <None Update="Raylib-CsLo.dll">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
 	  <None Update="Raylib-CsLo.pdb">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="raylib.dll">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="raylib.pdb">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Shaders\gol.glsl">

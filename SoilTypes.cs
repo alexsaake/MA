@@ -1,4 +1,4 @@
-﻿using Raylib_CsLo;
+﻿using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration
 {
@@ -13,15 +13,12 @@ namespace ProceduralLandscapeGeneration
         public static Color GetColor(this SoilTypes soilType)
         {
             Color color;
-            switch (soilType)
+            return soilType switch
             {
-                case SoilTypes.Stone:
-                    return Raylib.GRAY;
-                case SoilTypes.Sand:
-                    return Raylib.YELLOW;
-                default:
-                    return Raylib.PINK;
-            }
+                SoilTypes.Stone => Color.Gray,
+                SoilTypes.Sand => Color.Yellow,
+                _ => Color.Pink,
+            };
         }
     }
 }
