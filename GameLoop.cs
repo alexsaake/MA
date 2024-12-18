@@ -193,21 +193,6 @@ internal class GameLoop : IGameLoop
     private const int GOL_WIDTH = 768;
     private const int MAX_BUFFERED_TRANSFERTS = 48;
 
-    internal struct GolUpdateSSBO
-    {
-        public uint count;
-        public GolUpdateCmd[] commands = new GolUpdateCmd[MAX_BUFFERED_TRANSFERTS];
-
-        public GolUpdateSSBO() { }
-    }
-    internal struct GolUpdateCmd
-    {
-        public uint x;         // x coordinate of the gol command
-        public uint y;         // y coordinate of the gol command
-        public uint w;         // width of the filled zone
-        public uint enabled;   // whether to enable or disable zone
-    }
-
     public unsafe void Run()
     {
         // Initialization
@@ -226,11 +211,11 @@ internal class GameLoop : IGameLoop
         uint golLogicProgram = RlGl.rlLoadComputeShaderProgram(golLogicShader);
 
         // Game of Life logic render shader
-        Shader golRenderShader = Raylib.LoadShader(null, "resources/shaders/glsl430/golrender.glsl");
+        Shader golRenderShader = Raylib.LoadShader(null, "Shaders/golrender.glsl");
         int resUniformLoc = Raylib.GetShaderLocation(golRenderShader, "resolution");
 
         // Game of Life transfert shader (CPU<->GPU download and upload)
-        string golTransfertCode = Raylib.LoadFileText("Shaders/goltransfert.glsl");
+        string golTransfertCode = Raylib.LoadFileText("Shaders/goltransfer.glsl");
         byte[] bytesgolTransfertCode = Encoding.ASCII.GetBytes(golTransfertCode);
         sbyte[] sbytesgolTransfertCode = Array.ConvertAll(bytesgolTransfertCode, q => Convert.ToSByte(q));
         sbytesgolTransfertCode.GcPin();
@@ -242,7 +227,7 @@ internal class GameLoop : IGameLoop
         uint ssboB = RlGl.rlLoadShaderBuffer(GOL_WIDTH * GOL_WIDTH * sizeof(uint), null, RlGl.RL_DYNAMIC_COPY);
         uint ssboTransfert = RlGl.rlLoadShaderBuffer((uint)sizeof(GolUpdateSSBO), null, RlGl.RL_DYNAMIC_COPY);
 
-        GolUpdateSSBO transfertBuffer = new();
+        GolUpdateSSBO transferBuffer = new();
 
         // Create a white texture of the size of the window to update
         // each pixel of the window using the fragment shader: golRenderShader
@@ -261,28 +246,28 @@ internal class GameLoop : IGameLoop
             brushSize += (uint)Raylib.GetMouseWheelMove();
 
             if ((Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT) || Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_RIGHT))
-                && (transfertBuffer.count < MAX_BUFFERED_TRANSFERTS))
+                && (transferBuffer.count < MAX_BUFFERED_TRANSFERTS))
             {
                 // Buffer a new command
-                transfertBuffer.commands[transfertBuffer.count].x = (uint)Raylib.GetMouseX() - brushSize / 2;
-                transfertBuffer.commands[transfertBuffer.count].y = (uint)Raylib.GetMouseY() - brushSize / 2;
-                transfertBuffer.commands[transfertBuffer.count].w = brushSize;
-                transfertBuffer.commands[transfertBuffer.count].enabled = (uint)(Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT) ? 1 : 0);
-                transfertBuffer.count++;
+                transferBuffer.commands[transferBuffer.count].x = (uint)Raylib.GetMouseX() - brushSize / 2;
+                transferBuffer.commands[transferBuffer.count].y = (uint)Raylib.GetMouseY() - brushSize / 2;
+                transferBuffer.commands[transferBuffer.count].w = brushSize;
+                transferBuffer.commands[transferBuffer.count].enabled = (uint)(Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT) ? 1 : 0);
+                transferBuffer.count++;
             }
-            else if (transfertBuffer.count > 0)  // Process transfert buffer
+            else if (transferBuffer.count > 0)  // Process transfert buffer
             {
                 // Send SSBO buffer to GPU
-                RlGl.rlUpdateShaderBuffer(ssboTransfert, &transfertBuffer, (uint)sizeof(GolUpdateSSBO), 0);
+                RlGl.rlUpdateShaderBuffer(ssboTransfert, &transferBuffer, (uint)sizeof(GolUpdateSSBO), 0);
 
                 // Process SSBO commands on GPU
                 RlGl.rlEnableShader(golTransfertProgram);
                 RlGl.rlBindShaderBuffer(ssboA, 1);
                 RlGl.rlBindShaderBuffer(ssboTransfert, 3);
-                RlGl.rlComputeShaderDispatch(transfertBuffer.count, 1, 1); // Each GPU unit will process a command!
+                RlGl.rlComputeShaderDispatch(transferBuffer.count, 1, 1); // Each GPU unit will process a command!
                 RlGl.rlDisableShader();
 
-                transfertBuffer.count = 0;
+                transferBuffer.count = 0;
             }
             else
             {
@@ -337,7 +322,21 @@ internal class GameLoop : IGameLoop
         Raylib.UnloadShader(golRenderShader);      // Unload rendering fragment shader
 
         Raylib.CloseWindow();                      // Close window and OpenGL context
-                                            //--------------------------------------------------------------------------------------
+                                                   //--------------------------------------------------------------------------------------
 
+    }
+    public struct GolUpdateSSBO
+    {
+        public uint count;
+        public GolUpdateCmd[] commands = new GolUpdateCmd[MAX_BUFFERED_TRANSFERTS];
+
+        public GolUpdateSSBO() { }
+    }
+    public struct GolUpdateCmd
+    {
+        public uint x;         // x coordinate of the gol command
+        public uint y;         // y coordinate of the gol command
+        public uint w;         // width of the filled zone
+        public uint enabled;   // whether to enable or disable zone
     }
 }
