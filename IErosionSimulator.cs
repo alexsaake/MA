@@ -3,6 +3,6 @@
     internal interface IErosionSimulator
     {
         event EventHandler<HeightMap> ErosionIterationFinished;
-        void SimulateHydraulicErosion(HeightMap heightMap, int simulationIterations);
+        void SimulateHydraulicErosion(HeightMap heightMap, uint simulationIterations);
     }
 }

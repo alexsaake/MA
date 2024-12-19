@@ -13,6 +13,7 @@ internal class DependencyInjectionContainer
         containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>();
         containerBuilder.RegisterType<MeshCreator>().As<IMeshCreator>();
         containerBuilder.RegisterType<TextureCreator>().As<ITextureCreator>();
+        containerBuilder.RegisterType<ComputeShader>().As<IComputeShader>();
         return containerBuilder.Build();
     }
 }

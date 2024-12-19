@@ -10,7 +10,6 @@ namespace ProceduralLandscapeGeneration
         private const float MinimumVolume = 0.001f;
         private const float Entrainment = 10.0f;
         private const float Gravity = 2.0f;
-        private const float MomentumTransfer = 1.0f;
 
         private Vector2 myPosition;
         private Vector2 myOriginalPosition;
@@ -27,7 +26,7 @@ namespace ProceduralLandscapeGeneration
 
         public bool Move(HeightMap heightMap)
         {
-            Vector2Int position = new Vector2Int(myPosition);
+            IVector2 position = new IVector2(myPosition);
 
             if (heightMap.IsOutOfBounds(position))
             {
@@ -41,25 +40,13 @@ namespace ProceduralLandscapeGeneration
 
             if (myVolume < MinimumVolume)
             {
-                heightMap.Value[position.X, position.Y].Height += mySediment;
-                //Cascade(heightMap, position);
+                heightMap.Height[position.X, position.Y] += mySediment;
                 return false;
             }
 
             Vector3 normal = heightMap.GetNormal(position);
 
-            //Vector2 fSpeed = heightMap.Value[position.X, position.Y].Momentum;
-            Vector2 fSpeed = Vector2.Zero;
-            //float discharge = 0.4f * heightMap.Value[position.X, position.Y].Discharge;//erf c++
-            float discharge = 0;
-
             mySpeed += Gravity * new Vector2(normal.X, normal.Y) / myVolume;
-
-            if (fSpeed.Length() > 0
-                && mySpeed.Length() > 0)
-            {
-                mySpeed += MomentumTransfer * Vector2.Dot(Vector2.Normalize(fSpeed), Vector2.Normalize(mySpeed)) / (myVolume + discharge) * fSpeed;
-            }
 
             if (mySpeed.Length() > 0)
             {
@@ -72,45 +59,27 @@ namespace ProceduralLandscapeGeneration
             return true;
         }
 
-        public void Track(HeightMap heightMap)
-        {
-            Vector2Int position = new Vector2Int(myPosition);
-
-            if (heightMap.IsOutOfBounds(position))
-            {
-                return;
-            }
-
-            heightMap.Value[position.X, position.Y].DischargeTrack += myVolume;
-            heightMap.Value[position.X, position.Y].MomentumTrack += myVolume * mySpeed;
-        }
-
         public bool Interact(HeightMap heightMap)
         {
-            Vector2Int position = new Vector2Int(myOriginalPosition);
+            IVector2 position = new IVector2(myOriginalPosition);
 
             if (heightMap.IsOutOfBounds(position))
             {
                 return false;
             }
 
-            //float discharge = 0.4f * heightMap.Value[position.X, position.Y].Discharge;//erf c++
-            float discharge = 0.4f * heightMap.Value[position.X, position.Y].Discharge;//erf c++
-            //float resistance = heightMap.Value[position.X, position.Y].Resistance;
-            float resistance = 0;
-
             float h2;
             if (heightMap.IsOutOfBounds(myPosition))
             {
-                h2 = 0.99f * heightMap.Value[position.X, position.Y].Height;
+                h2 = 0.99f * heightMap.Height[position.X, position.Y];
             }
             else
             {
-                Vector2Int currentPosition = new Vector2Int(myPosition);
-                h2 = heightMap.Value[currentPosition.X, currentPosition.Y].Height;
+                IVector2 currentPosition = new IVector2(myPosition);
+                h2 = heightMap.Height[currentPosition.X, currentPosition.Y];
             }
 
-            float cEq = (1.0f + Entrainment * discharge) * heightMap.Value[position.X, position.Y].Height - h2;
+            float cEq = (1.0f + Entrainment) * heightMap.Height[position.X, position.Y] - h2;
             if (cEq < 0)
             {
                 cEq = 0;
@@ -118,7 +87,7 @@ namespace ProceduralLandscapeGeneration
 
             float cDiff = (cEq * myVolume - mySediment);
 
-            float effD = DepositionRate * (1.0f - resistance);
+            float effD = DepositionRate;
             if (effD < 0)
             {
                 effD = 0;
@@ -131,19 +100,11 @@ namespace ProceduralLandscapeGeneration
                     cDiff = -mySediment / effD;
                 }
             }
-            else if (effD * cDiff > 0)
-            {
-
-                //https://github.com/erosiv/soillib/blob/main/source/particle/water.hpp
-                //matrix = (matrix * sediment + wmatrix * (effD * cdiff)) / (sediment + effD * cdiff);
-            }
 
             mySediment += effD * cDiff;
-            heightMap.Value[position.X, position.Y].Height -= effD * cDiff;
+            heightMap.Height[position.X, position.Y] -= effD * cDiff;
 
             myVolume *= (1.0f - EvaporationRate);
-
-            //Cascade(heightMap, position);
 
             myAge++;
 

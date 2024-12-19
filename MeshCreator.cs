@@ -33,7 +33,7 @@ namespace ProceduralLandscapeGeneration
 
         private unsafe void AddVertex(Mesh mesh, ref int vertexIndex, HeightMap heightMap, int x, int y)
         {
-            float height = heightMap.Value[x, y].Height * Configuration.HeightMultiplier;
+            float height = heightMap.Height[x, y] * Configuration.HeightMultiplier;
             mesh.Vertices[vertexIndex * 3 + 0] = x;
             mesh.Vertices[vertexIndex * 3 + 1] = y;
             mesh.Vertices[vertexIndex * 3 + 2] = height;
@@ -43,12 +43,6 @@ namespace ProceduralLandscapeGeneration
             mesh.Normals[vertexIndex * 3 + 0] = normal.X;
             mesh.Normals[vertexIndex * 3 + 1] = normal.Y;
             mesh.Normals[vertexIndex * 3 + 2] = normal.Z;
-
-            Color color = heightMap.Value[x, y].Type.GetColor();
-            mesh.Colors[vertexIndex * 4 + 0] = color.R;
-            mesh.Colors[vertexIndex * 4 + 1] = color.G;
-            mesh.Colors[vertexIndex * 4 + 2] = color.B;
-            mesh.Colors[vertexIndex * 4 + 3] = color.A;
 
             vertexIndex++;
         }
@@ -60,7 +54,6 @@ namespace ProceduralLandscapeGeneration
 
             mesh->Vertices = (float*)Raylib.MemAlloc((uint)(mesh->VertexCount * 3 * sizeof(float)));
             mesh->Normals = (float*)Raylib.MemAlloc((uint)(mesh->VertexCount * 3 * sizeof(float)));
-            mesh->Colors = (byte*)Raylib.MemAlloc((uint)(mesh->VertexCount * 4 * sizeof(byte)));
 
             mesh->Indices = null;
         }

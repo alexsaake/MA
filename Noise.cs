@@ -35,7 +35,7 @@ namespace ProceduralLandscapeGeneration
                 persistance = 1;
             }
 
-            Soil[,] noiseMap = new Soil[width, depth];
+            float[,] noiseMap = new float[width, depth];
 
             Random randomNumberGenerator = new Random(mySeed);
             Vector2[] octaveOffsets = new Vector2[octaves];
@@ -85,7 +85,7 @@ namespace ProceduralLandscapeGeneration
                     {
                         minNoiseHeight = noiseHeight;
                     }
-                    noiseMap[x, y].Height = noiseHeight;
+                    noiseMap[x, y] = noiseHeight;
                 }
             }
 
@@ -93,19 +93,19 @@ namespace ProceduralLandscapeGeneration
             {
                 for (int x = 0; x < width; x++)
                 {
-                    noiseMap[x, y].Height = InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y].Height);
+                    noiseMap[x, y] = InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
                 }
             }
 
             return new HeightMap(noiseMap);
         }
 
-        private static float Lerp(float lower, float upper, float value)
+        public static float Lerp(float lower, float upper, float value)
         {
             return (1 - value) * lower + value * upper;
         }
 
-        private static float InverseLerp(float lower, float upper, float value)
+        public static float InverseLerp(float lower, float upper, float value)
         {
             if (value <= lower)
             {

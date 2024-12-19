@@ -4,17 +4,30 @@ namespace ProceduralLandscapeGeneration
 {
     internal class HeightMap
     {
-        public Soil[,] Value { get; }
+        public float[,] Height { get; }
 
-        public int Width => Value.GetLength(0);
-        public int Depth => Value.GetLength(1);
+        public int Width => Height.GetLength(0);
+        public int Depth => Height.GetLength(1);
 
-        public HeightMap(Soil[,] noiseMap)
+        public HeightMap(float[,] noiseMap)
         {
-            Value = noiseMap;
+            Height = noiseMap;
         }
 
-        public Vector3 GetNormal(Vector2Int position)
+        public HeightMap(float[] noiseMap)
+        {
+            int size = (int)MathF.Sqrt(noiseMap.Length);
+            Height = new float[size, size];
+            for (int x = 0; x < size; x++)
+            {
+                for (int y = 0; y < size; y++)
+                {
+                    Height[x, y] = noiseMap[x + y];
+                }
+            }
+        }
+
+        public Vector3 GetNormal(IVector2 position)
         {
             return GetScaledNormal(position.X, position.Y, 1);
         }
@@ -33,8 +46,8 @@ namespace ProceduralLandscapeGeneration
             }
 
             Vector3 normal = new(
-            scale * -(Value[x + 1, y - 1].Height - Value[x - 1, y - 1].Height + 2 * (Value[x + 1, y].Height - Value[x - 1, y].Height) + Value[x + 1, y + 1].Height - Value[x - 1, y + 1].Height),
-            scale * -(Value[x - 1, y + 1].Height - Value[x - 1, y - 1].Height + 2 * (Value[x, y + 1].Height - Value[x, y - 1].Height) + Value[x + 1, y + 1].Height - Value[x + 1, y - 1].Height),
+            scale * -(Height[x + 1, y - 1] - Height[x - 1, y - 1] + 2 * (Height[x + 1, y] - Height[x - 1, y]) + Height[x + 1, y + 1] - Height[x - 1, y + 1]),
+            scale * -(Height[x - 1, y + 1] - Height[x - 1, y - 1] + 2 * (Height[x, y + 1] - Height[x, y - 1]) + Height[x + 1, y + 1] - Height[x + 1, y - 1]),
             1.0f);
             normal = Vector3.Normalize(normal);
 
@@ -46,7 +59,7 @@ namespace ProceduralLandscapeGeneration
             return IsOutOfBounds((int)position.X, (int)position.Y);
         }
 
-        public bool IsOutOfBounds(Vector2Int position)
+        public bool IsOutOfBounds(IVector2 position)
         {
             return IsOutOfBounds(position.X, position.Y);
         }
