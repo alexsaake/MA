@@ -14,7 +14,7 @@ namespace ProceduralLandscapeGeneration
             myComputeShader = computeShader;
         }
 
-        public HeightMap GenerateHeightMap(int width, int depth)
+        public HeightMap GenerateHeightMap(uint width, uint depth)
         {
             HeightMap noiseMap = myNoise.GenerateNoiseMap(width, depth, 2, 8, 0.5f, 2, Vector2.Zero);
 
@@ -23,7 +23,7 @@ namespace ProceduralLandscapeGeneration
 
         public HeightMap GenerateHeightMapGPU(uint size)
         {
-            return GenerateHeightMapGPU(size, 2, 8, 0.5f, 2);
+            return GenerateHeightMapGPU(size, 200, 8, 0.5f, 2);
         }
 
         private unsafe HeightMap GenerateHeightMapGPU(uint size, float scale, uint octaves, float persistance, float lacunarity)
@@ -41,30 +41,41 @@ namespace ProceduralLandscapeGeneration
                 Size = size,
                 Scale = scale,
                 Octaves = octaves,
-                OctaveOffsets = octaveOffsets,
                 Persistence = persistance,
-                Lacunarity = lacunarity
+                Lacunarity = lacunarity,
+                //OctaveOffsets = octaveOffsets
             };
-            uint heightMapParametersSize = (uint)sizeof(HeightMapParameters);
-            uint heightMapParametersShaderBufferId = Rlgl.LoadShaderBuffer(heightMapParametersSize, null, Rlgl.DYNAMIC_COPY);
+            uint heightMapParametersBufferSize = (uint)sizeof(HeightMapParameters);
+            uint heightMapParametersBufferId = Rlgl.LoadShaderBuffer(heightMapParametersBufferSize, &heightMapParameters, Rlgl.DYNAMIC_COPY);
 
             float[] heightMap = new float[size * size];
-            uint heightMapShaderBufferSize = (uint)heightMap.Length * sizeof(float);
-            uint heightMapShaderBufferId = Rlgl.LoadShaderBuffer(heightMapShaderBufferSize, null, Rlgl.DYNAMIC_COPY);
+            uint heightMapBufferSize = (uint)heightMap.Length * sizeof(float);
+            uint heightMapBufferId = Rlgl.LoadShaderBuffer(heightMapBufferSize, null, Rlgl.DYNAMIC_COPY);
 
             myComputeShader.CreateShaderProgram("Shaders/HeightMapGenerator.glsl");
 
             Rlgl.EnableShader(myComputeShader.Id);
-            Rlgl.BindShaderBuffer(heightMapParametersShaderBufferId, 1);
-            Rlgl.BindShaderBuffer(heightMapShaderBufferId, 2);
+            Rlgl.BindShaderBuffer(heightMapParametersBufferId, 1);
+            Rlgl.BindShaderBuffer(heightMapBufferId, 2);
             Rlgl.ComputeShaderDispatch((uint)heightMap.Length, 1, 1);
-            Rlgl.ReadShaderBuffer(heightMapShaderBufferId, &heightMap, heightMapShaderBufferSize, 0);
+            fixed (float* heightMapPointer = heightMap)
+            {
+                Rlgl.ReadShaderBuffer(heightMapBufferId, heightMapPointer, heightMapBufferSize, 0);
+            }
             Rlgl.DisableShader();
 
-            Rlgl.UnloadShaderBuffer(heightMapParametersShaderBufferId);
-            Rlgl.UnloadShaderBuffer(heightMapShaderBufferId);
+            Rlgl.UnloadShaderBuffer(heightMapParametersBufferId);
+            Rlgl.UnloadShaderBuffer(heightMapBufferId);
 
             myComputeShader.Dispose();
+
+            float minHeightMapValue = heightMap.Min();
+            float maxHeightMapValue = heightMap.Max();
+
+            for (int i = 0; i < heightMap.Length; i++)
+            {
+                heightMap[i] = Math.InverseLerp(minHeightMapValue, maxHeightMapValue, heightMap[i]);
+            }
 
             return new HeightMap(heightMap);
         }
@@ -75,8 +86,8 @@ namespace ProceduralLandscapeGeneration
         public uint Size;
         public float Scale;
         public uint Octaves;
-        public Vector2[] OctaveOffsets;
         public float Persistence;
         public float Lacunarity;
+        //public Vector2[] OctaveOffsets;
     };
 }

@@ -16,7 +16,7 @@ namespace ProceduralLandscapeGeneration
             myNoiseGenerator = new FastNoise(seed);
         }
 
-        public HeightMap GenerateNoiseMap(int width, int depth, float scale, int octaves, float persistance, float lacunarity, Vector2 offset)
+        public HeightMap GenerateNoiseMap(uint width, uint depth, float scale, uint octaves, float persistence, float lacunarity, Vector2 offset)
         {
             if (lacunarity < 1)
             {
@@ -26,13 +26,13 @@ namespace ProceduralLandscapeGeneration
             {
                 octaves = 0;
             }
-            if (persistance < 0)
+            if (persistence < 0)
             {
-                persistance = 0;
+                persistence = 0;
             }
-            else if (persistance > 1)
+            else if (persistence > 1)
             {
-                persistance = 1;
+                persistence = 1;
             }
 
             float[,] noiseMap = new float[width, depth];
@@ -54,12 +54,9 @@ namespace ProceduralLandscapeGeneration
             float maxNoiseHeight = float.MinValue;
             float minNoiseHeight = float.MaxValue;
 
-            float halfWidth = width / 2f;
-            float halfHeight = depth / 2f;
-
-            for (int y = 0; y < depth; y++)
+            for (int x = 0; x < width; x++)
             {
-                for (int x = 0; x < width; x++)
+                for (int y = 0; y < depth; y++)
                 {
                     float amplitude = 1;
                     float frequency = 1;
@@ -67,13 +64,13 @@ namespace ProceduralLandscapeGeneration
 
                     for (int octave = 0; octave < octaves; octave++)
                     {
-                        float sampleX = (x - halfWidth) / scale * frequency + octaveOffsets[octave].X;
-                        float sampleY = (y - halfHeight) / scale * frequency + octaveOffsets[octave].Y;
+                        float sampleX = x / scale * frequency + octaveOffsets[octave].X;
+                        float sampleY = y / scale * frequency + octaveOffsets[octave].Y;
 
                         float perlinValue = myNoiseGenerator.GetPerlin(sampleX, sampleY);
                         noiseHeight += perlinValue * amplitude;
 
-                        amplitude *= persistance;
+                        amplitude *= persistence;
                         frequency *= lacunarity;
                     }
 
@@ -93,29 +90,11 @@ namespace ProceduralLandscapeGeneration
             {
                 for (int x = 0; x < width; x++)
                 {
-                    noiseMap[x, y] = InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
+                    noiseMap[x, y] = Math.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
                 }
             }
 
             return new HeightMap(noiseMap);
-        }
-
-        public static float Lerp(float lower, float upper, float value)
-        {
-            return (1 - value) * lower + value * upper;
-        }
-
-        public static float InverseLerp(float lower, float upper, float value)
-        {
-            if (value <= lower)
-            {
-                return 0;
-            }
-            if (value >= upper)
-            {
-                return 1;
-            }
-            return (value - lower) / (upper - lower);
         }
     }
 }

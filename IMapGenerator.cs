@@ -2,7 +2,7 @@
 {
     internal interface IMapGenerator
     {
-        HeightMap GenerateHeightMap(int width, int depth);
+        HeightMap GenerateHeightMap(uint width, uint depth);
         HeightMap GenerateHeightMapGPU(uint size);
     }
 }

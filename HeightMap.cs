@@ -18,12 +18,11 @@ namespace ProceduralLandscapeGeneration
         {
             int size = (int)MathF.Sqrt(noiseMap.Length);
             Height = new float[size, size];
-            for (int x = 0; x < size; x++)
+            for (int i = 0; i < noiseMap.Length; i++)
             {
-                for (int y = 0; y < size; y++)
-                {
-                    Height[x, y] = noiseMap[x + y];
-                }
+                int x = i % size;
+                int y = i / size;
+                Height[x, y] = noiseMap[i];
             }
         }
 

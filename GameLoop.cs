@@ -1,9 +1,5 @@
-﻿using Microsoft.Toolkit.HighPerformance;
-using Raylib_cs;
+﻿using Raylib_cs;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace ProceduralLandscapeGeneration;
 
@@ -73,7 +69,7 @@ internal class GameLoop : IGameLoop
         UpdateShadowMap(lightCamera, lightSpaceMatrixLocation, shadowMapLocation);
 
         myErosionSimulator.ErosionIterationFinished += OnErosionSimulationFinished;
-        Task.Run(() => myErosionSimulator.SimulateHydraulicErosion(heightMap, simulationIterations));
+        //Task.Run(() => myErosionSimulator.SimulateHydraulicErosion(heightMap, simulationIterations));
 
         Raylib.SetTargetFPS(60);
 

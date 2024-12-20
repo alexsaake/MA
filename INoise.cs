@@ -4,6 +4,6 @@ namespace ProceduralLandscapeGeneration
 {
     internal interface INoise
     {
-        HeightMap GenerateNoiseMap(int width, int depth, float scale, int octaves, float persistance, float lacunarity, Vector2 offset);
+        HeightMap GenerateNoiseMap(uint width, uint depth, float scale, uint octaves, float persistence, float lacunarity, Vector2 offset);
     }
 }
