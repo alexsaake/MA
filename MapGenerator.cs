@@ -52,7 +52,7 @@ namespace ProceduralLandscapeGeneration
             uint heightMapBufferSize = (uint)heightMap.Length * sizeof(float);
             uint heightMapBufferId = Rlgl.LoadShaderBuffer(heightMapBufferSize, null, Rlgl.DYNAMIC_COPY);
 
-            myComputeShader.CreateShaderProgram("Shaders/HeightMapGenerator.glsl");
+            myComputeShader.CreateComputeShaderProgram("Shaders/HeightMapGenerator.glsl");
 
             Rlgl.EnableShader(myComputeShader.Id);
             Rlgl.BindShaderBuffer(heightMapParametersBufferId, 1);

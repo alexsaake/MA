@@ -28,10 +28,10 @@ internal class GameLoop : IGameLoop
         myTransferComputeShader = transferComputeShader;
     }
 
-    public void Run()
-    {
-        MainLoop();
-    }
+    //public void Run()
+    //{
+    //    MainLoop();
+    //}
 
     private void MainLoop()
     {
@@ -186,5 +186,31 @@ internal class GameLoop : IGameLoop
         Raylib.UnloadModel(myModel);
         Mesh mesh = myMeshCreator.CreateMesh(heightMap);
         myModel = Raylib.LoadModelFromMesh(mesh);
+    }
+
+    public void Run()
+    {
+        Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-CsLo");
+
+        var meshShaderProgram = new ComputeShader();
+        meshShaderProgram.CreateMeshShaderProgram("Shaders/MeshShader.glsl", "Shaders/FragmentShader.glsl");
+
+        Rlgl.EnableShader(meshShaderProgram.Id);
+
+        Raylib.SetTargetFPS(60);
+
+        while (!Raylib.WindowShouldClose())
+        {
+            Raylib.ClearBackground(Color.RayWhite);
+
+            Rlgl.DrawMeshTasks(0, 1);
+            Raylib.SwapScreenBuffer();
+            Raylib.PollInputEvents();
+        }
+
+        Rlgl.DisableShader();
+        meshShaderProgram.Dispose();
+
+        Raylib.CloseWindow();
     }
 }

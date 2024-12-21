@@ -10,14 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\Raylib-cs\Raylib-cs\runtimes\win-x64\native\raylib.dll" Link="raylib.dll">
-      <PackagePath>runtimes/</PackagePath>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Pack>true</Pack>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Autofac" Version="8.2.0" />
     <PackageReference Include="DotnetNoise" Version="1.0.0" />
     <PackageReference Include="Microsoft.Toolkit.HighPerformance" Version="7.1.2" />
@@ -35,7 +27,16 @@
 	  <None Update="raylib.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
+	  <None Update="Shaders\TaskShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	  <None Update="Shaders\HeightMapGenerator.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Shaders\MeshShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Shaders\FragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
     <None Update="Shaders\ShadowMap.fs">
