@@ -134,7 +134,7 @@ internal class GameLoop : IGameLoop
     {
         RenderTexture2D target = new();
 
-        target.Id = Rlgl.LoadFramebuffer(width, height);
+        target.Id = Rlgl.LoadFramebuffer();
         target.Texture.Width = width;
         target.Texture.Height = height;
 
