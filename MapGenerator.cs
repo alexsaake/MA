@@ -21,12 +21,12 @@ namespace ProceduralLandscapeGeneration
             return noiseMap;
         }
 
-        public HeightMap GenerateHeightMapGPU(uint size)
+        public uint GenerateHeightMapShaderBuffer(uint size)
         {
-            return GenerateHeightMapGPU(size, 200, 8, 0.5f, 2);
+            return GenerateHeightMapShaderBuffer(size, 200, 8, 0.5f, 2);
         }
 
-        private unsafe HeightMap GenerateHeightMapGPU(uint size, float scale, uint octaves, float persistance, float lacunarity)
+        private unsafe uint GenerateHeightMapShaderBuffer(uint size, float scale, uint octaves, float persistance, float lacunarity)
         {
             var random = new Random(Configuration.Seed);
 
@@ -48,8 +48,8 @@ namespace ProceduralLandscapeGeneration
             uint heightMapParametersBufferSize = (uint)sizeof(HeightMapParameters);
             uint heightMapParametersBufferId = Rlgl.LoadShaderBuffer(heightMapParametersBufferSize, &heightMapParameters, Rlgl.DYNAMIC_COPY);
 
-            float[] heightMap = new float[size * size];
-            uint heightMapBufferSize = (uint)heightMap.Length * sizeof(float);
+            uint heightMapSize = size * size;
+            uint heightMapBufferSize = heightMapSize * sizeof(float);
             uint heightMapBufferId = Rlgl.LoadShaderBuffer(heightMapBufferSize, null, Rlgl.DYNAMIC_COPY);
 
             myComputeShader.CreateComputeShaderProgram("Shaders/HeightMapGenerator.glsl");
@@ -57,27 +57,14 @@ namespace ProceduralLandscapeGeneration
             Rlgl.EnableShader(myComputeShader.Id);
             Rlgl.BindShaderBuffer(heightMapParametersBufferId, 1);
             Rlgl.BindShaderBuffer(heightMapBufferId, 2);
-            Rlgl.ComputeShaderDispatch((uint)heightMap.Length, 1, 1);
-            fixed (float* heightMapPointer = heightMap)
-            {
-                Rlgl.ReadShaderBuffer(heightMapBufferId, heightMapPointer, heightMapBufferSize, 0);
-            }
+            Rlgl.ComputeShaderDispatch(heightMapSize, 1, 1);
             Rlgl.DisableShader();
 
             Rlgl.UnloadShaderBuffer(heightMapParametersBufferId);
-            Rlgl.UnloadShaderBuffer(heightMapBufferId);
 
             myComputeShader.Dispose();
 
-            float minHeightMapValue = heightMap.Min();
-            float maxHeightMapValue = heightMap.Max();
-
-            for (int i = 0; i < heightMap.Length; i++)
-            {
-                heightMap[i] = Math.InverseLerp(minHeightMapValue, maxHeightMapValue, heightMap[i]);
-            }
-
-            return new HeightMap(heightMap);
+            return heightMapBufferId;
         }
     }
 
