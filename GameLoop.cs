@@ -25,12 +25,20 @@ internal class GameLoop : IGameLoop
         Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-CsLo");
 
         uint heightMapShaderBufferId = myMapGenerator.GenerateHeightMapShaderBuffer(size);
-
-        Vector3 cameraPosition = new Vector3(10, -20, 20);
-        Camera3D camera = new(cameraPosition, new Vector3(10, 0, 0), Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
-        Raylib.UpdateCamera(ref camera, CameraMode.Free);
-
         Shader meshShader = Raylib.LoadMeshShader("Shaders/MeshShader.glsl", "Shaders/FragmentShader.glsl");
+
+        Vector3 heightMapCenter = new Vector3(size / 2, size / 2, 0);
+        Vector3 lightDirection = new Vector3(0, size, -size / 2);
+        int lightDirectionLocation = Raylib.GetShaderLocation(meshShader, "lightDirection");
+        unsafe
+        {
+            Raylib.SetShaderValue(meshShader, lightDirectionLocation, &lightDirection, ShaderUniformDataType.Vec3);
+        }
+        int viewPositionLocation = Raylib.GetShaderLocation(meshShader, "viewPosition");
+
+        Vector3 cameraPosition = heightMapCenter + new Vector3(500, -500, 500);
+        Camera3D camera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
+        Raylib.UpdateCamera(ref camera, CameraMode.Free);
 
         Raylib.SetTargetFPS(60);
 
@@ -39,6 +47,11 @@ internal class GameLoop : IGameLoop
         while (!Raylib.WindowShouldClose())
         {
             Raylib.UpdateCamera(ref camera, CameraMode.Free);
+            Vector3 viewPosition = camera.Position;
+            unsafe
+            {
+                Raylib.SetShaderValue(meshShader, viewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
+            }
 
             Raylib.BeginDrawing();
                 Raylib.ClearBackground(Color.SkyBlue);

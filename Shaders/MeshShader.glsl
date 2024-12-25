@@ -7,6 +7,7 @@ layout(local_size_x=1) in;
 
 #define VERTICES 64
 #define PRIMITIVES 98
+#define SCALE 60
 
 layout(max_vertices=VERTICES, max_primitives=PRIMITIVES) out;
 
@@ -14,7 +15,9 @@ layout(triangles) out;
 
 out PerVertexData
 {
-  vec4 color;
+	vec4 position;
+	vec4 color;
+	vec3 normal;
 } v_out[];
 
 layout(std430, binding = 1) readonly restrict buffer heightMapShaderBuffer
@@ -30,41 +33,40 @@ uint getIndex(uint x, uint y)
     return (y * size) + x;
 }
 
-//private Vector3 GetScaledNormal(int x, int y, int scale)
-//{
-//    if (x < 1 || x > Width - 2
-//        || y < 1 || y > Depth - 2)
-//    {
-//        return new Vector3(0, 0, 1);
-//    }
+vec3 getScaledNormal(uint x, uint y)
+{
+    uint mapSize = uint(sqrt(heightMap.length()));
+    if (x < 1 || x > mapSize - 2
+        || y < 1 || y > mapSize - 2)
+    {
+        return vec3(0.0f, 0.0f, 1.0f);
+    }
 
-//    Vector3 normal = new(
-//    scale * -(Height[x + 1, y - 1] - Height[x - 1, y - 1] + 2 * (Height[x + 1, y] - Height[x - 1, y]) + Height[x + 1, y + 1] - Height[x - 1, y + 1]),
-//    scale * -(Height[x - 1, y + 1] - Height[x - 1, y - 1] + 2 * (Height[x, y + 1] - Height[x, y - 1]) + Height[x + 1, y + 1] - Height[x + 1, y - 1]),
-//    1.0f);
-//    normal = Vector3.Normalize(normal);
+    float xp1ym1 = heightMap[getIndex(x + 1, y - 1)];
+    float xm1ym1 = heightMap[getIndex(x - 1, y - 1)];
+    float xp1y = heightMap[getIndex(x + 1, y)];
+    float xm1y = heightMap[getIndex(x - 1, y)];
+    float xp1yp1 = heightMap[getIndex(x + 1, y + 1)];
+    float xm1yp1 = heightMap[getIndex(x - 1, y + 1)];
+    float xyp1 = heightMap[getIndex(x, y + 1)];
+    float xym1 = heightMap[getIndex(x, y - 1)];
 
-//    return normal;
-//}
+    vec3 normal = vec3(
+    SCALE * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
+    SCALE * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
+    1.0f);
+
+    return normalize(normal);
+}
 
 void addVertex(uint vertex, uint x, uint y)
 {
-    uint scale = 5;
-    uint index = getIndex(x, y);
-    vec4 position = mvp * vec4(x, y, heightMap[index] * scale, 1.0);
+    vec4 position = mvp * vec4(x, y, heightMap[getIndex(x, y)] * SCALE, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
+    v_out[vertex].position = position;
     v_out[vertex].color = vec4(1.0, 1.0, 1.0, 1.0);
-}
-
-void addQuad(uint index, uint vertex)
-{
-    gl_PrimitiveIndicesNV[index + 0] = vertex + 0;
-    gl_PrimitiveIndicesNV[index + 1] = vertex + 1;
-    gl_PrimitiveIndicesNV[index + 2] = vertex + 3;
-    gl_PrimitiveIndicesNV[index + 3] = vertex + 0;
-    gl_PrimitiveIndicesNV[index + 4] = vertex + 3;
-    gl_PrimitiveIndicesNV[index + 5] = vertex + 2;
+    v_out[vertex].normal = getScaledNormal(x, y);
 }
 
 void main()
