@@ -29,8 +29,8 @@ internal class GameLoop : IGameLoop
 
     private void MainLoop()
     {
-        uint size = 512;
-        uint simulationIterations = 10000;
+        uint size = 1028;
+        uint simulationIterations = 100000;
         int shadowMapResolution = 1028;
 
         Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-CsLo");

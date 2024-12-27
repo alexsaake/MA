@@ -8,7 +8,7 @@ namespace ProceduralLandscapeGeneration
         private const float EvaporationRate = 0.001f;
         private const float DepositionRate = 0.05f;
         private const float MinimumVolume = 0.001f;
-        private const float Entrainment = 10.0f;
+        private const float Entrainment = 0.0f;
         private const float Gravity = 2.0f;
 
         private Vector2 myPosition;

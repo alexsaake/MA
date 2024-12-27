@@ -53,7 +53,7 @@ const int MaxAge = 1024;
 const float EvaporationRate = 0.001;
 const float DepositionRate = 0.05;
 const float MinimumVolume = 0.001;
-const float Entrainment = 10.0;
+const float Entrainment = 0.0;
 const float Gravity = 2.0;
 vec2 myPosition;
 vec2 myOriginalPosition;
