@@ -9,7 +9,8 @@ internal class DependencyInjectionContainer
         var containerBuilder = new ContainerBuilder();
         containerBuilder.RegisterType<GameLoop>().As<IGameLoop>();
         containerBuilder.RegisterType<MapGenerator>().As<IMapGenerator>();
-        containerBuilder.RegisterType<ComputeShader>().As<IComputeShader>();
+        containerBuilder.RegisterType<ComputeShaderProgram>().As<IComputeShaderProgram>();
+        containerBuilder.RegisterType<ComputeShaderProgramFactory>().As<IComputeShaderProgramFactory>();
         return containerBuilder.Build();
     }
 }

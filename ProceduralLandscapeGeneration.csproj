@@ -27,13 +27,25 @@
 	  <None Update="raylib.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Shaders\HeightMapGenerator.glsl">
+	  <None Update="Shaders\HeightMapGenerator.compute">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Shaders\ErosionSimulationComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Shaders\HeightMapGeneratorComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Shaders\MeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Shaders\FragmentShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Shaders\NormalizeComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Shaders\TaskShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
   </ItemGroup>

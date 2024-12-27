@@ -5,16 +5,16 @@ namespace ProceduralLandscapeGeneration
 {
     internal class MapGenerator : IMapGenerator
     {
-        private readonly IComputeShader myComputeShader;
+        private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
 
-        public MapGenerator(IComputeShader computeShader)
+        public MapGenerator(IComputeShaderProgramFactory computeShaderProgramFactory)
         {
-            myComputeShader = computeShader;
+            myComputeShaderProgramFactory = computeShaderProgramFactory;
         }
 
         public uint GenerateHeightMapShaderBuffer(uint size)
         {
-            return GenerateHeightMapShaderBuffer(size, 200, 8, 0.5f, 2);
+            return GenerateHeightMapShaderBuffer(size, 500, 8, 0.5f, 2);
         }
 
         private unsafe uint GenerateHeightMapShaderBuffer(uint size, float scale, uint octaves, float persistance, float lacunarity)
@@ -43,17 +43,29 @@ namespace ProceduralLandscapeGeneration
             uint heightMapBufferSize = heightMapSize * sizeof(float);
             uint heightMapBufferId = Rlgl.LoadShaderBuffer(heightMapBufferSize, null, Rlgl.DYNAMIC_COPY);
 
-            myComputeShader.CreateComputeShaderProgram("Shaders/HeightMapGenerator.glsl");
-
-            Rlgl.EnableShader(myComputeShader.Id);
+            ComputeShaderProgram heightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Shaders/HeightMapGeneratorComputeShader.glsl");
+            Rlgl.EnableShader(heightMapComputeShaderProgram.Id);
             Rlgl.BindShaderBuffer(heightMapParametersBufferId, 1);
             Rlgl.BindShaderBuffer(heightMapBufferId, 2);
             Rlgl.ComputeShaderDispatch(heightMapSize, 1, 1);
             Rlgl.DisableShader();
+            heightMapComputeShaderProgram.Dispose();
+
+            ComputeShaderProgram normalizeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Shaders/NormalizeComputeShader.glsl");
+            Rlgl.EnableShader(normalizeComputeShaderProgram.Id);
+            Rlgl.BindShaderBuffer(heightMapParametersBufferId, 1);
+            Rlgl.BindShaderBuffer(heightMapBufferId, 2);
+            Rlgl.ComputeShaderDispatch(heightMapSize, 1, 1);
+            Rlgl.DisableShader();
+            normalizeComputeShaderProgram.Dispose();
 
             Rlgl.UnloadShaderBuffer(heightMapParametersBufferId);
 
-            myComputeShader.Dispose();
+            var a = new float[heightMapSize];
+            fixed (float* ptr = a)
+            {
+                Rlgl.ReadShaderBuffer(heightMapBufferId, ptr, heightMapBufferSize, 0);
+            }
 
             return heightMapBufferId;
         }
@@ -66,6 +78,8 @@ namespace ProceduralLandscapeGeneration
         public uint Octaves;
         public float Persistence;
         public float Lacunarity;
+        public int Min;
+        public int Max;
         //public Vector2[] OctaveOffsets;
     };
 }

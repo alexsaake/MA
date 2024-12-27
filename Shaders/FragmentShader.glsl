@@ -8,7 +8,7 @@ in PerVertexData
 {
 	vec4 position;
 	vec4 color;
-	vec3 normal;
+	vec4 normal;
 } fragIn;
 
 uniform vec3 lightDirection;
@@ -20,7 +20,7 @@ void main()
 
 	vec3 ambient = 0.01 * lightColor;
 
-	vec3 normal = normalize(fragIn.normal);
+	vec3 normal = normalize(fragIn.normal.xyz);
     vec3 lightDirectionNormal = normalize(-lightDirection);  
     float diff = max(dot(normal, lightDirectionNormal), 0.0);
     vec3 diffuse = diff * lightColor;

@@ -20,9 +20,9 @@ internal class GameLoop : IGameLoop
     private void MainLoop()
     {
         const float chunkSize = 7.0f;
-        uint size = 10000;
+        uint size = 4096;
 
-        Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-CsLo");
+        Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-Cs");
 
         uint heightMapShaderBufferId = myMapGenerator.GenerateHeightMapShaderBuffer(size);
         Shader meshShader = Raylib.LoadMeshShader("Shaders/MeshShader.glsl", "Shaders/FragmentShader.glsl");
@@ -36,17 +36,27 @@ internal class GameLoop : IGameLoop
         }
         int viewPositionLocation = Raylib.GetShaderLocation(meshShader, "viewPosition");
 
-        Vector3 cameraPosition = heightMapCenter + new Vector3(500, -500, 500);
+        Vector3 cameraPosition = heightMapCenter + new Vector3(64, -64, 256);
         Camera3D camera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
-        Raylib.UpdateCamera(ref camera, CameraMode.Free);
+        Raylib.UpdateCamera(ref camera, CameraMode.Custom);
 
         Raylib.SetTargetFPS(60);
 
         uint drawCalls = (uint)(MathF.Ceiling(size / chunkSize) * MathF.Ceiling(size / chunkSize));
 
+        Rlgl.SetClipPlanes(0.001f, 10000.0f);
+
+        ComputeShaderProgram erosionSimulationComputeShaderProgram = new("Shaders/ErosionSimulationComputeShader.glsl");
+
+
+        Rlgl.EnableShader(erosionSimulationComputeShaderProgram.Id);
+        Rlgl.BindShaderBuffer(heightMapShaderBufferId, 1);
+        Rlgl.ComputeShaderDispatch(50000, 1, 1);
+        Rlgl.DisableShader();
+
         while (!Raylib.WindowShouldClose())
         {
-            Raylib.UpdateCamera(ref camera, CameraMode.Free);
+            Raylib.UpdateCamera(ref camera, CameraMode.Custom);
             Vector3 viewPosition = camera.Position;
             unsafe
             {
@@ -54,19 +64,20 @@ internal class GameLoop : IGameLoop
             }
 
             Raylib.BeginDrawing();
-                Raylib.ClearBackground(Color.SkyBlue);
-                Raylib.BeginShaderMode(meshShader);
-                    Raylib.BeginMode3D(camera);
-                        Rlgl.EnableShader(meshShader.Id);
-                        Rlgl.BindShaderBuffer(heightMapShaderBufferId, 1);
-                        Raylib.DrawMeshTasks(0, drawCalls);
-                        Rlgl.DisableShader();
-                    Raylib.EndMode3D();
-                Raylib.EndShaderMode();
+            Raylib.ClearBackground(Color.SkyBlue);
+            Raylib.BeginShaderMode(meshShader);
+            Raylib.BeginMode3D(camera);
+            Rlgl.EnableShader(meshShader.Id);
+            Rlgl.BindShaderBuffer(heightMapShaderBufferId, 1);
+            Raylib.DrawMeshTasks(0, drawCalls);
+            Rlgl.DisableShader();
+            Raylib.EndMode3D();
+            Raylib.EndShaderMode();
             Raylib.EndDrawing();
         }
 
         Raylib.UnloadShader(meshShader);
+        erosionSimulationComputeShaderProgram.Dispose();
         Rlgl.UnloadShaderBuffer(heightMapShaderBufferId);
 
         Raylib.CloseWindow();

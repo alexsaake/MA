@@ -75,6 +75,8 @@ float snoise(vec2 v)
 // original author Sebastian Lague
 // https://github.com/SebLague/Hydraulic-Erosion/blob/master/Assets/Scripts/ComputeShaders/HeightMap.compute﻿
 
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
 struct HeightMapParameters
 {
     uint size;
@@ -82,12 +84,12 @@ struct HeightMapParameters
     uint octaves;
     float persistence;
     float lacunarity;
+    int min;
+    int max;
     //octaveOffsets[8];
 };
 
-layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
-
-layout(std430, binding = 1) readonly restrict buffer heightMapParametersBuffer
+layout(std430, binding = 1) buffer heightMapParametersBuffer
 {
     HeightMapParameters parameters;
 };
@@ -124,4 +126,7 @@ void main()
     }
 
     heightMap[id] = noiseHeight;
+    int val = int(noiseHeight * 100000);
+    atomicMin(parameters.min, val);
+    atomicMax(parameters.max, val);
 }
