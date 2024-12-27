@@ -1,15 +1,20 @@
-﻿using System.Numerics;
+﻿using Raylib_cs;
+using System.Numerics;
 
 namespace ProceduralLandscapeGeneration
 {
     internal class ErosionSimulator : IErosionSimulator
     {
+        private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
+
         private Random myRandom;
 
         public event EventHandler<HeightMap>? ErosionIterationFinished;
 
-        public ErosionSimulator()
+        public ErosionSimulator(IComputeShaderProgramFactory computeShaderProgramFactory)
         {
+            myComputeShaderProgramFactory = computeShaderProgramFactory;
+
             myRandom = Random.Shared;
         }
 
@@ -51,6 +56,22 @@ namespace ProceduralLandscapeGeneration
                 }
             }
 
+            ErosionIterationFinished?.Invoke(this, heightMap);
+            Console.WriteLine($"INFO: End of simulation after {simulationIterations} iterations.");
+        }
+
+        public void SimulateHydraulicErosion(uint heightMapShaderBufferId, uint simulationIterations, uint size)
+        {            
+            ComputeShaderProgram erosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Shaders/ErosionSimulationComputeShader.glsl");
+
+            Rlgl.EnableShader(erosionSimulationComputeShaderProgram.Id);
+            Rlgl.BindShaderBuffer(heightMapShaderBufferId, 1);
+            Rlgl.ComputeShaderDispatch(simulationIterations, 1, 1);
+            Rlgl.DisableShader();
+
+            erosionSimulationComputeShaderProgram.Dispose();
+
+            ErosionIterationFinished?.Invoke(this, new HeightMap(heightMapShaderBufferId, size));
             Console.WriteLine($"INFO: End of simulation after {simulationIterations} iterations.");
         }
     }

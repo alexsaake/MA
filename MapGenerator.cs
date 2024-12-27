@@ -25,17 +25,7 @@ namespace ProceduralLandscapeGeneration
         {
             uint heightMapShaderBufferId = GenerateHeightMapShaderBuffer(size, 500, 8, 0.5f, 2);
 
-            uint heightMapSize = size * size;
-            uint heightMapBufferSize = heightMapSize * sizeof(float);
-            float[] heightMapValues = new float[heightMapSize];
-            fixed(float* heightMapValuesPointer = heightMapValues)
-            {
-                Rlgl.ReadShaderBuffer(heightMapShaderBufferId, heightMapValuesPointer, heightMapBufferSize, 0);
-            }
-
-            HeightMap heightMap = new(heightMapValues);
-
-            return heightMap;
+            return new HeightMap(heightMapShaderBufferId, size);
         }
 
         public uint GenerateHeightMapShaderBuffer(uint size)

@@ -5,14 +5,15 @@ namespace ProceduralLandscapeGeneration;
 
 internal class GameLoop : IGameLoop
 {
+    private readonly IMapGenerator myMapGenerator;
+    private readonly IErosionSimulator myErosionSimulator;
+    private readonly IMeshCreator myMeshCreator;
+
     private HeightMap? myNewHeightMap;
     private RenderTexture2D myShadowMap;
     private Model myModel;
     private Shader mySceneShader;
     private Shader myShadowMapShader;
-    private IMapGenerator myMapGenerator;
-    private IErosionSimulator myErosionSimulator;
-    private IMeshCreator myMeshCreator;
 
     public GameLoop(IMapGenerator mapGenerator, IErosionSimulator erosionSimulator, IMeshCreator meshCreator)
     {
@@ -29,12 +30,14 @@ internal class GameLoop : IGameLoop
     private void MainLoop()
     {
         uint size = 512;
-        uint simulationIterations = 100000;
+        uint simulationIterations = 10000;
         int shadowMapResolution = 1028;
 
         Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-CsLo");
 
-        HeightMap heightMap = myMapGenerator.GenerateHeightMapGPU(size);
+        uint heightMapShaderBufferId = myMapGenerator.GenerateHeightMapShaderBuffer(size);
+        
+        myErosionSimulator.ErosionIterationFinished += OnErosionSimulationFinished;
 
         mySceneShader = Raylib.LoadShader("Shaders/SceneVertexShader.glsl", "Shaders/SceneFragmentShader.glsl");
         myShadowMapShader = Raylib.LoadShader("Shaders/ShadowMapVertexShader.glsl", "Shaders/ShadowMapFragmentShader.glsl");
@@ -58,6 +61,7 @@ internal class GameLoop : IGameLoop
         Vector3 lightCameraPosition = heightMapCenter - lightDirection;
         Camera3D lightCamera = new(lightCameraPosition, heightMapCenter, Vector3.UnitZ, 550.0f, CameraProjection.Orthographic);
 
+        HeightMap heightMap = new HeightMap(heightMapShaderBufferId, size);
         InitiateModel(heightMap);
         UpdateShadowMap(lightCamera, lightSpaceMatrixLocation, shadowMapLocation);
 
@@ -65,7 +69,11 @@ internal class GameLoop : IGameLoop
 
         while (!Raylib.WindowShouldClose())
         {
-
+            if (Raylib.IsKeyPressed(KeyboardKey.Space))
+            {
+                //myErosionSimulator.SimulateHydraulicErosion(heightMap, simulationIterations);
+                myErosionSimulator.SimulateHydraulicErosion(heightMapShaderBufferId, simulationIterations, size);
+            }
 
             Raylib.BeginDrawing();
 

@@ -177,7 +177,7 @@ void main()
     uint index = uint(Random(id) * heightMap.length());
     uint x = index % myMapSize;
     uint y = index / myMapSize;
-    myPosition = vec2(x, y);
+    myPosition = vec2(myMapSize / 2, myMapSize / 2);
     myOriginalPosition = vec2(0.0, 0.0);
     mySpeed = vec2(0.0, 0.0);
     myAge = 0;
