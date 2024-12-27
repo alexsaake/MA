@@ -5,11 +5,20 @@ namespace ProceduralLandscapeGeneration
 {
     internal class MapGenerator : IMapGenerator
     {
+        private readonly INoise myNoise;
         private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
 
-        public MapGenerator(IComputeShaderProgramFactory computeShaderProgramFactory)
+        public MapGenerator(INoise noise, IComputeShaderProgramFactory computeShaderProgramFactory)
         {
+            myNoise = noise;
             myComputeShaderProgramFactory = computeShaderProgramFactory;
+        }
+
+        public HeightMap GenerateHeightMap(uint width, uint depth)
+        {
+            HeightMap noiseMap = myNoise.GenerateNoiseMap(width, depth, 2, 8, 0.5f, 2, Vector2.Zero);
+
+            return noiseMap;
         }
 
         public uint GenerateHeightMapShaderBuffer(uint size)

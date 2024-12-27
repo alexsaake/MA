@@ -11,6 +11,9 @@ internal class DependencyInjectionContainer
         containerBuilder.RegisterType<MapGenerator>().As<IMapGenerator>();
         containerBuilder.RegisterType<ComputeShaderProgram>().As<IComputeShaderProgram>();
         containerBuilder.RegisterType<ComputeShaderProgramFactory>().As<IComputeShaderProgramFactory>();
+        containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>();
+        containerBuilder.RegisterType<MeshCreator>().As<IMeshCreator>();
+        containerBuilder.RegisterType<Noise>().As<INoise>();
         return containerBuilder.Build();
     }
 }
