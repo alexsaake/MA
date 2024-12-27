@@ -2,8 +2,6 @@
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
-#define SCALE 60
-
 layout(std430, binding = 1) buffer heightMapShaderBuffer
 {
     float[] heightMap;
@@ -26,7 +24,7 @@ bool isOutOfBounds(ivec2 position)
     return position.x < 0 || position.x > myMapSize || position.y < 0 || position.y > myMapSize;
 }
 
-vec3 getScaledNormal(uint x, uint y)
+vec3 getUnscaledNormal(uint x, uint y)
 {
     if (x < 1 || x > myMapSize - 2
         || y < 1 || y > myMapSize - 2)
@@ -44,8 +42,8 @@ vec3 getScaledNormal(uint x, uint y)
     float xym1 = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    SCALE * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
-    SCALE * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
+    -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
+    -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
     1.0);
 
     return normalize(normal);
@@ -84,7 +82,7 @@ bool Move()
         return false;
     }
 
-    vec3 normal = getScaledNormal(position.x, position.y);
+    vec3 normal = getUnscaledNormal(position.x, position.y);
 
     mySpeed += Gravity * normal.xy / myVolume;
 
