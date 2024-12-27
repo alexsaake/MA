@@ -28,22 +28,21 @@ internal class GameLoop : IGameLoop
 
     private void MainLoop()
     {
-        uint width = 512;
-        uint depth = 512;
+        uint size = 512;
         uint simulationIterations = 100000;
         int shadowMapResolution = 1028;
 
         Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-CsLo");
 
-        HeightMap heightMap = myMapGenerator.GenerateHeightMap(width, depth);
+        HeightMap heightMap = myMapGenerator.GenerateHeightMapGPU(size);
 
         mySceneShader = Raylib.LoadShader("Shaders/SceneVertexShader.glsl", "Shaders/SceneFragmentShader.glsl");
         myShadowMapShader = Raylib.LoadShader("Shaders/ShadowMapVertexShader.glsl", "Shaders/ShadowMapFragmentShader.glsl");
 
         int lightSpaceMatrixLocation = Raylib.GetShaderLocation(mySceneShader, "lightSpaceMatrix");
         int shadowMapLocation = Raylib.GetShaderLocation(mySceneShader, "shadowMap");
-        Vector3 heightMapCenter = new Vector3(width / 2, depth / 2, 0);
-        Vector3 lightDirection = new Vector3(0, depth, -depth / 2);
+        Vector3 heightMapCenter = new Vector3(size / 2, size / 2, 0);
+        Vector3 lightDirection = new Vector3(0, size, -size / 2);
         int lightDirectionLocation = Raylib.GetShaderLocation(mySceneShader, "lightDirection");
         unsafe
         {
@@ -51,7 +50,7 @@ internal class GameLoop : IGameLoop
         }
         int viewPositionLocation = Raylib.GetShaderLocation(mySceneShader, "viewPosition");
 
-        Vector3 cameraPosition = heightMapCenter + new Vector3(width / 2, -depth / 2, depth / 2);
+        Vector3 cameraPosition = heightMapCenter + new Vector3(size / 2, -size / 2, size / 2);
         Camera3D camera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
         Raylib.UpdateCamera(ref camera, CameraMode.Free);
 
@@ -61,9 +60,6 @@ internal class GameLoop : IGameLoop
 
         InitiateModel(heightMap);
         UpdateShadowMap(lightCamera, lightSpaceMatrixLocation, shadowMapLocation);
-
-        myErosionSimulator.ErosionIterationFinished += OnErosionSimulationFinished;
-        Task.Run(() => myErosionSimulator.SimulateHydraulicErosion(heightMap, simulationIterations));
 
         Raylib.SetTargetFPS(60);
 

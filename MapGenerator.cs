@@ -14,11 +14,28 @@ namespace ProceduralLandscapeGeneration
             myComputeShaderProgramFactory = computeShaderProgramFactory;
         }
 
-        public HeightMap GenerateHeightMap(uint width, uint depth)
+        public HeightMap GenerateHeightMapCPU(uint width, uint depth)
         {
-            HeightMap noiseMap = myNoise.GenerateNoiseMap(width, depth, 2, 8, 0.5f, 2, Vector2.Zero);
+            HeightMap heightMap = myNoise.GenerateNoiseMap(width, depth, 2, 8, 0.5f, 2, Vector2.Zero);
 
-            return noiseMap;
+            return heightMap;
+        }
+
+        public unsafe HeightMap GenerateHeightMapGPU(uint size)
+        {
+            uint heightMapShaderBufferId = GenerateHeightMapShaderBuffer(size, 500, 8, 0.5f, 2);
+
+            uint heightMapSize = size * size;
+            uint heightMapBufferSize = heightMapSize * sizeof(float);
+            float[] heightMapValues = new float[heightMapSize];
+            fixed(float* heightMapValuesPointer = heightMapValues)
+            {
+                Rlgl.ReadShaderBuffer(heightMapShaderBufferId, heightMapValuesPointer, heightMapBufferSize, 0);
+            }
+
+            HeightMap heightMap = new(heightMapValues);
+
+            return heightMap;
         }
 
         public uint GenerateHeightMapShaderBuffer(uint size)
