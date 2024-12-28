@@ -2,6 +2,7 @@
 
 namespace ProceduralLandscapeGeneration
 {
+    //https://github.com/erosiv/soillib/blob/main/source/particle/water.hpp
     internal class WaterParticle
     {
         private const int MaxAge = 1024;

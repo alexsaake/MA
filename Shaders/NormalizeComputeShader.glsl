@@ -4,7 +4,7 @@ layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 struct HeightMapParameters
 {
-    uint size;
+    uint sideLength;
     float scale;
     uint octaves;
     float persistence;
@@ -33,7 +33,7 @@ void main()
 {
     uint id = gl_GlobalInvocationID.x;
     
-    uint mapSize = parameters.size * parameters.size;
+    uint mapSize = parameters.sideLength * parameters.sideLength;
     if (id >= mapSize) return;
 
     heightMap[id] = inverseLerp(float(parameters.min) / 100000, float(parameters.max) / 100000, heightMap[id]);

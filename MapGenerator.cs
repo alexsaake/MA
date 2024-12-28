@@ -21,19 +21,19 @@ namespace ProceduralLandscapeGeneration
             return heightMap;
         }
 
-        public unsafe HeightMap GenerateHeightMapGPU(uint size)
+        public unsafe HeightMap GenerateHeightMapGPU(uint sideLength)
         {
-            uint heightMapShaderBufferId = GenerateHeightMapShaderBuffer(size, 500, 8, 0.5f, 2);
+            uint heightMapShaderBufferId = GenerateHeightMapShaderBuffer(sideLength, 500, 8, 0.5f, 2);
 
-            return new HeightMap(heightMapShaderBufferId, size);
+            return new HeightMap(heightMapShaderBufferId, sideLength);
         }
 
-        public uint GenerateHeightMapShaderBuffer(uint size)
+        public uint GenerateHeightMapShaderBuffer(uint sideLength)
         {
-            return GenerateHeightMapShaderBuffer(size, 500, 8, 0.5f, 2);
+            return GenerateHeightMapShaderBuffer(sideLength, 500, 8, 0.5f, 2);
         }
 
-        private unsafe uint GenerateHeightMapShaderBuffer(uint size, float scale, uint octaves, float persistance, float lacunarity)
+        private unsafe uint GenerateHeightMapShaderBuffer(uint sideLengt, float scale, uint octaves, float persistance, float lacunarity)
         {
             var random = new Random(Configuration.Seed);
 
@@ -45,7 +45,7 @@ namespace ProceduralLandscapeGeneration
 
             HeightMapParameters heightMapParameters = new HeightMapParameters()
             {
-                Size = size,
+                SideLength = sideLengt,
                 Scale = scale,
                 Octaves = octaves,
                 Persistence = persistance,
@@ -55,7 +55,7 @@ namespace ProceduralLandscapeGeneration
             uint heightMapParametersBufferSize = (uint)sizeof(HeightMapParameters);
             uint heightMapParametersBufferId = Rlgl.LoadShaderBuffer(heightMapParametersBufferSize, &heightMapParameters, Rlgl.DYNAMIC_COPY);
 
-            uint heightMapSize = size * size;
+            uint heightMapSize = sideLengt * sideLengt;
             uint heightMapBufferSize = heightMapSize * sizeof(float);
             uint heightMapBufferId = Rlgl.LoadShaderBuffer(heightMapBufferSize, null, Rlgl.DYNAMIC_COPY);
 
@@ -89,7 +89,7 @@ namespace ProceduralLandscapeGeneration
 
     internal struct HeightMapParameters
     {
-        public uint Size;
+        public uint SideLength;
         public float Scale;
         public uint Octaves;
         public float Persistence;

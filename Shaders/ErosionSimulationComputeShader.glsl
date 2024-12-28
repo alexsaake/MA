@@ -7,6 +7,11 @@ layout(std430, binding = 1) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
+layout(std430, binding = 2) readonly restrict buffer heightMapIndicesShaderBuffer
+{
+    uint[] heightMapIndices;
+};
+
 uint myMapSize;
 
 uint getIndex(uint x, uint y)
@@ -49,11 +54,11 @@ vec3 getUnscaledNormal(uint x, uint y)
     return normalize(normal);
 }
 
-const int MaxAge = 1024;
+//https://github.com/erosiv/soillib/blob/main/source/particle/water.hpp
+const uint MaxAge = 16;
 const float EvaporationRate = 0.001;
 const float DepositionRate = 0.05;
 const float MinimumVolume = 0.001;
-const float Entrainment = 0.0;
 const float Gravity = 2.0;
 vec2 myPosition;
 vec2 myOriginalPosition;
@@ -79,6 +84,7 @@ bool Move()
     if(myVolume < MinimumVolume)
     {
         heightMap[getIndexV(position)] += mySediment;
+        //cascade(position);
         return false;
     }
 
@@ -117,7 +123,7 @@ bool Interact()
         h2 = heightMap[getIndexV(currentPosition)];
     }
 
-    float cEq = (1.0 + Entrainment) * heightMap[getIndexV(position)] - h2;
+    float cEq = heightMap[getIndexV(position)] - h2;
     if(cEq < 0)
     {
         cEq = 0;
@@ -144,27 +150,11 @@ bool Interact()
 
     myVolume *= (1.0 - EvaporationRate);
 
+    //cascade(position);
+
     myAge++;
 
     return true;
-}
-
-//https://github.com/keijiro/ComputePrngTest/blob/master/Assets/Prng.compute
-// Hash function from H. Schechter & R. Bridson, goo.gl/RXiKaH
-uint Hash(uint s)
-{
-    s ^= 2747636419u;
-    s *= 2654435769u;
-    s ^= s >> 16;
-    s *= 2654435769u;
-    s ^= s >> 16;
-    s *= 2654435769u;
-    return s;
-}
-
-float Random(uint seed)
-{
-    return float(Hash(seed)) / 4294967295.0; // 2^32-1
 }
 
 void main()
@@ -172,10 +162,10 @@ void main()
     uint id = gl_GlobalInvocationID.x;
     myMapSize = uint(sqrt(heightMap.length()));
 
-    uint index = uint(Random(id) * heightMap.length());
+    uint index = heightMapIndices[id];
     uint x = index % myMapSize;
     uint y = index / myMapSize;
-    myPosition = vec2(myMapSize / 2, myMapSize / 2);
+    myPosition = vec2(x, y);
     myOriginalPosition = vec2(0.0, 0.0);
     mySpeed = vec2(0.0, 0.0);
     myAge = 0;

@@ -24,18 +24,18 @@ internal class GameLoop : IGameLoop
 
     public void Run()
     {
-        MainLoop();
+        MainLoop2();
     }
 
     private void MainLoop()
     {
-        uint size = 1028;
+        uint sideLength = 1028;
         uint simulationIterations = 100000;
         int shadowMapResolution = 1028;
 
         Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-CsLo");
 
-        uint heightMapShaderBufferId = myMapGenerator.GenerateHeightMapShaderBuffer(size);
+        uint heightMapShaderBufferId = myMapGenerator.GenerateHeightMapShaderBuffer(sideLength);
         
         myErosionSimulator.ErosionIterationFinished += OnErosionSimulationFinished;
 
@@ -44,8 +44,8 @@ internal class GameLoop : IGameLoop
 
         int lightSpaceMatrixLocation = Raylib.GetShaderLocation(mySceneShader, "lightSpaceMatrix");
         int shadowMapLocation = Raylib.GetShaderLocation(mySceneShader, "shadowMap");
-        Vector3 heightMapCenter = new Vector3(size / 2, size / 2, 0);
-        Vector3 lightDirection = new Vector3(0, size, -size / 2);
+        Vector3 heightMapCenter = new Vector3(sideLength / 2, sideLength / 2, 0);
+        Vector3 lightDirection = new Vector3(0, sideLength, -sideLength / 2);
         int lightDirectionLocation = Raylib.GetShaderLocation(mySceneShader, "lightDirection");
         unsafe
         {
@@ -53,7 +53,7 @@ internal class GameLoop : IGameLoop
         }
         int viewPositionLocation = Raylib.GetShaderLocation(mySceneShader, "viewPosition");
 
-        Vector3 cameraPosition = heightMapCenter + new Vector3(size / 2, -size / 2, size / 2);
+        Vector3 cameraPosition = heightMapCenter + new Vector3(sideLength / 2, -sideLength / 2, sideLength / 2);
         Camera3D camera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
         Raylib.UpdateCamera(ref camera, CameraMode.Free);
 
@@ -61,7 +61,7 @@ internal class GameLoop : IGameLoop
         Vector3 lightCameraPosition = heightMapCenter - lightDirection;
         Camera3D lightCamera = new(lightCameraPosition, heightMapCenter, Vector3.UnitZ, 550.0f, CameraProjection.Orthographic);
 
-        HeightMap heightMap = new HeightMap(heightMapShaderBufferId, size);
+        HeightMap heightMap = new HeightMap(heightMapShaderBufferId, sideLength);
         InitiateModel(heightMap);
         UpdateShadowMap(lightCamera, lightSpaceMatrixLocation, shadowMapLocation);
 
@@ -72,7 +72,7 @@ internal class GameLoop : IGameLoop
             if (Raylib.IsKeyPressed(KeyboardKey.Space))
             {
                 //myErosionSimulator.SimulateHydraulicErosion(heightMap, simulationIterations);
-                myErosionSimulator.SimulateHydraulicErosion(heightMapShaderBufferId, simulationIterations, size);
+                myErosionSimulator.SimulateHydraulicErosion(heightMapShaderBufferId, sideLength * sideLength, simulationIterations);
             }
 
             Raylib.BeginDrawing();
@@ -189,15 +189,18 @@ internal class GameLoop : IGameLoop
     private void MainLoop2()
     {
         const float chunkSize = 7.0f;
-        uint size = 512;
+        uint sideLength = 512;
+        uint heightMapSize = sideLength * sideLength;
+        uint simulationIterations = heightMapSize / 16;
 
         Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-Cs");
 
-        uint heightMapShaderBufferId = myMapGenerator.GenerateHeightMapShaderBuffer(size);
+        uint heightMapShaderBufferId = myMapGenerator.GenerateHeightMapShaderBuffer(sideLength);
         Shader meshShader = Raylib.LoadMeshShader("Shaders/MeshShader.glsl", "Shaders/FragmentShader.glsl");
+        myErosionSimulator.Initialize();
 
-        Vector3 heightMapCenter = new Vector3(size / 2, size / 2, 0);
-        Vector3 lightDirection = new Vector3(0, size, -size / 2);
+        Vector3 heightMapCenter = new Vector3(sideLength / 2, sideLength / 2, 0);
+        Vector3 lightDirection = new Vector3(0, sideLength, -sideLength / 2);
         int lightDirectionLocation = Raylib.GetShaderLocation(meshShader, "lightDirection");
         unsafe
         {
@@ -205,26 +208,23 @@ internal class GameLoop : IGameLoop
         }
         int viewPositionLocation = Raylib.GetShaderLocation(meshShader, "viewPosition");
 
-        Vector3 cameraPosition = heightMapCenter + new Vector3(64, -64, 256);
+        Vector3 cameraPosition = heightMapCenter + new Vector3(sideLength / 2, -sideLength / 2, sideLength / 2);
         Camera3D camera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
         Raylib.UpdateCamera(ref camera, CameraMode.Custom);
 
         Raylib.SetTargetFPS(60);
 
-        uint drawCalls = (uint)(MathF.Ceiling(size / chunkSize) * MathF.Ceiling(size / chunkSize));
+        uint drawCalls = (uint)(MathF.Ceiling(sideLength / chunkSize) * MathF.Ceiling(sideLength / chunkSize));
 
         Rlgl.SetClipPlanes(0.001f, 10000.0f);
 
-        ComputeShaderProgram erosionSimulationComputeShaderProgram = new("Shaders/ErosionSimulationComputeShader.glsl");
-
-
-        Rlgl.EnableShader(erosionSimulationComputeShaderProgram.Id);
-        Rlgl.BindShaderBuffer(heightMapShaderBufferId, 1);
-        Rlgl.ComputeShaderDispatch(1000, 1, 1);
-        Rlgl.DisableShader();
-
         while (!Raylib.WindowShouldClose())
         {
+            if (Raylib.IsKeyDown(KeyboardKey.Space))
+            {
+                myErosionSimulator.SimulateHydraulicErosion(heightMapShaderBufferId, heightMapSize, simulationIterations);
+            }
+
             Raylib.UpdateCamera(ref camera, CameraMode.Custom);
             Vector3 viewPosition = camera.Position;
             unsafe
@@ -243,12 +243,9 @@ internal class GameLoop : IGameLoop
             Raylib.EndMode3D();
             Raylib.EndShaderMode();
             Raylib.EndDrawing();
-
-
         }
 
         Raylib.UnloadShader(meshShader);
-        erosionSimulationComputeShaderProgram.Dispose();
         Rlgl.UnloadShaderBuffer(heightMapShaderBufferId);
 
         Raylib.CloseWindow();

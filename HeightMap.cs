@@ -31,9 +31,8 @@ namespace ProceduralLandscapeGeneration
             return heightMap2D;
         }
 
-        public unsafe HeightMap(uint heightMapShaderBufferId, uint size)
+        public unsafe HeightMap(uint heightMapShaderBufferId, uint heightMapSize)
         {
-            uint heightMapSize = size * size;
             uint heightMapBufferSize = heightMapSize * sizeof(float);
             float[] heightMapValues = new float[heightMapSize];
             fixed (float* heightMapValuesPointer = heightMapValues)
