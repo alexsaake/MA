@@ -1,7 +1,8 @@
-﻿using Raylib_cs;
+﻿using ProceduralLandscapeGeneration.Common;
+using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration
+namespace ProceduralLandscapeGeneration.Rendering
 {
     internal class MeshCreator : IMeshCreator
     {

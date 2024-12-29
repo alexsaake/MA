@@ -27,37 +27,34 @@
 	  <None Update="raylib.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Shaders\HeightMapGenerator.compute">
+	  <None Update="Simulation\GPU\Shaders\ErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Shaders\ErosionSimulationComputeShader.glsl">
+	  <None Update="Simulation\GPU\Shaders\HeightMapGeneratorComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Shaders\HeightMapGeneratorComputeShader.glsl">
+	  <None Update="Rendering\Shaders\MeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Shaders\MeshShader.glsl">
+	  <None Update="Rendering\Shaders\FragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Shaders\FragmentShader.glsl">
+	  <None Update="Simulation\GPU\Shaders\NormalizeComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Shaders\NormalizeComputeShader.glsl">
+	  <None Update="Rendering\Shaders\SceneFragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Shaders\SceneFragmentShader.glsl">
+	  <None Update="Rendering\Shaders\SceneVertexShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Shaders\SceneVertexShader.glsl">
+	  <None Update="Rendering\Shaders\ShadowMapFragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Shaders\ShadowMapFragmentShader.glsl">
+	  <None Update="Rendering\Shaders\ShadowMapVertexShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Shaders\ShadowMapVertexShader.glsl">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Shaders\TaskShader.glsl">
+	  <None Update="Rendering\Shaders\TaskShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
   </ItemGroup>

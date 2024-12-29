@@ -1,7 +1,7 @@
 ﻿using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration
+namespace ProceduralLandscapeGeneration.Common
 {
     internal class HeightMap
     {
@@ -15,9 +15,21 @@ namespace ProceduralLandscapeGeneration
             Height = heightMap;
         }
 
-        public HeightMap(float[] heightMap) : this(Get2DHeightMapFrom1D(heightMap)) {}
+        public HeightMap(float[] heightMap) : this(Get2DHeightMapValuesFrom1D(heightMap)) { }
 
-        private static float[,] Get2DHeightMapFrom1D(float[] heightMap1D)
+        public unsafe HeightMap(uint heightMapShaderBufferId, uint heightMapSize)
+        {
+            uint heightMapBufferSize = heightMapSize * sizeof(float);
+            float[] heightMapValues = new float[heightMapSize];
+            fixed (float* heightMapValuesPointer = heightMapValues)
+            {
+                Rlgl.ReadShaderBuffer(heightMapShaderBufferId, heightMapValuesPointer, heightMapBufferSize, 0);
+            }
+
+            Height = Get2DHeightMapValuesFrom1D(heightMapValues);
+        }
+
+        private static float[,] Get2DHeightMapValuesFrom1D(float[] heightMap1D)
         {
             int size = (int)MathF.Sqrt(heightMap1D.Length);
             float[,] heightMap2D = new float[size, size];
@@ -31,16 +43,18 @@ namespace ProceduralLandscapeGeneration
             return heightMap2D;
         }
 
-        public unsafe HeightMap(uint heightMapShaderBufferId, uint heightMapSize)
+        public float[] Get1DHeightMapValues()
         {
-            uint heightMapBufferSize = heightMapSize * sizeof(float);
-            float[] heightMapValues = new float[heightMapSize];
-            fixed (float* heightMapValuesPointer = heightMapValues)
+            float[] heightMap1D = new float[Width * Depth];
+            for (int y = 0; y < Depth; y++)
             {
-                Rlgl.ReadShaderBuffer(heightMapShaderBufferId, heightMapValuesPointer, heightMapBufferSize, 0);
+                for (int x = 0; x < Width; x++)
+                {
+                    heightMap1D[x + y] = Height[x, y];
+                }
             }
 
-            Height = Get2DHeightMapFrom1D(heightMapValues);
+            return heightMap1D;
         }
 
         public Vector3 GetNormal(IVector2 position)
@@ -53,7 +67,7 @@ namespace ProceduralLandscapeGeneration
             return GetScaledNormal(x, y, Configuration.HeightMultiplier);
         }
 
-        private Vector3 GetScaledNormal(int x, int y, int scale)
+        private Vector3 GetScaledNormal(int x, int y, uint scale)
         {
             if (x < 1 || x > Width - 2
                 || y < 1 || y > Depth - 2)

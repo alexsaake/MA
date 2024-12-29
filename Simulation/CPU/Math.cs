@@ -1,8 +1,7 @@
-﻿namespace ProceduralLandscapeGeneration
+﻿namespace ProceduralLandscapeGeneration.Simulation.CPU
 {
     internal static class Math
     {
-
         public static float Lerp(float lower, float upper, float value)
         {
             return (1 - value) * lower + value * upper;

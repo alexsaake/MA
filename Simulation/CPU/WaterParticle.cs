@@ -1,8 +1,8 @@
-﻿using System.Numerics;
+﻿using ProceduralLandscapeGeneration.Common;
+using System.Numerics;
 
-namespace ProceduralLandscapeGeneration
+namespace ProceduralLandscapeGeneration.Simulation.CPU
 {
-    //https://github.com/erosiv/soillib/blob/main/source/particle/water.hpp
     internal class WaterParticle
     {
         private const int MaxAge = 1024;
@@ -86,7 +86,7 @@ namespace ProceduralLandscapeGeneration
                 cEq = 0;
             }
 
-            float cDiff = (cEq * myVolume - mySediment);
+            float cDiff = cEq * myVolume - mySediment;
 
             float effD = DepositionRate;
             if (effD < 0)
@@ -105,7 +105,7 @@ namespace ProceduralLandscapeGeneration
             mySediment += effD * cDiff;
             heightMap.Height[position.X, position.Y] -= effD * cDiff;
 
-            myVolume *= (1.0f - EvaporationRate);
+            myVolume *= 1.0f - EvaporationRate;
 
             myAge++;
 

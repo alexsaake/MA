@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration
+﻿namespace ProceduralLandscapeGeneration.Simulation.GPU
 {
     internal class ComputeShaderProgramFactory : IComputeShaderProgramFactory
     {

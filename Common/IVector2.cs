@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace ProceduralLandscapeGeneration
+namespace ProceduralLandscapeGeneration.Common
 {
     [StructLayout(LayoutKind.Sequential)]
     internal struct IVector2

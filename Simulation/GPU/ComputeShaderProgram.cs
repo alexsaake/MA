@@ -1,6 +1,6 @@
 ﻿using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration
+namespace ProceduralLandscapeGeneration.Simulation.GPU
 {
     internal class ComputeShaderProgram : IComputeShaderProgram
     {

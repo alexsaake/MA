@@ -1,6 +1,6 @@
 ﻿using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration
+namespace ProceduralLandscapeGeneration.Common
 {
     internal interface ITextureCreator
     {

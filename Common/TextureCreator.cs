@@ -2,7 +2,7 @@
 using Raylib_cs;
 using System.Runtime.CompilerServices;
 
-namespace ProceduralLandscapeGeneration
+namespace ProceduralLandscapeGeneration.Common
 {
     internal class TextureCreator : ITextureCreator
     {

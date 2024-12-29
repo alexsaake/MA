@@ -9,6 +9,6 @@ public class Program
         var container = DependencyInjectionContainer.Create();
 
         using var lifetimeScope = container.BeginLifetimeScope();
-        lifetimeScope.Resolve<IGameLoop>().Run();
+        lifetimeScope.Resolve<IApplication>().Run();
     }
 }
