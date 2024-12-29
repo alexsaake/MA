@@ -1,5 +1,6 @@
 ﻿using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;
+using ProceduralLandscapeGeneration.Simulation.CPU;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration;
@@ -27,7 +28,7 @@ internal class Application : IApplication
 
         while (!Raylib.WindowShouldClose())
         {
-            if (Raylib.IsKeyDown(KeyboardKey.Space))
+            if (Raylib.IsKeyPressed(KeyboardKey.Space))
             {
                 myErosionSimulator.SimulateHydraulicErosion();
             }
@@ -36,10 +37,7 @@ internal class Application : IApplication
 
             myRenderer.Draw();
         }
-    }
 
-    public void Dispose()
-    {
         myRenderer.Dispose();
         myErosionSimulator.Dispose();
 

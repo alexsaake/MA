@@ -4,9 +4,9 @@ namespace ProceduralLandscapeGeneration
 {
     internal static class Configuration
     {
-        public const ProcessorType HeightMapGeneration = ProcessorType.CPU;
+        public const ProcessorType HeightMapGeneration = ProcessorType.GPU;
         public const ProcessorType ErosionSimulation = ProcessorType.GPU;
-        public const ProcessorType MeshCreation = ProcessorType.CPU;
+        public const ProcessorType MeshCreation = ProcessorType.GPU;
 
         public const uint HeightMapSideLength = 512;
         public const uint SimulationIterations = 100000;

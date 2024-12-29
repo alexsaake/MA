@@ -8,7 +8,7 @@ namespace ProceduralLandscapeGeneration.Rendering
 {
     internal class MeshShaderRenderer : IRenderer
     {
-        private IErosionSimulator myErosionSimulator;
+        private readonly IErosionSimulator myErosionSimulator;
 
         private Shader myMeshShader;
         private int myViewPositionLocation;
@@ -16,6 +16,8 @@ namespace ProceduralLandscapeGeneration.Rendering
 
         private uint myHeightMapShaderBufferId;
         private uint myMeshletCount;
+        private bool myIsUpdateAvailable;
+        private bool myIsDisposed;
 
         public MeshShaderRenderer(IErosionSimulator erosionSimulator)
         {
@@ -66,7 +68,28 @@ namespace ProceduralLandscapeGeneration.Rendering
 
         private void OnErosionIterationFinished(object? sender, EventArgs e)
         {
-            UpdateShaderBuffer();
+            myIsUpdateAvailable = true;
+        }
+
+        private static uint CalculateMeshletCount()
+        {
+            const float chunkSize = 7.0f;
+            float meshletSideLength = MathF.Ceiling(Configuration.HeightMapSideLength / chunkSize);
+            return (uint)(meshletSideLength * meshletSideLength);
+        }
+
+        public unsafe void Update()
+        {
+            if (myIsUpdateAvailable)
+            {
+                UpdateShaderBuffer();
+
+                myIsUpdateAvailable = false;
+            }
+
+            Raylib.UpdateCamera(ref myCamera, CameraMode.Custom);
+            Vector3 viewPosition = myCamera.Position;
+            Raylib.SetShaderValue(myMeshShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
         }
 
         private unsafe void UpdateShaderBuffer()
@@ -81,19 +104,6 @@ namespace ProceduralLandscapeGeneration.Rendering
             }
         }
 
-        private uint CalculateMeshletCount()
-        {
-            const float chunkSize = 7.0f;
-            return (uint)(MathF.Ceiling(Configuration.HeightMapSideLength / chunkSize) * MathF.Ceiling(Configuration.HeightMapSideLength / chunkSize));
-        }
-
-        public unsafe void Update()
-        {
-            Raylib.UpdateCamera(ref myCamera, CameraMode.Custom);
-            Vector3 viewPosition = myCamera.Position;
-            Raylib.SetShaderValue(myMeshShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
-        }
-
         public void Draw()
         {
             Raylib.BeginDrawing();
@@ -101,8 +111,8 @@ namespace ProceduralLandscapeGeneration.Rendering
                 Raylib.BeginShaderMode(myMeshShader);
                     Raylib.BeginMode3D(myCamera);
                         Rlgl.EnableShader(myMeshShader.Id);
-                        Rlgl.BindShaderBuffer(myHeightMapShaderBufferId, 1);
-                        Raylib.DrawMeshTasks(0, myMeshletCount);
+                            Rlgl.BindShaderBuffer(myHeightMapShaderBufferId, 1);
+                            Raylib.DrawMeshTasks(0, myMeshletCount);
                         Rlgl.DisableShader();
                     Raylib.EndMode3D();
                 Raylib.EndShaderMode();
@@ -111,7 +121,18 @@ namespace ProceduralLandscapeGeneration.Rendering
 
         public void Dispose()
         {
+            if (myIsDisposed)
+            {
+                return;
+            }
+
+            if (myErosionSimulator is ErosionSimulatorCPU)
+            {
+                Rlgl.UnloadShaderBuffer(myHeightMapShaderBufferId);
+            }
             Raylib.UnloadShader(myMeshShader);
+
+            myIsDisposed = true;
         }
     }
 }

@@ -8,6 +8,8 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
         private readonly IRandom myRandom;
         private readonly IHeightMapGenerator myHeightMapGenerator;
 
+        private bool myIsDisposed;
+
         public HeightMap HeightMap { get; private set; }
         public uint HeightMapShaderBufferId => throw new NotImplementedException();
 
@@ -26,48 +28,57 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
 
         public void SimulateHydraulicErosion()
         {
-            uint lastCallback = 0;
-
-            for (uint iteration = 0; iteration <= Configuration.SimulationIterations; iteration += Configuration.ParallelExecutions)
+            Task.Run(() =>
             {
-                List<Task> parallelExecutionTasks = new List<Task>();
-                for (int parallelExecution = 0; parallelExecution < Configuration.ParallelExecutions; parallelExecution++)
+                uint lastCallback = 0;
+
+                for (uint iteration = 0; iteration <= Configuration.SimulationIterations; iteration += Configuration.ParallelExecutions)
                 {
-                    Vector2 newPosition = new(myRandom.Next(HeightMap.Width), myRandom.Next(HeightMap.Depth));
-                    parallelExecutionTasks.Add(Task.Run(() =>
+                    List<Task> parallelExecutionTasks = new List<Task>();
+                    for (int parallelExecution = 0; parallelExecution < Configuration.ParallelExecutions; parallelExecution++)
                     {
-                        WaterParticle waterParticle = new(newPosition);
-                        while (true)
+                        Vector2 newPosition = new(myRandom.Next(HeightMap.Width), myRandom.Next(HeightMap.Depth));
+                        parallelExecutionTasks.Add(Task.Run(() =>
                         {
-                            if (!waterParticle.Move(HeightMap))
+                            WaterParticle waterParticle = new(newPosition);
+                            while (true)
                             {
-                                break;
+                                if (!waterParticle.Move(HeightMap))
+                                {
+                                    break;
+                                }
+
+                                if (!waterParticle.Interact(HeightMap))
+                                {
+                                    break;
+                                }
                             }
+                        }));
+                    }
+                    Task.WaitAll(parallelExecutionTasks.ToArray());
 
-                            if (!waterParticle.Interact(HeightMap))
-                            {
-                                break;
-                            }
-                        }
-                    }));
+                    if (iteration % Configuration.SimulationCallbackEachIterations == 0
+                && iteration != lastCallback)
+                    {
+                        ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
+                        lastCallback = iteration;
+                        Console.WriteLine($"INFO: Step {iteration} of {Configuration.SimulationIterations}.");
+                    }
                 }
-                Task.WaitAll(parallelExecutionTasks.ToArray());
 
-                if (iteration % Configuration.SimulationCallbackEachIterations == 0
-            && iteration != lastCallback)
-                {
-                    ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-                    lastCallback = iteration;
-                    Console.WriteLine($"INFO: Step {iteration} of {Configuration.SimulationIterations}.");
-                }
-            }
-
-            ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-            Console.WriteLine($"INFO: End of simulation after {Configuration.SimulationIterations} iterations.");
+                ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
+                Console.WriteLine($"INFO: End of simulation after {Configuration.SimulationIterations} iterations.");
+            });
         }
 
         public void Dispose()
         {
+            if (myIsDisposed)
+            {
+                return;
+            }
+
+            myIsDisposed = true;
         }
     }
 }

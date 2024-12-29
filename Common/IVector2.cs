@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace ProceduralLandscapeGeneration.Common
@@ -16,6 +17,28 @@ namespace ProceduralLandscapeGeneration.Common
         {
             X = x;
             Y = y;
+        }
+
+        public static float Dot(IVector2 value1, IVector2 value2)
+        {
+            return (value1.X * value2.X)
+                 + (value1.Y * value2.Y);
+        }
+
+        public readonly float Length()
+        {
+            float lengthSquared = LengthSquared();
+            return MathF.Sqrt(lengthSquared);
+        }
+
+        public readonly float LengthSquared()
+        {
+            return Dot(this, this);
+        }
+
+        public static IVector2 operator +(IVector2 left, IVector2 right)
+        {
+            return new IVector2(left.X + right.X, left.Y + right.Y);
         }
     }
 }

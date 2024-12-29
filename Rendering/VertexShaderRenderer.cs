@@ -15,14 +15,15 @@ namespace ProceduralLandscapeGeneration.Rendering
         private Model myModel;
         private Shader mySceneShader;
         private Shader myShadowMapShader;
-        private uint myHeightMapShaderBufferId;
         private int myLightSpaceMatrixLocation;
         private int myShadowMapLocation;
         private int myViewPositionLocation;
         private Camera3D myCamera;
         private Camera3D myLightCamera;
 
+        private uint myHeightMapShaderBufferId;
         private bool myIsUpdateAvailable;
+        private bool myIsDisposed;
 
         public VertexShaderRenderer(IErosionSimulator erosionSimulator, IMeshCreator meshCreator)
         {
@@ -83,22 +84,22 @@ namespace ProceduralLandscapeGeneration.Rendering
         public void Draw()
         {
             Raylib.BeginDrawing();
-                Raylib.ClearBackground(Color.SkyBlue);
-                Raylib.BeginMode3D(myCamera);
-                    DrawScene(mySceneShader);
-                Raylib.EndMode3D();
+            Raylib.ClearBackground(Color.SkyBlue);
+            Raylib.BeginMode3D(myCamera);
+            DrawScene(mySceneShader);
+            Raylib.EndMode3D();
             Raylib.EndDrawing();
         }
 
         private unsafe void UpdateShadowMap()
         {
             Raylib.BeginTextureMode(myShadowMap);
-                Raylib.ClearBackground(Color.White);
-                Raylib.BeginMode3D(myLightCamera);
-                    Matrix4x4 lightProjection = Rlgl.GetMatrixProjection();
-                    Matrix4x4 lightView = Rlgl.GetMatrixModelview();
-                    DrawScene(myShadowMapShader);
-                Raylib.EndMode3D();
+            Raylib.ClearBackground(Color.White);
+            Raylib.BeginMode3D(myLightCamera);
+            Matrix4x4 lightProjection = Rlgl.GetMatrixProjection();
+            Matrix4x4 lightView = Rlgl.GetMatrixModelview();
+            DrawScene(myShadowMapShader);
+            Raylib.EndMode3D();
             Raylib.EndTextureMode();
             Matrix4x4 lightSpaceMatrix = Matrix4x4.Multiply(lightProjection, lightView);
             Raylib.SetShaderValueMatrix(mySceneShader, myLightSpaceMatrixLocation, lightSpaceMatrix);
@@ -185,6 +186,17 @@ namespace ProceduralLandscapeGeneration.Rendering
 
         public void Dispose()
         {
+            if (myIsDisposed)
+            {
+                return;
+            }
+
+            Raylib.UnloadRenderTexture(myShadowMap);
+            Raylib.UnloadModel(myModel);
+            Raylib.UnloadShader(mySceneShader);
+            Raylib.UnloadShader(myShadowMapShader);
+
+            myIsDisposed = true;
         }
     }
 }

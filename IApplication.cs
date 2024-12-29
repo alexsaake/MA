@@ -1,6 +1,6 @@
 ﻿namespace ProceduralLandscapeGeneration
 {
-    internal interface IApplication : IDisposable
+    internal interface IApplication
     {
         void Run();
     }

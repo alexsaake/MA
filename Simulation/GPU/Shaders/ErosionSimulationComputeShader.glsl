@@ -55,7 +55,7 @@ vec3 getUnscaledNormal(uint x, uint y)
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/water.hpp
-const uint MaxAge = 16;
+const uint MaxAge = 1024;
 const float EvaporationRate = 0.001;
 const float DepositionRate = 0.05;
 const float MinimumVolume = 0.001;

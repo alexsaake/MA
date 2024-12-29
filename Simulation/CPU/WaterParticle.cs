@@ -5,12 +5,14 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
 {
     internal class WaterParticle
     {
+        //https://github.com/erosiv/soillib/blob/main/source/particle/water.hpp
         private const int MaxAge = 1024;
         private const float EvaporationRate = 0.001f;
         private const float DepositionRate = 0.05f;
         private const float MinimumVolume = 0.001f;
-        private const float Entrainment = 0.0f;
         private const float Gravity = 2.0f;
+        private const float MaxDiff = 0.8f;
+        private const float Settling = 1.0f;
 
         private Vector2 myPosition;
         private Vector2 myOriginalPosition;
@@ -42,6 +44,7 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
             if (myVolume < MinimumVolume)
             {
                 heightMap.Height[position.X, position.Y] += mySediment;
+                Cascade(heightMap, position);
                 return false;
             }
 
@@ -80,7 +83,7 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
                 h2 = heightMap.Height[currentPosition.X, currentPosition.Y];
             }
 
-            float cEq = (1.0f + Entrainment) * heightMap.Height[position.X, position.Y] - h2;
+            float cEq = heightMap.Height[position.X, position.Y] - h2;
             if (cEq < 0)
             {
                 cEq = 0;
@@ -107,9 +110,95 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
 
             myVolume *= 1.0f - EvaporationRate;
 
+            Cascade(heightMap, position);
+
             myAge++;
 
             return true;
+        }
+        internal struct Point
+        {
+            public IVector2 pos;
+            public float h;
+            public float d;
+        }
+
+        //https://github.com/erosiv/soillib/blob/main/source/particle/cascade.hpp
+        void Cascade(HeightMap heightMap, IVector2 ipos)
+        {
+            if (heightMap.IsOutOfBounds(ipos))
+            {
+                return;
+            }
+
+            // Get Non-Out-of-Bounds Neighbors
+
+            IVector2[] n = {
+                new IVector2(-1, -1),
+                new IVector2(-1, 0),
+                new IVector2(-1, 1),
+                new IVector2(0, -1),
+                new IVector2(0, 1),
+                new IVector2(1, -1),
+                new IVector2(1, 0),
+                new IVector2(1, 1)
+            };
+
+            Point[] sn = new Point[8];
+
+            int num = 0;
+
+            for (int i = 0; i < n.Length; i++)
+            {
+                IVector2 nn = n[i];
+                IVector2 npos = ipos + nn;
+
+                if (heightMap.IsOutOfBounds(npos))
+                {
+                    continue;
+                }
+
+                sn[num].pos = npos;
+                sn[num].h = heightMap.Height[npos.X, npos.Y];
+                sn[num].d = nn.Length();
+                num++;
+            }
+
+            // Local Matrix, Target Height
+
+            float height = heightMap.Height[ipos.X, ipos.Y];
+            float h_ave = height;
+            for (int i = 0; i < num; ++i)
+            {
+                h_ave += sn[i].h;
+            }
+            h_ave /= (float)num + 1;
+
+            for (int i = 0; i < num; ++i)
+            {
+                // Full Height-Different Between Positions!
+                float diff = h_ave - sn[i].h;
+                if (diff == 0)
+                {
+                    continue;
+                }
+
+                IVector2 tpos = (diff > 0) ? ipos : sn[i].pos;
+                IVector2 bpos = (diff > 0) ? sn[i].pos : ipos;
+
+                // The Amount of Excess Difference!
+                float excess = 0.0f;
+                excess = MathF.Abs(diff) - sn[i].d * MaxDiff;
+                if (excess <= 0)
+                {
+                    continue;
+                }
+
+                // Actual Amount Transferred
+                float transfer = Settling * excess / 2.0f;
+                heightMap.Height[tpos.X, tpos.Y] -= transfer;
+                heightMap.Height[bpos.X, bpos.Y] += transfer;
+            }
         }
     }
 }

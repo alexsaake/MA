@@ -18,6 +18,7 @@ namespace ProceduralLandscapeGeneration.Simulation.GPU
         private uint myHeightMapIndicesShaderBufferSize;
         private uint myHeightMapIndicesShaderBufferId;
         private uint myHeightMapSize;
+        private bool myIsDisposed;
 
         public ErosionSimulatorComputeShader(IHeightMapGenerator heightMapGenerator, IComputeShaderProgramFactory computeShaderProgramFactory, IRandom random)
         {
@@ -66,8 +67,16 @@ namespace ProceduralLandscapeGeneration.Simulation.GPU
 
         public void Dispose()
         {
+            if (myIsDisposed)
+            {
+                return;
+            }
+
             myErosionSimulationComputeShaderProgram.Dispose();
+            Rlgl.UnloadShaderBuffer(HeightMapShaderBufferId);
             Rlgl.UnloadShaderBuffer(myHeightMapIndicesShaderBufferId);
+
+            myIsDisposed = true;
         }
     }
 }
