@@ -22,7 +22,6 @@ namespace ProceduralLandscapeGeneration.Rendering
         private Camera3D myCamera;
         private Camera3D myLightCamera;
 
-        private bool myIsShaderBuffer;
         private bool myIsUpdateAvailable;
 
         public VertexShaderRenderer(IErosionSimulator erosionSimulator, IMeshCreator meshCreator)
@@ -49,7 +48,7 @@ namespace ProceduralLandscapeGeneration.Rendering
 
             Vector3 cameraPosition = heightMapCenter + new Vector3(Configuration.HeightMapSideLength / 2, -Configuration.HeightMapSideLength / 2, Configuration.HeightMapSideLength / 2);
             myCamera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
-            Raylib.UpdateCamera(ref myCamera, CameraMode.Free);
+            Raylib.UpdateCamera(ref myCamera, CameraMode.Custom);
 
             myShadowMap = LoadShadowMapRenderTexture();
             Vector3 lightCameraPosition = heightMapCenter - lightDirection;
@@ -76,7 +75,7 @@ namespace ProceduralLandscapeGeneration.Rendering
                 myIsUpdateAvailable = false;
             }
 
-            Raylib.UpdateCamera(ref myCamera, CameraMode.Free);
+            Raylib.UpdateCamera(ref myCamera, CameraMode.Custom);
             Vector3 viewPosition = myCamera.Position;
             Raylib.SetShaderValue(mySceneShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
         }

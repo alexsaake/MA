@@ -50,7 +50,7 @@ namespace ProceduralLandscapeGeneration.Common
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    heightMap1D[x + y] = Height[x, y];
+                    heightMap1D[(y * Depth) + x] = Height[x, y];
                 }
             }
 

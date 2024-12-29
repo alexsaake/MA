@@ -36,8 +36,8 @@ namespace ProceduralLandscapeGeneration.Rendering
             myViewPositionLocation = Raylib.GetShaderLocation(myMeshShader, "viewPosition");
 
             Vector3 cameraPosition = heightMapCenter + new Vector3(Configuration.HeightMapSideLength / 2, -Configuration.HeightMapSideLength / 2, Configuration.HeightMapSideLength / 2);
-            Camera3D camera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
-            Raylib.UpdateCamera(ref camera, CameraMode.Custom);
+            myCamera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
+            Raylib.UpdateCamera(ref myCamera, CameraMode.Custom);
 
             myMeshletCount = CalculateMeshletCount();
 
