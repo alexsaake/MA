@@ -27,7 +27,10 @@
 	  <None Update="raylib.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Simulation\GPU\Shaders\ErosionSimulationComputeShader.glsl">
+	  <None Update="Simulation\GPU\Shaders\WaterErosionSimulationComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Simulation\GPU\Shaders\WindErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Simulation\GPU\Shaders\HeightMapGeneratorComputeShader.glsl">

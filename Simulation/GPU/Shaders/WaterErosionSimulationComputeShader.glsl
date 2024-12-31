@@ -157,26 +157,20 @@ void Cascade(ivec2 ipos)
 
 bool Move()
 {
-    ivec2 position = ivec2(myPosition);
+    const ivec2 position = ivec2(myPosition);
 
     if(isOutOfBounds(position))
     {
         return false;
     }
 
-    if(myAge > MaxAge)
+    if(myAge > MaxAge
+    || myVolume < MinimumVolume)
     {
         return false;
     }
 
-    if(myVolume < MinimumVolume)
-    {
-        heightMap[getIndexV(position)] += mySediment;
-        Cascade(position);
-        return false;
-    }
-
-    vec3 normal = getUnscaledNormal(position.x, position.y);
+    const vec3 normal = getUnscaledNormal(position.x, position.y);
 
     mySpeed += Gravity * normal.xy / myVolume;
 
@@ -193,7 +187,7 @@ bool Move()
 
 bool Interact()
 {
-    ivec2 position = ivec2(myOriginalPosition);
+    const ivec2 position = ivec2(myOriginalPosition);
 
     if(isOutOfBounds(position))
     {

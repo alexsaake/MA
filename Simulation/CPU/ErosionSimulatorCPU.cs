@@ -71,6 +71,11 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
             });
         }
 
+        public void SimulateWindErosion()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Dispose()
         {
             if (myIsDisposed)

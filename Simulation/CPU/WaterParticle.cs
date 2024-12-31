@@ -36,12 +36,8 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
                 return false;
             }
 
-            if (myAge > MaxAge)
-            {
-                return false;
-            }
-
-            if (myVolume < MinimumVolume)
+            if (myAge > MaxAge
+                || myVolume < MinimumVolume)
             {
                 heightMap.Height[position.X, position.Y] += mySediment;
                 Cascade(heightMap, position);

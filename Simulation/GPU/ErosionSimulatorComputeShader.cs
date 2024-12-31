@@ -14,7 +14,8 @@ namespace ProceduralLandscapeGeneration.Simulation.GPU
 
         public event EventHandler? ErosionIterationFinished;
 
-        private ComputeShaderProgram myErosionSimulationComputeShaderProgram;
+        private ComputeShaderProgram myWaterErosionSimulationComputeShaderProgram;
+        private ComputeShaderProgram myWindErosionSimulationComputeShaderProgram;
         private uint myHeightMapIndicesShaderBufferSize;
         private uint myHeightMapIndicesShaderBufferId;
         private uint myHeightMapSize;
@@ -31,18 +32,18 @@ namespace ProceduralLandscapeGeneration.Simulation.GPU
         {
             HeightMapShaderBufferId = myHeightMapGenerator.GenerateHeightMapShaderBuffer();
             myHeightMapSize = Configuration.HeightMapSideLength * Configuration.HeightMapSideLength;
-
-            myErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/ErosionSimulationComputeShader.glsl");
-
             myHeightMapIndicesShaderBufferSize = Configuration.SimulationIterations * sizeof(uint);
             myHeightMapIndicesShaderBufferId = Rlgl.LoadShaderBuffer(myHeightMapIndicesShaderBufferSize, null, Rlgl.DYNAMIC_COPY);
+
+            myWaterErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/WaterErosionSimulationComputeShader.glsl");
+            myWindErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/WindErosionSimulationComputeShader.glsl");
         }
 
         public void SimulateHydraulicErosion()
         {
             CreateRandomIndices();
 
-            Rlgl.EnableShader(myErosionSimulationComputeShaderProgram.Id);
+            Rlgl.EnableShader(myWaterErosionSimulationComputeShaderProgram.Id);
             Rlgl.BindShaderBuffer(HeightMapShaderBufferId, 1);
             Rlgl.BindShaderBuffer(myHeightMapIndicesShaderBufferId, 2);
             Rlgl.ComputeShaderDispatch(Configuration.SimulationIterations, 1, 1);
@@ -65,6 +66,33 @@ namespace ProceduralLandscapeGeneration.Simulation.GPU
             }
         }
 
+        public void SimulateWindErosion()
+        {
+            CreateRandomIndicesAlongBorder();
+
+            Rlgl.EnableShader(myWindErosionSimulationComputeShaderProgram.Id);
+            Rlgl.BindShaderBuffer(HeightMapShaderBufferId, 1);
+            Rlgl.BindShaderBuffer(myHeightMapIndicesShaderBufferId, 2);
+            Rlgl.ComputeShaderDispatch(Configuration.SimulationIterations, 1, 1);
+            Rlgl.DisableShader();
+
+            ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
+            Console.WriteLine($"INFO: End of simulation after {Configuration.SimulationIterations} iterations.");
+        }
+
+        private unsafe void CreateRandomIndicesAlongBorder()
+        {
+            uint[] randomHeightMapIndices = new uint[Configuration.SimulationIterations];
+            for (uint i = 0; i < Configuration.SimulationIterations; i++)
+            {
+                randomHeightMapIndices[i] = (uint)myRandom.Next((int)Configuration.HeightMapSideLength);
+            }
+            fixed (uint* randomHeightMapIndicesPointer = randomHeightMapIndices)
+            {
+                Rlgl.UpdateShaderBuffer(myHeightMapIndicesShaderBufferId, randomHeightMapIndicesPointer, myHeightMapIndicesShaderBufferSize, 0);
+            }
+        }
+
         public void Dispose()
         {
             if (myIsDisposed)
@@ -72,9 +100,11 @@ namespace ProceduralLandscapeGeneration.Simulation.GPU
                 return;
             }
 
-            myErosionSimulationComputeShaderProgram.Dispose();
             Rlgl.UnloadShaderBuffer(HeightMapShaderBufferId);
             Rlgl.UnloadShaderBuffer(myHeightMapIndicesShaderBufferId);
+
+            myWaterErosionSimulationComputeShaderProgram.Dispose();
+            myWindErosionSimulationComputeShaderProgram.Dispose();
 
             myIsDisposed = true;
         }
