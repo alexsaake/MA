@@ -57,9 +57,9 @@ namespace ProceduralLandscapeGeneration.Common
             return heightMap1D;
         }
 
-        public Vector3 GetNormal(IVector2 position)
+        public Vector3 GetScaledNormal(IVector2 position)
         {
-            return GetScaledNormal(position.X, position.Y, 1);
+            return GetScaledNormal(position.X, position.Y);
         }
 
         public Vector3 GetScaledNormal(int x, int y)

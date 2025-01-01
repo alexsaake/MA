@@ -44,7 +44,7 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
                 return false;
             }
 
-            Vector3 normal = heightMap.GetNormal(position);
+            Vector3 normal = heightMap.GetScaledNormal(position);
 
             mySpeed += Gravity * new Vector2(normal.X, normal.Y) / myVolume;
 

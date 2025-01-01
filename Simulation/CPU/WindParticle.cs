@@ -27,7 +27,7 @@ namespace ProceduralLandscapeGeneration
             while (myAge++ < MaximumAge)
             {
                 IVector2 initialPosition = new IVector2(myPosition.X, myPosition.Y);
-                Vector3 normal = heightMap.GetNormal(initialPosition);
+                Vector3 normal = heightMap.GetScaledNormal(initialPosition);
 
                 if (heightMap.IsOutOfBounds(initialPosition))
                 {

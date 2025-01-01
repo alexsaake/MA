@@ -31,7 +31,20 @@ bool isOutOfBounds(ivec2 position)
     return position.x < 0 || position.x > myMapSize || position.y < 0 || position.y > myMapSize;
 }
 
-vec3 getUnscaledNormal(uint x, uint y)
+//https://github.com/erosiv/soillib/blob/main/source/particle/wind.hpp
+const uint HeightMultiplier = 64;
+const uint MaxAge = 2048;
+const float BoundaryLayer = 2.0;
+const float Suspension = 0.05;
+const float Gravity = 0.1;
+const float MaxDiff = 0.8;
+const float Settling = 1.0;
+vec3 myPosition;
+vec3 mySpeed;
+int myAge;
+float mySediment;
+
+vec3 getScaledNormal(uint x, uint y)
 {
     if (x < 1 || x > myMapSize - 2
         || y < 1 || y > myMapSize - 2)
@@ -49,24 +62,12 @@ vec3 getUnscaledNormal(uint x, uint y)
     float xym1 = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
-    -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
+    HeightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
+    HeightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
     1.0);
 
     return normalize(normal);
 }
-
-//https://github.com/erosiv/soillib/blob/main/source/particle/wind.hpp
-const uint MaxAge = 2048;
-const float BoundaryLayer = 2.0;
-const float Suspension = 0.05;
-const float Gravity = 0.1;
-const float MaxDiff = 0.8;
-const float Settling = 1.0;
-vec3 myPosition;
-vec3 mySpeed;
-int myAge;
-float mySediment;
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/cascade.hpp
 void Cascade(ivec2 ipos)
@@ -207,7 +208,7 @@ bool Move()
         myPosition.z = height;
     }
     
-    const vec3 normal = getUnscaledNormal(position.x, position.y);
+    const vec3 normal = getScaledNormal(position.x, position.y);
     const float hfac = exp(-(myPosition.z - height) / BoundaryLayer);
     const float shadow = 1.0 - max(0.0, dot(normalize(persistentSpeed), normal));
     const float collision = max(0.0, -dot(normalize(mySpeed), normal));
@@ -260,7 +261,7 @@ bool Interact()
 
     // Compute Mass Transport
     
-    const vec3 normal = getUnscaledNormal(currentPosition.x, currentPosition.y);
+    const vec3 normal = getScaledNormal(currentPosition.x, currentPosition.y);
     const float height = heightMap[getIndexV(currentPosition)];
 
     const float hfac = exp(-(myPosition.z - height) / BoundaryLayer);
