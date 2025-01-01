@@ -1,75 +1,85 @@
 ﻿#version 430
 
-//
-// Description : Array and textureless GLSL 2D simplex noise function.
-//      Author : Ian McEwan, Ashima Arts.
-//  Maintainer : stegu
-//     Lastmod : 20110822 (ijm)
-//     License : Copyright (C) 2011 Ashima Arts. All rights reserved.
-//               Distributed under the MIT License. See LICENSE file.
-//               https://github.com/ashima/webgl-noise
-//               https://github.com/stegu/webgl-noise
-// 
+//https://www.shadertoy.com/view/NlSGDz
+// implementation of MurmurHash (https://sites.google.com/site/murmurhash/) for a 
+// single unsigned integer.
 
-vec3 mod289(vec3 x) {
-  return x - floor(x * (1.0 / 289.0)) * 289.0;
+uint hash(uint x, uint seed) {
+    const uint m = 0x5bd1e995U;
+    uint hash = seed;
+    // process input
+    uint k = x;
+    k *= m;
+    k ^= k >> 24;
+    k *= m;
+    hash *= m;
+    hash ^= k;
+    // some final mixing
+    hash ^= hash >> 13;
+    hash *= m;
+    hash ^= hash >> 15;
+    return hash;
 }
 
-vec2 mod289(vec2 x) {
-  return x - floor(x * (1.0 / 289.0)) * 289.0;
+// implementation of MurmurHash (https://sites.google.com/site/murmurhash/) for a  
+// 2-dimensional unsigned integer input vector.
+
+uint hash(uvec2 x, uint seed){
+    const uint m = 0x5bd1e995U;
+    uint hash = seed;
+    // process first vector element
+    uint k = x.x; 
+    k *= m;
+    k ^= k >> 24;
+    k *= m;
+    hash *= m;
+    hash ^= k;
+    // process second vector element
+    k = x.y; 
+    k *= m;
+    k ^= k >> 24;
+    k *= m;
+    hash *= m;
+    hash ^= k;
+	// some final mixing
+    hash ^= hash >> 13;
+    hash *= m;
+    hash ^= hash >> 15;
+    return hash;
 }
 
-vec3 permute(vec3 x) {
-  return mod289(((x*34.0)+10.0)*x);
+
+vec2 gradientDirection(uint hash) {
+    switch (int(hash) & 3) { // look at the last two bits to pick a gradient direction
+    case 0:
+        return vec2(1.0, 1.0);
+    case 1:
+        return vec2(-1.0, 1.0);
+    case 2:
+        return vec2(1.0, -1.0);
+    case 3:
+        return vec2(-1.0, -1.0);
+    }
 }
 
-float snoise(vec2 v)
-  {
-  const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
-                      0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
-                     -0.577350269189626,  // -1.0 + 2.0 * C.x
-                      0.024390243902439); // 1.0 / 41.0
-// First corner
-  vec2 i  = floor(v + dot(v, C.yy) );
-  vec2 x0 = v -   i + dot(i, C.xx);
+float interpolate(float value1, float value2, float value3, float value4, vec2 t) {
+    return mix(mix(value1, value2, t.x), mix(value3, value4, t.x), t.y);
+}
 
-// Other corners
-  vec2 i1;
-  //i1.x = step( x0.y, x0.x ); // x0.x > x0.y ? 1.0 : 0.0
-  //i1.y = 1.0 - i1.x;
-  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-  // x0 = x0 - 0.0 + 0.0 * C.xx ;
-  // x1 = x0 - i1 + 1.0 * C.xx ;
-  // x2 = x0 - 1.0 + 2.0 * C.xx ;
-  vec4 x12 = x0.xyxy + C.xxzz;
-  x12.xy -= i1;
+vec2 fade(vec2 t) {
+    // 6t^5 - 15t^4 + 10t^3
+	return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+}
 
-// Permutations
-  i = mod289(i); // Avoid truncation effects in permutation
-  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
-		+ i.x + vec3(0.0, i1.x, 1.0 ));
-
-  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
-  m = m*m ;
-  m = m*m ;
-
-// Gradients: 41 points uniformly over a line, mapped onto a diamond.
-// The ring size 17*17 = 289 is close to a multiple of 41 (41*7 = 287)
-
-  vec3 x = 2.0 * fract(p * C.www) - 1.0;
-  vec3 h = abs(x) - 0.5;
-  vec3 ox = floor(x + 0.5);
-  vec3 a0 = x - ox;
-
-// Normalise gradients implicitly by scaling m
-// Approximation of: m *= inversesqrt( a0*a0 + h*h );
-  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
-
-// Compute final noise value at P
-  vec3 g;
-  g.x  = a0.x  * x0.x  + h.x  * x0.y;
-  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
-  return 130.0 * dot(m, g);
+float perlinNoise(vec2 position, uint seed) {
+    vec2 floorPosition = floor(position);
+    vec2 fractPosition = position - floorPosition;
+    uvec2 cellCoordinates = uvec2(floorPosition);
+    float value1 = dot(gradientDirection(hash(cellCoordinates, seed)), fractPosition);
+    float value2 = dot(gradientDirection(hash((cellCoordinates + uvec2(1, 0)), seed)), fractPosition - vec2(1.0, 0.0));
+    float value3 = dot(gradientDirection(hash((cellCoordinates + uvec2(0, 1)), seed)), fractPosition - vec2(0.0, 1.0));
+    float value4 = dot(gradientDirection(hash((cellCoordinates + uvec2(1, 1)), seed)), fractPosition - vec2(1.0, 1.0));
+    return interpolate(value1, value2, value3, value4, fade(fractPosition));
 }
 
 // original author Sebastian Lague
@@ -79,14 +89,12 @@ layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 struct HeightMapParameters
 {
+    uint seed;
     uint sideLength;
     float scale;
     uint octaves;
     float persistence;
     float lacunarity;
-    int min;
-    int max;
-    //octaveOffsets[8];
 };
 
 layout(std430, binding = 1) buffer heightMapParametersBuffer
@@ -112,13 +120,15 @@ void main()
     float amplitude = 1;
     float frequency = 1;
     float noiseHeight = 0;
-
+    
+    uint currentSeed = uint(parameters.seed);
     for (int octave = 0; octave < parameters.octaves; octave++)
     {
-        float sampleX = x / parameters.scale * frequency;// + parameters.octaveOffsets[octave].X;
-        float sampleY = y / parameters.scale * frequency;// + parameters.octaveOffsets[octave].Y;
+        currentSeed = hash(currentSeed, 0x0U); // create a new seed for each octave
+        float sampleX = x / parameters.scale * frequency;
+        float sampleY = y / parameters.scale * frequency;
 
-        float perlinValue = snoise(vec2(sampleX, sampleY));
+        float perlinValue = perlinNoise(vec2(sampleX, sampleY), currentSeed);
         noiseHeight += perlinValue * amplitude;
 
         amplitude *= parameters.persistence;
@@ -126,7 +136,4 @@ void main()
     }
 
     heightMap[id] = noiseHeight;
-    int val = int(noiseHeight * 100000);
-    atomicMin(parameters.min, val);
-    atomicMax(parameters.max, val);
 }

@@ -1,6 +1,5 @@
 ﻿using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;
-using ProceduralLandscapeGeneration.Simulation.CPU;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration;
