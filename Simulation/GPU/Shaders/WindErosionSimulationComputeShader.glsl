@@ -12,33 +12,32 @@ layout(std430, binding = 2) readonly restrict buffer heightMapIndicesShaderBuffe
     uint[] heightMapIndices;
 };
 
-
 vec3 persistentSpeed = vec3(0.0, 1.0, 0.0);
-uint myMapSize;
+uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
 {
-    return (y * myMapSize) + x;
+    return (y * myHeightMapSideLength) + x;
 }
 
 uint getIndexV(ivec2 position)
 {
-    return (position.y * myMapSize) + position.x;
+    return (position.y * myHeightMapSideLength) + position.x;
 }
 
 bool isOutOfBounds(ivec2 position)
 {
-    return position.x < 0 || position.x > myMapSize || position.y < 0 || position.y > myMapSize;
+    return position.x < 0 || position.x > myHeightMapSideLength || position.y < 0 || position.y > myHeightMapSideLength;
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/wind.hpp
 const uint HeightMultiplier = 64;
-const uint MaxAge = 2048;
+const uint MaxAge = 1024;
 const float BoundaryLayer = 2.0;
 const float Suspension = 0.05;
-const float Gravity = 0.1;
-const float MaxDiff = 0.8;
-const float Settling = 1.0;
+const float Gravity = 2.0;
+const float MaxDiff = 0.005;
+const float Settling = 0.25;
 vec3 myPosition;
 vec3 mySpeed;
 int myAge;
@@ -46,8 +45,8 @@ float mySediment;
 
 vec3 getScaledNormal(uint x, uint y)
 {
-    if (x < 1 || x > myMapSize - 2
-        || y < 1 || y > myMapSize - 2)
+    if (x < 1 || x > myHeightMapSideLength - 2
+        || y < 1 || y > myHeightMapSideLength - 2)
     {
         return vec3(0.0, 0.0, 1.0);
     }
@@ -149,7 +148,7 @@ void Cascade(ivec2 ipos)
         }
 
         // Actual Amount Transferred
-        float transfer = Settling * excess / 2.0f;
+        float transfer = Settling * excess / 2.0;
         heightMap[tindex] -= transfer;
         heightMap[bindex] += transfer;
     }
@@ -206,8 +205,7 @@ bool Move()
     if (myAge == 0 || myPosition.z < height)
     {
         myPosition.z = height;
-    }
-    
+    }    
     const vec3 normal = getScaledNormal(position.x, position.y);
     const float hfac = exp(-(myPosition.z - height) / BoundaryLayer);
     const float shadow = 1.0 - max(0.0, dot(normalize(persistentSpeed), normal));
@@ -261,9 +259,8 @@ bool Interact()
 
     // Compute Mass Transport
     
-    const vec3 normal = getScaledNormal(currentPosition.x, currentPosition.y);
     const float height = heightMap[getIndexV(currentPosition)];
-
+    const vec3 normal = getScaledNormal(currentPosition.x, currentPosition.y);
     const float hfac = exp(-(myPosition.z - height) / BoundaryLayer);
     const float collision = max(0.0, -dot(normalize(mySpeed), normal));
     const float force = max(0.0, -dot(normalize(mySpeed), normal) * length(mySpeed));
@@ -289,11 +286,11 @@ bool Interact()
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    myMapSize = uint(sqrt(heightMap.length()));
+    myHeightMapSideLength = uint(sqrt(heightMap.length()));
 
     uint index = heightMapIndices[id];
-    uint x = index % myMapSize;
-    uint y = index / myMapSize;
+    uint x = index % myHeightMapSideLength;
+    uint y = index / myHeightMapSideLength;
     myPosition = vec3(x, y, 0);
     mySpeed = vec3(0.0, 0.0, 0.0);
     myAge = 0;

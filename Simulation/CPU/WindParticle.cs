@@ -7,7 +7,7 @@ namespace ProceduralLandscapeGeneration
     {
         private const int MaximumAge = 1024;
         private const float BoundaryLayer = 2.0f;
-        private const float Suspension = 0.05f;
+        private const float Suspension = 0.0001f;
         private const float Gravity = 0.1f;
 
         private Vector3 myPosition;
@@ -35,9 +35,9 @@ namespace ProceduralLandscapeGeneration
                 }
 
                 if (myAge == 1
-                    || myPosition.Y < heightMap.Height[initialPosition.X, initialPosition.Y])
+                    || myPosition.Z < heightMap.Height[initialPosition.X, initialPosition.Y])
                 {
-                    myPosition.Y = heightMap.Height[initialPosition.X, initialPosition.Y];
+                    myPosition.Z = heightMap.Height[initialPosition.X, initialPosition.Y];
                 }
 
                 float hfac = MathF.Exp(-(myPosition.Y - heightMap.Height[initialPosition.X, initialPosition.Y]) / BoundaryLayer);
@@ -135,9 +135,9 @@ namespace ProceduralLandscapeGeneration
 
         private const float LevelOfDetail = 1.2f;
         private const float MaxDiff = 0.005f;
-        private const float Settling = 1.0f;
+        private const float Settling = 0.01f;
 
-        private void Cascade(HeightMap heightMap, IVector2 position)
+        private static void Cascade(HeightMap heightMap, IVector2 position)
         {
 
             // Get Non-Out-of-Bounds Neighbors

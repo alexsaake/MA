@@ -11,6 +11,7 @@ namespace ProceduralLandscapeGeneration.Simulation
 
         void Initialize();
         void SimulateHydraulicErosion();
+        void SimulateThermalErosion();
         void SimulateWindErosion();
     }
 }

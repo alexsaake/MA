@@ -12,21 +12,21 @@ layout(std430, binding = 2) readonly restrict buffer heightMapIndicesShaderBuffe
     uint[] heightMapIndices;
 };
 
-uint myMapSize;
+uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
 {
-    return (y * myMapSize) + x;
+    return (y * myHeightMapSideLength) + x;
 }
 
 uint getIndexV(ivec2 position)
 {
-    return (position.y * myMapSize) + position.x;
+    return (position.y * myHeightMapSideLength) + position.x;
 }
 
 bool isOutOfBounds(ivec2 position)
 {
-    return position.x < 0 || position.x > myMapSize || position.y < 0 || position.y > myMapSize;
+    return position.x < 0 || position.x > myHeightMapSideLength || position.y < 0 || position.y > myHeightMapSideLength;
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/water.hpp
@@ -47,8 +47,8 @@ float mySediment;
 
 vec3 getScaledNormal(uint x, uint y)
 {
-    if (x < 1 || x > myMapSize - 2
-        || y < 1 || y > myMapSize - 2)
+    if (x < 1 || x > myHeightMapSideLength - 2
+        || y < 1 || y > myHeightMapSideLength - 2)
     {
         return vec3(0.0, 0.0, 1.0);
     }
@@ -168,6 +168,8 @@ bool Move()
     if(myAge > MaxAge
     || myVolume < MinimumVolume)
     {
+        heightMap[getIndexV(position)] += mySediment;
+        Cascade(position);
         return false;
     }
 
@@ -243,11 +245,11 @@ bool Interact()
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    myMapSize = uint(sqrt(heightMap.length()));
+    myHeightMapSideLength = uint(sqrt(heightMap.length()));
 
     uint index = heightMapIndices[id];
-    uint x = index % myMapSize;
-    uint y = index / myMapSize;
+    uint x = index % myHeightMapSideLength;
+    uint y = index / myHeightMapSideLength;
     myPosition = vec2(x, y);
     myOriginalPosition = vec2(0.0, 0.0);
     mySpeed = vec2(0.0, 0.0);

@@ -27,11 +27,15 @@ internal class Application : IApplication
 
         while (!Raylib.WindowShouldClose())
         {
-            if (Raylib.IsKeyPressed(KeyboardKey.One))
+            if (Raylib.IsKeyDown(KeyboardKey.One))
             {
                 myErosionSimulator.SimulateHydraulicErosion();
             }
-            else if (Raylib.IsKeyPressed(KeyboardKey.Two))
+            else if (Raylib.IsKeyDown(KeyboardKey.Two))
+            {
+                myErosionSimulator.SimulateThermalErosion();
+            }
+            else if (Raylib.IsKeyDown(KeyboardKey.Three))
             {
                 myErosionSimulator.SimulateWindErosion();
             }

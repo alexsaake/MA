@@ -28,6 +28,7 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
 
         public void SimulateHydraulicErosion()
         {
+            Console.WriteLine($"INFO: Simulating hydraulic erosion.");
             Task.Run(() =>
             {
                 uint lastCallback = 0;
@@ -71,8 +72,69 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
             });
         }
 
+        public void SimulateThermalErosion()
+        {
+            const float heightChange = 0.001f;
+
+            Console.WriteLine($"INFO: Simulating thermal erosion on each cell of the height map.");
+            Task.Run(() =>
+            {
+                uint mapSize = Configuration.HeightMapSideLength * Configuration.HeightMapSideLength;
+                uint iteration = 0;
+                uint lastCallback = 0;
+
+                for (int y = 0; y <= Configuration.HeightMapSideLength; y++)
+                {
+                    for (int x = 0; x <= Configuration.HeightMapSideLength;)
+                    {
+                        List<Task> parallelExecutionTasks = new List<Task>();
+                        for (int parallelExecution = 0; parallelExecution < Configuration.ParallelExecutions; parallelExecution++)
+                        {
+                            if (x > Configuration.HeightMapSideLength)
+                            {
+                                continue;
+                            }
+                            parallelExecutionTasks.Add(Task.Run(() =>
+                            {
+                                int localX = x;
+                                int localY = y;
+                                Vector3 normal = HeightMap.GetScaledNormal(localX, localY);
+                                IVector2 neighborPosition = new IVector2(localX + (int)MathF.Ceiling(normal.X), localY + (int)MathF.Ceiling(normal.Y));
+                                if (HeightMap.IsOutOfBounds(neighborPosition))
+                                {
+                                    return;
+                                }
+                                float neighborHeight = HeightMap.Height[neighborPosition.X, neighborPosition.Y] * Configuration.HeightMultiplier;
+                                float zDiff = HeightMap.Height[localX, localY] * Configuration.HeightMultiplier - neighborHeight;
+
+                                if (zDiff > Configuration.TangensThresholdAngle)
+                                {
+                                    HeightMap.Height[localX, localY] -= heightChange;
+                                    HeightMap.Height[neighborPosition.X, neighborPosition.Y] += heightChange;
+                                }
+                            }));
+                            x++;
+                            iteration++;
+                        }
+                        Task.WaitAll(parallelExecutionTasks.ToArray());
+
+                        if (iteration % Configuration.SimulationCallbackEachIterations == 0
+                            && iteration != lastCallback)
+                        {
+                            ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
+                            lastCallback = iteration;
+                            Console.WriteLine($"INFO: Step {iteration} of {mapSize}.");
+                        }
+                    }
+                }
+
+                Console.WriteLine($"INFO: End of simulation after {Configuration.SimulationIterations} iterations.");
+            });
+        }
+
         public void SimulateWindErosion()
         {
+            Console.WriteLine($"INFO: Simulating wind erosion.");
             Task.Run(() =>
             {
                 uint lastCallback = 0;
