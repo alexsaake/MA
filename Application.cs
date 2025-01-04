@@ -1,4 +1,5 @@
-﻿using ProceduralLandscapeGeneration.Rendering;
+﻿using ProceduralLandscapeGeneration.GUI;
+using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;
 using Raylib_cs;
 
@@ -6,18 +7,22 @@ namespace ProceduralLandscapeGeneration;
 
 internal class Application : IApplication
 {
+    private readonly IConfiguration myConfiguration;
+    private readonly IConfigurationGUI myConfigurationGUI;
     private readonly IErosionSimulator myErosionSimulator;
     private readonly IRenderer myRenderer;
 
-    public Application(IErosionSimulator erosionSimulator, IRenderer renderer)
+    public Application(IConfiguration configuration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, IRenderer renderer)
     {
+        myConfiguration = configuration;
+        myConfigurationGUI = configurationGUI;
         myErosionSimulator = erosionSimulator;
         myRenderer = renderer;
     }
 
     public void Run()
     {
-        Raylib.InitWindow(Configuration.ScreenWidth, Configuration.ScreenHeight, "Hello, Raylib-Cs");
+        Raylib.InitWindow(myConfiguration.ScreenWidth, myConfiguration.ScreenHeight, "Hello, Raylib-Cs");
 
         myErosionSimulator.Initialize();
         myRenderer.Initialize();
@@ -42,7 +47,11 @@ internal class Application : IApplication
 
             myRenderer.Update();
 
+            Raylib.BeginDrawing();
+            Raylib.ClearBackground(Color.SkyBlue);
             myRenderer.Draw();
+            myConfigurationGUI.Draw();
+            Raylib.EndDrawing();
         }
 
         myRenderer.Dispose();

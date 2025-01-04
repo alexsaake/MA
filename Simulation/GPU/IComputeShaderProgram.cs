@@ -1,7 +1,6 @@
-﻿namespace ProceduralLandscapeGeneration.Simulation.GPU
+﻿namespace ProceduralLandscapeGeneration.Simulation.GPU;
+
+internal interface IComputeShaderProgram : IDisposable
 {
-    internal interface IComputeShaderProgram : IDisposable
-    {
-        uint Id { get; }
-    }
+    uint Id { get; }
 }

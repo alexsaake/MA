@@ -1,23 +1,45 @@
 ﻿using ProceduralLandscapeGeneration.Common;
 
-namespace ProceduralLandscapeGeneration
-{
-    internal static class Configuration
-    {
-        public const ProcessorType HeightMapGeneration = ProcessorType.GPU;
-        public const ProcessorType ErosionSimulation = ProcessorType.GPU;
-        public const ProcessorType MeshCreation = ProcessorType.GPU;
+namespace ProceduralLandscapeGeneration;
 
-        public const uint HeightMapSideLength = 512;
-        public const uint SimulationIterations = 100000;
-        public const int Seed = 1337;
-        public const float TangensThresholdAngle = 0.65f;
-        public const uint HeightMultiplier = 64;
-        public const int ScreenWidth = 1920;
-        public const int ScreenHeight = 1080;
-        public const uint ParallelExecutions = 10;
-        public const uint MaximumModelVertices = ushort.MaxValue;
-        public const uint SimulationCallbackEachIterations = 1000;
-        public const int ShadowMapResolution = 1028;
+internal class Configuration : IConfiguration
+{
+    public const ProcessorType HeightMapGeneration = ProcessorType.GPU;
+    public const ProcessorType ErosionSimulation = ProcessorType.GPU;
+    public const ProcessorType MeshCreation = ProcessorType.GPU;
+
+    private uint myHeightMapSideLength;
+    public uint HeightMapSideLength
+    {
+        get => myHeightMapSideLength; set
+        {
+            myHeightMapSideLength = value;
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+    public uint SimulationIterations { get; set; } = 100000;
+    public int Seed { get; set; } = 1337;
+    private uint myTalusAngle;
+    public uint TalusAngle
+    {
+        get => myTalusAngle; set
+        {
+            myTalusAngle = value;
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+    public uint HeightMultiplier { get; set; } = 64;
+    public int ScreenWidth { get; set; } = 1920;
+    public int ScreenHeight { get; set; } = 1080;
+    public uint ParallelExecutions { get; set; } = 10;
+    public uint SimulationCallbackEachIterations { get; set; } = 1000;
+    public int ShadowMapResolution { get; set; } = 1028;
+
+    public event EventHandler? ConfigurationChanged;
+
+    public Configuration()
+    {
+        HeightMapSideLength = 512;
+        TalusAngle = 33;
     }
 }

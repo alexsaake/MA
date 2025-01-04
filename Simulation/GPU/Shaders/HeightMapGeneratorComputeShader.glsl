@@ -97,7 +97,7 @@ struct HeightMapParameters
     float lacunarity;
 };
 
-layout(std430, binding = 1) buffer heightMapParametersBuffer
+layout(std430, binding = 1) buffer heightMapParametersShaderBuffer
 {
     HeightMapParameters parameters;
 };

@@ -7,6 +7,17 @@ layout(std430, binding = 1) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
+struct ThermalErosionConfiguration
+{
+    uint heightMultiplier;
+    float tangensThresholdAngle;
+};
+
+layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
+{
+    ThermalErosionConfiguration configuration;
+};
+
 uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
@@ -20,8 +31,6 @@ bool isOutOfBounds(uint x, uint y)
 }
 
 //https://aparis69.github.io/public_html/posts/terrain_erosion.html
-const uint HeightMultiplier = 64;
-const float TangensThresholdAngle = 0.65; // ~33°
 const float HeightChange = 0.001;
 
 vec3 getScaledNormal(uint x, uint y)
@@ -42,8 +51,8 @@ vec3 getScaledNormal(uint x, uint y)
     float xym1 = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    HeightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
-    HeightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
+    configuration.heightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
+    configuration.heightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
     1.0);
 
     return normalize(normal);
@@ -67,10 +76,10 @@ void main()
     {
         return;
     }
-    float neighborHeight = heightMap[neighborIndex] * HeightMultiplier;
-    float zDiff = heightMap[id] * HeightMultiplier - neighborHeight;
+    float neighborHeight = heightMap[neighborIndex] * configuration.heightMultiplier;
+    float zDiff = heightMap[id] * configuration.heightMultiplier - neighborHeight;
 
-    if (zDiff > TangensThresholdAngle)
+    if (zDiff > configuration.tangensThresholdAngle)
     {
         heightMap[id] -= HeightChange;
         heightMap[neighborIndex] += HeightChange;

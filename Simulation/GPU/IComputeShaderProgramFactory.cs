@@ -1,7 +1,6 @@
-﻿namespace ProceduralLandscapeGeneration.Simulation.GPU
+﻿namespace ProceduralLandscapeGeneration.Simulation.GPU;
+
+internal interface IComputeShaderProgramFactory
 {
-    internal interface IComputeShaderProgramFactory
-    {
-        ComputeShaderProgram CreateComputeShaderProgram(string fileName);
-    }
+    ComputeShaderProgram CreateComputeShaderProgram(string fileName);
 }

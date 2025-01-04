@@ -1,10 +1,9 @@
 ﻿using ProceduralLandscapeGeneration.Common;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Rendering
+namespace ProceduralLandscapeGeneration.Rendering;
+
+internal interface IMeshCreator
 {
-    internal interface IMeshCreator
-    {
-        Mesh CreateMesh(HeightMap heightMap);
-    }
+    Mesh CreateMesh(HeightMap heightMap);
 }

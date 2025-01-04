@@ -1,22 +1,21 @@
-﻿namespace ProceduralLandscapeGeneration.Simulation
+﻿namespace ProceduralLandscapeGeneration.Simulation;
+
+internal class Random : IRandom
 {
-    internal class Random : IRandom
+    private readonly System.Random myRandom;
+
+    public Random(IConfiguration configuration)
     {
-        private readonly System.Random myRandom;
+        myRandom = new System.Random(configuration.Seed);
+    }
 
-        public Random()
-        {
-            myRandom = new System.Random(Configuration.Seed);
-        }
+    public int Next(int maxValue)
+    {
+        return myRandom.Next(maxValue);
+    }
 
-        public int Next(int maxValue)
-        {
-            return myRandom.Next(maxValue);
-        }
-
-        public int Next(int minValue, int maxValue)
-        {
-            return myRandom.Next(minValue, maxValue);
-        }
+    public int Next(int minValue, int maxValue)
+    {
+        return myRandom.Next(minValue, maxValue);
     }
 }

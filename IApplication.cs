@@ -1,7 +1,6 @@
-﻿namespace ProceduralLandscapeGeneration
+﻿namespace ProceduralLandscapeGeneration;
+
+internal interface IApplication
 {
-    internal interface IApplication
-    {
-        void Run();
-    }
+    void Run();
 }

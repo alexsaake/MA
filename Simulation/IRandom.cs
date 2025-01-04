@@ -1,8 +1,7 @@
-﻿namespace ProceduralLandscapeGeneration.Simulation
+﻿namespace ProceduralLandscapeGeneration.Simulation;
+
+internal interface IRandom
 {
-    internal interface IRandom
-    {
-        int Next(int maxValue);
-        int Next(int minValue, int maxValue);
-    }
+    int Next(int maxValue);
+    int Next(int minValue, int maxValue);
 }

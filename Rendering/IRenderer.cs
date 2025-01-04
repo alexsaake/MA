@@ -1,9 +1,8 @@
-﻿namespace ProceduralLandscapeGeneration.Rendering
+﻿namespace ProceduralLandscapeGeneration.Rendering;
+
+internal interface IRenderer : IDisposable
 {
-    internal interface IRenderer : IDisposable
-    {
-        void Initialize();
-        void Update();
-        void Draw();
-    }
+    void Initialize();
+    void Update();
+    void Draw();
 }

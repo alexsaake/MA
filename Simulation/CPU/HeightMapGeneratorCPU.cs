@@ -3,93 +3,94 @@ using ProceduralLandscapeGeneration.Common;
 using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.Simulation.CPU
+namespace ProceduralLandscapeGeneration.Simulation.CPU;
+
+internal class HeightMapGeneratorCPU : IHeightMapGenerator
 {
-    internal class HeightMapGeneratorCPU : IHeightMapGenerator
+    private const uint Scale = 2;
+    private const uint Octaves = 8;
+    private const float Persistance = 0.5f;
+    private const float Lacunarity = 2;
+
+    private readonly IConfiguration myConfigration;
+    private readonly IRandom myRandom;
+    private readonly FastNoise myNoiseGenerator;
+
+    public HeightMapGeneratorCPU(IConfiguration configuration, IRandom random)
     {
-        private const uint Scale = 2;
-        private const uint Octaves = 8;
-        private const float Persistance = 0.5f;
-        private const float Lacunarity = 2;
+        myConfigration = configuration;
+        myRandom = random;
+        myNoiseGenerator = new FastNoise(myConfigration.Seed);
+    }
 
-        private readonly IRandom myRandom;
-        private readonly FastNoise myNoiseGenerator;
+    public HeightMap GenerateHeightMap()
+    {
+        float[,] noiseMap = new float[myConfigration.HeightMapSideLength, myConfigration.HeightMapSideLength];
 
-        public HeightMapGeneratorCPU(IRandom random)
+        Vector2[] octaveOffsets = new Vector2[Octaves];
+        for (int octave = 0; octave < Octaves; octave++)
         {
-            myRandom = random;
-            myNoiseGenerator = new FastNoise(Configuration.Seed);
+            octaveOffsets[octave] = new Vector2(myRandom.Next(-100000, 100000), myRandom.Next(-100000, 100000));
         }
 
-        public HeightMap GenerateHeightMap()
+        float maxNoiseHeight = float.MinValue;
+        float minNoiseHeight = float.MaxValue;
+
+        for (int y = 0; y < myConfigration.HeightMapSideLength; y++)
         {
-            float[,] noiseMap = new float[Configuration.HeightMapSideLength, Configuration.HeightMapSideLength];
-
-            Vector2[] octaveOffsets = new Vector2[Octaves];
-            for (int octave = 0; octave < Octaves; octave++)
+            for (int x = 0; x < myConfigration.HeightMapSideLength; x++)
             {
-                octaveOffsets[octave] = new Vector2(myRandom.Next(-100000, 100000), myRandom.Next(-100000, 100000));
-            }
+                float amplitude = 1;
+                float frequency = 1;
+                float noiseHeight = 0;
 
-            float maxNoiseHeight = float.MinValue;
-            float minNoiseHeight = float.MaxValue;
-
-            for (int y = 0; y < Configuration.HeightMapSideLength; y++)
-            {
-                for (int x = 0; x < Configuration.HeightMapSideLength; x++)
+                for (int octave = 0; octave < Octaves; octave++)
                 {
-                    float amplitude = 1;
-                    float frequency = 1;
-                    float noiseHeight = 0;
+                    float sampleX = x / Scale * frequency + octaveOffsets[octave].X;
+                    float sampleY = y / Scale * frequency + octaveOffsets[octave].Y;
 
-                    for (int octave = 0; octave < Octaves; octave++)
-                    {
-                        float sampleX = x / Scale * frequency + octaveOffsets[octave].X;
-                        float sampleY = y / Scale * frequency + octaveOffsets[octave].Y;
+                    float perlinValue = myNoiseGenerator.GetPerlin(sampleX, sampleY);
+                    noiseHeight += perlinValue * amplitude;
 
-                        float perlinValue = myNoiseGenerator.GetPerlin(sampleX, sampleY);
-                        noiseHeight += perlinValue * amplitude;
-
-                        amplitude *= Persistance;
-                        frequency *= Lacunarity;
-                    }
-
-                    if (noiseHeight > maxNoiseHeight)
-                    {
-                        maxNoiseHeight = noiseHeight;
-                    }
-                    else if (noiseHeight < minNoiseHeight)
-                    {
-                        minNoiseHeight = noiseHeight;
-                    }
-                    noiseMap[x, y] = noiseHeight;
+                    amplitude *= Persistance;
+                    frequency *= Lacunarity;
                 }
-            }
 
-            for (int y = 0; y < Configuration.HeightMapSideLength; y++)
-            {
-                for (int x = 0; x < Configuration.HeightMapSideLength; x++)
+                if (noiseHeight > maxNoiseHeight)
                 {
-                    noiseMap[x, y] = Math.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
+                    maxNoiseHeight = noiseHeight;
                 }
+                else if (noiseHeight < minNoiseHeight)
+                {
+                    minNoiseHeight = noiseHeight;
+                }
+                noiseMap[x, y] = noiseHeight;
             }
-
-            return new HeightMap(noiseMap);
         }
 
-        public unsafe uint GenerateHeightMapShaderBuffer()
+        for (int y = 0; y < myConfigration.HeightMapSideLength; y++)
         {
-            HeightMap heightMap = GenerateHeightMap();
-            float[] heightMapValues = heightMap.Get1DHeightMapValues();
-
-            uint heightMapShaderBufferSize = (uint)heightMapValues.Length * sizeof(float);
-            uint heightMapShaderBufferId;
-            fixed (float* heightMapValuesPointer = heightMapValues)
+            for (int x = 0; x < myConfigration.HeightMapSideLength; x++)
             {
-                heightMapShaderBufferId = Rlgl.LoadShaderBuffer(heightMapShaderBufferSize, heightMapValuesPointer, Rlgl.DYNAMIC_COPY);
+                noiseMap[x, y] = Math.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
             }
-
-            return heightMapShaderBufferId;
         }
+
+        return new HeightMap(myConfigration, noiseMap);
+    }
+
+    public unsafe uint GenerateHeightMapShaderBuffer()
+    {
+        HeightMap heightMap = GenerateHeightMap();
+        float[] heightMapValues = heightMap.Get1DHeightMapValues();
+
+        uint heightMapShaderBufferSize = (uint)heightMapValues.Length * sizeof(float);
+        uint heightMapShaderBufferId;
+        fixed (float* heightMapValuesPointer = heightMapValues)
+        {
+            heightMapShaderBufferId = Rlgl.LoadShaderBuffer(heightMapShaderBufferSize, heightMapValuesPointer, Rlgl.DYNAMIC_COPY);
+        }
+
+        return heightMapShaderBufferId;
     }
 }

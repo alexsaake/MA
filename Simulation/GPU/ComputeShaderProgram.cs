@@ -1,28 +1,27 @@
 ﻿using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Simulation.GPU
+namespace ProceduralLandscapeGeneration.Simulation.GPU;
+
+internal class ComputeShaderProgram : IComputeShaderProgram
 {
-    internal class ComputeShaderProgram : IComputeShaderProgram
+    public uint Id { get; private set; }
+
+    public ComputeShaderProgram(string fileName)
     {
-        public uint Id { get; private set; }
+        Initialize(fileName);
+    }
 
-        public ComputeShaderProgram(string fileName)
-        {
-            Initialize(fileName);
-        }
+    private unsafe void Initialize(string fileName)
+    {
+        using var fileNameAnsiBuffer = fileName.ToAnsiBuffer();
+        sbyte* fileNamePointer = Raylib.LoadFileText(fileNameAnsiBuffer.AsPointer());
+        uint shaderId = Rlgl.CompileShader(fileNamePointer, (int)ShaderType.Compute);
 
-        private unsafe void Initialize(string fileName)
-        {
-            using var fileNameAnsiBuffer = fileName.ToAnsiBuffer();
-            sbyte* fileNamePointer = Raylib.LoadFileText(fileNameAnsiBuffer.AsPointer());
-            uint shaderId = Rlgl.CompileShader(fileNamePointer, (int)ShaderType.Compute);
+        Id = Rlgl.LoadComputeShaderProgram(shaderId);
+    }
 
-            Id = Rlgl.LoadComputeShaderProgram(shaderId);
-        }
-
-        public void Dispose()
-        {
-            Rlgl.UnloadShaderProgram(Id);
-        }
+    public void Dispose()
+    {
+        Rlgl.UnloadShaderProgram(Id);
     }
 }

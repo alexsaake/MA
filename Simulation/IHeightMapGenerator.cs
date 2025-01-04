@@ -1,10 +1,9 @@
 ﻿using ProceduralLandscapeGeneration.Common;
 
-namespace ProceduralLandscapeGeneration.Simulation
+namespace ProceduralLandscapeGeneration.Simulation;
+
+internal interface IHeightMapGenerator
 {
-    internal interface IHeightMapGenerator
-    {
-        HeightMap GenerateHeightMap();
-        uint GenerateHeightMapShaderBuffer();
-    }
+    HeightMap GenerateHeightMap();
+    uint GenerateHeightMapShaderBuffer();
 }

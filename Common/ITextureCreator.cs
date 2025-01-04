@@ -1,9 +1,8 @@
 ﻿using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Common
+namespace ProceduralLandscapeGeneration.Common;
+
+internal interface ITextureCreator
 {
-    internal interface ITextureCreator
-    {
-        Texture2D CreateTexture(HeightMap heightMap);
-    }
+    Texture2D CreateTexture(HeightMap heightMap);
 }

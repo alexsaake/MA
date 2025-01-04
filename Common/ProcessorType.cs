@@ -1,8 +1,7 @@
-﻿namespace ProceduralLandscapeGeneration.Common
+﻿namespace ProceduralLandscapeGeneration.Common;
+
+internal enum ProcessorType
 {
-    internal enum ProcessorType
-    {
-        CPU,
-        GPU
-    }
+    CPU,
+    GPU
 }
