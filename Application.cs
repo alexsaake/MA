@@ -1,4 +1,5 @@
-﻿using ProceduralLandscapeGeneration.GUI;
+﻿using Autofac;
+using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;
 using Raylib_cs;
@@ -12,12 +13,12 @@ internal class Application : IApplication
     private readonly IErosionSimulator myErosionSimulator;
     private readonly IRenderer myRenderer;
 
-    public Application(IConfiguration configuration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, IRenderer renderer)
+    public Application(IConfiguration configuration, IConfigurationGUI configurationGUI, ILifetimeScope lifetimeScope)
     {
         myConfiguration = configuration;
         myConfigurationGUI = configurationGUI;
-        myErosionSimulator = erosionSimulator;
-        myRenderer = renderer;
+        myErosionSimulator = lifetimeScope.ResolveKeyed<IErosionSimulator>(myConfiguration.ErosionSimulation);
+        myRenderer = lifetimeScope.ResolveKeyed<IRenderer>(myConfiguration.MeshCreation);
     }
 
     public void Run()

@@ -4,9 +4,47 @@ namespace ProceduralLandscapeGeneration;
 
 internal class Configuration : IConfiguration
 {
-    public const ProcessorType HeightMapGeneration = ProcessorType.GPU;
-    public const ProcessorType ErosionSimulation = ProcessorType.GPU;
-    public const ProcessorType MeshCreation = ProcessorType.GPU;
+    private ProcessorType myHeightMapGeneration;
+    public ProcessorType HeightMapGeneration
+    {
+        get => myHeightMapGeneration; set
+        {
+            if (myHeightMapGeneration == value)
+            {
+                return;
+            }
+            myHeightMapGeneration = value;
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private ProcessorType myErosionSimulation;
+    public ProcessorType ErosionSimulation
+    {
+        get => myErosionSimulation; set
+        {
+            if (myErosionSimulation == value)
+            {
+                return;
+            }
+            myErosionSimulation = value;
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private ProcessorType myMeshCreation;
+    public ProcessorType MeshCreation
+    {
+        get => myMeshCreation; set
+        {
+            if (myMeshCreation == value)
+            {
+                return;
+            }
+            myMeshCreation = value;
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
 
     private uint myHeightMapSideLength;
     public uint HeightMapSideLength
@@ -102,6 +140,9 @@ internal class Configuration : IConfiguration
 
     public Configuration()
     {
+        HeightMapGeneration = ProcessorType.GPU;
+        ErosionSimulation = ProcessorType.GPU;
+        MeshCreation = ProcessorType.GPU;
         SimulationIterations = 10000;
         Seed = 1337;
         HeightMapSideLength = 512;

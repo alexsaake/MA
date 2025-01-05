@@ -17,39 +17,13 @@ internal class DependencyInjectionContainer
         containerBuilder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ConfigurationGUI>().As<IConfigurationGUI>();
 
-        switch (Configuration.HeightMapGeneration)
-        {
-#pragma warning disable CS0162 // Unreachable code detected
-            case ProcessorType.GPU:
-                containerBuilder.RegisterType<HeightMapGeneratorComputeShader>().As<IHeightMapGenerator>();
-                break;
-            default:
-                containerBuilder.RegisterType<HeightMapGeneratorCPU>().As<IHeightMapGenerator>();
-                break;
-#pragma warning restore CS0162 // Unreachable code detected
-        }
-        switch (Configuration.ErosionSimulation)
-        {
-#pragma warning disable CS0162 // Unreachable code detected
-            case ProcessorType.GPU:
-                containerBuilder.RegisterType<ErosionSimulatorComputeShader>().As<IErosionSimulator>().SingleInstance();
-                break;
-            default:
-                containerBuilder.RegisterType<ErosionSimulatorCPU>().As<IErosionSimulator>().SingleInstance();
-                break;
-#pragma warning restore CS0162 // Unreachable code detected
-        }
-        switch (Configuration.MeshCreation)
-        {
-#pragma warning disable CS0162 // Unreachable code detected
-            case ProcessorType.GPU:
-                containerBuilder.RegisterType<MeshShaderRenderer>().As<IRenderer>();
-                break;
-            default:
-                containerBuilder.RegisterType<VertexShaderRenderer>().As<IRenderer>();
-                break;
-#pragma warning restore CS0162 // Unreachable code detected
-        }
+        containerBuilder.RegisterType<HeightMapGeneratorComputeShader>().As<IHeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.GPU);
+        containerBuilder.RegisterType<HeightMapGeneratorCPU>().As<IHeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.CPU);
+        containerBuilder.RegisterType<ErosionSimulatorComputeShader>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorType.GPU);
+        containerBuilder.RegisterType<ErosionSimulatorCPU>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorType.CPU);
+        containerBuilder.RegisterType<MeshShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorType.GPU);
+        containerBuilder.RegisterType<VertexShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorType.CPU);
+
         containerBuilder.RegisterType<ComputeShaderProgram>().As<IComputeShaderProgram>();
         containerBuilder.RegisterType<ComputeShaderProgramFactory>().As<IComputeShaderProgramFactory>();
         containerBuilder.RegisterType<VertexMeshCreator>().As<IVertexMeshCreator>();

@@ -1,4 +1,5 @@
-﻿using Raylib_cs;
+﻿using Autofac;
+using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.GUI;
 

@@ -1,4 +1,5 @@
-﻿using ProceduralLandscapeGeneration.Common;
+﻿using Autofac;
+using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Simulation;
 using ProceduralLandscapeGeneration.Simulation.CPU;
 using Raylib_cs;
@@ -21,10 +22,10 @@ internal class MeshShaderRenderer : IRenderer
     private bool myIsUpdateAvailable;
     private bool myIsDisposed;
 
-    public MeshShaderRenderer(IConfiguration configuration, IErosionSimulator erosionSimulator)
+    public MeshShaderRenderer(IConfiguration configuration, ILifetimeScope lifetimeScope)
     {
         myConfiguration = configuration;
-        myErosionSimulator = erosionSimulator;
+        myErosionSimulator = lifetimeScope.ResolveKeyed<IErosionSimulator>(myConfiguration.ErosionSimulation); ;
     }
 
     public unsafe void Initialize()

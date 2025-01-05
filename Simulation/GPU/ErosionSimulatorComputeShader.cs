@@ -1,4 +1,5 @@
-﻿using ProceduralLandscapeGeneration.Common;
+﻿using Autofac;
+using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Simulation.GPU.Shaders;
 using Raylib_cs;
 
@@ -25,10 +26,10 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
     private ComputeShaderProgram? myWindErosionSimulationComputeShaderProgram;
     private bool myIsDisposed;
 
-    public ErosionSimulatorComputeShader(IConfiguration configuration, IHeightMapGenerator heightMapGenerator, IComputeShaderProgramFactory computeShaderProgramFactory, IRandom random)
+    public ErosionSimulatorComputeShader(IConfiguration configuration, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory, IRandom random)
     {
         myConfiguration = configuration;
-        myHeightMapGenerator = heightMapGenerator;
+        myHeightMapGenerator = lifetimeScope.ResolveKeyed<IHeightMapGenerator>(myConfiguration.HeightMapGeneration);
         myComputeShaderProgramFactory = computeShaderProgramFactory;
         myRandom = random;
     }

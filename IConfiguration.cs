@@ -1,7 +1,12 @@
-﻿namespace ProceduralLandscapeGeneration;
+﻿using ProceduralLandscapeGeneration.Common;
+
+namespace ProceduralLandscapeGeneration;
 
 internal interface IConfiguration
 {
+    ProcessorType HeightMapGeneration { get; set; }
+    ProcessorType ErosionSimulation { get; set; }
+    ProcessorType MeshCreation { get; set; }
     uint HeightMapSideLength { get; set; }
     uint HeightMultiplier { get; set; }
     uint ParallelExecutions { get; set; }
