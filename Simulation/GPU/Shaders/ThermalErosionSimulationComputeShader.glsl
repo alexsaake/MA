@@ -71,7 +71,23 @@ void main()
     uint y = id / myHeightMapSideLength;
 
     vec2 normal = getScaledNormal(x, y).xy;
-    uint neighborIndex = getIndex(x + uint(ceil(normal.x)), y + uint(ceil(normal.y)));
+    if(normal.x > 0)
+    {
+        normal.x = ceil(normal.x);
+    }
+    else
+    {
+        normal.x = floor(normal.x);
+    }
+    if(normal.y > 0)
+    {
+        normal.y = ceil(normal.y);
+    }
+    else
+    {
+        normal.y = floor(normal.y);
+    }
+    uint neighborIndex = getIndex(x + int(normal.x), y + int(normal.y));
     if(neighborIndex < 0 || neighborIndex > heightMap.length())
     {
         return;
