@@ -35,7 +35,7 @@ const uint HeightMultiplier = 64;
 const uint MaxAge = 1024;
 const float BoundaryLayer = 2.0;
 const float Suspension = 0.05;
-const float Gravity = 2.0;
+const float Gravity = 0.025;
 const float MaxDiff = 0.005;
 const float Settling = 0.25;
 vec3 myPosition;

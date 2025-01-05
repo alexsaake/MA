@@ -13,22 +13,85 @@ internal class Configuration : IConfiguration
     {
         get => myHeightMapSideLength; set
         {
+            if (myHeightMapSideLength == value)
+            {
+                return;
+            }
             myHeightMapSideLength = value;
             ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
-    public uint SimulationIterations { get; set; } = 100000;
-    public int Seed { get; set; } = 1337;
+
+    private uint mySimulationIterations;
+    public uint SimulationIterations
+    {
+        get => mySimulationIterations; set
+        {
+            if (mySimulationIterations == value)
+            {
+                return;
+            }
+            mySimulationIterations = value;
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private int mySeed;
+    public int Seed
+    {
+        get => mySeed; set
+        {
+            if (mySeed == value)
+            {
+                return;
+            }
+            mySeed = value;
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     private uint myTalusAngle;
     public uint TalusAngle
     {
         get => myTalusAngle; set
         {
+            if (myTalusAngle == value)
+            {
+                return;
+            }
             myTalusAngle = value;
             ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
-    public uint HeightMultiplier { get; set; } = 64;
+
+    private float myHeightChange;
+    public float HeightChange
+    {
+        get => myHeightChange; set
+        {
+            if (myHeightChange == value)
+            {
+                return;
+            }
+            myHeightChange = value;
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private uint myHeightMultiplier;
+    public uint HeightMultiplier
+    {
+        get => myHeightMultiplier; set
+        {
+            if (myHeightMultiplier == value)
+            {
+                return;
+            }
+            myHeightMultiplier = value;
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     public int ScreenWidth { get; set; } = 1920;
     public int ScreenHeight { get; set; } = 1080;
     public uint ParallelExecutions { get; set; } = 10;
@@ -39,7 +102,11 @@ internal class Configuration : IConfiguration
 
     public Configuration()
     {
+        SimulationIterations = 10000;
+        Seed = 1337;
         HeightMapSideLength = 512;
         TalusAngle = 33;
+        HeightChange = 0.001f;
+        HeightMultiplier = 64;
     }
 }

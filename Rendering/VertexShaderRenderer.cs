@@ -10,7 +10,7 @@ internal class VertexShaderRenderer : IRenderer
 {
     private readonly IConfiguration myConfiguration;
     private readonly IErosionSimulator myErosionSimulator;
-    private readonly IMeshCreator myMeshCreator;
+    private readonly IVertexMeshCreator myVertexMeshCreator;
 
     private RenderTexture2D myShadowMap;
     private Model myModel;
@@ -25,11 +25,11 @@ internal class VertexShaderRenderer : IRenderer
     private bool myIsUpdateAvailable;
     private bool myIsDisposed;
 
-    public VertexShaderRenderer(IConfiguration configuration, IErosionSimulator erosionSimulator, IMeshCreator meshCreator)
+    public VertexShaderRenderer(IConfiguration configuration, IErosionSimulator erosionSimulator, IVertexMeshCreator vertexMeshCreator)
     {
         myConfiguration = configuration;
         myErosionSimulator = erosionSimulator;
-        myMeshCreator = meshCreator;
+        myVertexMeshCreator = vertexMeshCreator;
     }
 
     public void Initialize()
@@ -95,7 +95,7 @@ internal class VertexShaderRenderer : IRenderer
 
     private void InitiateModel()
     {
-        Mesh mesh = myMeshCreator.CreateMesh(GetHeightMap());
+        Mesh mesh = myVertexMeshCreator.CreateMesh(GetHeightMap());
         myModel = Raylib.LoadModelFromMesh(mesh);
     }
 
@@ -122,7 +122,7 @@ internal class VertexShaderRenderer : IRenderer
     private void UpdateModel()
     {
         Raylib.UnloadModel(myModel);
-        Mesh mesh = myMeshCreator.CreateMesh(GetHeightMap());
+        Mesh mesh = myVertexMeshCreator.CreateMesh(GetHeightMap());
         myModel = Raylib.LoadModelFromMesh(mesh);
     }
 

@@ -12,6 +12,7 @@ internal interface IConfiguration
     uint SimulationCallbackEachIterations { get; set; }
     uint SimulationIterations { get; set; }
     uint TalusAngle { get; set; }
+    float HeightChange { get; set; }
 
     event EventHandler? ConfigurationChanged;
 }

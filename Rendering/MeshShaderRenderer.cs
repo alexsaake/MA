@@ -16,6 +16,7 @@ internal class MeshShaderRenderer : IRenderer
     private Camera3D myCamera;
 
     private uint myHeightMapShaderBufferId;
+    private uint myConfigurationShaderBufferId;
     private uint myMeshletCount;
     private bool myIsUpdateAvailable;
     private bool myIsDisposed;
@@ -26,8 +27,10 @@ internal class MeshShaderRenderer : IRenderer
         myErosionSimulator = erosionSimulator;
     }
 
-    public void Initialize()
+    public unsafe void Initialize()
     {
+        myConfiguration.ConfigurationChanged += OnConfigurationChanged;
+
         myMeshShader = Raylib.LoadMeshShader("Rendering/Shaders/MeshShader.glsl", "Rendering/Shaders/FragmentShader.glsl");
 
         Vector3 heightMapCenter = new Vector3(myConfiguration.HeightMapSideLength / 2, myConfiguration.HeightMapSideLength / 2, 0);
@@ -53,13 +56,21 @@ internal class MeshShaderRenderer : IRenderer
         else
         {
             myHeightMapShaderBufferId = myErosionSimulator.HeightMapShaderBufferId;
+            uint heightMultiplierValue = myConfiguration.HeightMultiplier;
+            myConfigurationShaderBufferId = Rlgl.LoadShaderBuffer(sizeof(uint), &heightMultiplierValue, Rlgl.DYNAMIC_COPY);
         }
+    }
+
+    private unsafe void OnConfigurationChanged(object? sender, EventArgs e)
+    {
+        uint heightMultiplierValue = myConfiguration.HeightMultiplier;
+        Rlgl.UpdateShaderBuffer(myConfigurationShaderBufferId, &heightMultiplierValue, sizeof(uint), 0);
     }
 
     private unsafe void CreateShaderBuffer()
     {
-        HeightMap heightMap = myErosionSimulator.HeightMap;
-        float[] heightMapValues = heightMap.Get1DHeightMapValues();
+        HeightMap heightMap = myErosionSimulator.HeightMap!;
+        float[] heightMapValues = heightMap!.Get1DHeightMapValues();
 
         uint heightMapShaderBufferSize = (uint)heightMapValues.Length * sizeof(float);
         fixed (float* heightMapValuesPointer = heightMapValues)
@@ -96,7 +107,7 @@ internal class MeshShaderRenderer : IRenderer
 
     private unsafe void UpdateShaderBuffer()
     {
-        HeightMap heightMap = myErosionSimulator.HeightMap;
+        HeightMap heightMap = myErosionSimulator.HeightMap!;
         float[] heightMapValues = heightMap.Get1DHeightMapValues();
 
         uint heightMapShaderBufferSize = (uint)heightMapValues.Length * sizeof(float);
@@ -111,8 +122,9 @@ internal class MeshShaderRenderer : IRenderer
         Raylib.BeginShaderMode(myMeshShader);
             Raylib.BeginMode3D(myCamera);
                 Rlgl.EnableShader(myMeshShader.Id);
-                Rlgl.BindShaderBuffer(myHeightMapShaderBufferId, 1);
-                Raylib.DrawMeshTasks(0, myMeshletCount);
+                    Rlgl.BindShaderBuffer(myHeightMapShaderBufferId, 1);
+                    Rlgl.BindShaderBuffer(myConfigurationShaderBufferId, 2);
+                    Raylib.DrawMeshTasks(0, myMeshletCount);
                 Rlgl.DisableShader();
             Raylib.EndMode3D();
         Raylib.EndShaderMode();

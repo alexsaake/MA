@@ -11,6 +11,7 @@ struct ThermalErosionConfiguration
 {
     uint heightMultiplier;
     float tangensThresholdAngle;
+    float heightChange;
 };
 
 layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
@@ -31,7 +32,6 @@ bool isOutOfBounds(uint x, uint y)
 }
 
 //https://aparis69.github.io/public_html/posts/terrain_erosion.html
-const float HeightChange = 0.001;
 
 vec3 getScaledNormal(uint x, uint y)
 {
@@ -97,7 +97,7 @@ void main()
 
     if (zDiff > configuration.tangensThresholdAngle)
     {
-        heightMap[id] -= HeightChange;
-        heightMap[neighborIndex] += HeightChange;
+        heightMap[id] -= configuration.heightChange;
+        heightMap[neighborIndex] += configuration.heightChange;
     }
 }

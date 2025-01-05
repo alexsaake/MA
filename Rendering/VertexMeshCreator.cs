@@ -4,11 +4,11 @@ using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Rendering;
 
-internal class MeshCreator : IMeshCreator
+internal class VertexMeshCreator : IVertexMeshCreator
 {
     private readonly IConfiguration myConfiguration;
 
-    public MeshCreator(IConfiguration configuration)
+    public VertexMeshCreator(IConfiguration configuration)
     {
         myConfiguration = configuration;
     }

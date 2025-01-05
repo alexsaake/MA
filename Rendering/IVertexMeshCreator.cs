@@ -3,7 +3,7 @@ using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Rendering;
 
-internal interface IMeshCreator
+internal interface IVertexMeshCreator
 {
     Mesh CreateMesh(HeightMap heightMap);
 }

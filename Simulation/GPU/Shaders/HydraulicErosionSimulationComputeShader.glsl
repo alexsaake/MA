@@ -12,6 +12,17 @@ layout(std430, binding = 2) readonly restrict buffer heightMapIndicesShaderBuffe
     uint[] heightMapIndices;
 };
 
+struct HydraulicErosionConfiguration
+{
+    uint heightMultiplier;
+    float tangensThresholdAngle;
+};
+
+layout(std430, binding = 3) readonly restrict buffer configurationShaderBuffer
+{
+    HydraulicErosionConfiguration configuration;
+};
+
 uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
@@ -30,7 +41,6 @@ bool isOutOfBounds(ivec2 position)
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/water.hpp
-const uint HeightMultiplier = 64;
 const uint MaxAge = 1024;
 const float EvaporationRate = 0.001;
 const float DepositionRate = 0.05;
@@ -63,8 +73,8 @@ vec3 getScaledNormal(uint x, uint y)
     float xym1 = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    HeightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
-    HeightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
+    configuration.heightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
+    configuration.heightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
     1.0);
 
     return normalize(normal);

@@ -52,7 +52,7 @@ internal class DependencyInjectionContainer
         }
         containerBuilder.RegisterType<ComputeShaderProgram>().As<IComputeShaderProgram>();
         containerBuilder.RegisterType<ComputeShaderProgramFactory>().As<IComputeShaderProgramFactory>();
-        containerBuilder.RegisterType<MeshCreator>().As<IMeshCreator>();
+        containerBuilder.RegisterType<VertexMeshCreator>().As<IVertexMeshCreator>();
         containerBuilder.RegisterType<Simulation.Random>().As<IRandom>();
         return containerBuilder.Build();
     }
