@@ -11,6 +11,7 @@ internal class ErosionSimulatorCPU : IErosionSimulator
     private readonly ILifetimeScope myLifetimeScope;
     private IHeightMapGenerator myHeightMapGenerator;
 
+    private Task myRunningSimulation;
     private bool myIsDisposed;
 
     public HeightMap? HeightMap { get; private set; }
@@ -33,8 +34,14 @@ internal class ErosionSimulatorCPU : IErosionSimulator
 
     public void SimulateHydraulicErosion()
     {
+        if (myRunningSimulation is not null
+            && !myRunningSimulation.IsCompleted)
+        {
+            Console.WriteLine($"INFO: Simulation already running on CPU.");
+            return;
+        }
         Console.WriteLine($"INFO: Simulating hydraulic erosion.");
-        Task.Run(() =>
+        myRunningSimulation = Task.Run(() =>
         {
             uint lastCallback = 0;
 
@@ -79,12 +86,16 @@ internal class ErosionSimulatorCPU : IErosionSimulator
 
     public void SimulateThermalErosion()
     {
-        const float heightChange = 0.001f;
-
+        if (myRunningSimulation is not null
+            && !myRunningSimulation.IsCompleted)
+        {
+            Console.WriteLine($"INFO: Simulation already running on CPU.");
+            return;
+        }
         float tangensTalusAngle = MathF.Tan(myConfiguration.TalusAngle);
 
         Console.WriteLine($"INFO: Simulating thermal erosion on each cell of the height map.");
-        Task.Run(() =>
+        myRunningSimulation = Task.Run(() =>
         {
             uint mapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
             uint iteration = 0;
@@ -116,8 +127,8 @@ internal class ErosionSimulatorCPU : IErosionSimulator
 
                             if (zDiff > tangensTalusAngle)
                             {
-                                HeightMap.Height[localX, localY] -= heightChange;
-                                HeightMap.Height[neighborPosition.X, neighborPosition.Y] += heightChange;
+                                HeightMap.Height[localX, localY] -= myConfiguration.ThermalErosionHeightChange;
+                                HeightMap.Height[neighborPosition.X, neighborPosition.Y] += myConfiguration.ThermalErosionHeightChange;
                             }
                         }));
                         x++;
@@ -141,8 +152,14 @@ internal class ErosionSimulatorCPU : IErosionSimulator
 
     public void SimulateWindErosion()
     {
+        if (myRunningSimulation is not null
+            && !myRunningSimulation.IsCompleted)
+        {
+            Console.WriteLine($"INFO: Simulation already running on CPU.");
+            return;
+        }
         Console.WriteLine($"INFO: Simulating wind erosion.");
-        Task.Run(() =>
+        myRunningSimulation = Task.Run(() =>
         {
             uint lastCallback = 0;
 
