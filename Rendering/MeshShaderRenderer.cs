@@ -30,7 +30,7 @@ internal class MeshShaderRenderer : IRenderer
 
     public unsafe void Initialize()
     {
-        myConfiguration.ConfigurationChanged += OnConfigurationChanged;
+        myConfiguration.ErosionConfigurationChanged += OnErosionConfigurationChanged;
 
         myMeshShader = Raylib.LoadMeshShader("Rendering/Shaders/MeshShader.glsl", "Rendering/Shaders/FragmentShader.glsl");
 
@@ -62,7 +62,7 @@ internal class MeshShaderRenderer : IRenderer
         }
     }
 
-    private unsafe void OnConfigurationChanged(object? sender, EventArgs e)
+    private unsafe void OnErosionConfigurationChanged(object? sender, EventArgs e)
     {
         uint heightMultiplierValue = myConfiguration.HeightMultiplier;
         Rlgl.UpdateShaderBuffer(myConfigurationShaderBufferId, &heightMultiplierValue, sizeof(uint), 0);
@@ -137,6 +137,9 @@ internal class MeshShaderRenderer : IRenderer
         {
             return;
         }
+
+        myConfiguration.ErosionConfigurationChanged -= OnErosionConfigurationChanged;
+        myErosionSimulator.ErosionIterationFinished -= OnErosionIterationFinished;
 
         if (myErosionSimulator is ErosionSimulatorCPU)
         {

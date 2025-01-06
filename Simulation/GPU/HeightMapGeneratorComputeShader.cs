@@ -5,11 +5,6 @@ namespace ProceduralLandscapeGeneration.Simulation.GPU;
 
 internal class HeightMapGeneratorComputeShader : IHeightMapGenerator
 {
-    private const uint Scale = 500;
-    private const uint Octaves = 8;
-    private const float Persistance = 0.5f;
-    private const float Lacunarity = 2;
-
     private readonly IConfiguration myConfigration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
 
@@ -33,10 +28,10 @@ internal class HeightMapGeneratorComputeShader : IHeightMapGenerator
         {
             Seed = (uint)myConfigration.Seed,
             SideLength = myConfigration.HeightMapSideLength,
-            Scale = Scale,
-            Octaves = Octaves,
-            Persistence = Persistance,
-            Lacunarity = Lacunarity
+            Scale = myConfigration.NoiseScale,
+            Octaves = myConfigration.NoiseOctaves,
+            Persistence = myConfigration.NoisePersistence,
+            Lacunarity = myConfigration.NoiseLacunarity
         };
         uint heightMapParametersBufferSize = (uint)sizeof(HeightMapParameters);
         uint heightMapParametersBufferId = Rlgl.LoadShaderBuffer(heightMapParametersBufferSize, &heightMapParameters, Rlgl.DYNAMIC_COPY);
@@ -52,6 +47,14 @@ internal class HeightMapGeneratorComputeShader : IHeightMapGenerator
         Rlgl.ComputeShaderDispatch(heightMapSize, 1, 1);
         Rlgl.DisableShader();
         heightMapComputeShaderProgram.Dispose();
+
+        ComputeShaderProgram normalizeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/NormalizeComputeShader.glsl");
+        Rlgl.EnableShader(normalizeComputeShaderProgram.Id);
+        Rlgl.BindShaderBuffer(heightMapParametersBufferId, 1);
+        Rlgl.BindShaderBuffer(heightMapBufferId, 2);
+        Rlgl.ComputeShaderDispatch(heightMapSize, 1, 1);
+        Rlgl.DisableShader();
+        normalizeComputeShaderProgram.Dispose();
 
         Rlgl.UnloadShaderBuffer(heightMapParametersBufferId);
 

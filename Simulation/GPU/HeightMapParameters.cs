@@ -8,4 +8,6 @@ internal struct HeightMapParameters
     public uint Octaves;
     public float Persistence;
     public float Lacunarity;
+    public int Min;
+    public int Max;
 };

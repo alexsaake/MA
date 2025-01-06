@@ -10,29 +10,48 @@ internal class Application : IApplication
 {
     private readonly IConfiguration myConfiguration;
     private readonly IConfigurationGUI myConfigurationGUI;
-    private readonly IErosionSimulator myErosionSimulator;
-    private readonly IRenderer myRenderer;
+    private readonly ILifetimeScope myLifetimeScope;
+    private IErosionSimulator myErosionSimulator;
+    private IRenderer myRenderer;
+
+    private bool myIsModuleResetRequired;
 
     public Application(IConfiguration configuration, IConfigurationGUI configurationGUI, ILifetimeScope lifetimeScope)
     {
         myConfiguration = configuration;
         myConfigurationGUI = configurationGUI;
-        myErosionSimulator = lifetimeScope.ResolveKeyed<IErosionSimulator>(myConfiguration.ErosionSimulation);
-        myRenderer = lifetimeScope.ResolveKeyed<IRenderer>(myConfiguration.MeshCreation);
+        myLifetimeScope = lifetimeScope;
+        ResolveModules();
+    }
+
+    private void ResolveModules()
+    {
+        myErosionSimulator = myLifetimeScope.ResolveKeyed<IErosionSimulator>(myConfiguration.ErosionSimulation);
+        myRenderer = myLifetimeScope.ResolveKeyed<IRenderer>(myConfiguration.MeshCreation);
     }
 
     public void Run()
     {
-        Raylib.InitWindow(myConfiguration.ScreenWidth, myConfiguration.ScreenHeight, "Hello, Raylib-Cs");
+        myConfiguration.ProcessorTypeChanged += OnProcessorTypeChanged;
+        myConfiguration.HeightMapConfigurationChanged += OnHeightMapConfigurationChanged;
 
-        myErosionSimulator.Initialize();
-        myRenderer.Initialize();
+        Raylib.InitWindow(myConfiguration.ScreenWidth, myConfiguration.ScreenHeight, "Procedural Landscape Generation");
+
+        InitializeModules();
 
         Rlgl.SetClipPlanes(0.001f, 10000.0f);
         Raylib.SetTargetFPS(60);
 
         while (!Raylib.WindowShouldClose())
         {
+            if (myIsModuleResetRequired)
+            {
+                DisposeModules();
+                ResolveModules();
+                InitializeModules();
+                myIsModuleResetRequired = false;
+            }
+
             if (Raylib.IsKeyDown(KeyboardKey.One))
             {
                 myErosionSimulator.SimulateHydraulicErosion();
@@ -49,15 +68,39 @@ internal class Application : IApplication
             myRenderer.Update();
 
             Raylib.BeginDrawing();
-            Raylib.ClearBackground(Color.SkyBlue);
-            myRenderer.Draw();
-            myConfigurationGUI.Draw();
+                Raylib.ClearBackground(Color.SkyBlue);
+                myRenderer.Draw();
+                myConfigurationGUI.Draw();
             Raylib.EndDrawing();
         }
 
-        myRenderer.Dispose();
-        myErosionSimulator.Dispose();
+        myConfiguration.ProcessorTypeChanged -= OnProcessorTypeChanged;
+        myConfiguration.HeightMapConfigurationChanged -= OnHeightMapConfigurationChanged;
+
+        DisposeModules();
 
         Raylib.CloseWindow();
+    }
+
+    private void InitializeModules()
+    {
+        myErosionSimulator.Initialize();
+        myRenderer.Initialize();
+    }
+
+    private void OnProcessorTypeChanged(object? sender, EventArgs e)
+    {
+        myIsModuleResetRequired = true;
+    }
+    
+    private void OnHeightMapConfigurationChanged(object? sender, EventArgs e)
+    {
+        myIsModuleResetRequired = true;
+    }
+
+    private void DisposeModules()
+    {
+        myRenderer.Dispose();
+        myErosionSimulator.Dispose();
     }
 }

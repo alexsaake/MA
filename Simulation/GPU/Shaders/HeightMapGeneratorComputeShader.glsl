@@ -95,6 +95,8 @@ struct HeightMapParameters
     uint octaves;
     float persistence;
     float lacunarity;
+    int min;
+    int max;
 };
 
 layout(std430, binding = 1) buffer heightMapParametersShaderBuffer
@@ -125,8 +127,8 @@ void main()
     for (int octave = 0; octave < parameters.octaves; octave++)
     {
         currentSeed = hash(currentSeed, 0x0U); // create a new seed for each octave
-        float sampleX = x / parameters.scale * frequency;
-        float sampleY = y / parameters.scale * frequency;
+        float sampleX = x / (parameters.scale * 100) * frequency;
+        float sampleY = y / (parameters.scale * 100) * frequency;
 
         float perlinValue = perlinNoise(vec2(sampleX, sampleY), currentSeed);
         noiseHeight += perlinValue * amplitude;
@@ -136,4 +138,7 @@ void main()
     }
 
     heightMap[id] = noiseHeight;
+    int val = int(noiseHeight * 100000);
+    atomicMin(parameters.min, val);
+    atomicMax(parameters.max, val);
 }

@@ -14,7 +14,7 @@ internal class Configuration : IConfiguration
                 return;
             }
             myHeightMapGeneration = value;
-            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            ProcessorTypeChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -28,7 +28,7 @@ internal class Configuration : IConfiguration
                 return;
             }
             myErosionSimulation = value;
-            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            ProcessorTypeChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -42,35 +42,7 @@ internal class Configuration : IConfiguration
                 return;
             }
             myMeshCreation = value;
-            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    private uint myHeightMapSideLength;
-    public uint HeightMapSideLength
-    {
-        get => myHeightMapSideLength; set
-        {
-            if (myHeightMapSideLength == value)
-            {
-                return;
-            }
-            myHeightMapSideLength = value;
-            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    private uint mySimulationIterations;
-    public uint SimulationIterations
-    {
-        get => mySimulationIterations; set
-        {
-            if (mySimulationIterations == value)
-            {
-                return;
-            }
-            mySimulationIterations = value;
-            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            ProcessorTypeChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -84,35 +56,21 @@ internal class Configuration : IConfiguration
                 return;
             }
             mySeed = value;
-            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            HeightMapConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    private uint myTalusAngle;
-    public uint TalusAngle
+    private uint myHeightMapSideLength;
+    public uint HeightMapSideLength
     {
-        get => myTalusAngle; set
+        get => myHeightMapSideLength; set
         {
-            if (myTalusAngle == value)
+            if (myHeightMapSideLength == value)
             {
                 return;
             }
-            myTalusAngle = value;
-            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    private float myHeightChange;
-    public float HeightChange
-    {
-        get => myHeightChange; set
-        {
-            if (myHeightChange == value)
-            {
-                return;
-            }
-            myHeightChange = value;
-            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            myHeightMapSideLength = value;
+            HeightMapConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -126,7 +84,104 @@ internal class Configuration : IConfiguration
                 return;
             }
             myHeightMultiplier = value;
-            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            ErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myNoiseScale;
+    public float NoiseScale
+    {
+        get => myNoiseScale; set
+        {
+            if (myNoiseScale == value)
+            {
+                return;
+            }
+            myNoiseScale = value;
+            HeightMapConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private uint myNoiseOctaves;
+    public uint NoiseOctaves
+    {
+        get => myNoiseOctaves; set
+        {
+            if (myNoiseOctaves == value)
+            {
+                return;
+            }
+            myNoiseOctaves = value;
+            HeightMapConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myNoisePersistance;
+    public float NoisePersistence
+    {
+        get => myNoisePersistance; set
+        {
+            if (myNoisePersistance == value)
+            {
+                return;
+            }
+            myNoisePersistance = value;
+            HeightMapConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myNoiseLacunarity;
+    public float NoiseLacunarity
+    {
+        get => myNoiseLacunarity; set
+        {
+            if (myNoiseLacunarity == value)
+            {
+                return;
+            }
+            myNoiseLacunarity = value;
+            HeightMapConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private uint mySimulationIterations;
+    public uint SimulationIterations
+    {
+        get => mySimulationIterations; set
+        {
+            if (mySimulationIterations == value)
+            {
+                return;
+            }
+            mySimulationIterations = value;
+        }
+    }
+
+    private uint myTalusAngle;
+    public uint TalusAngle
+    {
+        get => myTalusAngle; set
+        {
+            if (myTalusAngle == value)
+            {
+                return;
+            }
+            myTalusAngle = value;
+            ThermalErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myHeightChange;
+    public float ThermalErosionHeightChange
+    {
+        get => myHeightChange; set
+        {
+            if (myHeightChange == value)
+            {
+                return;
+            }
+            myHeightChange = value;
+            ThermalErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -136,18 +191,28 @@ internal class Configuration : IConfiguration
     public uint SimulationCallbackEachIterations { get; set; } = 1000;
     public int ShadowMapResolution { get; set; } = 1028;
 
-    public event EventHandler? ConfigurationChanged;
+    public event EventHandler? ProcessorTypeChanged;
+    public event EventHandler? HeightMapConfigurationChanged;
+    public event EventHandler? ErosionConfigurationChanged;
+    public event EventHandler? ThermalErosionConfigurationChanged;
 
     public Configuration()
     {
         HeightMapGeneration = ProcessorType.GPU;
         ErosionSimulation = ProcessorType.GPU;
-        MeshCreation = ProcessorType.GPU;
-        SimulationIterations = 10000;
+        MeshCreation = ProcessorType.CPU;
+
         Seed = 1337;
         HeightMapSideLength = 512;
-        TalusAngle = 33;
-        HeightChange = 0.001f;
         HeightMultiplier = 64;
+        NoiseScale = 2.0f;
+        NoiseOctaves = 8;
+        NoisePersistence = 0.5f;
+        NoiseLacunarity = 2.0f;
+
+        SimulationIterations = 10000;
+
+        TalusAngle = 33;
+        ThermalErosionHeightChange = 0.001f;
     }
 }

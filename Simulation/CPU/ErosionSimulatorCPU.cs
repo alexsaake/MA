@@ -1,13 +1,15 @@
-﻿using ProceduralLandscapeGeneration.Common;
+﻿using Autofac;
+using ProceduralLandscapeGeneration.Common;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Simulation.CPU;
 
 internal class ErosionSimulatorCPU : IErosionSimulator
 {
-    private readonly IConfiguration myConfigration;
+    private readonly IConfiguration myConfiguration;
     private readonly IRandom myRandom;
-    private readonly IHeightMapGenerator myHeightMapGenerator;
+    private readonly ILifetimeScope myLifetimeScope;
+    private IHeightMapGenerator myHeightMapGenerator;
 
     private bool myIsDisposed;
 
@@ -16,15 +18,16 @@ internal class ErosionSimulatorCPU : IErosionSimulator
 
     public event EventHandler? ErosionIterationFinished;
 
-    public ErosionSimulatorCPU(IConfiguration configuration, IRandom random, IHeightMapGenerator heightMapGenerator)
+    public ErosionSimulatorCPU(IConfiguration configuration, IRandom random, ILifetimeScope lifetimeScope)
     {
-        myConfigration = configuration;
+        myConfiguration = configuration;
         myRandom = random;
-        myHeightMapGenerator = heightMapGenerator;
+        myLifetimeScope = lifetimeScope;
     }
 
     public void Initialize()
     {
+        myHeightMapGenerator = myLifetimeScope.ResolveKeyed<IHeightMapGenerator>(myConfiguration.HeightMapGeneration);
         HeightMap = myHeightMapGenerator.GenerateHeightMap();
     }
 
@@ -35,10 +38,10 @@ internal class ErosionSimulatorCPU : IErosionSimulator
         {
             uint lastCallback = 0;
 
-            for (uint iteration = 0; iteration <= myConfigration.SimulationIterations; iteration += myConfigration.ParallelExecutions)
+            for (uint iteration = 0; iteration <= myConfiguration.SimulationIterations; iteration += myConfiguration.ParallelExecutions)
             {
                 List<Task> parallelExecutionTasks = new List<Task>();
-                for (int parallelExecution = 0; parallelExecution < myConfigration.ParallelExecutions; parallelExecution++)
+                for (int parallelExecution = 0; parallelExecution < myConfiguration.ParallelExecutions; parallelExecution++)
                 {
                     Vector2 newPosition = new(myRandom.Next(HeightMap!.Width), myRandom.Next(HeightMap.Depth));
                     parallelExecutionTasks.Add(Task.Run(() =>
@@ -60,17 +63,17 @@ internal class ErosionSimulatorCPU : IErosionSimulator
                 }
                 Task.WaitAll(parallelExecutionTasks.ToArray());
 
-                if (iteration % myConfigration.SimulationCallbackEachIterations == 0
+                if (iteration % myConfiguration.SimulationCallbackEachIterations == 0
             && iteration != lastCallback)
                 {
                     ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
                     lastCallback = iteration;
-                    Console.WriteLine($"INFO: Step {iteration} of {myConfigration.SimulationIterations}.");
+                    Console.WriteLine($"INFO: Step {iteration} of {myConfiguration.SimulationIterations}.");
                 }
             }
 
             ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-            Console.WriteLine($"INFO: End of simulation after {myConfigration.SimulationIterations} iterations.");
+            Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
         });
     }
 
@@ -78,23 +81,23 @@ internal class ErosionSimulatorCPU : IErosionSimulator
     {
         const float heightChange = 0.001f;
 
-        float tangensTalusAngle = MathF.Tan(myConfigration.TalusAngle);
+        float tangensTalusAngle = MathF.Tan(myConfiguration.TalusAngle);
 
         Console.WriteLine($"INFO: Simulating thermal erosion on each cell of the height map.");
         Task.Run(() =>
         {
-            uint mapSize = myConfigration.HeightMapSideLength * myConfigration.HeightMapSideLength;
+            uint mapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
             uint iteration = 0;
             uint lastCallback = 0;
 
-            for (int y = 0; y <= myConfigration.HeightMapSideLength; y++)
+            for (int y = 0; y <= myConfiguration.HeightMapSideLength; y++)
             {
-                for (int x = 0; x <= myConfigration.HeightMapSideLength;)
+                for (int x = 0; x <= myConfiguration.HeightMapSideLength;)
                 {
                     List<Task> parallelExecutionTasks = new List<Task>();
-                    for (int parallelExecution = 0; parallelExecution < myConfigration.ParallelExecutions; parallelExecution++)
+                    for (int parallelExecution = 0; parallelExecution < myConfiguration.ParallelExecutions; parallelExecution++)
                     {
-                        if (x > myConfigration.HeightMapSideLength)
+                        if (x > myConfiguration.HeightMapSideLength)
                         {
                             continue;
                         }
@@ -108,8 +111,8 @@ internal class ErosionSimulatorCPU : IErosionSimulator
                             {
                                 return;
                             }
-                            float neighborHeight = HeightMap.Height[neighborPosition.X, neighborPosition.Y] * myConfigration.HeightMultiplier;
-                            float zDiff = HeightMap.Height[localX, localY] * myConfigration.HeightMultiplier - neighborHeight;
+                            float neighborHeight = HeightMap.Height[neighborPosition.X, neighborPosition.Y] * myConfiguration.HeightMultiplier;
+                            float zDiff = HeightMap.Height[localX, localY] * myConfiguration.HeightMultiplier - neighborHeight;
 
                             if (zDiff > tangensTalusAngle)
                             {
@@ -122,7 +125,7 @@ internal class ErosionSimulatorCPU : IErosionSimulator
                     }
                     Task.WaitAll(parallelExecutionTasks.ToArray());
 
-                    if (iteration % myConfigration.SimulationCallbackEachIterations == 0
+                    if (iteration % myConfiguration.SimulationCallbackEachIterations == 0
                         && iteration != lastCallback)
                     {
                         ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
@@ -132,7 +135,7 @@ internal class ErosionSimulatorCPU : IErosionSimulator
                 }
             }
 
-            Console.WriteLine($"INFO: End of simulation after {myConfigration.SimulationIterations} iterations.");
+            Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
         });
     }
 
@@ -143,10 +146,10 @@ internal class ErosionSimulatorCPU : IErosionSimulator
         {
             uint lastCallback = 0;
 
-            for (uint iteration = 0; iteration <= myConfigration.SimulationIterations; iteration += myConfigration.ParallelExecutions)
+            for (uint iteration = 0; iteration <= myConfiguration.SimulationIterations; iteration += myConfiguration.ParallelExecutions)
             {
                 List<Task> parallelExecutionTasks = new List<Task>();
-                for (int parallelExecution = 0; parallelExecution < myConfigration.ParallelExecutions; parallelExecution++)
+                for (int parallelExecution = 0; parallelExecution < myConfiguration.ParallelExecutions; parallelExecution++)
                 {
                     Vector2 newPosition = GetRandomPositionAtEdgeOfMap();
                     parallelExecutionTasks.Add(Task.Run(() =>
@@ -157,16 +160,16 @@ internal class ErosionSimulatorCPU : IErosionSimulator
                 }
                 Task.WaitAll(parallelExecutionTasks.ToArray());
 
-                if (iteration % myConfigration.SimulationCallbackEachIterations == 0
+                if (iteration % myConfiguration.SimulationCallbackEachIterations == 0
                     && iteration != lastCallback)
                 {
                     ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
                     lastCallback = iteration;
-                    Console.WriteLine($"INFO: Step {iteration} of {myConfigration.SimulationIterations}.");
+                    Console.WriteLine($"INFO: Step {iteration} of {myConfiguration.SimulationIterations}.");
                 }
             }
 
-            Console.WriteLine($"INFO: End of simulation after {myConfigration.SimulationIterations} iterations.");
+            Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
         });
     }
 
