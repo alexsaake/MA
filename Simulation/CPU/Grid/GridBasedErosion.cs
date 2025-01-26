@@ -1,7 +1,7 @@
 ﻿using ProceduralLandscapeGeneration.Common;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.Simulation.CPU
+namespace ProceduralLandscapeGeneration.Simulation.CPU.Grid
 {
     internal class GridBasedErosion
     {
@@ -9,7 +9,6 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
         //https://github.com/karhu/terrain-erosion/blob/master/Simulation/FluidSimulation.cpp
         public struct GridPoint
         {
-            public float TerrainHeight;
             public float WaterHeight;
             public float SuspendedSediment;
             public float TempSediment;
@@ -19,7 +18,8 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
             public float FlowTop;
             public float FlowBottom;
 
-            public Vector2 Velocity;
+            public float VelocityX;
+            public float VelocityY;
         }
 
         public GridPoint[,] GridPoints;
@@ -27,14 +27,6 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
         public GridBasedErosion(HeightMap heightMap)
         {
             GridPoints = new GridPoint[heightMap.Width, heightMap.Depth];
-
-            for (int y = 0; y < heightMap.Depth; y++)
-            {
-                for (int x = 0; x < heightMap.Width; x++)
-                {
-                    GridPoints[x, y].TerrainHeight = heightMap.Height[x, y];
-                }
-            }
         }
 
         public void WaterIncrease(IVector2 position, float value)
@@ -42,15 +34,15 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
             GridPoints[position.X, position.Y].WaterHeight += value;
         }
 
-        public void Simulate()
+        public void Simulate(HeightMap heightMap)
         {
-            SimulateFlow();
-            ErosionAndDeposition();
+            SimulateFlow(heightMap);
+            ErosionAndDeposition(heightMap);
             SedimentTransportation();
             WaterDecrease();
         }
 
-        private void SimulateFlow()
+        private void SimulateFlow(HeightMap heightMap)
         {
             float A = 0.00005f;
             float g = 9.81f;
@@ -63,22 +55,22 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
                 for (int x = 1; x < GridPoints.GetLength(0) - 1; x++)
                 {
                     float dh;
-                    float h0 = GridPoints[x, y].TerrainHeight + GridPoints[x, y].WaterHeight;
+                    float h0 = heightMap.Height[x, y] + GridPoints[x, y].WaterHeight;
                     float newFlux;
 
-                    dh = h0 - GridPoints[x - 1, y].TerrainHeight + GridPoints[x - 1, y].WaterHeight;
+                    dh = h0 - heightMap.Height[x - 1, y] + GridPoints[x - 1, y].WaterHeight;
                     newFlux = GridPoints[x, y].FlowLeft + fluxFactor * dh;
                     GridPoints[x, y].FlowLeft = MathF.Max(0.0f, newFlux);
 
-                    dh = h0 - GridPoints[x + 1, y].TerrainHeight + GridPoints[x + 1, y].WaterHeight;
+                    dh = h0 - heightMap.Height[x + 1, y] + GridPoints[x + 1, y].WaterHeight;
                     newFlux = GridPoints[x, y].FlowRight + fluxFactor * dh;
                     GridPoints[x, y].FlowRight = MathF.Max(0.0f, newFlux);
 
-                    dh = h0 - GridPoints[x, y - 1].TerrainHeight + GridPoints[x, y - 1].WaterHeight;
+                    dh = h0 - heightMap.Height[x, y - 1] + GridPoints[x, y - 1].WaterHeight;
                     newFlux = GridPoints[x, y].FlowBottom + fluxFactor * dh;
                     GridPoints[x, y].FlowBottom = MathF.Max(0.0f, newFlux);
 
-                    dh = h0 - GridPoints[x, y + 1].TerrainHeight + GridPoints[x, y + 1].WaterHeight;
+                    dh = h0 - heightMap.Height[x, y + 1] + GridPoints[x, y + 1].WaterHeight;
                     newFlux = GridPoints[x, y].FlowTop + fluxFactor * dh;
                     GridPoints[x, y].FlowTop = MathF.Max(0.0f, newFlux);
 
@@ -110,13 +102,13 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
 
                     if (meanWater == 0.0f)
                     {
-                        GridPoints[x, y].Velocity = Vector2.Zero;
+                        GridPoints[x, y].VelocityX = 0.0f;
+                        GridPoints[x, y].VelocityY = 0.0f;
                     }
                     else
                     {
-                        GridPoints[x, y].Velocity = new Vector2(
-                            0.5f * (GetFlowRight(x - 1, y) - GetFlowLeft(x, y) - GetFlowLeft(x + 1, y) + GetFlowRight(x, y)) / meanWater,
-                            0.5f * (GetFlowTop(x, y - 1) - GetFlowBottom(x, y) - GetFlowBottom(x, y + 1) + GetFlowTop(x, y)) / meanWater);
+                        GridPoints[x, y].VelocityX = 0.5f * (GetFlowRight(x - 1, y) - GetFlowLeft(x, y) - GetFlowLeft(x + 1, y) + GetFlowRight(x, y)) / meanWater;
+                        GridPoints[x, y].VelocityY = 0.5f * (GetFlowTop(x, y - 1) - GetFlowBottom(x, y) - GetFlowBottom(x, y + 1) + GetFlowTop(x, y)) / meanWater;
                     }
                 }
             }
@@ -158,7 +150,7 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
             return GridPoints[x, y].FlowTop;
         }
 
-        private void ErosionAndDeposition()
+        private void ErosionAndDeposition(HeightMap heightMap)
         {
             float Kc = 0.01f;
             float Ks = 0.1f;
@@ -168,25 +160,28 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
             {
                 for (int x = 1; x < GridPoints.GetLength(0) - 1; x++)
                 {
-                    Vector3 normal = new Vector3(GridPoints[x + 1, y].TerrainHeight - GridPoints[x - 1, y].TerrainHeight, GridPoints[x, y + 1].TerrainHeight - GridPoints[x, y - 1].TerrainHeight, 2);
+                    Vector3 normal = new Vector3(heightMap.Height[x + 1, y] - heightMap.Height[x - 1, y], heightMap.Height[x, y + 1] - heightMap.Height[x, y - 1], 2);
                     normal = Vector3.Normalize(normal);
                     float cosa = Vector3.Dot(normal, Vector3.UnitZ);
                     float sinAlpha = MathF.Sin(MathF.Acos(cosa));
                     sinAlpha = MathF.Max(sinAlpha, 0.1f);
 
-                    float capacity = Kc * GridPoints[x, y].Velocity.Length() * sinAlpha;
+                    float capacity = Kc * MathF.Sqrt(GridPoints[x, y].VelocityX * GridPoints[x, y].VelocityX + GridPoints[x, y].VelocityY * GridPoints[x, y].VelocityY) * sinAlpha * MathF.Min(GridPoints[x, y].WaterHeight, 0.01f) / 0.01f;
                     float delta = capacity - GridPoints[x, y].SuspendedSediment;
 
                     if (delta > 0.0f)
                     {
                         float d = Ks * delta;
-                        GridPoints[x, y].TerrainHeight -= d;
+                        heightMap.Height[x, y] -= d;
                         GridPoints[x, y].SuspendedSediment += d;
                     }
                     else if (delta < 0.0f)
                     {
                         float d = Kd * delta;
-                        GridPoints[x, y].TerrainHeight -= d;
+                        var a = heightMap.Height[x, y];
+                        heightMap.Height[x, y] -= d;
+
+                        var b = heightMap.Height[x, y];
                         GridPoints[x, y].SuspendedSediment += d;
                     }
                 }
@@ -199,10 +194,8 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
             {
                 for (int x = 1; x < GridPoints.GetLength(0) - 1; x++)
                 {
-                    Vector2 velocity = GridPoints[x, y].Velocity;
-
-                    float fromPosX = x - velocity.X;
-                    float fromPosY = y - velocity.Y;
+                    float fromPosX = x - GridPoints[x, y].VelocityX;
+                    float fromPosY = y - GridPoints[x, y].VelocityY;
 
                     // integer coordinates
                     int x0 = (int)fromPosX;

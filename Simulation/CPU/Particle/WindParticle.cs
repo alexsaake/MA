@@ -1,7 +1,7 @@
 ﻿using ProceduralLandscapeGeneration.Common;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration;
+namespace ProceduralLandscapeGeneration.Simulation.CPU.Particle;
 
 internal class WindParticle
 {
@@ -82,12 +82,12 @@ internal class WindParticle
 
             //// Turbulence
 
-            var random = new Random();
+            var random = new System.Random();
             mySpeed += 0.1f * hfac * collision * new Vector3(random.Next(1001) - 500.0f, random.Next(1001) - 500.0f, random.Next(1001) - 500.0f) / 500.0f;
 
             //// Speed is damped by drag
 
-            mySpeed *= (1.0f - 0.3f * mySediment);
+            mySpeed *= 1.0f - 0.3f * mySediment;
 
             //// Move
 

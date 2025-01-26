@@ -1,7 +1,7 @@
 ﻿using ProceduralLandscapeGeneration.Common;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.Simulation.CPU;
+namespace ProceduralLandscapeGeneration.Simulation.CPU.Particle;
 
 internal class WaterParticle
 {
@@ -179,8 +179,8 @@ internal class WaterParticle
                 continue;
             }
 
-            IVector2 tpos = (diff > 0) ? ipos : sn[i].pos;
-            IVector2 bpos = (diff > 0) ? sn[i].pos : ipos;
+            IVector2 tpos = diff > 0 ? ipos : sn[i].pos;
+            IVector2 bpos = diff > 0 ? sn[i].pos : ipos;
 
             // The Amount of Excess Difference!
             float excess = 0.0f;

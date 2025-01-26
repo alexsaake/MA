@@ -53,9 +53,9 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
         int heightMultiplier = myConfiguration.HeightMultiplier;
         myErosionConfigurationShaderBufferId = Rlgl.LoadShaderBuffer((uint)sizeof(ThermalErosionConfiguration), &heightMultiplier, Rlgl.DYNAMIC_COPY);
 
-        myHydraulicErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/HydraulicErosionSimulationComputeShader.glsl");
+        myHydraulicErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/Particle/HydraulicErosionSimulationComputeShader.glsl");
         myThermalErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/ThermalErosionSimulationComputeShader.glsl");
-        myWindErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/WindErosionSimulationComputeShader.glsl");
+        myWindErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/Particle/WindErosionSimulationComputeShader.glsl");
     }
 
     private unsafe void OnErosionConfigurationChanged(object? sender, EventArgs e)
@@ -156,6 +156,21 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
         }
     }
 
+    public void SimulateHydraulicErosionGridStart()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SimulateHydraulicErosionGridAddRain()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SimulateHydraulicErosionGridStop()
+    {
+        throw new NotImplementedException();
+    }
+
     public void Dispose()
     {
         if (myIsDisposed)
@@ -175,20 +190,5 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
         myWindErosionSimulationComputeShaderProgram?.Dispose();
 
         myIsDisposed = true;
-    }
-
-    public void SimulateHydraulicErosionGridStart()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void SimulateHydraulicErosionGridAddRain()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void SimulateHydraulicErosionGridStop()
-    {
-        throw new NotImplementedException();
     }
 }

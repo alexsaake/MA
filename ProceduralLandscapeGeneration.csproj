@@ -27,7 +27,10 @@
 	  <None Update="raylib.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Simulation\GPU\Shaders\HydraulicErosionSimulationComputeShader.glsl">
+	  <None Update="Simulation\GPU\Shaders\Grid\HydraulicErosionSimulationComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Simulation\GPU\Shaders\Particle\HydraulicErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Simulation\GPU\Shaders\NormalizeComputeShader.glsl">
@@ -36,7 +39,7 @@
 	  <None Update="Simulation\GPU\Shaders\ThermalErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Simulation\GPU\Shaders\WindErosionSimulationComputeShader.glsl">
+	  <None Update="Simulation\GPU\Shaders\Particle\WindErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Simulation\GPU\Shaders\HeightMapGeneratorComputeShader.glsl">

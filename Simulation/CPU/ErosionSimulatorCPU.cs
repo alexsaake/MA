@@ -1,5 +1,7 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Common;
+using ProceduralLandscapeGeneration.Simulation.CPU.Grid;
+using ProceduralLandscapeGeneration.Simulation.CPU.Particle;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Simulation.CPU;
@@ -212,17 +214,10 @@ internal class ErosionSimulatorCPU : IErosionSimulator
             {
                 lock (myHydraulicErosionGridLock)
                 {
-                    myGridBasedErosion.Simulate();
+                    myGridBasedErosion.Simulate(HeightMap!);
                 };
                 if (iteration % 10 == 0)//% myConfiguration.SimulationCallbackEachIterations == 0
                 {
-                    for (int y = 0; y < HeightMap!.Depth; y++)
-                    {
-                        for (int x = 0; x < HeightMap.Depth; x++)
-                        {
-                            HeightMap.Height[x, y] = myGridBasedErosion.GridPoints[x, y].TerrainHeight;
-                        }
-                    }
                     ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
                     Console.WriteLine($"INFO: Step {iteration}.");
                 }
