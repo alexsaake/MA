@@ -7,11 +7,6 @@ layout(std430, binding = 1) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-layout(std430, binding = 2) readonly restrict buffer heightMapIndicesShaderBuffer
-{
-    uint[] heightMapIndices;
-};
-
 layout(std430, binding = 3) readonly restrict buffer erosionConfigurationShaderBuffer
 {
     uint heightMultiplier;
@@ -84,25 +79,51 @@ void main()
     uint id = gl_GlobalInvocationID.x;
     myHeightMapSideLength = uint(sqrt(heightMap.length()));
 
-    uint index = heightMapIndices[id];
-    uint x = index % myHeightMapSideLength;
-    uint y = index / myHeightMapSideLength;
-    myPosition = vec2(x, y);
-    myOriginalPosition = vec2(0.0, 0.0);
-    mySpeed = vec2(0.0, 0.0);
-    myAge = 0;
-    myVolume = 1.0;
-    mySediment = 0.0;
+    uint x = id % myHeightMapSideLength;
+    uint y = id / myHeightMapSideLength;
 
-    while(true)
+    
+    float A = 0.00005f;
+    float g = 9.81f;
+    float l = 1.0f;
+
+    float fluxFactor = A * g / l;
+
+    float dh;
+    float h0 = heightMap[x, y] + gridPoints[x, y].WaterHeight;
+    float newFlux;
+
+    if(x > 0)
     {
-        if(!Move())
-        {
-            break;
-        }
-        if(!Interact())
-        {
-            break;
-        }
+        dh = h0 - heightMap.Height[x - 1, y] + gridPoints[x - 1, y].WaterHeight;
+        newFlux = gridPoints[x, y].FlowLeft + fluxFactor * dh;
+        gridPoints[x, y].FlowLeft = max(0.0f, newFlux);
+    }
+    else
+    {
+        gridPoints[x, y].FlowLeft = 0.0;
+    }
+
+    dh = h0 - heightMap.Height[x + 1, y] + gridPoints[x + 1, y].WaterHeight;
+    newFlux = gridPoints[x, y].FlowRight + fluxFactor * dh;
+    gridPoints[x, y].FlowRight = Max(0.0f, newFlux);
+
+    dh = h0 - heightMap.Height[x, y - 1] + gridPoints[x, y - 1].WaterHeight;
+    newFlux = gridPoints[x, y].FlowBottom + fluxFactor * dh;
+    gridPoints[x, y].FlowBottom = Max(0.0f, newFlux);
+
+    dh = h0 - heightMap.Height[x, y + 1] + gridPoints[x, y + 1].WaterHeight;
+    newFlux = gridPoints[x, y].FlowTop + fluxFactor * dh;
+    gridPoints[x, y].FlowTop = Max(0.0f, newFlux);
+
+    float sumFlux = gridPoints[x, y].FlowLeft + gridPoints[x, y].FlowRight + gridPoints[x, y].FlowBottom + gridPoints[x, y].FlowTop;
+    if (sumFlux > 0.0f)
+    {
+        float K = Min(1.0f, gridPoints[x, y].WaterHeight / sumFlux);
+
+        gridPoints[x, y].FlowLeft *= K;
+        gridPoints[x, y].FlowRight *= K;
+        gridPoints[x, y].FlowBottom *= K;
+        gridPoints[x, y].FlowTop *= K;
     }
 }
