@@ -176,4 +176,9 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
 
         myIsDisposed = true;
     }
+
+    public void SimulateHydraulicErosionGrid()
+    {
+        throw new NotImplementedException();
+    }
 }

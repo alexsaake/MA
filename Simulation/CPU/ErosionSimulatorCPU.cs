@@ -190,6 +190,55 @@ internal class ErosionSimulatorCPU : IErosionSimulator
         });
     }
 
+    public void SimulateHydraulicErosionGrid()
+    {
+        int dropCount = 1000;
+        float waterIncrease = 1.0f;
+
+        if (myRunningSimulation is not null
+            && !myRunningSimulation.IsCompleted)
+        {
+            Console.WriteLine($"INFO: Simulation already running on CPU.");
+            return;
+        }
+        Console.WriteLine($"INFO: Simulating hydraulic erosion grid.");
+        myRunningSimulation = Task.Run(() =>
+        {
+            uint lastCallback = 0;
+
+            GridBasedErosion gridBasedErosion = new GridBasedErosion(HeightMap);
+
+            for (uint iteration = 0; iteration <= myConfiguration.SimulationIterations; iteration += myConfiguration.ParallelExecutions)
+            {
+                IVector2 newPosition = new(myRandom.Next(HeightMap!.Width), myRandom.Next(HeightMap.Depth));
+                gridBasedErosion.WaterIncrease(newPosition, waterIncrease);
+
+                if (iteration % 100 == 0)
+                {
+                    gridBasedErosion.Simulate();
+                    for (int y = 0; y < HeightMap.Depth; y++)
+                    {
+                        for (int x = 0; x < HeightMap.Width; x++)
+                        {
+                            HeightMap.Height[x, y] = gridBasedErosion.GridPoints[x, y].TerrainHeight;
+                        }
+                    }
+                }
+
+                if (iteration % myConfiguration.SimulationCallbackEachIterations == 0
+            && iteration != lastCallback)
+                {
+                    ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
+                    lastCallback = iteration;
+                    Console.WriteLine($"INFO: Step {iteration} of {myConfiguration.SimulationIterations}.");
+                }
+            }
+
+            ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
+            Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
+        });
+    }
+
     private Vector2 GetRandomPositionAtEdgeOfMap()
     {
         return new(myRandom.Next(HeightMap!.Width), 0);
