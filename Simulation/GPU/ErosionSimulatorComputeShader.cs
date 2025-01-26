@@ -50,7 +50,7 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
         ThermalErosionConfiguration thermalErosionConfiguration = CreateThermalErosionConfiguration();
         myThermalErosionConfigurationShaderBufferId = Rlgl.LoadShaderBuffer((uint)sizeof(ThermalErosionConfiguration), &thermalErosionConfiguration, Rlgl.DYNAMIC_COPY);
 
-        uint heightMultiplier = myConfiguration.HeightMultiplier;
+        int heightMultiplier = myConfiguration.HeightMultiplier;
         myErosionConfigurationShaderBufferId = Rlgl.LoadShaderBuffer((uint)sizeof(ThermalErosionConfiguration), &heightMultiplier, Rlgl.DYNAMIC_COPY);
 
         myHydraulicErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/HydraulicErosionSimulationComputeShader.glsl");
@@ -60,7 +60,7 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
 
     private unsafe void OnErosionConfigurationChanged(object? sender, EventArgs e)
     {
-        uint heightMultiplier = myConfiguration.HeightMultiplier;
+        int heightMultiplier = myConfiguration.HeightMultiplier;
         Rlgl.UpdateShaderBuffer(myErosionConfigurationShaderBufferId, &heightMultiplier, sizeof(uint), 0);
     }
 
@@ -177,7 +177,17 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
         myIsDisposed = true;
     }
 
-    public void SimulateHydraulicErosionGrid()
+    public void SimulateHydraulicErosionGridStart()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SimulateHydraulicErosionGridAddRain()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SimulateHydraulicErosionGridStop()
     {
         throw new NotImplementedException();
     }

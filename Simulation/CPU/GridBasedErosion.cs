@@ -160,9 +160,9 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
 
         private void ErosionAndDeposition()
         {
-            float Kc = 25.0f;
-            float Ks = 0.01f;
-            float Kd = 0.01f;
+            float Kc = 0.01f;
+            float Ks = 0.1f;
+            float Kd = 0.1f;
 
             for (int y = 1; y < GridPoints.GetLength(1) - 1; y++)
             {
@@ -215,10 +215,10 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
                     float fY = fromPosY - y0;
 
                     // clamp to grid borders
-                    x0 = (int)MathF.Min(GridPoints.GetLength(0), MathF.Max(0, x0));
-                    x1 = (int)MathF.Min(GridPoints.GetLength(0), MathF.Max(0, x1));
-                    y0 = (int)MathF.Min(GridPoints.GetLength(1), MathF.Max(0, y0));
-                    y1 = (int)MathF.Min(GridPoints.GetLength(1), MathF.Max(0, y1));
+                    x0 = (int)MathF.Min(GridPoints.GetLength(0) - 1, MathF.Max(0, x0));
+                    x1 = (int)MathF.Min(GridPoints.GetLength(0) - 1, MathF.Max(0, x1));
+                    y0 = (int)MathF.Min(GridPoints.GetLength(1) - 1, MathF.Max(0, y0));
+                    y1 = (int)MathF.Min(GridPoints.GetLength(1) - 1, MathF.Max(0, y1));
 
                     float newVal = Math.Lerp(Math.Lerp(GridPoints[x0, y0].SuspendedSediment, GridPoints[x1, y0].SuspendedSediment, fX), Math.Lerp(GridPoints[x0, y1].SuspendedSediment, GridPoints[x1, y1].SuspendedSediment, fX), fY);
                     GridPoints[x, y].TempSediment = newVal;
@@ -236,7 +236,7 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
 
         private void WaterDecrease()
         {
-            float Ke = 0.0001f;
+            float Ke = 0.00001f;
 
             for (int y = 0; y < GridPoints.GetLength(1); y++)
             {

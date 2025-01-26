@@ -13,6 +13,8 @@ internal class ErosionSimulatorCPU : IErosionSimulator
 
     private Task myRunningSimulation;
     private bool myIsDisposed;
+    private GridBasedErosion? myGridBasedErosion;
+    private object myHydraulicErosionGridLock = new();
 
     public HeightMap? HeightMap { get; private set; }
     public uint HeightMapShaderBufferId => throw new NotImplementedException();
@@ -43,9 +45,9 @@ internal class ErosionSimulatorCPU : IErosionSimulator
         Console.WriteLine($"INFO: Simulating hydraulic erosion.");
         myRunningSimulation = Task.Run(() =>
         {
-            uint lastCallback = 0;
+            int lastCallback = 0;
 
-            for (uint iteration = 0; iteration <= myConfiguration.SimulationIterations; iteration += myConfiguration.ParallelExecutions)
+            for (int iteration = 0; iteration <= myConfiguration.SimulationIterations; iteration += myConfiguration.ParallelExecutions)
             {
                 List<Task> parallelExecutionTasks = new List<Task>();
                 for (int parallelExecution = 0; parallelExecution < myConfiguration.ParallelExecutions; parallelExecution++)
@@ -98,8 +100,8 @@ internal class ErosionSimulatorCPU : IErosionSimulator
         myRunningSimulation = Task.Run(() =>
         {
             uint mapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
-            uint iteration = 0;
-            uint lastCallback = 0;
+            int iteration = 0;
+            int lastCallback = 0;
 
             for (int y = 0; y <= myConfiguration.HeightMapSideLength; y++)
             {
@@ -161,9 +163,9 @@ internal class ErosionSimulatorCPU : IErosionSimulator
         Console.WriteLine($"INFO: Simulating wind erosion.");
         myRunningSimulation = Task.Run(() =>
         {
-            uint lastCallback = 0;
+            int lastCallback = 0;
 
-            for (uint iteration = 0; iteration <= myConfiguration.SimulationIterations; iteration += myConfiguration.ParallelExecutions)
+            for (int iteration = 0; iteration <= myConfiguration.SimulationIterations; iteration += myConfiguration.ParallelExecutions)
             {
                 List<Task> parallelExecutionTasks = new List<Task>();
                 for (int parallelExecution = 0; parallelExecution < myConfiguration.ParallelExecutions; parallelExecution++)
@@ -190,46 +192,69 @@ internal class ErosionSimulatorCPU : IErosionSimulator
         });
     }
 
-    public void SimulateHydraulicErosionGrid()
+    public void SimulateHydraulicErosionGridStart()
     {
-        int dropCount = 10000;
-        float waterIncrease = 0.01f;
-
         if (myRunningSimulation is not null
             && !myRunningSimulation.IsCompleted)
         {
             Console.WriteLine($"INFO: Simulation already running on CPU.");
             return;
         }
+
+        myGridBasedErosion = new GridBasedErosion(HeightMap!);
+
         Console.WriteLine($"INFO: Simulating hydraulic erosion grid.");
         myRunningSimulation = Task.Run(() =>
         {
-            GridBasedErosion gridBasedErosion = new GridBasedErosion(HeightMap);
+            int iteration = 0;
 
-            for (int drop = 0; drop < dropCount; drop++)
+            while (myGridBasedErosion is not null)
+            {
+                lock (myHydraulicErosionGridLock)
+                {
+                    myGridBasedErosion.Simulate();
+                };
+                if (iteration % 10 == 0)//% myConfiguration.SimulationCallbackEachIterations == 0
+                {
+                    for (int y = 0; y < HeightMap!.Depth; y++)
+                    {
+                        for (int x = 0; x < HeightMap.Depth; x++)
+                        {
+                            HeightMap.Height[x, y] = myGridBasedErosion.GridPoints[x, y].TerrainHeight;
+                        }
+                    }
+                    ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
+                    Console.WriteLine($"INFO: Step {iteration}.");
+                }
+                iteration++;
+            }
+        });
+    }
+
+    public void SimulateHydraulicErosionGridAddRain()
+    {
+        const float waterIncrease = 0.01f;
+
+        if (myGridBasedErosion is null)
+        {
+            return;
+        }
+
+        Console.WriteLine($"INFO: Adding {HeightMap!.Width} rain drops for hydraulic erosion grid.");
+        lock (myHydraulicErosionGridLock)
+        {
+            for (int drop = 0; drop < HeightMap!.Width; drop++)
             {
                 IVector2 newPosition = new(myRandom.Next(HeightMap!.Width), myRandom.Next(HeightMap.Depth));
-                gridBasedErosion.WaterIncrease(newPosition, waterIncrease);
+                myGridBasedErosion!.WaterIncrease(newPosition, waterIncrease);
             }
+        }
+    }
 
-            for (uint iteration = 0; iteration <= myConfiguration.SimulationIterations; iteration ++)
-            {
-
-                gridBasedErosion.Simulate();
-
-                for (int y = 0; y < HeightMap.Depth; y++)
-                {
-                    for (int x = 0; x < HeightMap.Depth; x++)
-                    {
-                        HeightMap.Height[x,y] = gridBasedErosion.GridPoints[x,y].TerrainHeight;
-                    }
-                }
-                ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-            }
-
-            ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-            Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
-        });
+    public void SimulateHydraulicErosionGridStop()
+    {
+        myGridBasedErosion = null;
+        Console.WriteLine($"INFO: End of simulation hydraulic erosion grid.");
     }
 
     private Vector2 GetRandomPositionAtEdgeOfMap()

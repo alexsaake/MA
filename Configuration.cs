@@ -74,8 +74,8 @@ internal class Configuration : IConfiguration
         }
     }
 
-    private uint myHeightMultiplier;
-    public uint HeightMultiplier
+    private int myHeightMultiplier;
+    public int HeightMultiplier
     {
         get => myHeightMultiplier; set
         {
@@ -157,8 +157,8 @@ internal class Configuration : IConfiguration
         }
     }
 
-    private uint myTalusAngle;
-    public uint TalusAngle
+    private int myTalusAngle;
+    public int TalusAngle
     {
         get => myTalusAngle; set
         {
@@ -187,8 +187,8 @@ internal class Configuration : IConfiguration
 
     public int ScreenWidth { get; set; } = 1920;
     public int ScreenHeight { get; set; } = 1080;
-    public uint ParallelExecutions { get; set; } = 10;
-    public uint SimulationCallbackEachIterations { get; set; } = 1000;
+    public int ParallelExecutions { get; set; } = 10;
+    public int SimulationCallbackEachIterations { get; set; } = 1000;
     public int ShadowMapResolution { get; set; } = 1028;
 
     public event EventHandler? ProcessorTypeChanged;

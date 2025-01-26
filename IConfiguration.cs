@@ -10,7 +10,7 @@ internal interface IConfiguration
 
     int Seed { get; set; }
     uint HeightMapSideLength { get; set; }
-    uint HeightMultiplier { get; set; }
+    int HeightMultiplier { get; set; }
     float NoiseScale { get; set; }
     uint NoiseOctaves { get; set; }
     float NoisePersistence { get; set; }
@@ -18,11 +18,11 @@ internal interface IConfiguration
 
     uint SimulationIterations { get; set; }
 
-    uint TalusAngle { get; set; }
+    int TalusAngle { get; set; }
     float ThermalErosionHeightChange { get; set; }
 
-    uint ParallelExecutions { get; set; }
-    uint SimulationCallbackEachIterations { get; set; }
+    int ParallelExecutions { get; set; }
+    int SimulationCallbackEachIterations { get; set; }
 
     int ScreenHeight { get; set; }
     int ScreenWidth { get; set; }

@@ -73,7 +73,7 @@ internal class HeightMap
         return GetScaledNormal(x, y, myConfiguration.HeightMultiplier);
     }
 
-    private Vector3 GetScaledNormal(int x, int y, uint scale)
+    private Vector3 GetScaledNormal(int x, int y, int scale)
     {
         if (x < 1 || x > Width - 2
             || y < 1 || y > Depth - 2)

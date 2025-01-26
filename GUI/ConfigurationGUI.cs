@@ -124,7 +124,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         if (Raygui.GuiValueBox(new Rectangle(position + PanelHeader + ElementXOffset + LabelWidth + 2 * ElementYMargin, 50, 20), null, &intValue, 1, 150, myHeightMultiplierEditMode) == 1)
         {
             myHeightMultiplierEditMode = !myHeightMultiplierEditMode;
-            myConfiguration.HeightMultiplier = (uint)intValue;
+            myConfiguration.HeightMultiplier = intValue;
         }
         myHeightMultiplierValue = intValue;
 
@@ -209,7 +209,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         if (Raygui.GuiValueBox(new Rectangle(position + PanelHeader + ElementXOffset + LabelWidth + 0 * ElementYMargin, 50, 20), null, &intValue, 0, 89, myTalusAngleEditMode) == 1)
         {
             myTalusAngleEditMode = !myTalusAngleEditMode;
-            myConfiguration.TalusAngle = (uint)intValue;
+            myConfiguration.TalusAngle = intValue;
         }
         myTalusAngleValue = intValue;
 
