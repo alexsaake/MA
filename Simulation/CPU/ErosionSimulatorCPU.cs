@@ -192,8 +192,8 @@ internal class ErosionSimulatorCPU : IErosionSimulator
 
     public void SimulateHydraulicErosionGrid()
     {
-        int dropCount = 1000;
-        float waterIncrease = 1.0f;
+        int dropCount = 10000;
+        float waterIncrease = 0.01f;
 
         if (myRunningSimulation is not null
             && !myRunningSimulation.IsCompleted)
@@ -204,34 +204,27 @@ internal class ErosionSimulatorCPU : IErosionSimulator
         Console.WriteLine($"INFO: Simulating hydraulic erosion grid.");
         myRunningSimulation = Task.Run(() =>
         {
-            uint lastCallback = 0;
-
             GridBasedErosion gridBasedErosion = new GridBasedErosion(HeightMap);
 
-            for (uint iteration = 0; iteration <= myConfiguration.SimulationIterations; iteration += myConfiguration.ParallelExecutions)
+            for (int drop = 0; drop < dropCount; drop++)
             {
                 IVector2 newPosition = new(myRandom.Next(HeightMap!.Width), myRandom.Next(HeightMap.Depth));
                 gridBasedErosion.WaterIncrease(newPosition, waterIncrease);
+            }
 
-                if (iteration % 100 == 0)
+            for (uint iteration = 0; iteration <= myConfiguration.SimulationIterations; iteration ++)
+            {
+
+                gridBasedErosion.Simulate();
+
+                for (int y = 0; y < HeightMap.Depth; y++)
                 {
-                    gridBasedErosion.Simulate();
-                    for (int y = 0; y < HeightMap.Depth; y++)
+                    for (int x = 0; x < HeightMap.Depth; x++)
                     {
-                        for (int x = 0; x < HeightMap.Width; x++)
-                        {
-                            HeightMap.Height[x, y] = gridBasedErosion.GridPoints[x, y].TerrainHeight;
-                        }
+                        HeightMap.Height[x,y] = gridBasedErosion.GridPoints[x,y].TerrainHeight;
                     }
                 }
-
-                if (iteration % myConfiguration.SimulationCallbackEachIterations == 0
-            && iteration != lastCallback)
-                {
-                    ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-                    lastCallback = iteration;
-                    Console.WriteLine($"INFO: Step {iteration} of {myConfiguration.SimulationIterations}.");
-                }
+                ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
             }
 
             ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
