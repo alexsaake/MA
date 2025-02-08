@@ -27,7 +27,19 @@
 	  <None Update="raylib.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Simulation\GPU\Shaders\Grid\HydraulicErosionSimulationComputeShader.glsl">
+	  <None Update="Simulation\GPU\Shaders\Grid\HydraulicErosionSimulationGridPassFiveComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Simulation\GPU\Shaders\Grid\HydraulicErosionSimulationGridPassFourComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Simulation\GPU\Shaders\Grid\HydraulicErosionSimulationGridPassThreeComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Simulation\GPU\Shaders\Grid\HydraulicErosionSimulationGridPassTwoComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Simulation\GPU\Shaders\Grid\HydraulicErosionSimulationGridPassOneComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Simulation\GPU\Shaders\Particle\HydraulicErosionSimulationComputeShader.glsl">
