@@ -20,6 +20,7 @@ internal class ErosionSimulatorCPU : IErosionSimulator
 
     public HeightMap? HeightMap { get; private set; }
     public uint HeightMapShaderBufferId => throw new NotImplementedException();
+    public uint GridPointsShaderBufferId => throw new NotImplementedException();
 
     public event EventHandler? ErosionIterationFinished;
 

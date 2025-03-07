@@ -10,16 +10,16 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU
 
         void ParticleDynamics()
         {
-            const float dt; //Zeitschritt
-            var radius;
-            const float rohf = ; //Konstante
-            var g = 9.81f;
-            var mass;
-            var forceExtern = mass * g - Volume(radius) * rohf;
+            //const float dt; //Zeitschritt
+            //var radius;
+            //const float rohf = ; //Konstante
+            //var g = 9.81f;
+            //var mass;
+            //var forceExtern = mass * g - Volume(radius) * rohf;
 
-            var v0;
-            var settling = 2/g * g * MathF.Pow(, 2);
-            var v1 = forceExtern * dt + settling * v0;
+            //var v0;
+            //var settling = 2/g * g * MathF.Pow(, 2);
+            //var v1 = forceExtern * dt + settling * v0;
 
             //Mp, R, rho_f gegeben
             //V = 4 / 3 * PI * R ^ 3

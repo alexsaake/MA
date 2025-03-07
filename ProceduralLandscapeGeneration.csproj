@@ -27,7 +27,7 @@
 	  <None Update="raylib.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Simulation\GPU\Shaders\Grid\HydraulicErosionSimulationGridPassFiveComputeShader.glsl">
+	  <None Update="Rendering\Shaders\WaterMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Simulation\GPU\Shaders\Grid\HydraulicErosionSimulationGridPassFourComputeShader.glsl">
@@ -57,7 +57,7 @@
 	  <None Update="Simulation\GPU\Shaders\HeightMapGeneratorComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Rendering\Shaders\MeshShader.glsl">
+	  <None Update="Rendering\Shaders\TerrainMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Rendering\Shaders\FragmentShader.glsl">

@@ -6,6 +6,7 @@ internal interface IErosionSimulator : IDisposable
 {
     HeightMap? HeightMap { get; }
     uint HeightMapShaderBufferId { get; }
+    uint GridPointsShaderBufferId { get; }
 
     event EventHandler? ErosionIterationFinished;
 

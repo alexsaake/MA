@@ -12,11 +12,13 @@ internal class MeshShaderRenderer : IRenderer
     private readonly IConfiguration myConfiguration;
     private readonly IErosionSimulator myErosionSimulator;
 
-    private Shader myMeshShader;
+    private Shader myTerrainMeshShader;
+    private Shader myWaterMeshShader;
     private int myViewPositionLocation;
     private Camera3D myCamera;
 
     private uint myHeightMapShaderBufferId;
+    private uint myGridPointsShaderBufferId;
     private uint myConfigurationShaderBufferId;
     private uint myMeshletCount;
     private bool myIsUpdateAvailable;
@@ -32,16 +34,18 @@ internal class MeshShaderRenderer : IRenderer
     {
         myConfiguration.ErosionConfigurationChanged += OnErosionConfigurationChanged;
 
-        myMeshShader = Raylib.LoadMeshShader("Rendering/Shaders/MeshShader.glsl", "Rendering/Shaders/FragmentShader.glsl");
+        myTerrainMeshShader = Raylib.LoadMeshShader("Rendering/Shaders/TerrainMeshShader.glsl", "Rendering/Shaders/FragmentShader.glsl");
+        myWaterMeshShader = Raylib.LoadMeshShader("Rendering/Shaders/WaterMeshShader.glsl", "Rendering/Shaders/FragmentShader.glsl");
 
         Vector3 heightMapCenter = new Vector3(myConfiguration.HeightMapSideLength / 2, myConfiguration.HeightMapSideLength / 2, 0);
         Vector3 lightDirection = new Vector3(0, myConfiguration.HeightMapSideLength, -myConfiguration.HeightMapSideLength / 2);
-        int lightDirectionLocation = Raylib.GetShaderLocation(myMeshShader, "lightDirection");
+        int lightDirectionLocation = Raylib.GetShaderLocation(myTerrainMeshShader, "lightDirection");
         unsafe
         {
-            Raylib.SetShaderValue(myMeshShader, lightDirectionLocation, &lightDirection, ShaderUniformDataType.Vec3);
+            Raylib.SetShaderValue(myTerrainMeshShader, lightDirectionLocation, &lightDirection, ShaderUniformDataType.Vec3);
+            Raylib.SetShaderValue(myWaterMeshShader, lightDirectionLocation, &lightDirection, ShaderUniformDataType.Vec3);
         }
-        myViewPositionLocation = Raylib.GetShaderLocation(myMeshShader, "viewPosition");
+        myViewPositionLocation = Raylib.GetShaderLocation(myTerrainMeshShader, "viewPosition");
 
         Vector3 cameraPosition = heightMapCenter + new Vector3(myConfiguration.HeightMapSideLength / 2, -myConfiguration.HeightMapSideLength / 2, myConfiguration.HeightMapSideLength / 2);
         myCamera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
@@ -57,6 +61,7 @@ internal class MeshShaderRenderer : IRenderer
         else
         {
             myHeightMapShaderBufferId = myErosionSimulator.HeightMapShaderBufferId;
+            myGridPointsShaderBufferId = myErosionSimulator.GridPointsShaderBufferId;
             int heightMultiplierValue = myConfiguration.HeightMultiplier;
             myConfigurationShaderBufferId = Rlgl.LoadShaderBuffer(sizeof(uint), &heightMultiplierValue, Rlgl.DYNAMIC_COPY);
         }
@@ -103,7 +108,8 @@ internal class MeshShaderRenderer : IRenderer
 
         Raylib.UpdateCamera(ref myCamera, CameraMode.Custom);
         Vector3 viewPosition = myCamera.Position;
-        Raylib.SetShaderValue(myMeshShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
+        Raylib.SetShaderValue(myTerrainMeshShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
+        Raylib.SetShaderValue(myWaterMeshShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
     }
 
     private unsafe void UpdateShaderBuffer()
@@ -120,9 +126,21 @@ internal class MeshShaderRenderer : IRenderer
 
     public void Draw()
     {
-        Raylib.BeginShaderMode(myMeshShader);
+        Raylib.BeginShaderMode(myWaterMeshShader);
+            Raylib.BeginBlendMode(BlendMode.AlphaPremultiply);
+                Raylib.BeginMode3D(myCamera);
+                    Rlgl.EnableShader(myWaterMeshShader.Id);
+                        Rlgl.BindShaderBuffer(myHeightMapShaderBufferId, 1);
+                        Rlgl.BindShaderBuffer(myGridPointsShaderBufferId, 2);
+                        Rlgl.BindShaderBuffer(myConfigurationShaderBufferId, 3);
+                        Raylib.DrawMeshTasks(0, myMeshletCount);
+                    Rlgl.DisableShader();
+                Raylib.EndMode3D();
+            Raylib.EndBlendMode();
+        Raylib.EndShaderMode();
+        Raylib.BeginShaderMode(myTerrainMeshShader);
             Raylib.BeginMode3D(myCamera);
-                Rlgl.EnableShader(myMeshShader.Id);
+                Rlgl.EnableShader(myTerrainMeshShader.Id);
                     Rlgl.BindShaderBuffer(myHeightMapShaderBufferId, 1);
                     Rlgl.BindShaderBuffer(myConfigurationShaderBufferId, 2);
                     Raylib.DrawMeshTasks(0, myMeshletCount);
@@ -145,7 +163,7 @@ internal class MeshShaderRenderer : IRenderer
         {
             Rlgl.UnloadShaderBuffer(myHeightMapShaderBufferId);
         }
-        Raylib.UnloadShader(myMeshShader);
+        Raylib.UnloadShader(myTerrainMeshShader);
 
         myIsDisposed = true;
     }

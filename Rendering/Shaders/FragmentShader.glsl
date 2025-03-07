@@ -31,5 +31,5 @@ void main()
     vec3 specular = spec * lightColor;
 
     vec3 result =  (ambient + diffuse + specular) * fragIn.color.rgb;
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4(result, fragIn.color.a);
 }
