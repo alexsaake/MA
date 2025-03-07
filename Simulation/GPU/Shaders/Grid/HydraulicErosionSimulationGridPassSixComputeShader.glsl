@@ -37,25 +37,6 @@ uint getIndex(vec2 position)
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
 //https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
 
-float4 SampleBilinear(RWTexture2D<float4> tex, float2 uv)
-{
-	float2 uva = floor(uv);
-	float2 uvb = ceil(uv);
-
-	uint2 id00 = (uint2)uva;  // 0 0
-	uint2 id10 = uint2(uvb.x, uva.y); // 1 0
-	uint2 id01 = uint2(uva.x, uvb.y); // 0 1	
-	uint2 id11 = (uint2)uvb; // 1 1
-
-	float2 d = uv - uva;
-
-	return
-		tex[id00] * (1 - d.x) * (1 - d.y) +
-		tex[id10] * d.x * (1 - d.y) +
-		tex[id01] * (1 - d.x) * d.y +
-		tex[id11] * d.x * d.y;
-}
-
 void main()
 {    
     float dt = 0.25;
@@ -69,11 +50,20 @@ void main()
     GridPoint gridPoint = gridPoints[id];
 
 	float4 state = CURRENT_SAMPLE(HeightMap);
-	float2 velocity = CURRENT_SAMPLE(VelocityMap); 
+	float4 outputFlux = CURRENT_SAMPLE(TerrainFluxMap);
+	float4 inputFlux = float4(
+		RDIR(LEFT_SAMPLE(TerrainFluxMap)),
+		LDIR(RIGHT_SAMPLE(TerrainFluxMap)),
+		BDIR(TOP_SAMPLE(TerrainFluxMap)),
+		TDIR(BOTTOM_SAMPLE(TerrainFluxMap)));	
+	
+	// Volume is changing by amount on incoming mass minus outgoing mass
+	float volumeDelta = SUM_COMPS(inputFlux) - SUM_COMPS(outputFlux);
 
-	// Sediment advection
-	SEDIMENT(state) = SEDIMENT(SampleBilinear(HeightMap, id.xy - velocity * _TimeDelta));
+	// Then, we update the terrain height in the current (x, y) cell
+	// min - is to prevent addind more mass than in flux
+	TERRAIN_HEIGHT(state) += min(1, _TimeDelta * _ThermalErosionTimeScale) * volumeDelta;
 
-	// Write heightmap
+	// Write new state to the HeightMap
 	CURRENT_SAMPLE(HeightMap) = state;
 }

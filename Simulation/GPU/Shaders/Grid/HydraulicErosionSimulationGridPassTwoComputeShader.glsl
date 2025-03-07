@@ -70,6 +70,24 @@ float GetFlowTop(uint x, uint y)
     return gridPoints[getIndex(x, y)].FlowTop;
 }
 
+float Kdmax = 10.0;
+
+float lmax(float waterHeight)
+{
+    if(waterHeight <= 0)
+    {
+        return 0;
+    }
+    if(waterHeight >= Kdmax)
+    {
+        return 1;
+    }
+    return 1 - (Kdmax - waterHeight) / Kdmax;
+}
+
+//https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
+//https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
+
 void main()
 {
     float dt = 0.25;
@@ -84,52 +102,28 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
-    float inFlow = GetFlowRight(x - 1, y) + GetFlowLeft(x + 1, y) + GetFlowTop(x, y - 1) + GetFlowBottom(x, y + 1);
-    float outFlow = gridPoint.FlowRight + gridPoint.FlowLeft + gridPoint.FlowTop + gridPoint.FlowBottom;
-    float dV = dt * (inFlow - outFlow);
-    float oldWater = gridPoint.WaterHeight;
-    gridPoint.WaterHeight += dV;
-    gridPoint.WaterHeight = max(0.0, gridPoint.WaterHeight);
+	float4 state = CURRENT_SAMPLE(HeightMap);
+	float4 outputFlux = CURRENT_SAMPLE(FluxMap);
+	float4 inputFlux = float4(
+		RDIR(LEFT_SAMPLE(FluxMap)),
+		LDIR(RIGHT_SAMPLE(FluxMap)),
+		BDIR(TOP_SAMPLE(FluxMap)),
+		TDIR(BOTTOM_SAMPLE(FluxMap)));
+	float waterHeightBefore = WATER_HEIGHT(state);
 
-    float meanWater = 0.5 * (oldWater + gridPoint.WaterHeight);
+	// Water surface and velocity field update
+	// volume is changing by amount on incoming fluid volume minus outgoing
+	float volumeDelta = SUM_COMPS(inputFlux) - SUM_COMPS(outputFlux);	
 
-    if (meanWater == 0.0)
-    {
-        gridPoint.VelocityX = 0.0;
-        gridPoint.VelocityY = 0.0;
-    }
-    else
-    {
-        gridPoint.VelocityX = 0.5 * (GetFlowRight(x - 1, y) - GetFlowLeft(x, y) - GetFlowLeft(x + 1, y) + GetFlowRight(x, y)) / dy * meanWater;
-        gridPoint.VelocityY = 0.5 * (GetFlowTop(x, y - 1) - GetFlowBottom(x, y) - GetFlowBottom(x, y + 1) + GetFlowTop(x, y)) / dx * meanWater;
-    }
-    
-    //----------------------------------------------------
+	// Then, we update the water height in the current (x, y) cell:
+	WATER_HEIGHT(state) += _TimeDelta * volumeDelta / (_CellSize.x * _CellSize.y);	
 
-    float Kc = 10.0;
-    float Ks = 1.0;
-    float Kd = 1.0;
+	// Write new state to the HeightMap
+	CURRENT_SAMPLE(HeightMap) = state;
 
-    vec3 normal = vec3(heightMap[getIndex(x + 1, y)] - heightMap[getIndex(x - 1, y)], heightMap[getIndex(x, y + 1)] - heightMap[getIndex(x, y - 1)], 2);
-    normal = normalize(normal);
-    float cosa = dot(normal, vec3(0, 0, 1));
-    float sinAlpha = sin(acos(cosa));
-
-    float capacity = Kc * sqrt(gridPoint.VelocityX * gridPoint.VelocityX + gridPoint.VelocityY * gridPoint.VelocityY) * sinAlpha;
-    float delta = capacity - gridPoint.SuspendedSediment;
-
-    if (delta > 0.0f)
-    {
-        float d = Ks * delta;
-        heightMap[id] -= d;
-        gridPoint.SuspendedSediment += d;
-    }
-    else if (delta < 0.0f)
-    {
-        float d = Kd * delta;
-        heightMap[id] -= d;
-        gridPoint.SuspendedSediment += d;
-    }
-
-    gridPoints[id] = gridPoint;
+	// Compute new velocity from flux to the VelocityMap
+	CURRENT_SAMPLE(VelocityMap) = float2(
+		0.5 * (LDIR(inputFlux) - LDIR(outputFlux) + RDIR(outputFlux) - RDIR(inputFlux)),
+		0.5 * (BDIR(inputFlux) - BDIR(outputFlux) + TDIR(outputFlux) - TDIR(inputFlux)));
+		/// _PipeLength * 0.5 * (waterHeightBefore + WATER_HEIGHT(state));
 }

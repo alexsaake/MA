@@ -30,6 +30,12 @@
 	  <None Update="Rendering\Shaders\WaterMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
+	  <None Update="Simulation\GPU\Shaders\Grid\HydraulicErosionSimulationGridPassSixComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Simulation\GPU\Shaders\Grid\HydraulicErosionSimulationGridPassFiveComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	  <None Update="Simulation\GPU\Shaders\Grid\HydraulicErosionSimulationGridPassFourComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>

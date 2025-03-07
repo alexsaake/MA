@@ -34,84 +34,113 @@ uint getIndex(uint x, uint y)
     return (y * myHeightMapSideLength) + x;
 }
 
-//https://github.com/karhu/terrain-erosion/blob/master/Simulation/FluidSimulation.cpp
-//https://github.com/keepitwiel/hydraulic-erosion-simulator/blob/main/src/algorithm.py
+float GetFlowRight(uint x, uint y)
+{
+    if (x < 0 || x > myHeightMapSideLength - 1)
+    {
+        return 0.0;
+    }
+    return gridPoints[getIndex(x, y)].FlowRight;
+}
+
+float GetFlowLeft(uint x, uint y)
+{
+    if (x < 0 || x > myHeightMapSideLength - 1)
+    {
+        return 0.0;
+    }
+    return gridPoints[getIndex(x, y)].FlowLeft;
+}
+
+float GetFlowBottom(uint x, uint y)
+{
+    if (y < 0 || y > myHeightMapSideLength - 1)
+    {
+        return 0.0;
+    }
+    return gridPoints[getIndex(x, y)].FlowBottom;
+}
+
+float GetFlowTop(uint x, uint y)
+{
+    if (y < 0 || y > myHeightMapSideLength - 1)
+    {
+        return 0.0;
+    }
+    return gridPoints[getIndex(x, y)].FlowTop;
+}
+
+float Kdmax = 10.0;
+
+float lmax(float waterHeight)
+{
+    if(waterHeight <= 0)
+    {
+        return 0;
+    }
+    if(waterHeight >= Kdmax)
+    {
+        return 1;
+    }
+    return 1 - (Kdmax - waterHeight) / Kdmax;
+}
+
+//https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
+//https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
 
 void main()
-{    
+{
     float dt = 0.25;
-    float A = 0.6;
-    float g = 9.81;
-    float l = 1.0;
+    float dx = 1.0;
+    float dy = 1.0;
 
     uint id = gl_GlobalInvocationID.x;
-    uint myHeightMapSideLength = uint(sqrt(heightMap.length()));
+    myHeightMapSideLength = uint(sqrt(gridPoints.length()));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;
-
-    float fluxFactor = dt * A * g / l;
     
     GridPoint gridPoint = gridPoints[id];
 
-    float dh;
-    float h0 = heightMap[id] + gridPoint.WaterHeight;
-    float newFlux;
+	// Sample the heighmap (state map)
+	float4 state = CURRENT_SAMPLE(HeightMap);
+	float4 stateLeft = LEFT_SAMPLE(HeightMap);
+	float4 stateRight = RIGHT_SAMPLE(HeightMap);
+	float4 stateTop = TOP_SAMPLE(HeightMap);
+	float4 stateBottom = BOTTOM_SAMPLE(HeightMap);
 
-    if(x > 0)
-    {
-        dh = h0 - heightMap[getIndex(x - 1, y)] + gridPoints[getIndex(x - 1, y)].WaterHeight;
-        newFlux = gridPoint.FlowLeft + fluxFactor * dh;
-        gridPoint.FlowLeft = max(0.0f, newFlux);
-    }
-    else
-    {
-        gridPoint.FlowLeft = 0.0;
-    }
+	float terrainHeight = TERRAIN_HEIGHT(state);
+	float waterHeight = WATER_HEIGHT(state);
 
-    if(x < myHeightMapSideLength - 1)
-    {
-        dh = h0 - heightMap[getIndex(x + 1, y)] + gridPoints[getIndex(x + 1, y)].WaterHeight;
-        newFlux = gridPoint.FlowRight + fluxFactor * dh;
-        gridPoint.FlowRight = max(0.0f, newFlux);
-    }
-    else
-    {
-        gridPoint.FlowRight = 0.0;
-    }
+	// Flow simulation using shallow-water model. Computation of the velocity field and water height changes.
+	// Sample flux
+	float4 outputFlux = CURRENT_SAMPLE(FluxMap);
 
-    if(y > 0)
-    {
-        dh = h0 - heightMap[getIndex(x, y - 1)] + gridPoints[getIndex(x, y - 1)].WaterHeight;
-        newFlux = gridPoint.FlowBottom + fluxFactor * dh;
-        gridPoint.FlowBottom = max(0.0f, newFlux);
-    }
-    else
-    {
-        gridPoint.FlowBottom = 0.0;
-    }
+	// Overall height difference in each direction
+	float4 heightDifference = FULL_HEIGHT(state) - float4(
+		FULL_HEIGHT(stateLeft),
+		FULL_HEIGHT(stateRight),
+		FULL_HEIGHT(stateTop),
+		FULL_HEIGHT(stateBottom));
 
-    if(y < myHeightMapSideLength - 1)
-    {
-        dh = h0 - heightMap[getIndex(1, y + 1)] + gridPoints[getIndex(x, y + 1)].WaterHeight;
-        newFlux = gridPoint.FlowTop + fluxFactor * dh;
-        gridPoint.FlowTop = max(0.0f, newFlux);
-    }
-    else
-    {
-        gridPoint.FlowTop = 0.0;
-    }
+	// Output flux	
+	outputFlux = max(0, outputFlux + _TimeDelta * _Gravity * _PipeArea * heightDifference / _PipeLength);
 
-    float sumFlux = gridPoint.FlowLeft + gridPoint.FlowRight + gridPoint.FlowBottom + gridPoint.FlowTop;
-    if (sumFlux > 0.0f)
-    {
-        float K = min(1.0f, gridPoint.WaterHeight / (sumFlux * dt));
+	/*
+		Rescale flux
+		The total outflow should not exceed the total amount
+		of the water in the given cell.If the calculated value is
+		larger than the current amount in the given cell, then flux will
+		be scaled down with an appropriate factor
+	*/
+	outputFlux *= min(1, waterHeight * _CellSize.x * _CellSize.y / (SUM_COMPS(outputFlux) * _TimeDelta));
 
-        gridPoint.FlowLeft *= K;
-        gridPoint.FlowRight *= K;
-        gridPoint.FlowBottom *= K;
-        gridPoint.FlowTop *= K;
-    }
+	// Boundaries (uncomment thisif you want water to bounce of boundaries)						
+	if (id.x == 0) LDIR(outputFlux) = 0;
+	if (id.y == 0) BDIR(outputFlux) = 0;
+	if (id.x == _Width - 1) RDIR(outputFlux) = 0;
+	if (id.y == _Height - 1) TDIR(outputFlux) = 0;	
 
-    gridPoints[id] = gridPoint;
+	// Write new flux to the FluxMap
+	CURRENT_SAMPLE(FluxMap) = max(0, outputFlux);
 }
