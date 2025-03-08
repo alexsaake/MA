@@ -12,6 +12,7 @@ struct GridPoint
     float WaterHeight;
     float SuspendedSediment;
     float TempSediment;
+    float Hardness;
 
     float FlowLeft;
     float FlowRight;
@@ -90,57 +91,79 @@ float lmax(float waterHeight)
 
 void main()
 {
-    float dt = 0.25;
-    float dx = 1.0;
-    float dy = 1.0;
+    float dt = 1.0;
+    float pipeArea = 20;
+    float gravity = 9.81;
+    float l = 1.0;
 
     uint id = gl_GlobalInvocationID.x;
-    myHeightMapSideLength = uint(sqrt(gridPoints.length()));
+    uint myHeightMapSideLength = uint(sqrt(heightMap.length()));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;
+
+    float fluxFactor = dt * pipeArea * gravity / l;
     
     GridPoint gridPoint = gridPoints[id];
 
-	// Sample the heighmap (state map)
-	float4 state = CURRENT_SAMPLE(HeightMap);
-	float4 stateLeft = LEFT_SAMPLE(HeightMap);
-	float4 stateRight = RIGHT_SAMPLE(HeightMap);
-	float4 stateTop = TOP_SAMPLE(HeightMap);
-	float4 stateBottom = BOTTOM_SAMPLE(HeightMap);
+    float dh;
+    float h0 = heightMap[id] + gridPoint.WaterHeight;
+    float newFlux;
 
-	float terrainHeight = TERRAIN_HEIGHT(state);
-	float waterHeight = WATER_HEIGHT(state);
+    if(x > 0)
+    {
+        dh = h0 - heightMap[getIndex(x - 1, y)] + gridPoints[getIndex(x - 1, y)].WaterHeight;
+        newFlux = gridPoint.FlowLeft + fluxFactor * dh;
+        gridPoint.FlowLeft = max(0.0f, newFlux);
+    }
+    else
+    {
+        gridPoint.FlowLeft = 0.0;
+    }
 
-	// Flow simulation using shallow-water model. Computation of the velocity field and water height changes.
-	// Sample flux
-	float4 outputFlux = CURRENT_SAMPLE(FluxMap);
+    if(x < myHeightMapSideLength - 1)
+    {
+        dh = h0 - heightMap[getIndex(x + 1, y)] + gridPoints[getIndex(x + 1, y)].WaterHeight;
+        newFlux = gridPoint.FlowRight + fluxFactor * dh;
+        gridPoint.FlowRight = max(0.0f, newFlux);
+    }
+    else
+    {
+        gridPoint.FlowRight = 0.0;
+    }
 
-	// Overall height difference in each direction
-	float4 heightDifference = FULL_HEIGHT(state) - float4(
-		FULL_HEIGHT(stateLeft),
-		FULL_HEIGHT(stateRight),
-		FULL_HEIGHT(stateTop),
-		FULL_HEIGHT(stateBottom));
+    if(y > 0)
+    {
+        dh = h0 - heightMap[getIndex(x, y - 1)] + gridPoints[getIndex(x, y - 1)].WaterHeight;
+        newFlux = gridPoint.FlowBottom + fluxFactor * dh;
+        gridPoint.FlowBottom = max(0.0f, newFlux);
+    }
+    else
+    {
+        gridPoint.FlowBottom = 0.0;
+    }
 
-	// Output flux	
-	outputFlux = max(0, outputFlux + _TimeDelta * _Gravity * _PipeArea * heightDifference / _PipeLength);
+    if(y < myHeightMapSideLength - 1)
+    {
+        dh = h0 - heightMap[getIndex(1, y + 1)] + gridPoints[getIndex(x, y + 1)].WaterHeight;
+        newFlux = gridPoint.FlowTop + fluxFactor * dh;
+        gridPoint.FlowTop = max(0.0f, newFlux);
+    }
+    else
+    {
+        gridPoint.FlowTop = 0.0;
+    }
 
-	/*
-		Rescale flux
-		The total outflow should not exceed the total amount
-		of the water in the given cell.If the calculated value is
-		larger than the current amount in the given cell, then flux will
-		be scaled down with an appropriate factor
-	*/
-	outputFlux *= min(1, waterHeight * _CellSize.x * _CellSize.y / (SUM_COMPS(outputFlux) * _TimeDelta));
+    float sumFlux = gridPoint.FlowLeft + gridPoint.FlowRight + gridPoint.FlowBottom + gridPoint.FlowTop;
+    if (sumFlux > 0.0f)
+    {
+        float K = min(1.0f, gridPoint.WaterHeight / (sumFlux * dt));
 
-	// Boundaries (uncomment thisif you want water to bounce of boundaries)						
-	if (id.x == 0) LDIR(outputFlux) = 0;
-	if (id.y == 0) BDIR(outputFlux) = 0;
-	if (id.x == _Width - 1) RDIR(outputFlux) = 0;
-	if (id.y == _Height - 1) TDIR(outputFlux) = 0;	
+        gridPoint.FlowLeft *= K;
+        gridPoint.FlowRight *= K;
+        gridPoint.FlowBottom *= K;
+        gridPoint.FlowTop *= K;
+    }
 
-	// Write new flux to the FluxMap
-	CURRENT_SAMPLE(FluxMap) = max(0, outputFlux);
+    gridPoints[id] = gridPoint;
 }

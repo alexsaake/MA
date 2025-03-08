@@ -12,6 +12,7 @@ struct GridPoint
     float WaterHeight;
     float SuspendedSediment;
     float TempSediment;
+    float Hardness;
 
     float FlowLeft;
     float FlowRight;
@@ -39,7 +40,7 @@ uint getIndex(vec2 position)
 
 void main()
 {    
-    float dt = 0.25;
+    float dt = 1.0;
 
     uint id = gl_GlobalInvocationID.x;
     uint myHeightMapSideLength = uint(sqrt(heightMap.length()));

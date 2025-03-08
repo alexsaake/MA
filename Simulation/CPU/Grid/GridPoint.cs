@@ -5,6 +5,7 @@
         public float WaterHeight;
         public float SuspendedSediment;
         public float TempSediment;
+        public float Hardness;
 
         public float FlowLeft;
         public float FlowRight;

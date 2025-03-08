@@ -12,6 +12,7 @@ struct GridPoint
     float WaterHeight;
     float SuspendedSediment;
     float TempSediment;
+    float Hardness;
 
     float FlowLeft;
     float FlowRight;
@@ -90,7 +91,7 @@ float lmax(float waterHeight)
 
 void main()
 {
-    float dt = 0.25;
+    float dt = 1.0;
     float dx = 1.0;
     float dy = 1.0;
 
@@ -102,28 +103,17 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
-	float4 state = CURRENT_SAMPLE(HeightMap);
-	float4 outputFlux = CURRENT_SAMPLE(FluxMap);
-	float4 inputFlux = float4(
-		RDIR(LEFT_SAMPLE(FluxMap)),
-		LDIR(RIGHT_SAMPLE(FluxMap)),
-		BDIR(TOP_SAMPLE(FluxMap)),
-		TDIR(BOTTOM_SAMPLE(FluxMap)));
-	float waterHeightBefore = WATER_HEIGHT(state);
+	float waterHeightBefore = gridPoint.WaterHeight;
+    float flowIn = gridPoints[getIndex(x - 1, y)].FlowRight + gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoints[getIndex(x, y - 1)].FlowTop + gridPoints[getIndex(x, y + 1)].FlowBottom;
+    float flowOut = gridPoint.FlowRight + gridPoint.FlowLeft + gridPoint.FlowTop + gridPoint.FlowBottom;
 
-	// Water surface and velocity field update
-	// volume is changing by amount on incoming fluid volume minus outgoing
-	float volumeDelta = SUM_COMPS(inputFlux) - SUM_COMPS(outputFlux);	
+	float volumeDelta = flowIn - flowOut;
 
-	// Then, we update the water height in the current (x, y) cell:
-	WATER_HEIGHT(state) += _TimeDelta * volumeDelta / (_CellSize.x * _CellSize.y);	
+	gridPoint.WaterHeight += dt * volumeDelta / (dx * dy);
 
-	// Write new state to the HeightMap
-	CURRENT_SAMPLE(HeightMap) = state;
-
-	// Compute new velocity from flux to the VelocityMap
-	CURRENT_SAMPLE(VelocityMap) = float2(
-		0.5 * (LDIR(inputFlux) - LDIR(outputFlux) + RDIR(outputFlux) - RDIR(inputFlux)),
-		0.5 * (BDIR(inputFlux) - BDIR(outputFlux) + TDIR(outputFlux) - TDIR(inputFlux)));
+    gridPoint.VelocityX = 0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft + gridPoints[getIndex(x + 1, y)].FlowLeft - gridPoint.FlowRight);
+    gridPoint.VelocityY = 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom + gridPoints[getIndex(x, y + 1)].FlowBottom - gridPoint.FlowTop);
 		/// _PipeLength * 0.5 * (waterHeightBefore + WATER_HEIGHT(state));
+
+    gridPoints[id] = gridPoint;
 }

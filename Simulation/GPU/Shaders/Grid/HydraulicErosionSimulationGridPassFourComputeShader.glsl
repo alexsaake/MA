@@ -12,6 +12,7 @@ struct GridPoint
     float WaterHeight;
     float SuspendedSediment;
     float TempSediment;
+    float Hardness;
 
     float FlowLeft;
     float FlowRight;
@@ -37,28 +38,27 @@ uint getIndex(vec2 position)
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
 //https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
 
-float4 SampleBilinear(RWTexture2D<float4> tex, float2 uv)
+float SampleBilinear(vec2 uv)
 {
-	float2 uva = floor(uv);
-	float2 uvb = ceil(uv);
+	vec2 uva = floor(uv);
+	vec2 uvb = ceil(uv);
 
-	uint2 id00 = (uint2)uva;  // 0 0
-	uint2 id10 = uint2(uvb.x, uva.y); // 1 0
-	uint2 id01 = uint2(uva.x, uvb.y); // 0 1	
-	uint2 id11 = (uint2)uvb; // 1 1
+	uvec2 id00 = uvec2(uva);  // 0 0
+	uvec2 id10 = uvec2(uvb.x, uva.y); // 1 0
+	uvec2 id01 = uvec2(uva.x, uvb.y); // 0 1	
+	uvec2 id11 = uvec2(uvb); // 1 1
 
-	float2 d = uv - uva;
+	vec2 d = uv - uva;
 
-	return
-		tex[id00] * (1 - d.x) * (1 - d.y) +
-		tex[id10] * d.x * (1 - d.y) +
-		tex[id01] * (1 - d.x) * d.y +
-		tex[id11] * d.x * d.y;
+    return gridPoints[getIndex(id00)].SuspendedSediment * (1 - d.x) * (1 - d.y) +
+		gridPoints[getIndex(id10)].SuspendedSediment * d.x * (1 - d.y) +
+		gridPoints[getIndex(id01)].SuspendedSediment * (1 - d.x) * d.y +
+		gridPoints[getIndex(id11)].SuspendedSediment * d.x * d.y;
 }
 
 void main()
 {    
-    float dt = 0.25;
+    float dt = 1.0;
 
     uint id = gl_GlobalInvocationID.x;
     uint myHeightMapSideLength = uint(sqrt(heightMap.length()));
@@ -68,12 +68,8 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
-	float4 state = CURRENT_SAMPLE(HeightMap);
-	float2 velocity = CURRENT_SAMPLE(VelocityMap); 
-
 	// Sediment advection
-	SEDIMENT(state) = SEDIMENT(SampleBilinear(HeightMap, id.xy - velocity * _TimeDelta));
+	gridPoint.SuspendedSediment = SampleBilinear(vec2(x, y) - vec2(gridPoint.VelocityX, gridPoint.VelocityY) * dt);
 
-	// Write heightmap
-	CURRENT_SAMPLE(HeightMap) = state;
+    gridPoints[id] = gridPoint;
 }

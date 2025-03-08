@@ -12,6 +12,7 @@ struct GridPoint
     float WaterHeight;
     float SuspendedSediment;
     float TempSediment;
+    float Hardness;
 
     float FlowLeft;
     float FlowRight;
@@ -29,7 +30,12 @@ layout(std430, binding = 2) buffer gridPointsShaderBuffer
 
 uint myHeightMapSideLength;
 
-uint getIndex(vec2 position)
+uint getIndex(uint x, uint y)
+{
+    return uint((y * myHeightMapSideLength) + x);
+}
+
+uint getIndexVector(vec2 position)
 {
     return uint((position.y * myHeightMapSideLength) + position.x);
 }
@@ -37,28 +43,17 @@ uint getIndex(vec2 position)
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
 //https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
 
-vec2 SampleBilinear(vec2 uv)
-{
-	vec2 uva = floor(uv);
-	vec2 uvb = ceil(uv);
-
-	uvec2 id00 = uvec2(uva);  // 0 0
-	uvec2 id10 = uvec2(uvb.x, uva.y); // 1 0
-	uvec2 id01 = uvec2(uva.x, uvb.y); // 0 1	
-	uvec2 id11 = uvec2(uvb); // 1 1
-
-	float2 d = uv - uva;
-
-	return
-		heightMap[getIndex(id00)] * (1 - d.x) * (1 - d.y) +
-		heightMap[getIndex(id10)] * d.x * (1 - d.y) +
-		heightMap[getIndex(id01)] * (1 - d.x) * d.y +
-		heightMap[getIndex(id11)] * d.x * d.y;
-}
-
 void main()
 {    
-    float dt = 0.25;
+    float dt = 1.0;
+    float dx = 1.0;
+    float dy = 1.0;
+    float maximalErosionDepth = 1.0;
+    float sedimentCapacity = 1.0;
+    float suspensionRate = 0.5;
+    float depositionRate = 1.0;
+    float evaporationRate = 0.0015;
+    float sedimentSofteningRate = 5.0;
 
     uint id = gl_GlobalInvocationID.x;
     uint myHeightMapSideLength = uint(sqrt(heightMap.length()));
@@ -68,48 +63,37 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
-	// Sample the heighmap (state map)
-	float4 state = CURRENT_SAMPLE(HeightMap);
-	float4 stateLeft = LEFT_SAMPLE(HeightMap);
-	float4 stateRight = RIGHT_SAMPLE(HeightMap);
-	float4 stateTop = TOP_SAMPLE(HeightMap);
-	float4 stateBottom = BOTTOM_SAMPLE(HeightMap);
-	float2 velocity = CURRENT_SAMPLE(VelocityMap);
-
-
-	// Tilt angle computation
-	float3 dhdx = float3(2 * _CellSize.x, TERRAIN_HEIGHT(stateRight) - TERRAIN_HEIGHT(stateLeft), 0);
-	float3 dhdy = float3(0, TERRAIN_HEIGHT(stateTop) - TERRAIN_HEIGHT(stateBottom), 2 * _CellSize.y);
-	float3 normal = cross(dhdx, dhdy);
+	vec3 dhdx = vec3(2 * dx, heightMap[getIndex(x + 1, y)] - heightMap[getIndex(x - 1, y)], 0);
+	vec3 dhdy = vec3(0, heightMap[getIndex(x, y + 1)] - heightMap[getIndex(x, y - 1)], 2 * dy);
+	vec3 normal = cross(dhdx, dhdy);
 
 	float sinTiltAngle = abs(normal.y) / length(normal);
 	
-	// Erosion limiting factor
-	float lmax = saturate(1 - max(0, _MaxErosionDepth - WATER_HEIGHT(state)) / _MaxErosionDepth);
-	float sedimentTransportCapacity = _SedimentCapacity * length(velocity) * min(sinTiltAngle, 0.05) * lmax;
+	float lmax = clamp(1 - max(0, maximalErosionDepth - gridPoint.WaterHeight) / maximalErosionDepth, 0.0, 1.0);
+	float sedimentTransportCapacity = sedimentCapacity * length(vec2(gridPoint.VelocityX, gridPoint.VelocityY)) * min(sinTiltAngle, 0.05) * lmax;
 
-	if (SEDIMENT(state) < sedimentTransportCapacity)
+	gridPoint.Hardness = 1;
+
+	if (gridPoint.SuspendedSediment < sedimentTransportCapacity)
 	{
-		float mod = _TimeDelta * _SuspensionRate * HARDNESS(state) * (sedimentTransportCapacity - SEDIMENT(state));		
-		TERRAIN_HEIGHT(state) -= mod;
-		SEDIMENT(state) += mod;
-		WATER_HEIGHT(state) += mod;
+		float mod = dt * suspensionRate * gridPoint.Hardness * (sedimentTransportCapacity - gridPoint.SuspendedSediment);		
+		heightMap[id] -= mod;
+		gridPoint.SuspendedSediment += mod;
+		gridPoint.WaterHeight += mod;
 	}
 	else
 	{
-		float mod = _TimeDelta * _DepositionRate * (SEDIMENT(state) - sedimentTransportCapacity);
-		TERRAIN_HEIGHT(state) += mod;
-		SEDIMENT(state) -= mod;
-		WATER_HEIGHT(state) -= mod;
+		float mod = dt * depositionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
+		heightMap[id] += mod;
+		gridPoint.SuspendedSediment -= mod;
+		gridPoint.WaterHeight -= mod;
 	}	
 
-	// Water evaporation.
-	WATER_HEIGHT(state) *= 1 - _Evaporation * _TimeDelta;
+	gridPoint.WaterHeight *= 1 - evaporationRate * dt;
 	 
 	// Hardness update
-	HARDNESS(state) = HARDNESS(state) - _TimeDelta * _SedimentSofteningRate * _SuspensionRate * (SEDIMENT(state) - sedimentTransportCapacity);
-	HARDNESS(state) = clamp(HARDNESS(state), 0.1, 1);
-
-	// Write heighmap
-	CURRENT_SAMPLE(HeightMap) = state;
+	gridPoint.Hardness -= dt * sedimentSofteningRate * suspensionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
+	gridPoint.Hardness = clamp(gridPoint.Hardness, 0.1, 1.0);
+	
+    gridPoints[id] = gridPoint;
 }
