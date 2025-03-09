@@ -35,35 +35,18 @@ layout(std430, binding = 2) buffer gridPointsShaderBuffer
 
 uint myHeightMapSideLength;
 
-uint getIndex(vec2 position)
+uint getIndex(uint x, uint y)
 {
-    return uint((position.y * myHeightMapSideLength) + position.x);
+    return uint((y * myHeightMapSideLength) + x);
 }
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
 //https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
 
-float SampleBilinear(vec2 uv)
-{
-	vec2 uva = floor(uv);
-	vec2 uvb = ceil(uv);
-
-	uvec2 id00 = uvec2(uva);  // 0 0
-	uvec2 id10 = uvec2(uvb.x, uva.y); // 1 0
-	uvec2 id01 = uvec2(uva.x, uvb.y); // 0 1	
-	uvec2 id11 = uvec2(uvb); // 1 1
-
-	vec2 d = uv - uva;
-
-    return gridPoints[getIndex(id00)].SuspendedSediment * (1 - d.x) * (1 - d.y) +
-		gridPoints[getIndex(id10)].SuspendedSediment * d.x * (1 - d.y) +
-		gridPoints[getIndex(id01)].SuspendedSediment * (1 - d.x) * d.y +
-		gridPoints[getIndex(id11)].SuspendedSediment * d.x * d.y;
-}
-
 void main()
 {    
     float timeDelta = 0.25;
+    float thermalErosionTimeScale = 1.0;
 
     uint id = gl_GlobalInvocationID.x;
     uint myHeightMapSideLength = uint(sqrt(heightMap.length()));
@@ -73,7 +56,10 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
-	gridPoint.TempSediment = SampleBilinear(vec2(x, y) - vec2(gridPoint.VelocityX, gridPoint.VelocityY) * timeDelta);
+    float thermalIn = gridPoints[getIndex(x - 1, y)].ThermalRight + gridPoints[getIndex(x + 1, y)].ThermalLeft + gridPoints[getIndex(x, y - 1)].ThermalTop + gridPoints[getIndex(x, y + 1)].ThermalBottom;
+    float thermalOut = gridPoint.ThermalRight + gridPoint.ThermalLeft + gridPoint.ThermalTop + gridPoint.ThermalBottom;
 
-    gridPoints[id] = gridPoint;
+	float volumeDelta = thermalIn - thermalOut;
+
+	heightMap[id] += min(1, timeDelta * thermalErosionTimeScale) * volumeDelta;
 }

@@ -1,6 +1,6 @@
 ﻿#version 430
 
-layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 layout(std430, binding = 1) buffer heightMapShaderBuffer
 {
@@ -18,6 +18,11 @@ struct GridPoint
     float FlowRight;
     float FlowTop;
     float FlowBottom;
+
+    float ThermalLeft;
+    float ThermalRight;
+    float ThermalTop;
+    float ThermalBottom;
 
     float VelocityX;
     float VelocityY;
@@ -45,15 +50,15 @@ uint getIndexVector(vec2 position)
 
 void main()
 {    
-    float dt = 1.0;
-    float dx = 1.0;
-    float dy = 1.0;
-    float maximalErosionDepth = 1.0;
+    float timeDelta = 0.25;
+    float cellSizeX = 1.0 / 256;
+    float cellSizeY = 1.0 / 256;
+    float maximalErosionDepth = 10.0;
     float sedimentCapacity = 1.0;
     float suspensionRate = 0.5;
     float depositionRate = 1.0;
-    float evaporationRate = 0.0015;
-    float sedimentSofteningRate = 5.0;
+    float evaporationRate = 0.015;
+    float sedimentSofteningRate = 0.0;
 
     uint id = gl_GlobalInvocationID.x;
     uint myHeightMapSideLength = uint(sqrt(heightMap.length()));
@@ -63,8 +68,8 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
-	vec3 dhdx = vec3(2 * dx, heightMap[getIndex(x + 1, y)] - heightMap[getIndex(x - 1, y)], 0);
-	vec3 dhdy = vec3(0, heightMap[getIndex(x, y + 1)] - heightMap[getIndex(x, y - 1)], 2 * dy);
+	vec3 dhdx = vec3(2 * cellSizeX, heightMap[getIndex(x + 1, y)] - heightMap[getIndex(x - 1, y)], 0);
+	vec3 dhdy = vec3(0, heightMap[getIndex(x, y + 1)] - heightMap[getIndex(x, y - 1)], 2 * cellSizeY);
 	vec3 normal = cross(dhdx, dhdy);
 
 	float sinTiltAngle = abs(normal.y) / length(normal);
@@ -72,27 +77,23 @@ void main()
 	float lmax = clamp(1 - max(0, maximalErosionDepth - gridPoint.WaterHeight) / maximalErosionDepth, 0.0, 1.0);
 	float sedimentTransportCapacity = sedimentCapacity * length(vec2(gridPoint.VelocityX, gridPoint.VelocityY)) * min(sinTiltAngle, 0.05) * lmax;
 
-	gridPoint.Hardness = 1;
-
 	if (gridPoint.SuspendedSediment < sedimentTransportCapacity)
 	{
-		float mod = dt * suspensionRate * gridPoint.Hardness * (sedimentTransportCapacity - gridPoint.SuspendedSediment);		
+		float mod = timeDelta * suspensionRate * gridPoint.Hardness * (sedimentTransportCapacity - gridPoint.SuspendedSediment);		
 		heightMap[id] -= mod;
 		gridPoint.SuspendedSediment += mod;
-		gridPoint.WaterHeight += mod;
 	}
 	else
 	{
-		float mod = dt * depositionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
+		float mod = timeDelta * depositionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
 		heightMap[id] += mod;
 		gridPoint.SuspendedSediment -= mod;
-		gridPoint.WaterHeight -= mod;
 	}	
 
-	gridPoint.WaterHeight *= 1 - evaporationRate * dt;
+	gridPoint.WaterHeight *= 1 - evaporationRate * timeDelta;
 	 
 	// Hardness update
-	gridPoint.Hardness -= dt * sedimentSofteningRate * suspensionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
+	gridPoint.Hardness -= timeDelta * sedimentSofteningRate * suspensionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
 	gridPoint.Hardness = clamp(gridPoint.Hardness, 0.1, 1.0);
 	
     gridPoints[id] = gridPoint;
