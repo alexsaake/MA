@@ -1,6 +1,6 @@
 ﻿#version 430
 
-layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
 layout(std430, binding = 1) buffer heightMapShaderBuffer
 {
@@ -18,7 +18,7 @@ struct GridPoint
     float FlowRight;
     float FlowTop;
     float FlowBottom;
-
+    
     float ThermalLeft;
     float ThermalRight;
     float ThermalTop;
@@ -64,15 +64,22 @@ float SampleBilinear(vec2 uv)
 void main()
 {    
     float timeDelta = 0.25;
-
+    float evaporationRate = 0.15;
+    
     uint id = gl_GlobalInvocationID.x;
-    uint myHeightMapSideLength = uint(sqrt(heightMap.length()));
+    uint heightMapLength = heightMap.length();
+    if(id > heightMapLength)
+    {
+        return;
+    }
+    myHeightMapSideLength = uint(sqrt(gridPoints.length()));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;
     
     GridPoint gridPoint = gridPoints[id];
 
+	gridPoint.WaterHeight = max(0.0, gridPoint.WaterHeight * (1.0 - evaporationRate * timeDelta));
 	gridPoint.TempSediment = SampleBilinear(vec2(x, y) - vec2(gridPoint.VelocityX, gridPoint.VelocityY) * timeDelta);
 
     gridPoints[id] = gridPoint;

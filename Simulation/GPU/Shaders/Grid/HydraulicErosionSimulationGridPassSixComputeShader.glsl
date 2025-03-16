@@ -1,6 +1,6 @@
 ﻿#version 430
 
-layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
 layout(std430, binding = 1) buffer heightMapShaderBuffer
 {
@@ -45,14 +45,19 @@ uint getIndex(uint x, uint y)
 
 void main()
 {
-	float cellSizeX = 1.0 / 256;
-	float cellSizeY = 1.0 / 256;
+    float cellSizeX = 1.0;
+    float cellSizeY = 1.0;
 	float thermalErosionRate = 0.15;
 	float talusAngleTangentCoeff = 0.8;
 	float talusAngleTangentBias = 0.1;
-
-	uint id = gl_GlobalInvocationID.x;
-    uint myHeightMapSideLength = uint(sqrt(heightMap.length()));
+	
+    uint id = gl_GlobalInvocationID.x;
+    uint heightMapLength = heightMap.length();
+    if(id > heightMapLength)
+    {
+        return;
+    }
+    myHeightMapSideLength = uint(sqrt(gridPoints.length()));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;

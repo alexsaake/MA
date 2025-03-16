@@ -85,7 +85,7 @@ float perlinNoise(vec2 position, uint seed) {
 // original author Sebastian Lague
 // https://github.com/SebLague/Hydraulic-Erosion/blob/master/Assets/Scripts/ComputeShaders/HeightMap.compute﻿
 
-layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
 struct HeightMapParameters
 {

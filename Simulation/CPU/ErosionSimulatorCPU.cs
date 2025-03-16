@@ -204,7 +204,7 @@ internal class ErosionSimulatorCPU : IErosionSimulator
             return;
         }
 
-        myGridBasedErosion = new GridBasedErosion(HeightMap!);
+        //myGridBasedErosion = new GridBasedErosion(HeightMap!);
 
         Console.WriteLine($"INFO: Simulating hydraulic erosion grid.");
         myRunningSimulation = Task.Run(() =>
@@ -215,7 +215,7 @@ internal class ErosionSimulatorCPU : IErosionSimulator
             {
                 lock (myHydraulicErosionGridLock)
                 {
-                    myGridBasedErosion.Simulate(HeightMap!);
+                    //myGridBasedErosion.Simulate(HeightMap!);
                 };
                 if (iteration % 10 == 0)//% myConfiguration.SimulationCallbackEachIterations == 0
                 {
@@ -242,7 +242,7 @@ internal class ErosionSimulatorCPU : IErosionSimulator
             for (int drop = 0; drop < HeightMap!.Width; drop++)
             {
                 IVector2 newPosition = new(myRandom.Next(HeightMap!.Width), myRandom.Next(HeightMap.Depth));
-                myGridBasedErosion!.WaterIncrease(newPosition, waterIncrease);
+                //myGridBasedErosion!.WaterIncrease(newPosition, waterIncrease);
             }
         }
     }

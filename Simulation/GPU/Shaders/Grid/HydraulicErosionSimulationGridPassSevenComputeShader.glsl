@@ -1,6 +1,6 @@
 ﻿#version 430
 
-layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
 layout(std430, binding = 1) buffer heightMapShaderBuffer
 {
@@ -47,9 +47,14 @@ void main()
 {    
     float timeDelta = 0.25;
     float thermalErosionTimeScale = 1.0;
-
+    
     uint id = gl_GlobalInvocationID.x;
-    uint myHeightMapSideLength = uint(sqrt(heightMap.length()));
+    uint heightMapLength = heightMap.length();
+    if(id > heightMapLength)
+    {
+        return;
+    }
+    myHeightMapSideLength = uint(sqrt(gridPoints.length()));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;

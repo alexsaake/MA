@@ -1,6 +1,6 @@
 ﻿#version 430
 
-layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
 layout(std430, binding = 1) buffer heightMapShaderBuffer
 {
@@ -51,17 +51,21 @@ uint getIndexVector(vec2 position)
 void main()
 {    
     float timeDelta = 0.25;
-    float cellSizeX = 1.0 / 256;
-    float cellSizeY = 1.0 / 256;
+    float cellSizeX = 1.0;
+    float cellSizeY = 1.0;
     float maximalErosionDepth = 10.0;
     float sedimentCapacity = 1.0;
     float suspensionRate = 0.5;
     float depositionRate = 1.0;
-    float evaporationRate = 0.015;
     float sedimentSofteningRate = 0.0;
-
+	
     uint id = gl_GlobalInvocationID.x;
-    uint myHeightMapSideLength = uint(sqrt(heightMap.length()));
+    uint heightMapLength = heightMap.length();
+    if(id > heightMapLength)
+    {
+        return;
+    }
+    myHeightMapSideLength = uint(sqrt(gridPoints.length()));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;
@@ -88,9 +92,7 @@ void main()
 		float mod = timeDelta * depositionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
 		heightMap[id] += mod;
 		gridPoint.SuspendedSediment -= mod;
-	}	
-
-	gridPoint.WaterHeight *= 1 - evaporationRate * timeDelta;
+	}
 	 
 	// Hardness update
 	gridPoint.Hardness -= timeDelta * sedimentSofteningRate * suspensionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
