@@ -187,6 +187,10 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
 
     public void SimulateHydraulicErosionGridStart()
     {
+        //https://trossvik.com/procedural/
+        //https://lilyraeburn.com/Thesis.html
+
+
         Console.WriteLine($"INFO: Simulating hydraulic erosion grid.");
 
         uint mapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
@@ -222,17 +226,17 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
         Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
         Rlgl.DisableShader();
 
-        Rlgl.EnableShader(myHydraulicErosionSimulationGridPassSixComputeShaderProgram!.Id);
-        Rlgl.BindShaderBuffer(HeightMapShaderBufferId, 1);
-        Rlgl.BindShaderBuffer(GridPointsShaderBufferId, 2);
-        Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
-        Rlgl.DisableShader();
+        //Rlgl.EnableShader(myHydraulicErosionSimulationGridPassSixComputeShaderProgram!.Id);
+        //Rlgl.BindShaderBuffer(HeightMapShaderBufferId, 1);
+        //Rlgl.BindShaderBuffer(GridPointsShaderBufferId, 2);
+        //Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
+        //Rlgl.DisableShader();
 
-        Rlgl.EnableShader(myHydraulicErosionSimulationGridPassSevenComputeShaderProgram!.Id);
-        Rlgl.BindShaderBuffer(HeightMapShaderBufferId, 1);
-        Rlgl.BindShaderBuffer(GridPointsShaderBufferId, 2);
-        Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
-        Rlgl.DisableShader();
+        //Rlgl.EnableShader(myHydraulicErosionSimulationGridPassSevenComputeShaderProgram!.Id);
+        //Rlgl.BindShaderBuffer(HeightMapShaderBufferId, 1);
+        //Rlgl.BindShaderBuffer(GridPointsShaderBufferId, 2);
+        //Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
+        //Rlgl.DisableShader();
 
         ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
         Console.WriteLine($"INFO: End of simulation.");
@@ -240,7 +244,7 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
 
     public unsafe void SimulateHydraulicErosionGridAddRain()
     {
-        const float waterIncrease = 0.25f;
+        const float waterIncrease = 0.0125f;
 
         uint mapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
         uint bufferSize = mapSize * (uint)sizeof(GridPoint);
