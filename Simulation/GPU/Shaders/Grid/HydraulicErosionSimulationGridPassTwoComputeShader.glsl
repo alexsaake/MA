@@ -73,7 +73,6 @@ void main()
 
     gridPoint.VelocityX = 0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft + gridPoints[getIndex(x + 1, y)].FlowLeft - gridPoint.FlowRight);
     gridPoint.VelocityY = 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom + gridPoints[getIndex(x, y + 1)].FlowBottom - gridPoint.FlowTop);
-		/// _PipeLength * 0.5 * (waterHeightBefore + WATER_HEIGHT(state));
 
     gridPoints[id] = gridPoint;
 }

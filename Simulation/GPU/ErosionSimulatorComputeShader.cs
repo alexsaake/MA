@@ -164,6 +164,7 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
         Rlgl.EnableShader(myWindErosionParticleSimulationComputeShaderProgram!.Id);
         Rlgl.BindShaderBuffer(HeightMapShaderBufferId, 1);
         Rlgl.BindShaderBuffer(myHeightMapIndicesShaderBufferId, 2);
+        Rlgl.BindShaderBuffer(myErosionConfigurationShaderBufferId, 3);
         Rlgl.ComputeShaderDispatch(myConfiguration.SimulationIterations / 64, 1, 1);
         Rlgl.DisableShader();
 
@@ -205,6 +206,7 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
         Rlgl.EnableShader(myHydraulicErosionSimulationGridPassThreeComputeShaderProgram!.Id);
         Rlgl.BindShaderBuffer(HeightMapShaderBufferId, 1);
         Rlgl.BindShaderBuffer(GridPointsShaderBufferId, 2);
+        Rlgl.BindShaderBuffer(myErosionConfigurationShaderBufferId, 3);
         Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
         Rlgl.DisableShader();
 
@@ -220,17 +222,17 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
         Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
         Rlgl.DisableShader();
 
-        //Rlgl.EnableShader(myHydraulicErosionSimulationGridPassSixComputeShaderProgram!.Id);
-        //Rlgl.BindShaderBuffer(HeightMapShaderBufferId, 1);
-        //Rlgl.BindShaderBuffer(GridPointsShaderBufferId, 2);
-        //Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
-        //Rlgl.DisableShader();
+        Rlgl.EnableShader(myHydraulicErosionSimulationGridPassSixComputeShaderProgram!.Id);
+        Rlgl.BindShaderBuffer(HeightMapShaderBufferId, 1);
+        Rlgl.BindShaderBuffer(GridPointsShaderBufferId, 2);
+        Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
+        Rlgl.DisableShader();
 
-        //Rlgl.EnableShader(myHydraulicErosionSimulationGridPassSevenComputeShaderProgram!.Id);
-        //Rlgl.BindShaderBuffer(HeightMapShaderBufferId, 1);
-        //Rlgl.BindShaderBuffer(GridPointsShaderBufferId, 2);
-        //Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
-        //Rlgl.DisableShader();
+        Rlgl.EnableShader(myHydraulicErosionSimulationGridPassSevenComputeShaderProgram!.Id);
+        Rlgl.BindShaderBuffer(HeightMapShaderBufferId, 1);
+        Rlgl.BindShaderBuffer(GridPointsShaderBufferId, 2);
+        Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
+        Rlgl.DisableShader();
 
         ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
         Console.WriteLine($"INFO: End of simulation.");
@@ -238,7 +240,7 @@ internal class ErosionSimulatorComputeShader : IErosionSimulator
 
     public unsafe void SimulateHydraulicErosionGridAddRain()
     {
-        const float waterIncrease = 0.012f;
+        const float waterIncrease = 0.25f;
 
         uint mapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
         uint bufferSize = mapSize * (uint)sizeof(GridPoint);

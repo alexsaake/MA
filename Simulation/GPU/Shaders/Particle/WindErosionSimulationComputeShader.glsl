@@ -12,7 +12,11 @@ layout(std430, binding = 2) readonly restrict buffer heightMapIndicesShaderBuffe
     uint[] heightMapIndices;
 };
 
-vec3 persistentSpeed = vec3(0.0, 1.0, 0.0);
+layout(std430, binding = 3) readonly restrict buffer erosionConfigurationShaderBuffer
+{
+    uint heightMultiplier;
+};
+
 uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
@@ -31,8 +35,8 @@ bool isOutOfBounds(ivec2 position)
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/wind.hpp
-const uint HeightMultiplier = 64;
-const uint MaxAge = 1024;
+const vec3 persistentSpeed = vec3(0.0, 0.125, 0.0);
+const uint MaxAge = 102400;
 const float BoundaryLayer = 2.0;
 const float Suspension = 0.05;
 const float Gravity = 0.025;
@@ -61,8 +65,8 @@ vec3 getScaledNormal(uint x, uint y)
     float xym1 = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    HeightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
-    HeightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
+    heightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
+    heightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
     1.0);
 
     return normalize(normal);
