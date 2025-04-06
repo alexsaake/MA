@@ -71,8 +71,8 @@ void main()
 	gridPoint.WaterHeight += timeDelta * volumeDelta / (cellSizeX * cellSizeY);
     gridPoint.WaterHeight = max(0.0, gridPoint.WaterHeight);
 
-    gridPoint.VelocityX = 0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft + gridPoints[getIndex(x + 1, y)].FlowLeft - gridPoint.FlowRight);
-    gridPoint.VelocityY = 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom + gridPoints[getIndex(x, y + 1)].FlowBottom - gridPoint.FlowTop);
+    gridPoint.VelocityX = 0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight);
+    gridPoint.VelocityY = 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop);
 
     gridPoints[id] = gridPoint;
 }

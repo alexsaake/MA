@@ -13,7 +13,7 @@ internal class HydraulicErosion : IHydraulicErosion
     private readonly IRandom myRandom;
 
     private ComputeShaderProgram? myFluxCalculation;
-    private ComputeShaderProgram? myHydraulicErosionSimulationGridPassTwoComputeShaderProgram;
+    private ComputeShaderProgram? myVelocityMap;
     private ComputeShaderProgram? myHydraulicErosionSimulationGridPassThreeComputeShaderProgram;
     private ComputeShaderProgram? myHydraulicErosionSimulationGridPassFourComputeShaderProgram;
     private ComputeShaderProgram? myHydraulicErosionSimulationGridPassFiveComputeShaderProgram;
@@ -33,7 +33,7 @@ internal class HydraulicErosion : IHydraulicErosion
     public unsafe void Initialize()
     {
         myFluxCalculation = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/FlowCalculationComputeShader.glsl");
-        myHydraulicErosionSimulationGridPassTwoComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/HydraulicErosionSimulationGridPassTwoComputeShader.glsl");
+        myVelocityMap = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/VelocityMapComputeShader.glsl");
         myHydraulicErosionSimulationGridPassThreeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/HydraulicErosionSimulationGridPassThreeComputeShader.glsl");
         myHydraulicErosionSimulationGridPassFourComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/HydraulicErosionSimulationGridPassFourComputeShader.glsl");
         myHydraulicErosionSimulationGridPassFiveComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/HydraulicErosionSimulationGridPassFiveComputeShader.glsl");
@@ -63,14 +63,17 @@ internal class HydraulicErosion : IHydraulicErosion
         Rlgl.DisableShader();
     }
 
-    public void Erode()
+    public void VelocityMap()
     {
-        Rlgl.EnableShader(myHydraulicErosionSimulationGridPassTwoComputeShaderProgram!.Id);
+        Rlgl.EnableShader(myVelocityMap!.Id);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], 2);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
+    }
 
+    public void Erode()
+    {
         Rlgl.EnableShader(myHydraulicErosionSimulationGridPassThreeComputeShaderProgram!.Id);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], 2);
@@ -130,7 +133,7 @@ internal class HydraulicErosion : IHydraulicErosion
     public void Dispose()
     {
         myFluxCalculation?.Dispose();
-        myHydraulicErosionSimulationGridPassTwoComputeShaderProgram?.Dispose();
+        myVelocityMap?.Dispose();
         myHydraulicErosionSimulationGridPassThreeComputeShaderProgram?.Dispose();
         myHydraulicErosionSimulationGridPassFourComputeShaderProgram?.Dispose();
         myHydraulicErosionSimulationGridPassFiveComputeShaderProgram?.Dispose();

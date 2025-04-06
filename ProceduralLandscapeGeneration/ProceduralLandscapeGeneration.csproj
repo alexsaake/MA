@@ -45,7 +45,7 @@
 	  <None Update="Simulation\GPU\Grid\Shaders\HydraulicErosionSimulationGridPassThreeComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Simulation\GPU\Grid\Shaders\HydraulicErosionSimulationGridPassTwoComputeShader.glsl">
+	  <None Update="Simulation\GPU\Grid\Shaders\VelocityMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Simulation\GPU\Grid\Shaders\FlowCalculationComputeShader.glsl">
