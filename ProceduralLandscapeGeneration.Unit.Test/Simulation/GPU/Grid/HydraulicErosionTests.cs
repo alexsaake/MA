@@ -25,7 +25,7 @@ public class HydraulicErosionTests
     }
 
     [Test]
-    public unsafe void FlowCalculation_Flat3x3HeightMapWithoutWater_AllFlowIsZero()
+    public unsafe void Flow_Flat3x3HeightMapWithoutWater_AllFlowIsZero()
     {
         uint heightMapSideLength = 3;
         uint mapSize = heightMapSideLength * heightMapSideLength;
@@ -40,7 +40,7 @@ public class HydraulicErosionTests
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configurationMock.Object, shaderBuffers, new Random(Mock.Of<IConfiguration>()));
         testee.Initialize();
 
-        testee.FlowCalculation();
+        testee.Flow();
 
         GridPoint[] gridPointValues = new GridPoint[mapSize];
         fixed (void* gridPointValuesPointer = gridPointValues)
@@ -57,7 +57,7 @@ public class HydraulicErosionTests
     }
 
     [Test]
-    public unsafe void FlowCalculation_Flat3x3HeightMapWithWaterInMiddle_OutFlowIsEqualInAllDirections()
+    public unsafe void Flow_Flat3x3HeightMapWithWaterInMiddle_OutFlowIsEqualInAllDirections()
     {
         float timeDelta = 1.0f;
         uint heightMapSideLength = 3;
@@ -75,7 +75,7 @@ public class HydraulicErosionTests
         float waterIncrease = 4;
         testee.AddWater(1, 1, waterIncrease);
 
-        testee.FlowCalculation();
+        testee.Flow();
 
         GridPoint[] gridPointValues = new GridPoint[mapSize];
         fixed (void* gridPointValuesPointer = gridPointValues)
@@ -91,7 +91,7 @@ public class HydraulicErosionTests
     }
 
     [Test]
-    public unsafe void FlowCalculation_Slope3x3HeightMapWithWaterInMiddle_OutFlowIsHigherDownSlope()
+    public unsafe void Flow_Slope3x3HeightMapWithWaterInMiddle_OutFlowIsHigherDownSlope()
     {
         float timeDelta = 1.0f;
         uint heightMapSideLength = 3;
@@ -120,7 +120,7 @@ public class HydraulicErosionTests
         float waterIncrease = 4;
         testee.AddWater(1, 1, waterIncrease);
 
-        testee.FlowCalculation();
+        testee.Flow();
 
         GridPoint[] gridPointValues = new GridPoint[mapSize];
         fixed (void* gridPointValuesPointer = gridPointValues)
@@ -150,7 +150,7 @@ public class HydraulicErosionTests
         configurationMock.Setup(x => x.HeightMapSideLength).Returns(heightMapSideLength);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configurationMock.Object, shaderBuffers, new Random(Mock.Of<IConfiguration>()));
         testee.Initialize();
-        testee.FlowCalculation();
+        testee.Flow();
 
         testee.VelocityMap();
 
@@ -183,7 +183,7 @@ public class HydraulicErosionTests
         testee.Initialize();
         float waterIncrease = 4;
         testee.AddWater(1, 1, waterIncrease);
-        testee.FlowCalculation();
+        testee.Flow();
 
         testee.VelocityMap();
 
@@ -237,7 +237,7 @@ public class HydraulicErosionTests
         testee.Initialize();
         float waterIncrease = 4;
         testee.AddWater(1, 1, waterIncrease);
-        testee.FlowCalculation();
+        testee.Flow();
 
         testee.VelocityMap();
 
@@ -261,5 +261,37 @@ public class HydraulicErosionTests
         GridPoint bottom = gridPointValues[testee.GetIndex(1, 0)];
         Assert.That(bottom.VelocityX, Is.EqualTo(0));
         Assert.That(bottom.VelocityY, Is.EqualTo(-0.5f));
+    }
+
+    [Test]
+    public unsafe void SuspendDeposite_Flat3x3HeightMapWithoutWater_AllVelocityIsZero()
+    {
+        uint heightMapSideLength = 3;
+        uint mapSize = heightMapSideLength * heightMapSideLength;
+        uint heightMapSize = mapSize * sizeof(float);
+        uint gridPointSize = (uint)(mapSize * sizeof(GridPoint));
+        ShaderBuffers shaderBuffers = new ShaderBuffers
+        {
+            { ShaderBufferTypes.HeightMap,  heightMapSize}
+        };
+        Mock<IConfiguration> configurationMock = new Mock<IConfiguration>();
+        configurationMock.Setup(x => x.HeightMapSideLength).Returns(heightMapSideLength);
+        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configurationMock.Object, shaderBuffers, new Random(Mock.Of<IConfiguration>()));
+        testee.Initialize();
+        testee.Flow();
+        testee.VelocityMap();
+
+        testee.SuspendDeposite();
+
+        GridPoint[] gridPointValues = new GridPoint[mapSize];
+        fixed (void* gridPointValuesPointer = gridPointValues)
+        {
+            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridPoints], gridPointValuesPointer, gridPointSize, 0);
+        }
+        foreach (GridPoint gridPoint in gridPointValues)
+        {
+            Assert.That(gridPoint.VelocityX, Is.Zero);
+            Assert.That(gridPoint.VelocityY, Is.Zero);
+        }
     }
 }

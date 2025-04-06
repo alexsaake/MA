@@ -1,6 +1,5 @@
 ﻿using ProceduralLandscapeGeneration.Simulation.CPU.Grid;
 using Raylib_cs;
-using System;
 
 namespace ProceduralLandscapeGeneration.Simulation.GPU.Grid;
 
@@ -12,9 +11,9 @@ internal class HydraulicErosion : IHydraulicErosion
     private readonly IShaderBuffers myShaderBufferIds;
     private readonly IRandom myRandom;
 
-    private ComputeShaderProgram? myFluxCalculation;
+    private ComputeShaderProgram? myFlow;
     private ComputeShaderProgram? myVelocityMap;
-    private ComputeShaderProgram? myHydraulicErosionSimulationGridPassThreeComputeShaderProgram;
+    private ComputeShaderProgram? mySuspendDeposite;
     private ComputeShaderProgram? myHydraulicErosionSimulationGridPassFourComputeShaderProgram;
     private ComputeShaderProgram? myHydraulicErosionSimulationGridPassFiveComputeShaderProgram;
     private ComputeShaderProgram? myHydraulicErosionSimulationGridPassSixComputeShaderProgram;
@@ -32,15 +31,15 @@ internal class HydraulicErosion : IHydraulicErosion
 
     public unsafe void Initialize()
     {
-        myFluxCalculation = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/FlowCalculationComputeShader.glsl");
-        myVelocityMap = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/VelocityMapComputeShader.glsl");
-        myHydraulicErosionSimulationGridPassThreeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/HydraulicErosionSimulationGridPassThreeComputeShader.glsl");
+        myFlow = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/1FlowComputeShader.glsl");
+        myVelocityMap = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/2VelocityMapComputeShader.glsl");
+        mySuspendDeposite = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/3SuspendDepositeComputeShader.glsl");
         myHydraulicErosionSimulationGridPassFourComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/HydraulicErosionSimulationGridPassFourComputeShader.glsl");
         myHydraulicErosionSimulationGridPassFiveComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/HydraulicErosionSimulationGridPassFiveComputeShader.glsl");
         myHydraulicErosionSimulationGridPassSixComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/HydraulicErosionSimulationGridPassSixComputeShader.glsl");
         myHydraulicErosionSimulationGridPassSevenComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/HydraulicErosionSimulationGridPassSevenComputeShader.glsl");
 
-                uint mapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint mapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
         GridPoint[] gridPoints = new GridPoint[mapSize];
         for (int i = 0; i < gridPoints.Length; i++)
         {
@@ -54,9 +53,9 @@ internal class HydraulicErosion : IHydraulicErosion
         }
     }
 
-    public void FlowCalculation()
+    public void Flow()
     {
-        Rlgl.EnableShader(myFluxCalculation!.Id);
+        Rlgl.EnableShader(myFlow!.Id);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], 2);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
@@ -72,14 +71,18 @@ internal class HydraulicErosion : IHydraulicErosion
         Rlgl.DisableShader();
     }
 
-    public void Erode()
+    public void SuspendDeposite()
     {
-        Rlgl.EnableShader(myHydraulicErosionSimulationGridPassThreeComputeShaderProgram!.Id);
+        Rlgl.EnableShader(mySuspendDeposite!.Id);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], 2);
+        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMultiplier], 3);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
+    }
 
+    public void Erode()
+    {
         Rlgl.EnableShader(myHydraulicErosionSimulationGridPassFourComputeShaderProgram!.Id);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], 2);
@@ -103,6 +106,29 @@ internal class HydraulicErosion : IHydraulicErosion
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], 2);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
+    }
+
+    public unsafe void AddRain(float value)
+    {
+        uint mapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint bufferSize = mapSize * (uint)sizeof(GridPoint);
+
+        GridPoint[] gridPoints = new GridPoint[mapSize];
+        fixed (void* gridPointsPointer = gridPoints)
+        {
+            Rlgl.ReadShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
+        }
+
+        for (int drop = 0; drop < myConfiguration.HeightMapSideLength; drop++)
+        {
+            uint index = GetIndex((uint)myRandom.Next((int)myConfiguration.HeightMapSideLength), (uint)myRandom.Next((int)myConfiguration.HeightMapSideLength));
+            gridPoints[index].WaterHeight += value;
+        }
+
+        fixed (void* gridPointsPointer = gridPoints)
+        {
+            Rlgl.UpdateShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
+        }
     }
 
     public unsafe void AddWater(uint x, uint y, float value)
@@ -132,9 +158,9 @@ internal class HydraulicErosion : IHydraulicErosion
 
     public void Dispose()
     {
-        myFluxCalculation?.Dispose();
+        myFlow?.Dispose();
         myVelocityMap?.Dispose();
-        myHydraulicErosionSimulationGridPassThreeComputeShaderProgram?.Dispose();
+        mySuspendDeposite?.Dispose();
         myHydraulicErosionSimulationGridPassFourComputeShaderProgram?.Dispose();
         myHydraulicErosionSimulationGridPassFiveComputeShaderProgram?.Dispose();
         myHydraulicErosionSimulationGridPassSixComputeShaderProgram?.Dispose();

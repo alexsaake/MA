@@ -3,8 +3,10 @@
 internal interface IHydraulicErosion : IDisposable
 {
     void Initialize();
-    void FlowCalculation();
+    void Flow();
     void VelocityMap();
+    void Erode();
+    void AddRain(float value);
     void AddWater(uint x, uint y, float value);
     uint GetIndex(uint x, uint y);
 }

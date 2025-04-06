@@ -68,8 +68,8 @@ vec3 getScaledNormal(uint x, uint y)
     float xym1 = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    heightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
-    heightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
+    64 * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
+    64 * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
     1.0);
 
     return normalize(normal);

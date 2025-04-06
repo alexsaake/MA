@@ -3,5 +3,6 @@
 enum ShaderBufferTypes
 {
     HeightMap,
-    GridPoints
+    GridPoints,
+    HeightMultiplier
 }
