@@ -46,7 +46,7 @@ uint getIndex(uint x, uint y)
 
 void main()
 {
-    float timeDelta = 0.25;
+    float timeDelta = 1.0;
     float cellSizeX = 1.0;
     float cellSizeY = 1.0;
     float gravity = 9.81;

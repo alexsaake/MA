@@ -9,7 +9,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
     private readonly IShaderBuffers myShaderBuffers;
 
-    public HeightMapGenerator(IConfiguration configuration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers     shaderBuffers)
+    public HeightMapGenerator(IConfiguration configuration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
     {
         myConfigration = configuration;
         myComputeShaderProgramFactory = computeShaderProgramFactory;
