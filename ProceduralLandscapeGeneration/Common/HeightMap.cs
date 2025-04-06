@@ -1,4 +1,5 @@
-﻿using Raylib_cs;
+﻿using ProceduralLandscapeGeneration.Simulation.GPU;
+using Raylib_cs;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Common;
@@ -21,15 +22,15 @@ internal class HeightMap
 
     public HeightMap(IConfiguration configuration, float[] heightMap) : this(configuration, Get2DHeightMapValuesFrom1D(heightMap)) { }
 
-    public unsafe HeightMap(IConfiguration configuration, uint heightMapShaderBufferId, uint heightMapSize) : this(configuration, GetHeightMapFromShaderBuffer(heightMapShaderBufferId, heightMapSize)) { }
+    public unsafe HeightMap(IConfiguration configuration, IShaderBuffers shaderBuffers, uint heightMapSize) : this(configuration, GetHeightMapFromShaderBuffer(shaderBuffers, heightMapSize)) { }
 
-    private static unsafe float[,] GetHeightMapFromShaderBuffer(uint heightMapShaderBufferId, uint heightMapSize)
+    private static unsafe float[,] GetHeightMapFromShaderBuffer(IShaderBuffers shaderBuffers, uint heightMapSize)
     {
         uint heightMapBufferSize = heightMapSize * sizeof(float);
         float[] heightMapValues = new float[heightMapSize];
         fixed (float* heightMapValuesPointer = heightMapValues)
         {
-            Rlgl.ReadShaderBuffer(heightMapShaderBufferId, heightMapValuesPointer, heightMapBufferSize, 0);
+            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapBufferSize, 0);
         }
 
         return Get2DHeightMapValuesFrom1D(heightMapValues);

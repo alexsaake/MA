@@ -195,7 +195,7 @@ internal class ErosionSimulatorCPU : IErosionSimulator
         });
     }
 
-    public void SimulateHydraulicErosionGridStart()
+    public void SimulateHydraulicErosionGrid()
     {
         if (myRunningSimulation is not null
             && !myRunningSimulation.IsCompleted)

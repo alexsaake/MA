@@ -2,6 +2,7 @@
 using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Simulation;
 using ProceduralLandscapeGeneration.Simulation.CPU;
+using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;
 
@@ -11,6 +12,7 @@ internal class MeshShaderRenderer : IRenderer
 {
     private readonly IConfiguration myConfiguration;
     private readonly IErosionSimulator myErosionSimulator;
+    private readonly IShaderBuffers myShaderBufferIds;
 
     private Shader myTerrainMeshShader;
     private Shader myWaterMeshShader;
@@ -24,10 +26,11 @@ internal class MeshShaderRenderer : IRenderer
     private bool myIsUpdateAvailable;
     private bool myIsDisposed;
 
-    public MeshShaderRenderer(IConfiguration configuration, ILifetimeScope lifetimeScope)
+    public MeshShaderRenderer(IConfiguration configuration, ILifetimeScope lifetimeScope, IShaderBuffers shaderBufferIds)
     {
         myConfiguration = configuration;
-        myErosionSimulator = lifetimeScope.ResolveKeyed<IErosionSimulator>(myConfiguration.ErosionSimulation); ;
+        myErosionSimulator = lifetimeScope.ResolveKeyed<IErosionSimulator>(myConfiguration.ErosionSimulation);
+        myShaderBufferIds = shaderBufferIds;
     }
 
     public unsafe void Initialize()
@@ -60,8 +63,8 @@ internal class MeshShaderRenderer : IRenderer
         }
         else
         {
-            myHeightMapShaderBufferId = myErosionSimulator.HeightMapShaderBufferId;
-            myGridPointsShaderBufferId = myErosionSimulator.GridPointsShaderBufferId;
+            myHeightMapShaderBufferId = myShaderBufferIds[ShaderBufferTypes.HeightMap];
+            myGridPointsShaderBufferId = myShaderBufferIds[ShaderBufferTypes.GridPoints];
             int heightMultiplierValue = myConfiguration.HeightMultiplier;
             myConfigurationShaderBufferId = Rlgl.LoadShaderBuffer(sizeof(uint), &heightMultiplierValue, Rlgl.DYNAMIC_COPY);
         }

@@ -5,6 +5,7 @@ using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;
 using ProceduralLandscapeGeneration.Simulation.CPU;
 using ProceduralLandscapeGeneration.Simulation.GPU;
+using ProceduralLandscapeGeneration.Simulation.GPU.Grid;
 
 namespace ProceduralLandscapeGeneration;
 
@@ -17,13 +18,15 @@ internal class DependencyInjectionContainer
         containerBuilder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ConfigurationGUI>().As<IConfigurationGUI>();
 
-        containerBuilder.RegisterType<HeightMapGeneratorComputeShader>().As<IHeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.GPU);
+        containerBuilder.RegisterType<HeightMapGenerator>().As<IHeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.GPU);
         containerBuilder.RegisterType<HeightMapGeneratorCPU>().As<IHeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.CPU);
-        containerBuilder.RegisterType<ErosionSimulatorComputeShader>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorType.GPU);
+        containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorType.GPU);
         containerBuilder.RegisterType<ErosionSimulatorCPU>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorType.CPU);
         containerBuilder.RegisterType<MeshShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorType.GPU);
         containerBuilder.RegisterType<VertexShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorType.CPU);
 
+        containerBuilder.RegisterType<HydraulicErosion>().As<IHydraulicErosion>();
+        containerBuilder.RegisterType<ShaderBuffers>().As<IShaderBuffers>().SingleInstance();
         containerBuilder.RegisterType<ComputeShaderProgram>().As<IComputeShaderProgram>();
         containerBuilder.RegisterType<ComputeShaderProgramFactory>().As<IComputeShaderProgramFactory>();
         containerBuilder.RegisterType<VertexMeshCreator>().As<IVertexMeshCreator>();

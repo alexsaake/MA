@@ -80,7 +80,7 @@ vec3 getScaledNormal(uint x, uint y)
 
 void main()
 {    
-    float timeDelta = 0.25;
+    float timeDelta = 1.0;
     float cellSizeX = 1.0;
     float cellSizeY = 1.0;
     float maximalErosionDepth = 10.0;
@@ -117,7 +117,7 @@ void main()
 		heightMap[id] -= mod;
 		gridPoint.SuspendedSediment += mod;
 	}
-	else
+	else if (gridPoint.SuspendedSediment > sedimentTransportCapacity)
 	{
 		float mod = timeDelta * depositionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
 		heightMap[id] += mod;

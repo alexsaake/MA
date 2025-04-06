@@ -1,5 +1,6 @@
 ﻿using DotnetNoise;
 using ProceduralLandscapeGeneration.Common;
+using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;
 
@@ -9,12 +10,16 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
 {
     private readonly IConfiguration myConfiguration;
     private readonly IRandom myRandom;
+    private readonly IShaderBuffers myShaderBuffers;
+
     private readonly FastNoise myNoiseGenerator;
 
-    public HeightMapGeneratorCPU(IConfiguration configuration, IRandom random)
+    public HeightMapGeneratorCPU(IConfiguration configuration, IRandom random, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
         myRandom = random;
+        myShaderBuffers = shaderBuffers;
+
         myNoiseGenerator = new FastNoise(myConfiguration.Seed);
     }
 
@@ -74,18 +79,15 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
         return new HeightMap(myConfiguration, noiseMap);
     }
 
-    public unsafe uint GenerateHeightMapShaderBuffer()
+    public unsafe void GenerateHeightMapShaderBuffer()
     {
         HeightMap heightMap = GenerateHeightMap();
         float[] heightMapValues = heightMap.Get1DHeightMapValues();
 
         uint heightMapShaderBufferSize = (uint)heightMapValues.Length * sizeof(float);
-        uint heightMapShaderBufferId;
         fixed (float* heightMapValuesPointer = heightMapValues)
         {
-            heightMapShaderBufferId = Rlgl.LoadShaderBuffer(heightMapShaderBufferSize, heightMapValuesPointer, Rlgl.DYNAMIC_COPY);
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapShaderBufferSize, 0);
         }
-
-        return heightMapShaderBufferId;
     }
 }

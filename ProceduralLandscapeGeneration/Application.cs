@@ -66,15 +66,11 @@ internal class Application : IApplication
             }
             else if (Raylib.IsKeyDown(KeyboardKey.Four))
             {
-                myErosionSimulator.SimulateHydraulicErosionGridStart();
+                myErosionSimulator.SimulateHydraulicErosionGrid();
             }
             else if (Raylib.IsKeyDown(KeyboardKey.Five))
             {
                 myErosionSimulator.SimulateHydraulicErosionGridAddRain();
-            }
-            else if (Raylib.IsKeyDown(KeyboardKey.Six))
-            {
-                myErosionSimulator.SimulateHydraulicErosionGridStop();
             }
 
             myRenderer.Update();

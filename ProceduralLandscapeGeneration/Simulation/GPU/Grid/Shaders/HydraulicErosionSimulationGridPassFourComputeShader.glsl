@@ -63,7 +63,7 @@ float SampleBilinear(vec2 uv)
 
 void main()
 {    
-    float timeDelta = 0.25;
+    float timeDelta = 1.0;
     float evaporationRate = 0.15;
     
     uint id = gl_GlobalInvocationID.x;

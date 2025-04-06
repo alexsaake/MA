@@ -12,6 +12,7 @@ internal class VertexShaderRenderer : IRenderer
     private readonly IConfiguration myConfiguration;
     private readonly IErosionSimulator myErosionSimulator;
     private readonly IVertexMeshCreator myVertexMeshCreator;
+    private readonly IShaderBuffers myShaderBufferIds;
 
     private RenderTexture2D myShadowMap;
     private Model myModel;
@@ -26,11 +27,12 @@ internal class VertexShaderRenderer : IRenderer
     private bool myIsUpdateAvailable;
     private bool myIsDisposed;
 
-    public VertexShaderRenderer(IConfiguration configuration, ILifetimeScope lifetimeScope, IVertexMeshCreator vertexMeshCreator)
+    public VertexShaderRenderer(IConfiguration configuration, ILifetimeScope lifetimeScope, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBufferIds)
     {
         myConfiguration = configuration;
         myErosionSimulator = lifetimeScope.ResolveKeyed<IErosionSimulator>(myConfiguration.ErosionSimulation);
         myVertexMeshCreator = vertexMeshCreator;
+        myShaderBufferIds = shaderBufferIds;
     }
 
     public void Initialize()
@@ -136,7 +138,7 @@ internal class VertexShaderRenderer : IRenderer
 
     private HeightMap GetHeightMap()
     {
-        if (myErosionSimulator is ErosionSimulatorComputeShader)
+        if (myErosionSimulator is ErosionSimulator)
         {
             return GetHeightMapFromShaderBuffer();
         }
@@ -150,7 +152,7 @@ internal class VertexShaderRenderer : IRenderer
         uint heightMapShaderBufferSize = heightMapSize * sizeof(float);
         fixed (float* heightMapValuesPointer = heightMapValues)
         {
-            Rlgl.ReadShaderBuffer(myErosionSimulator.HeightMapShaderBufferId, heightMapValuesPointer, heightMapShaderBufferSize, 0);
+            Rlgl.ReadShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapShaderBufferSize, 0);
         }
 
         return new HeightMap(myConfiguration, heightMapValues);

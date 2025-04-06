@@ -5,5 +5,5 @@ namespace ProceduralLandscapeGeneration.Simulation;
 internal interface IHeightMapGenerator
 {
     HeightMap GenerateHeightMap();
-    uint GenerateHeightMapShaderBuffer();
+    void GenerateHeightMapShaderBuffer();
 }

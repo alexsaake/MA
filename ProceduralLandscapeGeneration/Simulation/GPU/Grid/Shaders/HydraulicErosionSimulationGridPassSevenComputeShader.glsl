@@ -37,18 +37,16 @@ uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
 {
-    return (y * myHeightMapSideLength) + x;
+    return uint((y * myHeightMapSideLength) + x);
 }
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
 //https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
-//https://lisyarus.github.io/blog/posts/simulating-water-over-terrain.html
 
 void main()
-{
-    float timeDelta = 0.25;
-    float cellSizeX = 1.0;
-    float cellSizeY = 1.0;
+{    
+    float timeDelta = 1.0;
+    float thermalErosionTimeScale = 1.0;
     
     uint id = gl_GlobalInvocationID.x;
     uint heightMapLength = heightMap.length();
@@ -63,16 +61,10 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
-    float flowIn = gridPoints[getIndex(x - 1, y)].FlowRight + gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoints[getIndex(x, y - 1)].FlowTop + gridPoints[getIndex(x, y + 1)].FlowBottom;
-    float flowOut = gridPoint.FlowRight + gridPoint.FlowLeft + gridPoint.FlowTop + gridPoint.FlowBottom;
+    float thermalIn = gridPoints[getIndex(x - 1, y)].ThermalRight + gridPoints[getIndex(x + 1, y)].ThermalLeft + gridPoints[getIndex(x, y - 1)].ThermalTop + gridPoints[getIndex(x, y + 1)].ThermalBottom;
+    float thermalOut = gridPoint.ThermalRight + gridPoint.ThermalLeft + gridPoint.ThermalTop + gridPoint.ThermalBottom;
 
-	float volumeDelta = flowIn - flowOut;
+	float volumeDelta = thermalIn - thermalOut;
 
-	gridPoint.WaterHeight += timeDelta * volumeDelta / (cellSizeX * cellSizeY);
-    gridPoint.WaterHeight = max(0.0, gridPoint.WaterHeight);
-
-    gridPoint.VelocityX = 0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft + gridPoints[getIndex(x + 1, y)].FlowLeft - gridPoint.FlowRight);
-    gridPoint.VelocityY = 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom + gridPoints[getIndex(x, y + 1)].FlowBottom - gridPoint.FlowTop);
-
-    gridPoints[id] = gridPoint;
+	heightMap[id] += min(1.0, timeDelta * thermalErosionTimeScale) * volumeDelta;
 }
