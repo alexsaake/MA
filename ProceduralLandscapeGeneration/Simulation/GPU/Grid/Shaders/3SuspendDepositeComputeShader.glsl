@@ -33,11 +33,6 @@ layout(std430, binding = 2) buffer gridPointsShaderBuffer
     GridPoint[] gridPoints;
 };
 
-layout(std430, binding = 3) readonly restrict buffer erosionConfigurationShaderBuffer
-{
-    uint heightMultiplier;
-};
-
 uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
@@ -48,31 +43,6 @@ uint getIndex(uint x, uint y)
 uint getIndexVector(vec2 position)
 {
     return uint((position.y * myHeightMapSideLength) + position.x);
-}
-
-vec3 getScaledNormal(uint x, uint y)
-{
-    if (x < 1 || x > myHeightMapSideLength - 2
-        || y < 1 || y > myHeightMapSideLength - 2)
-    {
-        return vec3(0.0, 0.0, 1.0);
-    }
-
-    float xp1ym1 = heightMap[getIndex(x + 1, y - 1)];
-    float xm1ym1 = heightMap[getIndex(x - 1, y - 1)];
-    float xp1y = heightMap[getIndex(x + 1, y)];
-    float xm1y = heightMap[getIndex(x - 1, y)];
-    float xp1yp1 = heightMap[getIndex(x + 1, y + 1)];
-    float xm1yp1 = heightMap[getIndex(x - 1, y + 1)];
-    float xyp1 = heightMap[getIndex(x, y + 1)];
-    float xym1 = heightMap[getIndex(x, y - 1)];
-
-    vec3 normal = vec3(
-    64 * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
-    64 * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
-    1.0);
-
-    return normalize(normal);
 }
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
@@ -104,7 +74,7 @@ void main()
 
 	vec3 dhdx = vec3(2.0 * cellSizeX, heightMap[getIndex(x + 1, y)] - heightMap[getIndex(x - 1, y)], 0.0);
 	vec3 dhdy = vec3(0.0, heightMap[getIndex(x, y + 1)] - heightMap[getIndex(x, y - 1)], 2.0 * cellSizeY);
-	vec3 normal = getScaledNormal(x, y);//cross(dhdx, dhdy);
+	vec3 normal = cross(dhdx, dhdy);
 
 	float sinTiltAngle = abs(normal.y) / length(normal);
 	

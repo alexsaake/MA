@@ -171,8 +171,9 @@ internal class ErosionSimulator : IErosionSimulator
 
         Console.WriteLine($"INFO: Simulating hydraulic erosion grid.");
 
-        myHydraulicErosion.FlowCalculation();
+        myHydraulicErosion.Flow();
         myHydraulicErosion.VelocityMap();
+        myHydraulicErosion.SuspendDeposite();
         myHydraulicErosion.Erode();
 
         ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
