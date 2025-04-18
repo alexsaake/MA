@@ -2,7 +2,7 @@
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-layout(std430, binding = 1) coherent buffer heightMapShaderBuffer
+layout(std430, binding = 1) buffer heightMapShaderBuffer
 {
     float[] heightMap;
 };
@@ -28,7 +28,7 @@ struct GridPoint
     float VelocityY;
 };
 
-layout(std430, binding = 2) coherent buffer gridPointsShaderBuffer
+layout(std430, binding = 2) buffer gridPointsShaderBuffer
 {
     GridPoint[] gridPoints;
 };

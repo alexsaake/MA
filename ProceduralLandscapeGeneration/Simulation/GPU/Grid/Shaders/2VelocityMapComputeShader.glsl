@@ -2,7 +2,7 @@
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-layout(std430, binding = 1) coherent buffer heightMapShaderBuffer
+layout(std430, binding = 1) buffer heightMapShaderBuffer
 {
     float[] heightMap;
 };
@@ -28,7 +28,7 @@ struct GridPoint
     float VelocityY;
 };
 
-layout(std430, binding = 2) coherent buffer gridPointsShaderBuffer
+layout(std430, binding = 2) buffer gridPointsShaderBuffer
 {
     GridPoint[] gridPoints;
 };
@@ -69,7 +69,6 @@ void main()
 	float volumeDelta = flowIn - flowOut;
 
 	gridPoint.WaterHeight += timeDelta * volumeDelta / (cellSizeX * cellSizeY);
-    gridPoint.WaterHeight = max(0.0, gridPoint.WaterHeight);
 
     gridPoint.VelocityX = 0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight);
     gridPoint.VelocityY = 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop);

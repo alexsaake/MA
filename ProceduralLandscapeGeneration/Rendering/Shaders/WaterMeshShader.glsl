@@ -36,6 +36,11 @@ struct GridPoint
     float FlowTop;
     float FlowBottom;
 
+    float ThermalLeft;
+    float ThermalRight;
+    float ThermalTop;
+    float ThermalBottom;
+
     float VelocityX;
     float VelocityY;
 };

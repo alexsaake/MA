@@ -50,7 +50,7 @@ void main()
     float cellSizeX = 1.0;
     float cellSizeY = 1.0;
     float gravity = 9.81;
-    float friction = 1.0;
+    float friction = 0.5;
     
     uint id = gl_GlobalInvocationID.x;
     uint heightMapLength = heightMap.length();
@@ -66,7 +66,7 @@ void main()
     GridPoint gridPoint = gridPoints[id];
 
     float totalHeight = heightMap[id] + gridPoint.WaterHeight;
-    float frictionFactor = 0;//pow(1 - friction, timeDelta);
+    float frictionFactor = pow(1 - friction, timeDelta);
 
     if(x > 0)
     {

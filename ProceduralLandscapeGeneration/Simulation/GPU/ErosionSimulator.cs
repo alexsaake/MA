@@ -28,8 +28,6 @@ internal class ErosionSimulator : IErosionSimulator
     private uint myThermalErosionConfigurationShaderBufferId;
     private ComputeShaderProgram? myWindErosionParticleSimulationComputeShaderProgram;
 
-    private bool myIsDisposed;
-
     public ErosionSimulator(IConfiguration configuration, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory, IRandom random, IHydraulicErosion hydraulicErosion, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
@@ -174,6 +172,8 @@ internal class ErosionSimulator : IErosionSimulator
         myHydraulicErosion.Flow();
         myHydraulicErosion.VelocityMap();
         myHydraulicErosion.SuspendDeposite();
+        myHydraulicErosion.Evaporate();
+        myHydraulicErosion.MoveSediment();
         myHydraulicErosion.Erode();
 
         ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
@@ -191,11 +191,6 @@ internal class ErosionSimulator : IErosionSimulator
 
     public void Dispose()
     {
-        if (myIsDisposed)
-        {
-            return;
-        }
-
         myConfiguration.ErosionConfigurationChanged -= OnErosionConfigurationChanged;
         myConfiguration.ThermalErosionConfigurationChanged -= OnThermalErosionConfigurationChanged;
 
@@ -208,7 +203,5 @@ internal class ErosionSimulator : IErosionSimulator
 
         myHydraulicErosion.Dispose();
         myShaderBuffers.Dispose();
-
-        myIsDisposed = true;
     }
 }
