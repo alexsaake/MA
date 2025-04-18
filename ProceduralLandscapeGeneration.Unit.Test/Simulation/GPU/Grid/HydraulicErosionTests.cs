@@ -12,14 +12,14 @@ namespace ProceduralLandscapeGeneration.Int.Test.Simulation.GPU.Grid;
 [SingleThreaded]
 public class HydraulicErosionTests
 {
-    [OneTimeSetUp]
-    public void OneTimeSetUp()
+    [SetUp]
+    public void SetUp()
     {
         Raylib.InitWindow(1, 1, nameof(HydraulicErosionTests));
     }
 
-    [OneTimeTearDown]
-    public void OneTimeTearDown()
+    [TearDown]
+    public void TearDown()
     {
         Raylib.CloseWindow();
     }
@@ -439,5 +439,155 @@ public class HydraulicErosionTests
         Assert.That(topHeightMap, Is.EqualTo(1 + expectedErosion + 0.008f).Within(0.001f));
         float bottomHeightMap = heightMapValuesAfterSimulation[bottomIndex];
         Assert.That(bottomHeightMap, Is.EqualTo(1 + expectedErosion + 0.008f).Within(0.001f));
+    }
+
+    [Test]
+    public unsafe void SuspendDeposite_Flat3x3HeightMapWithWaterInMiddle_DepositedSedimentAndHeightMapChangesAreEqualInAllDirections()
+    {
+        uint heightMapSideLength = 3;
+        uint mapSize = heightMapSideLength * heightMapSideLength;
+        uint heightMapSize = mapSize * sizeof(float);
+        uint gridPointSize = (uint)(mapSize * sizeof(GridPoint));
+        ShaderBuffers shaderBuffers = new ShaderBuffers
+        {
+            { ShaderBufferTypes.HeightMap, heightMapSize }
+        };
+        Mock<IConfiguration> configurationMock = new Mock<IConfiguration>();
+        configurationMock.Setup(x => x.HeightMapSideLength).Returns(heightMapSideLength);
+        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configurationMock.Object, shaderBuffers, new Random(Mock.Of<IConfiguration>()));
+        testee.Initialize();
+        float waterIncrease = 4;
+        testee.AddWater(1, 1, waterIncrease);
+        testee.Flow();
+        testee.VelocityMap();
+        testee.SuspendDeposite();
+        float waterDecrease = -1;
+        testee.AddWater(0, 1, waterDecrease);
+        testee.AddWater(1, 0, waterDecrease);
+        testee.AddWater(1, 2, waterDecrease);
+        testee.AddWater(2, 1, waterDecrease);
+        testee.Flow();
+        testee.VelocityMap();
+
+        testee.SuspendDeposite();
+
+        GridPoint[] gridPointValues = new GridPoint[mapSize];
+        fixed (void* gridPointValuesPointer = gridPointValues)
+        {
+            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridPoints], gridPointValuesPointer, gridPointSize, 0);
+        }
+        float expectedSuspendedSediment = 0.0125f;
+        uint centerIndex = testee.GetIndex(1, 1);
+        GridPoint centerGridPoint = gridPointValues[centerIndex];
+        Assert.That(centerGridPoint.SuspendedSediment, Is.EqualTo(0));
+        uint leftIndex = testee.GetIndex(0, 1);
+        GridPoint leftGridPoint = gridPointValues[leftIndex];
+        Assert.That(leftGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
+        uint rightIndex = testee.GetIndex(2, 1);
+        GridPoint rightGridPoint = gridPointValues[rightIndex];
+        Assert.That(rightGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
+        uint topIndex = testee.GetIndex(1, 2);
+        GridPoint topGridPoint = gridPointValues[topIndex];
+        Assert.That(topGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
+        uint bottomIndex = testee.GetIndex(1, 0);
+        GridPoint bottomGridPoint = gridPointValues[bottomIndex];
+        Assert.That(bottomGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
+
+        float[] heightMapValuesAfterSimulation = new float[mapSize];
+        fixed (void* heightMapValuesPointerAfterSimulation = heightMapValuesAfterSimulation)
+        {
+            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointerAfterSimulation, heightMapSize, 0);
+        }
+        float expectedDeposition = -expectedSuspendedSediment;
+        float centerHeightMap = heightMapValuesAfterSimulation[centerIndex];
+        Assert.That(centerHeightMap, Is.EqualTo(0));
+        float leftHeightMap = heightMapValuesAfterSimulation[leftIndex];
+        Assert.That(leftHeightMap, Is.EqualTo(expectedDeposition).Within(0.001f));
+        float rightHeightMap = heightMapValuesAfterSimulation[rightIndex];
+        Assert.That(rightHeightMap, Is.EqualTo(expectedDeposition).Within(0.001f));
+        float topHeightMap = heightMapValuesAfterSimulation[topIndex];
+        Assert.That(topHeightMap, Is.EqualTo(expectedDeposition).Within(0.001f));
+        float bottomHeightMap = heightMapValuesAfterSimulation[bottomIndex];
+        Assert.That(bottomHeightMap, Is.EqualTo(expectedDeposition).Within(0.001f));
+    }
+
+    [Test]
+    public unsafe void SuspendDeposite_Slope3x3HeightMapWithWaterInMiddle_DepositedSedimentAndHeightMapChangesAreEqualAndHigherDownSlope()
+    {
+        uint heightMapSideLength = 3;
+        uint mapSize = heightMapSideLength * heightMapSideLength;
+        uint heightMapSize = mapSize * sizeof(float);
+        uint gridPointSize = (uint)(mapSize * sizeof(GridPoint));
+        ShaderBuffers shaderBuffers = new ShaderBuffers
+        {
+            { ShaderBufferTypes.HeightMap, heightMapSize }
+        };
+        Mock<IConfiguration> configurationMock = new Mock<IConfiguration>();
+        configurationMock.Setup(x => x.HeightMapSideLength).Returns(heightMapSideLength);
+        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configurationMock.Object, shaderBuffers, new Random(Mock.Of<IConfiguration>()));
+        float[] heightMapValues = new float[mapSize];
+        heightMapValues[testee.GetIndex(1, 0)] = 1;
+        heightMapValues[testee.GetIndex(1, 1)] = 1;
+        heightMapValues[testee.GetIndex(1, 2)] = 1;
+        heightMapValues[testee.GetIndex(2, 0)] = 2;
+        heightMapValues[testee.GetIndex(2, 1)] = 2;
+        heightMapValues[testee.GetIndex(2, 2)] = 2;
+        fixed (void* heightMapValuesPointer = heightMapValues)
+        {
+            Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapSize, 0);
+        }
+        testee.Initialize();
+        float waterIncrease = 4;
+        testee.AddWater(1, 1, waterIncrease);
+        testee.Flow();
+        testee.VelocityMap();
+        testee.SuspendDeposite();
+
+        testee.RemoveWater();
+        testee.Flow();
+        testee.VelocityMap();
+
+        testee.SuspendDeposite();
+
+        Rlgl.MemoryBarrier();
+
+        GridPoint[] gridPointValues = new GridPoint[mapSize];
+        fixed (void* gridPointValuesPointer = gridPointValues)
+        {
+            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridPoints], gridPointValuesPointer, gridPointSize, 0);
+        }
+        float expectedSuspendedSediment = 0.0175f;
+        uint centerIndex = testee.GetIndex(1, 1);
+        GridPoint centerGridPoint = gridPointValues[centerIndex];
+        Assert.That(centerGridPoint.SuspendedSediment, Is.EqualTo(0));
+        uint leftIndex = testee.GetIndex(0, 1);
+        GridPoint leftGridPoint = gridPointValues[leftIndex];
+        Assert.That(leftGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
+        uint rightIndex = testee.GetIndex(2, 1);
+        GridPoint rightGridPoint = gridPointValues[rightIndex];
+        Assert.That(rightGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment - 0.01125f).Within(0.001f));
+        uint topIndex = testee.GetIndex(1, 2);
+        GridPoint topGridPoint = gridPointValues[topIndex];
+        Assert.That(topGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment - 0.0092f).Within(0.001f));
+        uint bottomIndex = testee.GetIndex(1, 0);
+        GridPoint bottomGridPoint = gridPointValues[bottomIndex];
+        Assert.That(bottomGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment - 0.0092f).Within(0.001f));
+
+        float[] heightMapValuesAfterSimulation = new float[mapSize];
+        fixed (void* heightMapValuesPointerAfterSimulation = heightMapValuesAfterSimulation)
+        {
+            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointerAfterSimulation, heightMapSize, 0);
+        }
+        float expectedDeposition = -expectedSuspendedSediment;
+        float centerHeightMap = heightMapValuesAfterSimulation[centerIndex];
+        Assert.That(centerHeightMap, Is.EqualTo(1));
+        float leftHeightMap = heightMapValuesAfterSimulation[leftIndex];
+        Assert.That(leftHeightMap, Is.EqualTo(expectedDeposition).Within(0.001f));
+        float rightHeightMap = heightMapValuesAfterSimulation[rightIndex];
+        Assert.That(rightHeightMap, Is.EqualTo(2 + expectedDeposition + 0.01125f).Within(0.001f));
+        float topHeightMap = heightMapValuesAfterSimulation[topIndex];
+        Assert.That(topHeightMap, Is.EqualTo(1 + expectedDeposition + 0.0092f).Within(0.001f));
+        float bottomHeightMap = heightMapValuesAfterSimulation[bottomIndex];
+        Assert.That(bottomHeightMap, Is.EqualTo(1 + expectedDeposition + 0.0092f).Within(0.001f));
     }
 }
