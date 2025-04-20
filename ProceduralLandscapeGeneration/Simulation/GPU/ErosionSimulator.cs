@@ -182,11 +182,9 @@ internal class ErosionSimulator : IErosionSimulator
 
     public unsafe void SimulateHydraulicErosionGridAddRain()
     {
-        const float waterIncrease = 0.0125f;
-
         Console.WriteLine($"INFO: Adding {myConfiguration.HeightMapSideLength} rain drops for hydraulic erosion grid.");
 
-        myHydraulicErosion.AddRain(waterIncrease);
+        myHydraulicErosion.AddRain(myConfiguration.WaterIncrease);
     }
 
     public void Dispose()

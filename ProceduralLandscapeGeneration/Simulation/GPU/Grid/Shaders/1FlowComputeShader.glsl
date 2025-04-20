@@ -2,7 +2,7 @@
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-layout(std430, binding = 1) coherent buffer heightMapShaderBuffer
+layout(std430, binding = 1) buffer heightMapShaderBuffer
 {
     float[] heightMap;
 };
@@ -28,9 +28,29 @@ struct GridPoint
     float VelocityY;
 };
 
-layout(std430, binding = 2) coherent buffer gridPointsShaderBuffer
+layout(std430, binding = 2) buffer gridPointsShaderBuffer
 {
     GridPoint[] gridPoints;
+};
+
+struct GridErosionConfiguration
+{
+    float TimeDelta;
+    float CellSizeX;
+    float CellSizeY;
+    float Gravity;
+    float Friction;
+    float MaximalErosionDepth;
+    float SedimentCapacity;
+    float SuspensionRate;
+    float DepositionRate;
+    float SedimentSofteningRate;
+    float EvaporationRate;
+};
+
+layout(std430, binding = 3) buffer gridErosionConfigurationShaderBuffer
+{
+    GridErosionConfiguration gridErosionConfiguration;
 };
 
 uint myHeightMapSideLength;
@@ -45,13 +65,7 @@ uint getIndex(uint x, uint y)
 //https://lisyarus.github.io/blog/posts/simulating-water-over-terrain.html
 
 void main()
-{
-    float timeDelta = 1.0;
-    float cellSizeX = 1.0;
-    float cellSizeY = 1.0;
-    float gravity = 9.81;
-    float friction = 0.5;
-    
+{    
     uint id = gl_GlobalInvocationID.x;
     uint heightMapLength = heightMap.length();
     if(id > heightMapLength)
@@ -66,12 +80,12 @@ void main()
     GridPoint gridPoint = gridPoints[id];
 
     float totalHeight = heightMap[id] + gridPoint.WaterHeight;
-    float frictionFactor = pow(1 - friction, timeDelta);
+    float frictionFactor = pow(1 - gridErosionConfiguration.Friction, gridErosionConfiguration.TimeDelta);
 
     if(x > 0)
     {
         float totalHeightLeft = heightMap[getIndex(x - 1, y)] + gridPoints[getIndex(x - 1, y)].WaterHeight;
-        gridPoint.FlowLeft = gridPoint.FlowLeft * frictionFactor + (totalHeight - totalHeightLeft) * gravity * timeDelta / cellSizeX;
+        gridPoint.FlowLeft = gridPoint.FlowLeft * frictionFactor + (totalHeight - totalHeightLeft) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeX;
         gridPoint.FlowLeft = max(0.0, gridPoint.FlowLeft);
     }
     else
@@ -82,7 +96,7 @@ void main()
     if(x < myHeightMapSideLength - 1)
     {
         float totalHeightRight = heightMap[getIndex(x + 1, y)] + gridPoints[getIndex(x + 1, y)].WaterHeight;
-        gridPoint.FlowRight = gridPoint.FlowRight * frictionFactor + (totalHeight - totalHeightRight) * gravity * timeDelta / cellSizeX;
+        gridPoint.FlowRight = gridPoint.FlowRight * frictionFactor + (totalHeight - totalHeightRight) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeX;
         gridPoint.FlowRight = max(0.0, gridPoint.FlowRight);
     }
     else
@@ -93,7 +107,7 @@ void main()
     if(y > 0)
     {
         float totalHeightBottom = heightMap[getIndex(x, y - 1)] + gridPoints[getIndex(x, y - 1)].WaterHeight;
-        gridPoint.FlowBottom = gridPoint.FlowBottom * frictionFactor + (totalHeight - totalHeightBottom) * gravity * timeDelta / cellSizeY;
+        gridPoint.FlowBottom = gridPoint.FlowBottom * frictionFactor + (totalHeight - totalHeightBottom) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeY;
         gridPoint.FlowBottom = max(0.0, gridPoint.FlowBottom);
     }
     else
@@ -104,7 +118,7 @@ void main()
     if(y < myHeightMapSideLength - 1)
     {
         float totalHeightTop = heightMap[getIndex(x, y + 1)] + gridPoints[getIndex(x, y + 1)].WaterHeight;
-        gridPoint.FlowTop = gridPoint.FlowTop * frictionFactor + (totalHeight - totalHeightTop) * gravity * timeDelta / cellSizeY;
+        gridPoint.FlowTop = gridPoint.FlowTop * frictionFactor + (totalHeight - totalHeightTop) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeY;
         gridPoint.FlowTop = max(0.0, gridPoint.FlowTop);
     }
     else
@@ -115,7 +129,7 @@ void main()
     float totalOutflow = gridPoint.FlowLeft + gridPoint.FlowRight + gridPoint.FlowBottom + gridPoint.FlowTop;
     if (totalOutflow > gridPoint.WaterHeight)
     {
-        float scale = min(1.0, gridPoint.WaterHeight * cellSizeX * cellSizeY / (totalOutflow * timeDelta));
+        float scale = min(1.0, gridPoint.WaterHeight * gridErosionConfiguration.CellSizeX * gridErosionConfiguration.CellSizeY / (totalOutflow * gridErosionConfiguration.TimeDelta));
         
         gridPoint.FlowLeft *= scale;
         gridPoint.FlowRight *= scale;

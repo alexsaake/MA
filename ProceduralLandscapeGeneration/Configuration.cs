@@ -7,7 +7,8 @@ internal class Configuration : IConfiguration
     private ProcessorType myHeightMapGeneration;
     public ProcessorType HeightMapGeneration
     {
-        get => myHeightMapGeneration; set
+        get => myHeightMapGeneration;
+        set
         {
             if (myHeightMapGeneration == value)
             {
@@ -21,7 +22,8 @@ internal class Configuration : IConfiguration
     private ProcessorType myErosionSimulation;
     public ProcessorType ErosionSimulation
     {
-        get => myErosionSimulation; set
+        get => myErosionSimulation;
+        set
         {
             if (myErosionSimulation == value)
             {
@@ -35,7 +37,8 @@ internal class Configuration : IConfiguration
     private ProcessorType myMeshCreation;
     public ProcessorType MeshCreation
     {
-        get => myMeshCreation; set
+        get => myMeshCreation;
+        set
         {
             if (myMeshCreation == value)
             {
@@ -49,7 +52,8 @@ internal class Configuration : IConfiguration
     private int mySeed;
     public int Seed
     {
-        get => mySeed; set
+        get => mySeed;
+        set
         {
             if (mySeed == value)
             {
@@ -63,7 +67,8 @@ internal class Configuration : IConfiguration
     private uint myHeightMapSideLength;
     public uint HeightMapSideLength
     {
-        get => myHeightMapSideLength; set
+        get => myHeightMapSideLength;
+        set
         {
             if (myHeightMapSideLength == value)
             {
@@ -77,7 +82,8 @@ internal class Configuration : IConfiguration
     private int myHeightMultiplier;
     public int HeightMultiplier
     {
-        get => myHeightMultiplier; set
+        get => myHeightMultiplier;
+        set
         {
             if (myHeightMultiplier == value)
             {
@@ -91,7 +97,8 @@ internal class Configuration : IConfiguration
     private float myNoiseScale;
     public float NoiseScale
     {
-        get => myNoiseScale; set
+        get => myNoiseScale;
+        set
         {
             if (myNoiseScale == value)
             {
@@ -105,7 +112,8 @@ internal class Configuration : IConfiguration
     private uint myNoiseOctaves;
     public uint NoiseOctaves
     {
-        get => myNoiseOctaves; set
+        get => myNoiseOctaves;
+        set
         {
             if (myNoiseOctaves == value)
             {
@@ -119,7 +127,8 @@ internal class Configuration : IConfiguration
     private float myNoisePersistance;
     public float NoisePersistence
     {
-        get => myNoisePersistance; set
+        get => myNoisePersistance;
+        set
         {
             if (myNoisePersistance == value)
             {
@@ -133,7 +142,8 @@ internal class Configuration : IConfiguration
     private float myNoiseLacunarity;
     public float NoiseLacunarity
     {
-        get => myNoiseLacunarity; set
+        get => myNoiseLacunarity;
+        set
         {
             if (myNoiseLacunarity == value)
             {
@@ -147,7 +157,8 @@ internal class Configuration : IConfiguration
     private uint mySimulationIterations;
     public uint SimulationIterations
     {
-        get => mySimulationIterations; set
+        get => mySimulationIterations;
+        set
         {
             if (mySimulationIterations == value)
             {
@@ -160,7 +171,8 @@ internal class Configuration : IConfiguration
     private int myTalusAngle;
     public int TalusAngle
     {
-        get => myTalusAngle; set
+        get => myTalusAngle;
+        set
         {
             if (myTalusAngle == value)
             {
@@ -174,7 +186,8 @@ internal class Configuration : IConfiguration
     private float myHeightChange;
     public float ThermalErosionHeightChange
     {
-        get => myHeightChange; set
+        get => myHeightChange;
+        set
         {
             if (myHeightChange == value)
             {
@@ -191,10 +204,176 @@ internal class Configuration : IConfiguration
     public int SimulationCallbackEachIterations { get; set; } = 1000;
     public int ShadowMapResolution { get; set; } = 1028;
 
+    public float WaterIncrease { get; set; }
+
+    private float myTimeDelta;
+    public float TimeDelta
+    {
+        get => myTimeDelta;
+        set
+        {
+            if (myTimeDelta == value)
+            {
+                return;
+            }
+            myTimeDelta = value;
+            GridErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myCellSizeX;
+    public float CellSizeX
+    {
+        get => myCellSizeX;
+        set
+        {
+            if (myCellSizeX == value)
+            {
+                return;
+            }
+            myCellSizeX = value;
+            GridErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+    private float myCellSizeY;
+    public float CellSizeY
+    {
+        get => myCellSizeY;
+        set
+        {
+            if (myCellSizeY == value)
+            {
+                return;
+            }
+            myCellSizeY = value;
+            GridErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+    private float myGravity;
+    public float Gravity
+    {
+        get => myGravity;
+        set
+        {
+            if (myGravity == value)
+            {
+                return;
+            }
+            myGravity = value;
+            GridErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myFriction;
+    public float Friction
+    {
+        get => myFriction;
+        set
+        {
+            if (myFriction == value)
+            {
+                return;
+            }
+            myFriction = value;
+            GridErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myMaximalErpsionDepth;
+    public float MaximalErosionDepth
+    {
+        get => myMaximalErpsionDepth;
+        set
+        {
+            if (myMaximalErpsionDepth == value)
+            {
+                return;
+            }
+            myMaximalErpsionDepth = value;
+            GridErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float mySedimentCapacity;
+    public float SedimentCapacity
+    {
+        get => mySedimentCapacity;
+        set
+        {
+            if (mySedimentCapacity == value)
+            {
+                return;
+            }
+            mySedimentCapacity = value;
+            GridErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float mySuspensionRate;
+    public float SuspensionRate
+    {
+        get => mySuspensionRate;
+        set
+        {
+            if (mySuspensionRate == value)
+            {
+                return;
+            }
+            mySuspensionRate = value;
+            GridErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myDepositionRate;
+    public float DepositionRate
+    {
+        get => myDepositionRate;
+        set
+        {
+            if (myDepositionRate == value)
+            {
+                return;
+            }
+            myDepositionRate = value;
+            GridErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float mySedimentSofteningRate;
+    public float SedimentSofteningRate
+    {
+        get => mySedimentSofteningRate;
+        set
+        {
+            if (mySedimentSofteningRate == value)
+            {
+                return;
+            }
+            mySedimentSofteningRate = value;
+            GridErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myEvaporationRate;
+    public float EvaporationRate
+    {
+        get => myEvaporationRate;
+        set
+        {
+            if (myEvaporationRate == value)
+            {
+                return;
+            }
+            myEvaporationRate = value;
+            GridErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     public event EventHandler? ProcessorTypeChanged;
     public event EventHandler? HeightMapConfigurationChanged;
     public event EventHandler? ErosionConfigurationChanged;
     public event EventHandler? ThermalErosionConfigurationChanged;
+    public event EventHandler? GridErosionConfigurationChanged;
 
     public Configuration()
     {
@@ -214,5 +393,18 @@ internal class Configuration : IConfiguration
 
         TalusAngle = 33;
         ThermalErosionHeightChange = 0.001f;
+
+        WaterIncrease = 0.0125f;
+        TimeDelta = 1;
+        CellSizeX = 1;
+        CellSizeY = 1;
+        Gravity = 9.81f;
+        Friction = 0.5f;
+        MaximalErosionDepth = 10;
+        SedimentCapacity = 1;
+        SuspensionRate = 0.25f;
+        DepositionRate = 0.5f;
+        SedimentSofteningRate = 0;
+        EvaporationRate = 0.0125f;
     }
 }

@@ -33,6 +33,26 @@ layout(std430, binding = 2) buffer gridPointsShaderBuffer
     GridPoint[] gridPoints;
 };
 
+struct GridErosionConfiguration
+{
+    float TimeDelta;
+    float CellSizeX;
+    float CellSizeY;
+    float Gravity;
+    float Friction;
+    float MaximalErosionDepth;
+    float SedimentCapacity;
+    float SuspensionRate;
+    float DepositionRate;
+    float SedimentSofteningRate;
+    float EvaporationRate;
+};
+
+layout(std430, binding = 3) buffer gridErosionConfigurationShaderBuffer
+{
+    GridErosionConfiguration gridErosionConfiguration;
+};
+
 uint myHeightMapSideLength;
 
 uint getIndex(vec2 position)
@@ -63,9 +83,6 @@ float SampleBilinear(vec2 uv)
 
 void main()
 {    
-    float timeDelta = 1.0;
-    float evaporationRate = 0.15;
-    
     uint id = gl_GlobalInvocationID.x;
     uint heightMapLength = heightMap.length();
     if(id > heightMapLength)
@@ -79,8 +96,10 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
-	gridPoint.WaterHeight = max(0.0, gridPoint.WaterHeight * (1.0 - evaporationRate * timeDelta));
-	gridPoint.TempSediment = SampleBilinear(vec2(x, y) - vec2(gridPoint.VelocityX, gridPoint.VelocityY) * timeDelta);
+	gridPoint.WaterHeight = max(0.0, gridPoint.WaterHeight * (1.0 - gridErosionConfiguration.EvaporationRate * gridErosionConfiguration.TimeDelta));
+	gridPoint.TempSediment = SampleBilinear(vec2(x, y) - vec2(gridPoint.VelocityX, gridPoint.VelocityY) * gridErosionConfiguration.TimeDelta);
 
     gridPoints[id] = gridPoint;
+    
+    memoryBarrier();
 }

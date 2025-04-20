@@ -33,6 +33,26 @@ layout(std430, binding = 2) buffer gridPointsShaderBuffer
     GridPoint[] gridPoints;
 };
 
+struct GridErosionConfiguration
+{
+    float TimeDelta;
+    float CellSizeX;
+    float CellSizeY;
+    float Gravity;
+    float Friction;
+    float MaximalErosionDepth;
+    float SedimentCapacity;
+    float SuspensionRate;
+    float DepositionRate;
+    float SedimentSofteningRate;
+    float EvaporationRate;
+};
+
+layout(std430, binding = 3) buffer gridErosionConfigurationShaderBuffer
+{
+    GridErosionConfiguration gridErosionConfiguration;
+};
+
 uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
@@ -45,11 +65,7 @@ uint getIndex(uint x, uint y)
 //https://lisyarus.github.io/blog/posts/simulating-water-over-terrain.html
 
 void main()
-{
-    float timeDelta = 1.0;
-    float cellSizeX = 1.0;
-    float cellSizeY = 1.0;
-    
+{    
     uint id = gl_GlobalInvocationID.x;
     uint heightMapLength = heightMap.length();
     if(id > heightMapLength)
@@ -68,7 +84,7 @@ void main()
 
 	float volumeDelta = flowIn - flowOut;
 
-	gridPoint.WaterHeight += timeDelta * volumeDelta / (cellSizeX * cellSizeY);
+	gridPoint.WaterHeight += gridErosionConfiguration.TimeDelta * volumeDelta / (gridErosionConfiguration.CellSizeX * gridErosionConfiguration.CellSizeY);
 
     gridPoint.VelocityX = 0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight);
     gridPoint.VelocityY = 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop);

@@ -46,12 +46,43 @@ internal class HydraulicErosion : IHydraulicErosion
             gridPoints[i].Hardness = 1.0f;
         }
         myShaderBufferIds.Add(ShaderBufferTypes.GridPoints, (uint)(mapSize * sizeof(GridPoint)));
-
         fixed (void* gridPointsPointer = gridPoints)
         {
             Rlgl.UpdateShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], gridPointsPointer, mapSize * (uint)sizeof(GridPoint), 0);
         }
+        myConfiguration.ErosionConfigurationChanged += OnErosionConfigurationChanged;
+        myShaderBufferIds.Add(ShaderBufferTypes.GridErosionConfiguration, (uint)sizeof(GridErosionConfiguration));
+        UpdateGridErosionConfiguration();
         Rlgl.MemoryBarrier();
+    }
+
+    private void OnErosionConfigurationChanged(object? sender, EventArgs e)
+    {
+        UpdateGridErosionConfiguration();
+    }
+
+    private unsafe void UpdateGridErosionConfiguration()
+    {
+        GridErosionConfiguration gridErosionConfiguration = CreateGridErosionConfiguration();
+        Rlgl.UpdateShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridErosionConfiguration], &gridErosionConfiguration, (uint)sizeof(GridErosionConfiguration), 0);
+    }
+
+    private GridErosionConfiguration CreateGridErosionConfiguration()
+    {
+        return new GridErosionConfiguration
+        {
+            TimeDelta = myConfiguration.TimeDelta,
+            CellSizeX = myConfiguration.CellSizeX,
+            CellSizeY = myConfiguration.CellSizeY,
+            Gravity = myConfiguration.Gravity,
+            Friction = myConfiguration.Friction,
+            MaximalErosionDepth = myConfiguration.MaximalErosionDepth,
+            SedimentCapacity = myConfiguration.SedimentCapacity,
+            SuspensionRate = myConfiguration.SuspensionRate,
+            DepositionRate = myConfiguration.DepositionRate,
+            SedimentSofteningRate = myConfiguration.SedimentSofteningRate,
+            EvaporationRate = myConfiguration.EvaporationRate
+        };
     }
 
     public void Flow()
@@ -59,6 +90,7 @@ internal class HydraulicErosion : IHydraulicErosion
         Rlgl.EnableShader(myFlow!.Id);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], 2);
+        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridErosionConfiguration], 3);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
@@ -69,6 +101,7 @@ internal class HydraulicErosion : IHydraulicErosion
         Rlgl.EnableShader(myVelocityMap!.Id);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], 2);
+        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridErosionConfiguration], 3);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
@@ -79,6 +112,7 @@ internal class HydraulicErosion : IHydraulicErosion
         Rlgl.EnableShader(mySuspendDeposite!.Id);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], 2);
+        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridErosionConfiguration], 3);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
@@ -89,6 +123,7 @@ internal class HydraulicErosion : IHydraulicErosion
         Rlgl.EnableShader(myEvaporate!.Id);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], 2);
+        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridErosionConfiguration], 3);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
@@ -99,6 +134,7 @@ internal class HydraulicErosion : IHydraulicErosion
         Rlgl.EnableShader(myMoveSediment!.Id);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], 2);
+        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridErosionConfiguration], 3);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();

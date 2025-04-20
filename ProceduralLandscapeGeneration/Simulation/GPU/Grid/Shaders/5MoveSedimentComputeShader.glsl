@@ -45,4 +45,6 @@ void main()
     gridPoint.SuspendedSediment = gridPoint.TempSediment;
 
     gridPoints[id] = gridPoint;
+    
+    memoryBarrier();
 }
