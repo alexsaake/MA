@@ -28,6 +28,9 @@ internal interface IConfiguration
     int ScreenWidth { get; set; }
     int ShadowMapResolution { get; set; }
 
+    bool ShowWater { get; set; }
+    bool ShowSediment { get; set; }
+
     float WaterIncrease { get; set; }
     float TimeDelta { get; set; }
     float CellSizeX { get; set; }

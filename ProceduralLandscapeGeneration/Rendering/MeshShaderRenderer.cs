@@ -133,39 +133,37 @@ internal class MeshShaderRenderer : IRenderer
 
     public void Draw()
     {
-        Raylib.BeginShaderMode(myWaterMeshShader);
-            Raylib.BeginBlendMode(BlendMode.AlphaPremultiply);
-                Raylib.BeginMode3D(myCamera);
-                    Rlgl.EnableShader(myWaterMeshShader.Id);
-                        Rlgl.BindShaderBuffer(myHeightMapShaderBufferId, 1);
-                        Rlgl.BindShaderBuffer(myGridPointsShaderBufferId, 2);
-                        Rlgl.BindShaderBuffer(myConfigurationShaderBufferId, 3);
-                        Raylib.DrawMeshTasks(0, myMeshletCount);
-                    Rlgl.DisableShader();
-                Raylib.EndMode3D();
-            Raylib.EndBlendMode();
-        Raylib.EndShaderMode();
-        Raylib.BeginShaderMode(mySedimentMeshShader);
-            Raylib.BeginBlendMode(BlendMode.AlphaPremultiply);
-                Raylib.BeginMode3D(myCamera);
+        Raylib.BeginMode3D(myCamera);
+            if (myConfiguration.ShowSediment)
+            {
+                Raylib.BeginShaderMode(mySedimentMeshShader);
                     Rlgl.EnableShader(mySedimentMeshShader.Id);
                         Rlgl.BindShaderBuffer(myHeightMapShaderBufferId, 1);
                         Rlgl.BindShaderBuffer(myGridPointsShaderBufferId, 2);
                         Rlgl.BindShaderBuffer(myConfigurationShaderBufferId, 3);
                         Raylib.DrawMeshTasks(0, myMeshletCount);
                     Rlgl.DisableShader();
-                Raylib.EndMode3D();
-            Raylib.EndBlendMode();
-        Raylib.EndShaderMode();
-        Raylib.BeginShaderMode(myTerrainMeshShader);
-            Raylib.BeginMode3D(myCamera);
+                Raylib.EndShaderMode();
+            }
+            Raylib.BeginShaderMode(myTerrainMeshShader);
                 Rlgl.EnableShader(myTerrainMeshShader.Id);
                     Rlgl.BindShaderBuffer(myHeightMapShaderBufferId, 1);
                     Rlgl.BindShaderBuffer(myConfigurationShaderBufferId, 2);
                     Raylib.DrawMeshTasks(0, myMeshletCount);
                 Rlgl.DisableShader();
-            Raylib.EndMode3D();
-        Raylib.EndShaderMode();
+            Raylib.EndShaderMode();
+            if (myConfiguration.ShowWater)
+            {
+                Raylib.BeginShaderMode(myWaterMeshShader);
+                    Rlgl.EnableShader(myWaterMeshShader.Id);
+                        Rlgl.BindShaderBuffer(myHeightMapShaderBufferId, 1);
+                        Rlgl.BindShaderBuffer(myGridPointsShaderBufferId, 2);
+                        Rlgl.BindShaderBuffer(myConfigurationShaderBufferId, 3);
+                        Raylib.DrawMeshTasks(0, myMeshletCount);
+                    Rlgl.DisableShader();
+                Raylib.EndShaderMode();
+            }
+        Raylib.EndMode3D();
     }
 
     public void Dispose()

@@ -204,6 +204,9 @@ internal class Configuration : IConfiguration
     public int SimulationCallbackEachIterations { get; set; } = 1000;
     public int ShadowMapResolution { get; set; } = 1028;
 
+    public bool ShowWater { get; set; }
+    public bool ShowSediment { get; set; }
+
     public float WaterIncrease { get; set; }
 
     private float myTimeDelta;
@@ -389,22 +392,22 @@ internal class Configuration : IConfiguration
         NoisePersistence = 0.5f;
         NoiseLacunarity = 2.0f;
 
-        SimulationIterations = 10000;
+        SimulationIterations = 100;
 
         TalusAngle = 33;
         ThermalErosionHeightChange = 0.001f;
 
-        WaterIncrease = 0.0125f;
+        WaterIncrease = 1;
         TimeDelta = 1;
         CellSizeX = 1;
         CellSizeY = 1;
         Gravity = 9.81f;
         Friction = 0.5f;
         MaximalErosionDepth = 10;
-        SedimentCapacity = 1;
-        SuspensionRate = 0.25f;
-        DepositionRate = 0.5f;
+        SedimentCapacity = 0.1f;
+        SuspensionRate = 0.1f;
+        DepositionRate = 0.1f;
         SedimentSofteningRate = 0;
-        EvaporationRate = 0.0125f;
+        EvaporationRate = 0.003f;
     }
 }

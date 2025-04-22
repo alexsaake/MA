@@ -24,9 +24,9 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myConfiguration = configuration;
 
         myProcessorTypePanel = new PanelWithElements(Vector2.Zero, "Processor Type");
-        myProcessorTypePanel.Add(new ToggleSliderWithLabel("Height Map Generation", (value) => myConfiguration.HeightMapGeneration = (ProcessorType)value, (int)myConfiguration.HeightMapGeneration));
-        myProcessorTypePanel.Add(new ToggleSliderWithLabel("Erosion Simulation", (value) => myConfiguration.ErosionSimulation = (ProcessorType)value, (int)myConfiguration.ErosionSimulation));
-        myProcessorTypePanel.Add(new ToggleSliderWithLabel("Mesh Creation", (value) => myConfiguration.MeshCreation = (ProcessorType)value, (int)myConfiguration.MeshCreation));
+        myProcessorTypePanel.Add(new ToggleSliderWithLabel("Height Map Generation", "GPU;CPU", (value) => myConfiguration.HeightMapGeneration = (ProcessorType)value, (int)myConfiguration.HeightMapGeneration));
+        myProcessorTypePanel.Add(new ToggleSliderWithLabel("Erosion Simulation", "GPU;CPU", (value) => myConfiguration.ErosionSimulation = (ProcessorType)value, (int)myConfiguration.ErosionSimulation));
+        myProcessorTypePanel.Add(new ToggleSliderWithLabel("Mesh Creation", "GPU;CPU", (value) => myConfiguration.MeshCreation = (ProcessorType)value, (int)myConfiguration.MeshCreation));
 
         myHeightMapGeneratorPanel = new PanelWithElements(new Vector2(0, 110), "Height Map Generator");
         myHeightMapGeneratorPanel.Add(new ValueBoxIntWithLabel("Seed", (value) => myConfiguration.Seed = value, myConfiguration.Seed, int.MinValue, int.MaxValue));
@@ -45,6 +45,8 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Height Change", (value) => myConfiguration.ThermalErosionHeightChange = value, myConfiguration.ThermalErosionHeightChange));
 
         myGridErosionPanel = new PanelWithElements(new Vector2(0, 465), "Grid Erosion");
+        myGridErosionPanel.Add(new ToggleSliderWithLabel("Show Water", "Off;On", (value) => myConfiguration.ShowWater = value == 1, myConfiguration.ShowWater ? 0 : 1));
+        myGridErosionPanel.Add(new ToggleSliderWithLabel("Show Sediment", "Off;On", (value) => myConfiguration.ShowSediment = value == 1, myConfiguration.ShowSediment ? 0 : 1));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Water Increase", (value) => myConfiguration.WaterIncrease = value, myConfiguration.WaterIncrease));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => myConfiguration.TimeDelta = value, myConfiguration.TimeDelta));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Cell Size X", (value) => myConfiguration.CellSizeX = value, myConfiguration.CellSizeX));

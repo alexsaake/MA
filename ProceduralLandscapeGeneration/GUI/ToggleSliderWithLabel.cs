@@ -6,12 +6,14 @@ namespace ProceduralLandscapeGeneration.GUI
     class ToggleSliderWithLabel : IGUIElement
     {
         private string myName;
+        private string mySliderOptions;
         private Action<int> myValueDelegate;
         private int myValue;
 
-        public ToggleSliderWithLabel(string name, Action<int> valueDelegate, int value)
+        public ToggleSliderWithLabel(string name, string sliderOptions, Action<int> valueDelegate, int value)
         {
             myName = name;
+            mySliderOptions = sliderOptions;
             myValueDelegate = valueDelegate;
             myValue = value;
         }
@@ -20,7 +22,7 @@ namespace ProceduralLandscapeGeneration.GUI
         {
             int value = myValue;
             Raygui.GuiLabel(new Rectangle(position, 100, 20), myName);
-            Raygui.GuiToggleSlider(new Rectangle(position + ConfigurationGUI.LabelWidth, 50, 20), "CPU;GPU", &value);
+            Raygui.GuiToggleSlider(new Rectangle(position + ConfigurationGUI.LabelWidth, 50, 20), mySliderOptions, &value);
             myValue = value;
             myValueDelegate(value);
         }

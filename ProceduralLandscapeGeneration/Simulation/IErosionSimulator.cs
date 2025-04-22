@@ -11,7 +11,6 @@ internal interface IErosionSimulator : IDisposable
     void Initialize();
     void SimulateHydraulicErosion();
     void SimulateHydraulicErosionGrid();
-    void SimulateHydraulicErosionGridAddRain();
     void SimulateThermalErosion();
     void SimulateWindErosion();
 }

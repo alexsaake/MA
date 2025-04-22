@@ -169,22 +169,19 @@ internal class ErosionSimulator : IErosionSimulator
 
         Console.WriteLine($"INFO: Simulating hydraulic erosion grid.");
 
-        myHydraulicErosion.Flow();
-        myHydraulicErosion.VelocityMap();
-        myHydraulicErosion.SuspendDeposite();
-        myHydraulicErosion.Evaporate();
-        myHydraulicErosion.MoveSediment();
-        myHydraulicErosion.Erode();
+        //for (uint i = 0; i < myConfiguration.SimulationIterations; i++)
+        //{
+            myHydraulicErosion.AddRain(myConfiguration.WaterIncrease);
+            myHydraulicErosion.Flow();
+            myHydraulicErosion.VelocityMap();
+            myHydraulicErosion.SuspendDeposite();
+            myHydraulicErosion.Evaporate();
+            myHydraulicErosion.MoveSediment();
+            myHydraulicErosion.Erode();
+        //}
 
         ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-        Console.WriteLine($"INFO: End of simulation.");
-    }
-
-    public unsafe void SimulateHydraulicErosionGridAddRain()
-    {
-        Console.WriteLine($"INFO: Adding {myConfiguration.HeightMapSideLength} rain drops for hydraulic erosion grid.");
-
-        myHydraulicErosion.AddRain(myConfiguration.WaterIncrease);
+        Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
     }
 
     public void Dispose()
