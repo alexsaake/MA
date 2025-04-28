@@ -80,7 +80,7 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
-    float totalHeight = (heightMap[id] + gridPoint.WaterHeight) * heightMultiplier;
+    float totalHeight = heightMap[id] + gridPoint.WaterHeight;
     float frictionFactor = pow(1 - gridErosionConfiguration.Friction, gridErosionConfiguration.TimeDelta);
 
     if(x > 0)

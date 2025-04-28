@@ -85,7 +85,7 @@ void main()
 
 	float volumeDelta = gridErosionConfiguration.TimeDelta * (flowIn - flowOut);
 
-	gridPoint.WaterHeight = max(0, gridPoint.WaterHeight + volumeDelta / (gridErosionConfiguration.CellSizeX * gridErosionConfiguration.CellSizeY);
+	gridPoint.WaterHeight = max(0, gridPoint.WaterHeight + volumeDelta / (gridErosionConfiguration.CellSizeX * gridErosionConfiguration.CellSizeY));
 
     if(gridPoint.WaterHeight > 0)
     {
