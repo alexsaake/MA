@@ -68,14 +68,14 @@ internal class MeshShaderRenderer : IRenderer
         {
             myHeightMapShaderBufferId = myShaderBufferIds[ShaderBufferTypes.HeightMap];
             myGridPointsShaderBufferId = myShaderBufferIds[ShaderBufferTypes.GridPoints];
-            int heightMultiplierValue = myConfiguration.HeightMultiplier;
+            uint heightMultiplierValue = myConfiguration.HeightMultiplier;
             myConfigurationShaderBufferId = Rlgl.LoadShaderBuffer(sizeof(uint), &heightMultiplierValue, Rlgl.DYNAMIC_COPY);
         }
     }
 
     private unsafe void OnErosionConfigurationChanged(object? sender, EventArgs e)
     {
-        int heightMultiplierValue = myConfiguration.HeightMultiplier;
+        uint heightMultiplierValue = myConfiguration.HeightMultiplier;
         Rlgl.UpdateShaderBuffer(myConfigurationShaderBufferId, &heightMultiplierValue, sizeof(uint), 0);
     }
 

@@ -10,7 +10,7 @@ internal interface IConfiguration
 
     int Seed { get; set; }
     uint HeightMapSideLength { get; set; }
-    int HeightMultiplier { get; set; }
+    uint HeightMultiplier { get; set; }
     float NoiseScale { get; set; }
     uint NoiseOctaves { get; set; }
     float NoisePersistence { get; set; }
@@ -30,6 +30,7 @@ internal interface IConfiguration
 
     bool ShowWater { get; set; }
     bool ShowSediment { get; set; }
+    bool AddRain { get; set; }
 
     float WaterIncrease { get; set; }
     float TimeDelta { get; set; }
@@ -43,6 +44,8 @@ internal interface IConfiguration
     float DepositionRate { get; set; }
     float SedimentSofteningRate { get; set; }
     float EvaporationRate { get; set; }
+
+    uint GetIndex(uint x, uint y);
 
     event EventHandler? ProcessorTypeChanged;
     event EventHandler? HeightMapConfigurationChanged;

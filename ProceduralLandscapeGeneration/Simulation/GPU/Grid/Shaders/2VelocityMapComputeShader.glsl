@@ -63,6 +63,7 @@ uint getIndex(uint x, uint y)
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
 //https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
 //https://lisyarus.github.io/blog/posts/simulating-water-over-terrain.html
+//https://github.com/karhu/terrain-erosion/blob/master/Simulation/FluidSimulation.cpp
 
 void main()
 {    
@@ -82,13 +83,21 @@ void main()
     float flowIn = gridPoints[getIndex(x - 1, y)].FlowRight + gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoints[getIndex(x, y - 1)].FlowTop + gridPoints[getIndex(x, y + 1)].FlowBottom;
     float flowOut = gridPoint.FlowRight + gridPoint.FlowLeft + gridPoint.FlowTop + gridPoint.FlowBottom;
 
-	float volumeDelta = flowIn - flowOut;
+	float volumeDelta = gridErosionConfiguration.TimeDelta * (flowIn - flowOut);
 
-	gridPoint.WaterHeight += gridErosionConfiguration.TimeDelta * volumeDelta / (gridErosionConfiguration.CellSizeX * gridErosionConfiguration.CellSizeY);
+	gridPoint.WaterHeight = max(0, gridPoint.WaterHeight + volumeDelta / (gridErosionConfiguration.CellSizeX * gridErosionConfiguration.CellSizeY);
 
-    gridPoint.VelocityX = 0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight);
-    gridPoint.VelocityY = 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop);
-
+    if(gridPoint.WaterHeight > 0)
+    {
+        gridPoint.VelocityX = 0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight) / gridErosionConfiguration.CellSizeY;
+        gridPoint.VelocityY = 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop) / gridErosionConfiguration.CellSizeX;
+    }
+    else
+    {
+        gridPoint.VelocityX = 0;
+        gridPoint.VelocityY = 0;
+    }
+    
     gridPoints[id] = gridPoint;
 
     memoryBarrier();

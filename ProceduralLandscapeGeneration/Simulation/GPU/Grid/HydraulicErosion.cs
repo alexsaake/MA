@@ -111,8 +111,9 @@ internal class HydraulicErosion : IHydraulicErosion
     {
         Rlgl.EnableShader(mySuspendDeposite!.Id);
         Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
-        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], 2);
-        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridErosionConfiguration], 3);
+        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.ErosionConfiguration], 2);
+        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], 3);
+        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridErosionConfiguration], 4);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
@@ -171,7 +172,7 @@ internal class HydraulicErosion : IHydraulicErosion
 
         for (int drop = 0; drop < myConfiguration.HeightMapSideLength; drop++)
         {
-            uint index = GetIndex((uint)myRandom.Next((int)myConfiguration.HeightMapSideLength), (uint)myRandom.Next((int)myConfiguration.HeightMapSideLength));
+            uint index = myConfiguration.GetIndex((uint)myRandom.Next((int)myConfiguration.HeightMapSideLength), (uint)myRandom.Next((int)myConfiguration.HeightMapSideLength));
             gridPoints[index].WaterHeight += value;
         }
 
@@ -194,7 +195,7 @@ internal class HydraulicErosion : IHydraulicErosion
             Rlgl.ReadShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
         }
 
-        uint index = GetIndex(x, y);
+        uint index = myConfiguration.GetIndex(x, y);
         gridPoints[index].WaterHeight += value;
 
         fixed (void* gridPointsPointer = gridPoints)
@@ -226,11 +227,6 @@ internal class HydraulicErosion : IHydraulicErosion
             Rlgl.UpdateShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
         }
         Rlgl.MemoryBarrier();
-    }
-
-    public uint GetIndex(uint x, uint y)
-    {
-        return (y * myConfiguration.HeightMapSideLength) + x;
     }
 
     public void Dispose()

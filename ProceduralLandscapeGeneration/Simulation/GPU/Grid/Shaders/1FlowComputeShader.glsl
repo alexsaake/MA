@@ -63,6 +63,7 @@ uint getIndex(uint x, uint y)
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
 //https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
 //https://lisyarus.github.io/blog/posts/simulating-water-over-terrain.html
+//https://github.com/karhu/terrain-erosion/blob/master/Simulation/FluidSimulation.cpp
 
 void main()
 {    
@@ -79,14 +80,13 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
-    float totalHeight = heightMap[id] + gridPoint.WaterHeight;
+    float totalHeight = (heightMap[id] + gridPoint.WaterHeight) * heightMultiplier;
     float frictionFactor = pow(1 - gridErosionConfiguration.Friction, gridErosionConfiguration.TimeDelta);
 
     if(x > 0)
     {
         float totalHeightLeft = heightMap[getIndex(x - 1, y)] + gridPoints[getIndex(x - 1, y)].WaterHeight;
-        gridPoint.FlowLeft = gridPoint.FlowLeft * frictionFactor + (totalHeight - totalHeightLeft) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeX;
-        gridPoint.FlowLeft = max(0.0, gridPoint.FlowLeft);
+        gridPoint.FlowLeft = max(0.0, gridPoint.FlowLeft * frictionFactor + (totalHeight - totalHeightLeft) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeX);
     }
     else
     {
@@ -96,8 +96,7 @@ void main()
     if(x < myHeightMapSideLength - 1)
     {
         float totalHeightRight = heightMap[getIndex(x + 1, y)] + gridPoints[getIndex(x + 1, y)].WaterHeight;
-        gridPoint.FlowRight = gridPoint.FlowRight * frictionFactor + (totalHeight - totalHeightRight) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeX;
-        gridPoint.FlowRight = max(0.0, gridPoint.FlowRight);
+        gridPoint.FlowRight = max(0.0, gridPoint.FlowRight * frictionFactor + (totalHeight - totalHeightRight) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeX);
     }
     else
     {
@@ -107,8 +106,7 @@ void main()
     if(y > 0)
     {
         float totalHeightBottom = heightMap[getIndex(x, y - 1)] + gridPoints[getIndex(x, y - 1)].WaterHeight;
-        gridPoint.FlowBottom = gridPoint.FlowBottom * frictionFactor + (totalHeight - totalHeightBottom) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeY;
-        gridPoint.FlowBottom = max(0.0, gridPoint.FlowBottom);
+        gridPoint.FlowBottom = max(0.0, gridPoint.FlowBottom * frictionFactor + (totalHeight - totalHeightBottom) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeY);
     }
     else
     {
@@ -118,8 +116,7 @@ void main()
     if(y < myHeightMapSideLength - 1)
     {
         float totalHeightTop = heightMap[getIndex(x, y + 1)] + gridPoints[getIndex(x, y + 1)].WaterHeight;
-        gridPoint.FlowTop = gridPoint.FlowTop * frictionFactor + (totalHeight - totalHeightTop) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeY;
-        gridPoint.FlowTop = max(0.0, gridPoint.FlowTop);
+        gridPoint.FlowTop = max(0.0, gridPoint.FlowTop * frictionFactor + (totalHeight - totalHeightTop) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeY);
     }
     else
     {

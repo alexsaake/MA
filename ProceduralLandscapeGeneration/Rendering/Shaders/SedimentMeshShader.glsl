@@ -50,7 +50,7 @@ layout(std430, binding = 2) buffer gridPointsShaderBuffer
     GridPoint[] gridPoints;
 };
 
-layout(std430, binding = 3) readonly restrict buffer configurationShaderBuffer
+layout(std430, binding = 3) readonly restrict buffer erosionConfigurationShaderBuffer
 {
     uint heightMultiplier;
 };

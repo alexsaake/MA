@@ -51,9 +51,9 @@ internal class ErosionSimulator : IErosionSimulator
         ThermalErosionConfiguration thermalErosionConfiguration = CreateThermalErosionConfiguration();
         myThermalErosionConfigurationShaderBufferId = Rlgl.LoadShaderBuffer((uint)sizeof(ThermalErosionConfiguration), &thermalErosionConfiguration, Rlgl.DYNAMIC_COPY);
 
-        int heightMultiplier = myConfiguration.HeightMultiplier;
-        myShaderBuffers.Add(ShaderBufferTypes.HeightMultiplier, sizeof(int));
-        Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMultiplier], &heightMultiplier, sizeof(int), 0);
+        myShaderBuffers.Add(ShaderBufferTypes.ErosionConfiguration, sizeof(int));
+        uint heightMultiplier = myConfiguration.HeightMultiplier;
+        Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ErosionConfiguration], &heightMultiplier, sizeof(int), 0);
 
         myHydraulicErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/Particle/HydraulicErosionSimulationComputeShader.glsl");
         myThermalErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/ThermalErosionSimulationComputeShader.glsl");
@@ -64,8 +64,8 @@ internal class ErosionSimulator : IErosionSimulator
 
     private unsafe void OnErosionConfigurationChanged(object? sender, EventArgs e)
     {
-        int heightMultiplier = myConfiguration.HeightMultiplier;
-        Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMultiplier], &heightMultiplier, sizeof(uint), 0);
+        uint heightMultiplier = myConfiguration.HeightMultiplier;
+        Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ErosionConfiguration], &heightMultiplier, sizeof(uint), 0);
     }
 
     private unsafe void OnThermalErosionConfigurationChanged(object? sender, EventArgs e)
@@ -92,7 +92,7 @@ internal class ErosionSimulator : IErosionSimulator
         Rlgl.EnableShader(myHydraulicErosionParticleSimulationComputeShaderProgram!.Id);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myHeightMapIndicesShaderBufferId, 2);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMultiplier], 3);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ErosionConfiguration], 3);
         Rlgl.ComputeShaderDispatch(myConfiguration.SimulationIterations / 64, 1, 1);
         Rlgl.DisableShader();
 
@@ -108,7 +108,7 @@ internal class ErosionSimulator : IErosionSimulator
 
         Rlgl.EnableShader(myThermalErosionSimulationComputeShaderProgram!.Id);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMultiplier], 2);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ErosionConfiguration], 2);
         Rlgl.BindShaderBuffer(myThermalErosionConfigurationShaderBufferId, 3);
         Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
         Rlgl.DisableShader();
@@ -140,7 +140,7 @@ internal class ErosionSimulator : IErosionSimulator
         Rlgl.EnableShader(myWindErosionParticleSimulationComputeShaderProgram!.Id);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myHeightMapIndicesShaderBufferId, 2);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMultiplier], 3);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ErosionConfiguration], 3);
         Rlgl.ComputeShaderDispatch(myConfiguration.SimulationIterations / 64, 1, 1);
         Rlgl.DisableShader();
 
@@ -171,13 +171,16 @@ internal class ErosionSimulator : IErosionSimulator
 
         //for (uint i = 0; i < myConfiguration.SimulationIterations; i++)
         //{
+        if (myConfiguration.AddRain)
+        {
             myHydraulicErosion.AddRain(myConfiguration.WaterIncrease);
-            myHydraulicErosion.Flow();
-            myHydraulicErosion.VelocityMap();
-            myHydraulicErosion.SuspendDeposite();
-            myHydraulicErosion.Evaporate();
-            myHydraulicErosion.MoveSediment();
-            myHydraulicErosion.Erode();
+        }
+        myHydraulicErosion.Flow();
+        myHydraulicErosion.VelocityMap();
+        myHydraulicErosion.SuspendDeposite();
+        myHydraulicErosion.Evaporate();
+        myHydraulicErosion.MoveSediment();
+        myHydraulicErosion.Erode();
         //}
 
         ErosionIterationFinished?.Invoke(this, EventArgs.Empty);

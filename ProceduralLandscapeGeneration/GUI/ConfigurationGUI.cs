@@ -31,7 +31,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myHeightMapGeneratorPanel = new PanelWithElements(new Vector2(0, 110), "Height Map Generator");
         myHeightMapGeneratorPanel.Add(new ValueBoxIntWithLabel("Seed", (value) => myConfiguration.Seed = value, myConfiguration.Seed, int.MinValue, int.MaxValue));
         myHeightMapGeneratorPanel.Add(new ValueBoxIntWithLabel("Side Length", (value) => myConfiguration.HeightMapSideLength = (uint)value, (int)myConfiguration.HeightMapSideLength, 32, 8192));
-        myHeightMapGeneratorPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => myConfiguration.HeightMultiplier = value, myConfiguration.HeightMultiplier, 1, 150));
+        myHeightMapGeneratorPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => myConfiguration.HeightMultiplier = (uint)value, (int)myConfiguration.HeightMultiplier, 1, 150));
         myHeightMapGeneratorPanel.Add(new ValueBoxFloatWithLabel("Noise Scale", (value) => myConfiguration.NoiseScale = value, myConfiguration.NoiseScale));
         myHeightMapGeneratorPanel.Add(new ValueBoxIntWithLabel("Noise Octaves", (value) => myConfiguration.NoiseOctaves = (uint)value, (int)myConfiguration.NoiseOctaves, 1, 16));
         myHeightMapGeneratorPanel.Add(new ValueBoxFloatWithLabel("Noise Persistance", (value) => myConfiguration.NoisePersistence = value, myConfiguration.NoisePersistence));
@@ -47,6 +47,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myGridErosionPanel = new PanelWithElements(new Vector2(0, 465), "Grid Erosion");
         myGridErosionPanel.Add(new ToggleSliderWithLabel("Show Water", "Off;On", (value) => myConfiguration.ShowWater = value == 1, myConfiguration.ShowWater ? 0 : 1));
         myGridErosionPanel.Add(new ToggleSliderWithLabel("Show Sediment", "Off;On", (value) => myConfiguration.ShowSediment = value == 1, myConfiguration.ShowSediment ? 0 : 1));
+        myGridErosionPanel.Add(new ToggleSliderWithLabel("Add Rain", "Off;On", (value) => myConfiguration.AddRain = value == 1, myConfiguration.AddRain ? 0 : 1));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Water Increase", (value) => myConfiguration.WaterIncrease = value, myConfiguration.WaterIncrease));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => myConfiguration.TimeDelta = value, myConfiguration.TimeDelta));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Cell Size X", (value) => myConfiguration.CellSizeX = value, myConfiguration.CellSizeX));

@@ -79,8 +79,8 @@ internal class Configuration : IConfiguration
         }
     }
 
-    private int myHeightMultiplier;
-    public int HeightMultiplier
+    private uint myHeightMultiplier;
+    public uint HeightMultiplier
     {
         get => myHeightMultiplier;
         set
@@ -206,6 +206,7 @@ internal class Configuration : IConfiguration
 
     public bool ShowWater { get; set; }
     public bool ShowSediment { get; set; }
+    public bool AddRain { get; set; }
 
     public float WaterIncrease { get; set; }
 
@@ -385,8 +386,8 @@ internal class Configuration : IConfiguration
         MeshCreation = ProcessorType.CPU;
 
         Seed = 1337;
-        HeightMapSideLength = 512;
-        HeightMultiplier = 64;
+        HeightMapSideLength = 32;
+        HeightMultiplier = 16;
         NoiseScale = 2.0f;
         NoiseOctaves = 8;
         NoisePersistence = 0.5f;
@@ -397,17 +398,22 @@ internal class Configuration : IConfiguration
         TalusAngle = 33;
         ThermalErosionHeightChange = 0.001f;
 
-        WaterIncrease = 1;
+        WaterIncrease = 0.0125f;
         TimeDelta = 1;
         CellSizeX = 1;
         CellSizeY = 1;
         Gravity = 9.81f;
-        Friction = 0.5f;
+        Friction = 1.0f;
         MaximalErosionDepth = 10;
         SedimentCapacity = 0.1f;
         SuspensionRate = 0.1f;
         DepositionRate = 0.1f;
         SedimentSofteningRate = 0;
-        EvaporationRate = 0.003f;
+        EvaporationRate = 0.0125f;
+    }
+
+    public uint GetIndex(uint x, uint y)
+    {
+        return (y * HeightMapSideLength) + x;
     }
 }

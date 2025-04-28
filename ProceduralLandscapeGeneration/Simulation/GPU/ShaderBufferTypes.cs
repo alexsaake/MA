@@ -5,5 +5,5 @@ enum ShaderBufferTypes
     HeightMap,
     GridPoints,
     GridErosionConfiguration,
-    HeightMultiplier
+    ErosionConfiguration
 }

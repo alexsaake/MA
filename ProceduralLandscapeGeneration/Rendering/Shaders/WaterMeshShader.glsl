@@ -50,7 +50,7 @@ layout(std430, binding = 2) buffer gridPointsShaderBuffer
     GridPoint[] gridPoints;
 };
 
-layout(std430, binding = 3) readonly restrict buffer configurationShaderBuffer
+layout(std430, binding = 3) readonly restrict buffer erosionConfigurationShaderBuffer
 {
     uint heightMultiplier;
 };
@@ -66,7 +66,7 @@ uint getIndex(uint x, uint y)
 
 void addVertex(uint vertex, uint x, uint y)
 {
-    float zOffset = 0.5;
+    float zOffset = 0.01;
     uint index = getIndex(x, y);
     vec4 position = mvp * vec4(x, y, (heightMap[index] - zOffset + gridPoints[index].WaterHeight) * heightMultiplier, 1.0);
 

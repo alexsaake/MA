@@ -24,7 +24,7 @@ layout(std430, binding = 1) readonly restrict buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
+layout(std430, binding = 2) readonly restrict buffer erosionConfigurationShaderBuffer
 {
     uint heightMultiplier;
 };
