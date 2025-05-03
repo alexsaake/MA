@@ -1,35 +1,34 @@
 ﻿using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.GUI
+namespace ProceduralLandscapeGeneration.GUI;
+
+class PanelWithElements
 {
-    class PanelWithElements
+    private readonly Vector2 myPosition;
+    private readonly string myName;
+    private readonly List<IGUIElement> myElements;
+
+    public PanelWithElements(Vector2 position, string name)
     {
-        private readonly Vector2 myPosition;
-        private readonly string myName;
-        private readonly List<IGUIElement> myElements;
+        myPosition = position;
+        myName = name;
 
-        public PanelWithElements(Vector2 position, string name)
+        myElements = new List<IGUIElement>();
+    }
+
+    public void Add(IGUIElement element)
+    {
+        myElements.Add(element);
+    }
+
+    public void Draw()
+    {
+        Raygui.GuiPanel(new Rectangle(myPosition, 170, ConfigurationGUI.PanelHeader.Y + ConfigurationGUI.ElementXOffset.Y + myElements.Count * ConfigurationGUI.ElementYMargin.Y), myName);
+
+        for(int i = 0; i < myElements.Count; i++)
         {
-            myPosition = position;
-            myName = name;
-
-            myElements = new List<IGUIElement>();
-        }
-
-        public void Add(IGUIElement element)
-        {
-            myElements.Add(element);
-        }
-
-        public void Draw()
-        {
-            Raygui.GuiPanel(new Rectangle(myPosition, 170, ConfigurationGUI.PanelHeader.Y + ConfigurationGUI.ElementXOffset.Y + myElements.Count * ConfigurationGUI.ElementYMargin.Y), myName);
-
-            for(int i = 0; i < myElements.Count; i++)
-            {
-                myElements[i].Draw(myPosition + ConfigurationGUI.PanelHeader + ConfigurationGUI.ElementXOffset + i * ConfigurationGUI.ElementYMargin);
-            }
+            myElements[i].Draw(myPosition + ConfigurationGUI.PanelHeader + ConfigurationGUI.ElementXOffset + i * ConfigurationGUI.ElementYMargin);
         }
     }
 }

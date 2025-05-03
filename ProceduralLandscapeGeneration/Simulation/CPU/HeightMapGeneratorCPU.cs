@@ -85,9 +85,15 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
         float[] heightMapValues = heightMap.Get1DHeightMapValues();
 
         uint heightMapShaderBufferSize = (uint)heightMapValues.Length * sizeof(float);
+        myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapShaderBufferSize);
         fixed (float* heightMapValuesPointer = heightMapValues)
         {
             Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapShaderBufferSize, 0);
         }
+    }
+
+    public void Dispose()
+    {
+        myShaderBuffers.Dispose();
     }
 }

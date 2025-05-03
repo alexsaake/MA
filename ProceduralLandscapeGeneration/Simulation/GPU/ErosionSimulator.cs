@@ -199,6 +199,7 @@ internal class ErosionSimulator : IErosionSimulator
         myThermalErosionSimulationComputeShaderProgram?.Dispose();
         myWindErosionParticleSimulationComputeShaderProgram?.Dispose();
 
+        myHeightMapGenerator?.Dispose();
         myHydraulicErosion.Dispose();
         myShaderBuffers.Dispose();
     }

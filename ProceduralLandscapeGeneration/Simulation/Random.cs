@@ -18,4 +18,14 @@ internal class Random : IRandom
     {
         return myRandom.Next(minValue, maxValue);
     }
+
+    public float NextFloat()
+    {
+        return myRandom.NextSingle();
+    }
+
+    public float NextFloat(float minValue, float maxValue)
+    {
+        return minValue + myRandom.NextSingle() * (maxValue - minValue);
+    }
 }

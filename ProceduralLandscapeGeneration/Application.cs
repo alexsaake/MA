@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;

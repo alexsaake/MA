@@ -265,6 +265,8 @@ internal class ErosionSimulatorCPU : IErosionSimulator
             return;
         }
 
+        myHeightMapGenerator.Dispose();
+
         myIsDisposed = true;
     }
 }

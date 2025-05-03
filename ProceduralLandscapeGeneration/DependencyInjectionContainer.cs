@@ -4,6 +4,7 @@ using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;
 using ProceduralLandscapeGeneration.Simulation.CPU;
+using ProceduralLandscapeGeneration.Simulation.CPU.ClusterConvection;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using ProceduralLandscapeGeneration.Simulation.GPU.Grid;
 
@@ -19,7 +20,8 @@ internal class DependencyInjectionContainer
         containerBuilder.RegisterType<ConfigurationGUI>().As<IConfigurationGUI>();
 
         containerBuilder.RegisterType<HeightMapGenerator>().As<IHeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.GPU);
-        containerBuilder.RegisterType<HeightMapGeneratorCPU>().As<IHeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.CPU);
+        //containerBuilder.RegisterType<HeightMapGeneratorCPU>().As<IHeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.CPU);
+        containerBuilder.RegisterType<ClusterConvectionHeightMapGenerator>().As<IHeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.CPU);
         containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorType.GPU);
         containerBuilder.RegisterType<ErosionSimulatorCPU>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorType.CPU);
         containerBuilder.RegisterType<MeshShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorType.GPU);
@@ -31,6 +33,7 @@ internal class DependencyInjectionContainer
         containerBuilder.RegisterType<ComputeShaderProgramFactory>().As<IComputeShaderProgramFactory>();
         containerBuilder.RegisterType<VertexMeshCreator>().As<IVertexMeshCreator>();
         containerBuilder.RegisterType<Simulation.Random>().As<IRandom>();
+        containerBuilder.RegisterType<PoissonDiskSampler>().As<IPoissonDiskSampler>();
         return containerBuilder.Build();
     }
 }

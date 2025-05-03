@@ -60,4 +60,9 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
         Rlgl.UnloadShaderBuffer(heightMapParametersBufferId);
     }
+
+    public void Dispose()
+    {
+        myShaderBuffers.Dispose();
+    }
 }
