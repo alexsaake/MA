@@ -1,5 +1,7 @@
 ﻿using Autofac;
+using Microsoft.VisualBasic;
 using ProceduralLandscapeGeneration.Common;
+using ProceduralLandscapeGeneration.Simulation.CPU.ClusterConvection;
 using ProceduralLandscapeGeneration.Simulation.CPU.Grid;
 using ProceduralLandscapeGeneration.Simulation.CPU.Particle;
 using System.Numerics;
@@ -11,7 +13,7 @@ internal class ErosionSimulatorCPU : IErosionSimulator
     private readonly IConfiguration myConfiguration;
     private readonly IRandom myRandom;
     private readonly ILifetimeScope myLifetimeScope;
-    private IHeightMapGenerator myHeightMapGenerator;
+    private IClusterConvectionHeightMapGenerator myHeightMapGenerator;
 
     private Task myRunningSimulation;
     private bool myIsDisposed;
@@ -33,7 +35,8 @@ internal class ErosionSimulatorCPU : IErosionSimulator
 
     public void Initialize()
     {
-        myHeightMapGenerator = myLifetimeScope.ResolveKeyed<IHeightMapGenerator>(myConfiguration.HeightMapGeneration);
+        //myHeightMapGenerator = myLifetimeScope.ResolveKeyed<IHeightMapGenerator>(myConfiguration.HeightMapGeneration);
+        myHeightMapGenerator = myLifetimeScope.Resolve<IClusterConvectionHeightMapGenerator>();
         HeightMap = myHeightMapGenerator.GenerateHeightMap();
     }
 
@@ -256,6 +259,13 @@ internal class ErosionSimulatorCPU : IErosionSimulator
     private Vector2 GetRandomPositionAtEdgeOfMap()
     {
         return new(myRandom.Next(HeightMap!.Width), 0);
+    }
+
+    public void SimulatePlateTectonics()
+    {
+        HeightMap = myHeightMapGenerator.Update();
+        ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
+        Console.WriteLine($"INFO: End of Plate Tectonics.");
     }
 
     public void Dispose()

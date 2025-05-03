@@ -187,6 +187,11 @@ internal class ErosionSimulator : IErosionSimulator
         Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
     }
 
+    public void SimulatePlateTectonics()
+    {
+        throw new NotImplementedException();
+    }
+
     public void Dispose()
     {
         myConfiguration.ErosionConfigurationChanged -= OnErosionConfigurationChanged;

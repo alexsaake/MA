@@ -6,9 +6,10 @@ using System.Numerics;
 namespace ProceduralLandscapeGeneration.Simulation.CPU.ClusterConvection;
 
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
-internal class ClusterConvectionHeightMapGenerator : IHeightMapGenerator
+internal class ClusterConvectionHeightMapGenerator : IClusterConvectionHeightMapGenerator
 {
-    private const float Growth = 0.05f;
+    private const float Radius = 0.5f;
+    private const int PlateCount = 10;
 
     private readonly IConfiguration myConfiguration;
     private readonly IRandom myRandom;
@@ -16,6 +17,8 @@ internal class ClusterConvectionHeightMapGenerator : IHeightMapGenerator
     private readonly IPoissonDiskSampler myPoissonDiskSampler;
 
     private List<Segment> mySegments;
+    private List<Plate> myPlates;
+    private HeightMap myHeatMap;
 
     public ClusterConvectionHeightMapGenerator(IConfiguration configuration, IRandom random, IShaderBuffers shaderBuffers, IPoissonDiskSampler poissonDiskSampler)
     {
@@ -25,47 +28,54 @@ internal class ClusterConvectionHeightMapGenerator : IHeightMapGenerator
         myPoissonDiskSampler = poissonDiskSampler;
 
         mySegments = new List<Segment>();
+        myPlates = new List<Plate>();
     }
 
     public HeightMap GenerateHeightMap()
     {
-        float[,] noiseMap = new float[myConfiguration.HeightMapSideLength, myConfiguration.HeightMapSideLength];
-        HeightMap heatMap = new HeightMapGeneratorCPU(myConfiguration, myRandom, myShaderBuffers).GenerateHeightMap();
+        float[,] heightMap = new float[myConfiguration.HeightMapSideLength, myConfiguration.HeightMapSideLength];
+        myHeatMap = new HeightMapGeneratorCPU(myConfiguration, myRandom, myShaderBuffers).GenerateHeightMap();
 
-        List<Vector2> points = myPoissonDiskSampler.GeneratePoints(1.0f, myConfiguration.HeightMapSideLength);
+        List<Vector2> points = myPoissonDiskSampler.GeneratePoints(Radius, myConfiguration.HeightMapSideLength);
         foreach (Vector2 point in points)
         {
-            Segment segment = new Segment(point);
-            mySegments.Add(segment);
+            Segment newSegment = new Segment(point);
+            mySegments.Add(newSegment);
 
-            if (!segment.IsAlive)
+            for (int i = 0; i < 10; i++)
             {
-                continue;
+                newSegment.Update(heightMap, myHeatMap);
             }
-
-            IVector2 position = new IVector2(segment.Position);
-            float heatValue = heatMap.Height[position.X, position.Y];
-
-            float rate = Growth * (1.0f - heatValue);
-            float G = rate * (1.0f - heatValue - segment.Density * segment.Thickness);
-            if (G < 0.0) G *= 0.05f;
-
-            float D = Langmuir(3.0f, 1.0f - heatValue);
-
-            segment.Mass += segment.Area * G * D;
-            segment.Thickness += G;
-
-            segment.Buoyancy();
-
-            noiseMap[position.X, position.Y] = segment.Height;
         }
 
-        return new HeightMap(myConfiguration, noiseMap);
-    }
+        for (int i = 0; i < PlateCount; i++)
+        {
+            myPlates.Add(new Plate(new Vector2(myRandom.Next((int)myConfiguration.HeightMapSideLength), myRandom.Next((int)myConfiguration.HeightMapSideLength))));
+        }
 
-    private float Langmuir(float k, float x)
-    {
-        return k * x / (1.0f + k * x);
+        foreach (Segment segment in mySegments)
+        {
+            float distance = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+            Plate? nearestPlate = null;
+            foreach (Plate plate in myPlates)
+            {
+                float plateToSegmentDistance = (plate.Position - segment.Position).Length();
+                if (plateToSegmentDistance < distance)
+                {
+                    distance = plateToSegmentDistance;
+                    nearestPlate = plate;
+                }
+            }
+            nearestPlate!.Segments.Add(segment);
+            segment.Parent = nearestPlate;
+        }
+
+        foreach (Plate plate in myPlates)
+        {
+            plate.Recenter();
+        }
+
+        return new HeightMap(myConfiguration, heightMap);
     }
 
     public unsafe void GenerateHeightMapShaderBuffer()
@@ -81,9 +91,95 @@ internal class ClusterConvectionHeightMapGenerator : IHeightMapGenerator
         }
     }
 
+    public HeightMap Update()
+    {
+        foreach (Plate plate in myPlates)
+        {
+            for (int segment = 0; segment < plate.Segments.Count; segment++)
+            {
+                IVector2 position = new IVector2(plate.Segments[segment].Position);
+                if (position.X < -myConfiguration.HeightMapSideLength || position.X > 2 * myConfiguration.HeightMapSideLength - 1 ||
+                position.Y < -myConfiguration.HeightMapSideLength || position.Y > 2 * myConfiguration.HeightMapSideLength - 1)
+                {
+                    plate.Segments[segment].IsAlive = false;
+                }
+            }
+
+            bool erased = false;
+            for (int segment = 0; segment < plate.Segments.Count; segment++)
+            {
+                if (!plate.Segments[segment].IsAlive)
+                {
+                    plate.Segments.RemoveAt(segment);
+                    segment--;
+                    erased = true;
+                }
+            }
+            if (erased)
+            {
+                plate.Recenter();
+            }
+        }
+
+        for (int plate = 0; plate < myPlates.Count; plate++)
+        {
+            if (myPlates[plate].Segments.Count == 0)
+            {
+                myPlates.RemoveAt(plate);
+                plate--;
+                continue;
+            }
+        }
+
+        mySegments.RemoveAll(x => !x.IsAlive);
+
+        // Fill Gaps
+
+        //foreach(Plate plate in myPlates)
+        //{
+        //    foreach(Segment segment in plate.Segments)
+        //    {
+        //        float angle = myRandom.NextFloat() * 2.0f * MathF.PI;
+        //        Vector2 scan = segment.Position;
+        //        scan += myConfiguration.HeightMapSideLength * Radius / 2.0f * new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+
+        //        if (scan.X < 0 || scan.X >= myConfiguration.HeightMapSideLength ||
+        //        scan.Y < 0 || scan.Y >= myConfiguration.HeightMapSideLength)
+        //        {
+        //            continue;
+        //        }
+
+        //        Compute Color at Scan
+        //        Index of the current guy in general
+        //        int csind = cluster.sample(scan);
+
+        //        if (csind < 0)
+        //        {
+
+        //            cluster.points.push_back(scan);
+        //            p.seg.push_back(cluster.add(cluster.points.back()));
+        //            p.seg.back()->parent = &p;
+        //            cluster.reassign();
+        //            plate.Recenter();
+        //            break;
+
+        //        }
+        //    }
+        //}
+
+        float[,] heightMap = new float[myConfiguration.HeightMapSideLength, myConfiguration.HeightMapSideLength];
+        foreach (Segment segment in mySegments)
+        {
+            segment.Update(heightMap, myHeatMap);
+        }
+
+        return new HeightMap(myConfiguration, heightMap);
+    }
+
     public void Dispose()
     {
         mySegments.Clear();
+        myPlates.Clear();
         myShaderBuffers.Dispose();
     }
 }

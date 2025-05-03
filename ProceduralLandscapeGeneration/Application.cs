@@ -69,6 +69,10 @@ internal class Application : IApplication
             {
                 myErosionSimulator.SimulateHydraulicErosionGrid();
             }
+            else if (Raylib.IsKeyDown(KeyboardKey.Five))
+            {
+                myErosionSimulator.SimulatePlateTectonics();
+            }
 
             myRenderer.Update();
 

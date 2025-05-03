@@ -19,9 +19,9 @@ internal class DependencyInjectionContainer
         containerBuilder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ConfigurationGUI>().As<IConfigurationGUI>();
 
-        containerBuilder.RegisterType<HeightMapGenerator>().As<IHeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.GPU);
-        //containerBuilder.RegisterType<HeightMapGeneratorCPU>().As<IHeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.CPU);
-        containerBuilder.RegisterType<ClusterConvectionHeightMapGenerator>().As<IHeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.CPU);
+        containerBuilder.RegisterType<HeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.GPU);
+        containerBuilder.RegisterType<HeightMapGeneratorCPU>().Keyed<IHeightMapGenerator>(ProcessorType.CPU);
+        containerBuilder.RegisterType<ClusterConvectionHeightMapGenerator>().As<IClusterConvectionHeightMapGenerator>();
         containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorType.GPU);
         containerBuilder.RegisterType<ErosionSimulatorCPU>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorType.CPU);
         containerBuilder.RegisterType<MeshShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorType.GPU);
