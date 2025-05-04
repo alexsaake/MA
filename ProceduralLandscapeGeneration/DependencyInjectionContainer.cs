@@ -4,7 +4,7 @@ using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;
 using ProceduralLandscapeGeneration.Simulation.CPU;
-using ProceduralLandscapeGeneration.Simulation.CPU.ClusterConvection;
+using ProceduralLandscapeGeneration.Simulation.CPU.PlateTectonics;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using ProceduralLandscapeGeneration.Simulation.GPU.Grid;
 
@@ -19,13 +19,18 @@ internal class DependencyInjectionContainer
         containerBuilder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ConfigurationGUI>().As<IConfigurationGUI>();
 
-        containerBuilder.RegisterType<HeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorType.GPU);
-        containerBuilder.RegisterType<HeightMapGeneratorCPU>().Keyed<IHeightMapGenerator>(ProcessorType.CPU);
-        containerBuilder.RegisterType<ClusterConvectionHeightMapGenerator>().As<IClusterConvectionHeightMapGenerator>();
-        containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorType.GPU);
-        containerBuilder.RegisterType<ErosionSimulatorCPU>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorType.CPU);
-        containerBuilder.RegisterType<MeshShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorType.GPU);
-        containerBuilder.RegisterType<VertexShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorType.CPU);
+        containerBuilder.RegisterType<HeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorTypes.GPU);
+        containerBuilder.RegisterType<HeightMapGeneratorCPU>().Keyed<IHeightMapGenerator>(ProcessorTypes.CPU);
+        containerBuilder.Register(context => new PlateTectonicsHeightMapGenerator(
+                                                    context.Resolve<IConfiguration>(),
+                                                    context.Resolve<IRandom>(),
+                                                    context.Resolve<IShaderBuffers>(),
+                                                    context.ResolveKeyed<IHeightMapGenerator>(ProcessorTypes.CPU)))
+                        .As<IPlateTectonicsHeightMapGenerator>();
+        containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorTypes.GPU);
+        containerBuilder.RegisterType<ErosionSimulatorCPU>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorTypes.CPU);
+        containerBuilder.RegisterType<MeshShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorTypes.GPU);
+        containerBuilder.RegisterType<VertexShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorTypes.CPU);
 
         containerBuilder.RegisterType<HydraulicErosion>().As<IHydraulicErosion>();
         containerBuilder.RegisterType<ShaderBuffers>().As<IShaderBuffers>().SingleInstance();

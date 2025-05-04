@@ -11,64 +11,93 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
     internal static Vector2 ElementYMargin = new Vector2(0, 25);
     internal static Vector2 LabelWidth = new Vector2(100, 0);
 
-    private readonly IConfiguration myConfiguration;
+    private IConfiguration myConfiguration;
 
-    private PanelWithElements myProcessorTypePanel;
-    private PanelWithElements myHeightMapGeneratorPanel;
-    private PanelWithElements myErosionPanel;
-    private PanelWithElements myThermalErosionPanel;
-    private PanelWithElements myGridErosionPanel;
+    private readonly PanelWithElements myMapGenerationPanel;
+    private readonly PanelWithElements myProcessorTypePanel;
+    private readonly PanelWithElements myNoiseMapGenerationPanel;
+    private readonly PanelWithElements myHeatMapGenerationPanel;
+    private readonly PanelWithElements myPlateTectonicsMapGenerationPanel;
+    private readonly PanelWithElements myErosionPanel;
+    private readonly PanelWithElements myThermalErosionPanel;
+    private readonly PanelWithElements myGridErosionPanel;
 
     public ConfigurationGUI(IConfiguration configuration)
     {
         myConfiguration = configuration;
 
-        myProcessorTypePanel = new PanelWithElements(Vector2.Zero, "Processor Type");
-        myProcessorTypePanel.Add(new ToggleSliderWithLabel("Height Map Generation", "GPU;CPU", (value) => myConfiguration.HeightMapGeneration = (ProcessorType)value, (int)myConfiguration.HeightMapGeneration));
-        myProcessorTypePanel.Add(new ToggleSliderWithLabel("Erosion Simulation", "GPU;CPU", (value) => myConfiguration.ErosionSimulation = (ProcessorType)value, (int)myConfiguration.ErosionSimulation));
-        myProcessorTypePanel.Add(new ToggleSliderWithLabel("Mesh Creation", "GPU;CPU", (value) => myConfiguration.MeshCreation = (ProcessorType)value, (int)myConfiguration.MeshCreation));
+        myMapGenerationPanel = new PanelWithElements("Map Generation");
+        myMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "Noise;Tectonics", (value) => configuration.MapGeneration = (MapGenerationTypes)value, (int)configuration.MapGeneration));
+        myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Side Length", (value) => configuration.HeightMapSideLength = (uint)value, (int)configuration.HeightMapSideLength, 32, 8192));
+        myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => configuration.HeightMultiplier = (uint)value, (int)configuration.HeightMultiplier, 1, 150));
 
-        myHeightMapGeneratorPanel = new PanelWithElements(new Vector2(0, 110), "Height Map Generator");
-        myHeightMapGeneratorPanel.Add(new ValueBoxIntWithLabel("Seed", (value) => myConfiguration.Seed = value, myConfiguration.Seed, int.MinValue, int.MaxValue));
-        myHeightMapGeneratorPanel.Add(new ValueBoxIntWithLabel("Side Length", (value) => myConfiguration.HeightMapSideLength = (uint)value, (int)myConfiguration.HeightMapSideLength, 32, 8192));
-        myHeightMapGeneratorPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => myConfiguration.HeightMultiplier = (uint)value, (int)myConfiguration.HeightMultiplier, 1, 150));
-        myHeightMapGeneratorPanel.Add(new ValueBoxFloatWithLabel("Noise Scale", (value) => myConfiguration.NoiseScale = value, myConfiguration.NoiseScale));
-        myHeightMapGeneratorPanel.Add(new ValueBoxIntWithLabel("Noise Octaves", (value) => myConfiguration.NoiseOctaves = (uint)value, (int)myConfiguration.NoiseOctaves, 1, 16));
-        myHeightMapGeneratorPanel.Add(new ValueBoxFloatWithLabel("Noise Persistance", (value) => myConfiguration.NoisePersistence = value, myConfiguration.NoisePersistence));
-        myHeightMapGeneratorPanel.Add(new ValueBoxFloatWithLabel("Noise Lacunarity", (value) => myConfiguration.NoiseLacunarity = value, myConfiguration.NoiseLacunarity));
+        myProcessorTypePanel = new PanelWithElements("Processor Type");
+        myProcessorTypePanel.Add(new ToggleSliderWithLabel("Erosion Simulation", "GPU;CPU", (value) => configuration.ErosionSimulation = (ProcessorTypes)value, (int)configuration.ErosionSimulation));
+        myProcessorTypePanel.Add(new ToggleSliderWithLabel("Mesh Creation", "GPU;CPU", (value) => configuration.MeshCreation = (ProcessorTypes)value, (int)configuration.MeshCreation));
 
-        myErosionPanel = new PanelWithElements(new Vector2(0, 320), "Erosion");
-        myErosionPanel.Add(new ValueBoxIntWithLabel("Simulation Iterations", (value) => myConfiguration.SimulationIterations = (uint)value, (int)myConfiguration.SimulationIterations, 1, 1000000));
+        myNoiseMapGenerationPanel = new PanelWithElements("Noise Map Generation");
+        myNoiseMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "GPU;CPU", (value) => configuration.HeightMapGeneration = (ProcessorTypes)value, (int)configuration.HeightMapGeneration));
+        myNoiseMapGenerationPanel.Add(new ValueBoxIntWithLabel("Seed", (value) => configuration.Seed = value, configuration.Seed, int.MinValue, int.MaxValue));
+        myNoiseMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Scale", (value) => configuration.NoiseScale = value, configuration.NoiseScale));
+        myNoiseMapGenerationPanel.Add(new ValueBoxIntWithLabel("Octaves", (value) => configuration.NoiseOctaves = (uint)value, (int)configuration.NoiseOctaves, 1, 16));
+        myNoiseMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Persistance", (value) => configuration.NoisePersistence = value, configuration.NoisePersistence));
+        myNoiseMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Lacunarity", (value) => configuration.NoiseLacunarity = value, configuration.NoiseLacunarity));
 
-        myThermalErosionPanel = new PanelWithElements(new Vector2(0, 380), "Thermal Erosion");
-        myThermalErosionPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => myConfiguration.TalusAngle = value, myConfiguration.TalusAngle, 0, 89));
-        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Height Change", (value) => myConfiguration.ThermalErosionHeightChange = value, myConfiguration.ThermalErosionHeightChange));
+        myHeatMapGenerationPanel = new PanelWithElements("Heat Map Generation");
+        myHeatMapGenerationPanel.Add(new ValueBoxIntWithLabel("Seed", (value) => configuration.Seed = value, configuration.Seed, int.MinValue, int.MaxValue));
+        myHeatMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Scale", (value) => configuration.NoiseScale = value, configuration.NoiseScale));
+        myHeatMapGenerationPanel.Add(new ValueBoxIntWithLabel("Octaves", (value) => configuration.NoiseOctaves = (uint)value, (int)configuration.NoiseOctaves, 1, 16));
+        myHeatMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Persistance", (value) => configuration.NoisePersistence = value, configuration.NoisePersistence));
+        myHeatMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Lacunarity", (value) => configuration.NoiseLacunarity = value, configuration.NoiseLacunarity));
 
-        myGridErosionPanel = new PanelWithElements(new Vector2(0, 465), "Grid Erosion");
-        myGridErosionPanel.Add(new ToggleSliderWithLabel("Show Water", "Off;On", (value) => myConfiguration.ShowWater = value == 1, myConfiguration.ShowWater ? 0 : 1));
-        myGridErosionPanel.Add(new ToggleSliderWithLabel("Show Sediment", "Off;On", (value) => myConfiguration.ShowSediment = value == 1, myConfiguration.ShowSediment ? 0 : 1));
-        myGridErosionPanel.Add(new ToggleSliderWithLabel("Add Rain", "Off;On", (value) => myConfiguration.AddRain = value == 1, myConfiguration.AddRain ? 0 : 1));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Water Increase", (value) => myConfiguration.WaterIncrease = value, myConfiguration.WaterIncrease));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => myConfiguration.TimeDelta = value, myConfiguration.TimeDelta));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Cell Size X", (value) => myConfiguration.CellSizeX = value, myConfiguration.CellSizeX));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Cell Size Y", (value) => myConfiguration.CellSizeY = value, myConfiguration.CellSizeY));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => myConfiguration.Gravity = value, myConfiguration.Gravity));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Friction", (value) => myConfiguration.Friction = value, myConfiguration.Friction));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Maximal Erosion Depth", (value) => myConfiguration.MaximalErosionDepth = value, myConfiguration.MaximalErosionDepth));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Sediment Capacity", (value) => myConfiguration.SedimentCapacity = value, myConfiguration.SedimentCapacity));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Suspension Rate", (value) => myConfiguration.SuspensionRate = value, myConfiguration.SuspensionRate));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Deposition Rate", (value) => myConfiguration.DepositionRate = value, myConfiguration.DepositionRate));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Sediment Softening Rate", (value) => myConfiguration.SedimentSofteningRate = value, myConfiguration.SedimentSofteningRate));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => myConfiguration.EvaporationRate = value, myConfiguration.EvaporationRate));
+        myPlateTectonicsMapGenerationPanel = new PanelWithElements("Plate Tectonics");
+        myPlateTectonicsMapGenerationPanel.Add(new ValueBoxIntWithLabel("Plate Count", (value) => configuration.PlateCount = value, configuration.PlateCount, 0, 100));
+
+        myErosionPanel = new PanelWithElements("Erosion");
+        myErosionPanel.Add(new ValueBoxIntWithLabel("Simulation Iterations", (value) => configuration.SimulationIterations = (uint)value, (int)configuration.SimulationIterations, 1, 1000000));
+
+        myThermalErosionPanel = new PanelWithElements("Thermal Erosion");
+        myThermalErosionPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => configuration.TalusAngle = value, configuration.TalusAngle, 0, 89));
+        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Height Change", (value) => configuration.ThermalErosionHeightChange = value, configuration.ThermalErosionHeightChange));
+
+        myGridErosionPanel = new PanelWithElements("Grid Erosion");
+        myGridErosionPanel.Add(new ToggleSliderWithLabel("Show Water", "Off;On", (value) => configuration.ShowWater = value == 1, configuration.ShowWater ? 0 : 1));
+        myGridErosionPanel.Add(new ToggleSliderWithLabel("Show Sediment", "Off;On", (value) => configuration.ShowSediment = value == 1, configuration.ShowSediment ? 0 : 1));
+        myGridErosionPanel.Add(new ToggleSliderWithLabel("Add Rain", "Off;On", (value) => configuration.AddRain = value == 1, configuration.AddRain ? 0 : 1));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Water Increase", (value) => configuration.WaterIncrease = value, configuration.WaterIncrease));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => configuration.TimeDelta = value, configuration.TimeDelta));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Cell Size X", (value) => configuration.CellSizeX = value, configuration.CellSizeX));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Cell Size Y", (value) => configuration.CellSizeY = value, configuration.CellSizeY));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => configuration.Gravity = value, configuration.Gravity));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Friction", (value) => configuration.Friction = value, configuration.Friction));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Maximal Erosion Depth", (value) => configuration.MaximalErosionDepth = value, configuration.MaximalErosionDepth));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Sediment Capacity", (value) => configuration.SedimentCapacity = value, configuration.SedimentCapacity));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Suspension Rate", (value) => configuration.SuspensionRate = value, configuration.SuspensionRate));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Deposition Rate", (value) => configuration.DepositionRate = value, configuration.DepositionRate));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Sediment Softening Rate", (value) => configuration.SedimentSofteningRate = value, configuration.SedimentSofteningRate));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => configuration.EvaporationRate = value, configuration.EvaporationRate));
     }
 
     public unsafe void Draw()
     {
-        myProcessorTypePanel.Draw();
-        myHeightMapGeneratorPanel.Draw();
-        myErosionPanel.Draw();
-        myThermalErosionPanel.Draw();
-        myGridErosionPanel.Draw();
+        myMapGenerationPanel.Draw(Vector2.Zero);
+        myProcessorTypePanel.Draw(myMapGenerationPanel.BottomLeft);
+        Vector2? offset = null;
+        switch (myConfiguration.MapGeneration)
+        {
+            case MapGenerationTypes.Noise:
+                myNoiseMapGenerationPanel.Draw(myProcessorTypePanel.BottomLeft);
+                offset = myNoiseMapGenerationPanel.BottomLeft;
+                break;
+            case MapGenerationTypes.Tectonics:
+                myHeatMapGenerationPanel.Draw(myProcessorTypePanel.BottomLeft);
+                myPlateTectonicsMapGenerationPanel.Draw(myHeatMapGenerationPanel.BottomLeft);
+                offset = myPlateTectonicsMapGenerationPanel.BottomLeft;
+                break;
+        }
+        myErosionPanel.Draw(offset!.Value);
+        myThermalErosionPanel.Draw(myErosionPanel.BottomLeft);
+        myGridErosionPanel.Draw(myThermalErosionPanel.BottomLeft);
 
         Raygui.GuiEnable();
     }

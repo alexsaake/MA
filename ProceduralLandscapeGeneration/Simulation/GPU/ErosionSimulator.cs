@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Common;
+using ProceduralLandscapeGeneration.Simulation.CPU.PlateTectonics;
 using ProceduralLandscapeGeneration.Simulation.GPU.Grid;
 using ProceduralLandscapeGeneration.Simulation.GPU.Shaders;
 using Raylib_cs;
@@ -15,6 +16,7 @@ internal class ErosionSimulator : IErosionSimulator
     private readonly IHydraulicErosion myHydraulicErosion;
     private readonly IShaderBuffers myShaderBuffers;
     private IHeightMapGenerator? myHeightMapGenerator;
+    private readonly IPlateTectonicsHeightMapGenerator myPlateTectonicsHeightMapGenerator;
 
     public HeightMap? HeightMap => throw new NotImplementedException();
 
@@ -28,7 +30,7 @@ internal class ErosionSimulator : IErosionSimulator
     private uint myThermalErosionConfigurationShaderBufferId;
     private ComputeShaderProgram? myWindErosionParticleSimulationComputeShaderProgram;
 
-    public ErosionSimulator(IConfiguration configuration, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory, IRandom random, IHydraulicErosion hydraulicErosion, IShaderBuffers shaderBuffers)
+    public ErosionSimulator(IConfiguration configuration, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory, IRandom random, IHydraulicErosion hydraulicErosion, IShaderBuffers shaderBuffers, IPlateTectonicsHeightMapGenerator plateTectonicsHeightMapGenerator)
     {
         myConfiguration = configuration;
         myLifetimeScope = lifetimeScope;
@@ -36,6 +38,7 @@ internal class ErosionSimulator : IErosionSimulator
         myRandom = random;
         myHydraulicErosion = hydraulicErosion;
         myShaderBuffers = shaderBuffers;
+        myPlateTectonicsHeightMapGenerator = plateTectonicsHeightMapGenerator;
     }
 
     public unsafe void Initialize()
@@ -44,7 +47,23 @@ internal class ErosionSimulator : IErosionSimulator
         myConfiguration.ThermalErosionConfigurationChanged += OnThermalErosionConfigurationChanged;
 
         myHeightMapGenerator = myLifetimeScope.ResolveKeyed<IHeightMapGenerator>(myConfiguration.HeightMapGeneration);
-        myHeightMapGenerator.GenerateHeightMapShaderBuffer();
+        switch (myConfiguration.MapGeneration)
+        {
+            case MapGenerationTypes.Noise:
+                myHeightMapGenerator.GenerateHeightMapShaderBuffer();
+                break;
+            case MapGenerationTypes.Tectonics:
+                uint heightMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+                uint heightMapBufferSize = heightMapSize * sizeof(float);
+                myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
+                HeightMap heightMap = myPlateTectonicsHeightMapGenerator.GenerateHeightMap();
+                float[] heightMapValues = heightMap.Get1DHeightMapValues();
+                fixed (float* heightMapValuesPointer = heightMapValues)
+                {
+                    Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapBufferSize, 0);
+                }
+                break;
+        }
 
         myHeightMapIndicesShaderBufferSize = myConfiguration.SimulationIterations * sizeof(uint);
         myHeightMapIndicesShaderBufferId = Rlgl.LoadShaderBuffer(myHeightMapIndicesShaderBufferSize, null, Rlgl.DYNAMIC_COPY);
@@ -187,9 +206,18 @@ internal class ErosionSimulator : IErosionSimulator
         Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
     }
 
-    public void SimulatePlateTectonics()
+    public unsafe void SimulatePlateTectonics()
     {
-        throw new NotImplementedException();
+        uint heightMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint heightMapBufferSize = heightMapSize * sizeof(float);
+        HeightMap heightMap = myPlateTectonicsHeightMapGenerator.SimulatePlateTectonics();
+        float[] heightMapValues = heightMap.Get1DHeightMapValues();
+        fixed (float* heightMapValuesPointer = heightMapValues)
+        {
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapBufferSize, 0);
+        }
+        ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
+        Console.WriteLine($"INFO: End of plate tectonics simulation.");
     }
 
     public void Dispose()
@@ -205,6 +233,7 @@ internal class ErosionSimulator : IErosionSimulator
         myWindErosionParticleSimulationComputeShaderProgram?.Dispose();
 
         myHeightMapGenerator?.Dispose();
+        myPlateTectonicsHeightMapGenerator.Dispose();
         myHydraulicErosion.Dispose();
         myShaderBuffers.Dispose();
     }

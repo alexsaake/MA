@@ -4,8 +4,23 @@ namespace ProceduralLandscapeGeneration;
 
 internal class Configuration : IConfiguration
 {
-    private ProcessorType myHeightMapGeneration;
-    public ProcessorType HeightMapGeneration
+    private MapGenerationTypes myMapGeneration;
+    public MapGenerationTypes MapGeneration
+    {
+        get => myMapGeneration;
+        set
+        {
+            if (myMapGeneration == value)
+            {
+                return;
+            }
+            myMapGeneration = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private ProcessorTypes myHeightMapGeneration;
+    public ProcessorTypes HeightMapGeneration
     {
         get => myHeightMapGeneration;
         set
@@ -15,12 +30,12 @@ internal class Configuration : IConfiguration
                 return;
             }
             myHeightMapGeneration = value;
-            ProcessorTypeChanged?.Invoke(this, EventArgs.Empty);
+            ResetRequired?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    private ProcessorType myErosionSimulation;
-    public ProcessorType ErosionSimulation
+    private ProcessorTypes myErosionSimulation;
+    public ProcessorTypes ErosionSimulation
     {
         get => myErosionSimulation;
         set
@@ -30,12 +45,12 @@ internal class Configuration : IConfiguration
                 return;
             }
             myErosionSimulation = value;
-            ProcessorTypeChanged?.Invoke(this, EventArgs.Empty);
+            ResetRequired?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    private ProcessorType myMeshCreation;
-    public ProcessorType MeshCreation
+    private ProcessorTypes myMeshCreation;
+    public ProcessorTypes MeshCreation
     {
         get => myMeshCreation;
         set
@@ -45,7 +60,7 @@ internal class Configuration : IConfiguration
                 return;
             }
             myMeshCreation = value;
-            ProcessorTypeChanged?.Invoke(this, EventArgs.Empty);
+            ResetRequired?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -60,7 +75,7 @@ internal class Configuration : IConfiguration
                 return;
             }
             mySeed = value;
-            HeightMapConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            ResetRequired?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -75,7 +90,7 @@ internal class Configuration : IConfiguration
                 return;
             }
             myHeightMapSideLength = value;
-            HeightMapConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            ResetRequired?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -105,7 +120,7 @@ internal class Configuration : IConfiguration
                 return;
             }
             myNoiseScale = value;
-            HeightMapConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            ResetRequired?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -120,7 +135,7 @@ internal class Configuration : IConfiguration
                 return;
             }
             myNoiseOctaves = value;
-            HeightMapConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            ResetRequired?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -135,7 +150,7 @@ internal class Configuration : IConfiguration
                 return;
             }
             myNoisePersistance = value;
-            HeightMapConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            ResetRequired?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -150,7 +165,22 @@ internal class Configuration : IConfiguration
                 return;
             }
             myNoiseLacunarity = value;
-            HeightMapConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private int myPlateCount;
+    public int PlateCount
+    {
+        get => myPlateCount;
+        set
+        {
+            if (myPlateCount == value)
+            {
+                return;
+            }
+            myPlateCount = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -373,17 +403,16 @@ internal class Configuration : IConfiguration
         }
     }
 
-    public event EventHandler? ProcessorTypeChanged;
-    public event EventHandler? HeightMapConfigurationChanged;
+    public event EventHandler? ResetRequired;
     public event EventHandler? ErosionConfigurationChanged;
     public event EventHandler? ThermalErosionConfigurationChanged;
     public event EventHandler? GridErosionConfigurationChanged;
 
     public Configuration()
     {
-        HeightMapGeneration = ProcessorType.GPU;
-        ErosionSimulation = ProcessorType.GPU;
-        MeshCreation = ProcessorType.CPU;
+        HeightMapGeneration = ProcessorTypes.GPU;
+        ErosionSimulation = ProcessorTypes.GPU;
+        MeshCreation = ProcessorTypes.CPU;
 
         Seed = 1337;
         HeightMapSideLength = 32;
@@ -392,6 +421,8 @@ internal class Configuration : IConfiguration
         NoiseOctaves = 8;
         NoisePersistence = 0.5f;
         NoiseLacunarity = 2.0f;
+
+        PlateCount = 10;
 
         SimulationIterations = 100;
 

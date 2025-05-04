@@ -5,14 +5,17 @@ namespace ProceduralLandscapeGeneration.GUI;
 
 class PanelWithElements
 {
-    private readonly Vector2 myPosition;
-    private readonly string myName;
     private readonly List<IGUIElement> myElements;
 
-    public PanelWithElements(Vector2 position, string name)
+    private Vector2 myPosition;
+
+    public string Name { get; set; }
+
+    public Vector2 BottomLeft => myPosition + ConfigurationGUI.PanelHeader + myElements.Count * ConfigurationGUI.ElementYMargin + new Vector2(0, 7);
+
+    public PanelWithElements(string name)
     {
-        myPosition = position;
-        myName = name;
+        Name = name;
 
         myElements = new List<IGUIElement>();
     }
@@ -22,9 +25,10 @@ class PanelWithElements
         myElements.Add(element);
     }
 
-    public void Draw()
+    public void Draw(Vector2 position)
     {
-        Raygui.GuiPanel(new Rectangle(myPosition, 170, ConfigurationGUI.PanelHeader.Y + ConfigurationGUI.ElementXOffset.Y + myElements.Count * ConfigurationGUI.ElementYMargin.Y), myName);
+        myPosition = position;
+        Raygui.GuiPanel(new Rectangle(myPosition, 170, ConfigurationGUI.PanelHeader.Y + ConfigurationGUI.ElementXOffset.Y + myElements.Count * ConfigurationGUI.ElementYMargin.Y), Name);
 
         for(int i = 0; i < myElements.Count; i++)
         {

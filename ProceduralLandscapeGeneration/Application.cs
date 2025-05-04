@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;
@@ -33,8 +32,7 @@ internal class Application : IApplication
 
     public void Run()
     {
-        myConfiguration.ProcessorTypeChanged += OnProcessorTypeChanged;
-        myConfiguration.HeightMapConfigurationChanged += OnHeightMapConfigurationChanged;
+        myConfiguration.ResetRequired += OnResetRequired;
 
         Raylib.InitWindow(myConfiguration.ScreenWidth, myConfiguration.ScreenHeight, "Procedural Landscape Generation");
 
@@ -77,14 +75,13 @@ internal class Application : IApplication
             myRenderer.Update();
 
             Raylib.BeginDrawing();
-                Raylib.ClearBackground(Color.SkyBlue);
-                myRenderer.Draw();
-                myConfigurationGUI.Draw();
+            Raylib.ClearBackground(Color.SkyBlue);
+            myRenderer.Draw();
+            myConfigurationGUI.Draw();
             Raylib.EndDrawing();
         }
 
-        myConfiguration.ProcessorTypeChanged -= OnProcessorTypeChanged;
-        myConfiguration.HeightMapConfigurationChanged -= OnHeightMapConfigurationChanged;
+        myConfiguration.ResetRequired -= OnResetRequired;
 
         DisposeModules();
 
@@ -97,12 +94,7 @@ internal class Application : IApplication
         myRenderer.Initialize();
     }
 
-    private void OnProcessorTypeChanged(object? sender, EventArgs e)
-    {
-        myIsModuleResetRequired = true;
-    }
-    
-    private void OnHeightMapConfigurationChanged(object? sender, EventArgs e)
+    private void OnResetRequired(object? sender, EventArgs e)
     {
         myIsModuleResetRequired = true;
     }

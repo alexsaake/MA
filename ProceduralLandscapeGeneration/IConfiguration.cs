@@ -4,9 +4,10 @@ namespace ProceduralLandscapeGeneration;
 
 internal interface IConfiguration
 {
-    ProcessorType HeightMapGeneration { get; set; }
-    ProcessorType ErosionSimulation { get; set; }
-    ProcessorType MeshCreation { get; set; }
+    MapGenerationTypes MapGeneration { get; set; }
+    ProcessorTypes HeightMapGeneration { get; set; }
+    ProcessorTypes ErosionSimulation { get; set; }
+    ProcessorTypes MeshCreation { get; set; }
 
     int Seed { get; set; }
     uint HeightMapSideLength { get; set; }
@@ -15,6 +16,8 @@ internal interface IConfiguration
     uint NoiseOctaves { get; set; }
     float NoisePersistence { get; set; }
     float NoiseLacunarity { get; set; }
+
+    int PlateCount { get; set; }
 
     uint SimulationIterations { get; set; }
 
@@ -47,8 +50,7 @@ internal interface IConfiguration
 
     uint GetIndex(uint x, uint y);
 
-    event EventHandler? ProcessorTypeChanged;
-    event EventHandler? HeightMapConfigurationChanged;
+    event EventHandler? ResetRequired;
     event EventHandler? ErosionConfigurationChanged;
     event EventHandler? ThermalErosionConfigurationChanged;
     event EventHandler? GridErosionConfigurationChanged;

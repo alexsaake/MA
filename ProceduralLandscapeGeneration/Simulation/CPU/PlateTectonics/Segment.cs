@@ -1,7 +1,7 @@
 ﻿using ProceduralLandscapeGeneration.Common;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.Simulation.CPU.ClusterConvection;
+namespace ProceduralLandscapeGeneration.Simulation.CPU.PlateTectonics;
 
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 internal class Segment
@@ -13,18 +13,20 @@ internal class Segment
     public Vector2 Speed { get; set; } = Vector2.Zero;
     public int Area { get; private set; } = 1;
     public float Mass { get; set; } = 0.1f;
-    public float Height { get; private set; } = 0.0f;
+    public float Height { get; set; } = 0.0f;
     public float Thickness { get; set; } = 0.1f;
-    public float Density { get; private set; } = 1.0f;
+    public float Density { get; set; } = 1.0f;
     public bool IsAlive { get; set; } = true;
     public bool IsColliding { get; set; } = false;
+
+    public Segment(uint x, uint y) : this(new Vector2(x, y)) { }
 
     public Segment(Vector2 position)
     {
         Position = position;
     }
 
-    public void Update(float[,] heightMap, HeightMap heatMap)
+    public void Update(HeightMap heightMap, HeightMap heatMap, uint heightMapSideLength)
     {
         if (!IsAlive)
         {
@@ -32,6 +34,11 @@ internal class Segment
         }
 
         IVector2 position = new IVector2(Position);
+        if (position.X < 0 || position.X > heightMapSideLength - 1
+            || position.Y < 0 || position.Y > heightMapSideLength - 1)
+        {
+            return;
+        }
         float heatValue = heatMap.Height[position.X, position.Y];
 
         float rate = Growth * (1.0f - heatValue);
@@ -45,17 +52,17 @@ internal class Segment
 
         Buoyancy();
 
-        heightMap[position.X, position.Y] = Height;
+        heightMap.Height[position.X, position.Y] = Height;
     }
 
-    private void Buoyancy()
+    private static float Langmuir(float k, float x)
+    {
+        return k * x / (1.0f + k * x);
+    }
+
+    public void Buoyancy()
     {
         Density = Mass / (Area * Thickness);
         Height = Thickness * (1.0f - Density);
-    }
-
-    private float Langmuir(float k, float x)
-    {
-        return k * x / (1.0f + k * x);
     }
 }

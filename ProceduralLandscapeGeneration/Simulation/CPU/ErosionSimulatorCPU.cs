@@ -1,9 +1,8 @@
 ﻿using Autofac;
-using Microsoft.VisualBasic;
 using ProceduralLandscapeGeneration.Common;
-using ProceduralLandscapeGeneration.Simulation.CPU.ClusterConvection;
 using ProceduralLandscapeGeneration.Simulation.CPU.Grid;
 using ProceduralLandscapeGeneration.Simulation.CPU.Particle;
+using ProceduralLandscapeGeneration.Simulation.CPU.PlateTectonics;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Simulation.CPU;
@@ -13,10 +12,10 @@ internal class ErosionSimulatorCPU : IErosionSimulator
     private readonly IConfiguration myConfiguration;
     private readonly IRandom myRandom;
     private readonly ILifetimeScope myLifetimeScope;
-    private IClusterConvectionHeightMapGenerator myHeightMapGenerator;
+    private IHeightMapGenerator myHeightMapGenerator;
+    private readonly IPlateTectonicsHeightMapGenerator myPlateTectonicsHeightMapGenerator;
 
     private Task myRunningSimulation;
-    private bool myIsDisposed;
     private GridBasedErosion? myGridBasedErosion;
     private object myHydraulicErosionGridLock = new();
 
@@ -26,18 +25,26 @@ internal class ErosionSimulatorCPU : IErosionSimulator
 
     public event EventHandler? ErosionIterationFinished;
 
-    public ErosionSimulatorCPU(IConfiguration configuration, IRandom random, ILifetimeScope lifetimeScope)
+    public ErosionSimulatorCPU(IConfiguration configuration, IRandom random, ILifetimeScope lifetimeScope, IPlateTectonicsHeightMapGenerator plateTectonicsHeightMapGenerator)
     {
         myConfiguration = configuration;
         myRandom = random;
         myLifetimeScope = lifetimeScope;
+        myPlateTectonicsHeightMapGenerator = plateTectonicsHeightMapGenerator;
     }
 
     public void Initialize()
     {
-        //myHeightMapGenerator = myLifetimeScope.ResolveKeyed<IHeightMapGenerator>(myConfiguration.HeightMapGeneration);
-        myHeightMapGenerator = myLifetimeScope.Resolve<IClusterConvectionHeightMapGenerator>();
-        HeightMap = myHeightMapGenerator.GenerateHeightMap();
+        myHeightMapGenerator = myLifetimeScope.ResolveKeyed<IHeightMapGenerator>(myConfiguration.HeightMapGeneration);
+        switch (myConfiguration.MapGeneration)
+        {
+            case MapGenerationTypes.Noise:
+                HeightMap = myHeightMapGenerator.GenerateHeightMap();
+                break;
+            case MapGenerationTypes.Tectonics:
+                HeightMap = myPlateTectonicsHeightMapGenerator.GenerateHeightMap();
+                break;
+        }
     }
 
     public void SimulateHydraulicErosion()
@@ -88,7 +95,7 @@ internal class ErosionSimulatorCPU : IErosionSimulator
             }
 
             ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-            Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
+            Console.WriteLine($"INFO: End of hydraulic erosion simulation after {myConfiguration.SimulationIterations} iterations.");
         });
     }
 
@@ -154,7 +161,8 @@ internal class ErosionSimulatorCPU : IErosionSimulator
                 }
             }
 
-            Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
+            ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
+            Console.WriteLine($"INFO: End of thermal erosioon simulation after {myConfiguration.SimulationIterations} iterations.");
         });
     }
 
@@ -194,7 +202,8 @@ internal class ErosionSimulatorCPU : IErosionSimulator
                 }
             }
 
-            Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
+            ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
+            Console.WriteLine($"INFO: End of wind erosion simulation after {myConfiguration.SimulationIterations} iterations.");
         });
     }
 
@@ -219,7 +228,8 @@ internal class ErosionSimulatorCPU : IErosionSimulator
                 lock (myHydraulicErosionGridLock)
                 {
                     //myGridBasedErosion.Simulate(HeightMap!);
-                };
+                }
+                ;
                 if (iteration % 10 == 0)//% myConfiguration.SimulationCallbackEachIterations == 0
                 {
                     ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
@@ -228,32 +238,9 @@ internal class ErosionSimulatorCPU : IErosionSimulator
                 iteration++;
             }
         });
-    }
 
-    public void SimulateHydraulicErosionGridAddRain()
-    {
-        const float waterIncrease = 0.01f;
-
-        if (myGridBasedErosion is null)
-        {
-            return;
-        }
-
-        Console.WriteLine($"INFO: Adding {HeightMap!.Width} rain drops for hydraulic erosion grid.");
-        lock (myHydraulicErosionGridLock)
-        {
-            for (int drop = 0; drop < HeightMap!.Width; drop++)
-            {
-                IVector2 newPosition = new(myRandom.Next(HeightMap!.Width), myRandom.Next(HeightMap.Depth));
-                //myGridBasedErosion!.WaterIncrease(newPosition, waterIncrease);
-            }
-        }
-    }
-
-    public void SimulateHydraulicErosionGridStop()
-    {
-        myGridBasedErosion = null;
-        Console.WriteLine($"INFO: End of simulation hydraulic erosion grid.");
+        ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
+        Console.WriteLine($"INFO: End of hydraulic erosion grid simulation.");
     }
 
     private Vector2 GetRandomPositionAtEdgeOfMap()
@@ -263,20 +250,14 @@ internal class ErosionSimulatorCPU : IErosionSimulator
 
     public void SimulatePlateTectonics()
     {
-        HeightMap = myHeightMapGenerator.Update();
+        HeightMap = myPlateTectonicsHeightMapGenerator.SimulatePlateTectonics();
         ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-        Console.WriteLine($"INFO: End of Plate Tectonics.");
+        Console.WriteLine($"INFO: End of plate tectonics simulation.");
     }
 
     public void Dispose()
     {
-        if (myIsDisposed)
-        {
-            return;
-        }
-
-        myHeightMapGenerator.Dispose();
-
-        myIsDisposed = true;
+        myHeightMapGenerator?.Dispose();
+        myPlateTectonicsHeightMapGenerator?.Dispose();
     }
 }

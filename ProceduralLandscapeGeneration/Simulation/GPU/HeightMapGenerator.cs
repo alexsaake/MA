@@ -5,13 +5,13 @@ namespace ProceduralLandscapeGeneration.Simulation.GPU;
 
 internal class HeightMapGenerator : IHeightMapGenerator
 {
-    private readonly IConfiguration myConfigration;
+    private readonly IConfiguration myConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
     private readonly IShaderBuffers myShaderBuffers;
 
     public HeightMapGenerator(IConfiguration configuration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
     {
-        myConfigration = configuration;
+        myConfiguration = configuration;
         myComputeShaderProgramFactory = computeShaderProgramFactory;
         myShaderBuffers = shaderBuffers;
     }
@@ -20,25 +20,25 @@ internal class HeightMapGenerator : IHeightMapGenerator
     {
         GenerateHeightMapShaderBuffer();
 
-        uint heightMapSize = myConfigration.HeightMapSideLength * myConfigration.HeightMapSideLength;
-        return new HeightMap(myConfigration, myShaderBuffers, heightMapSize);
+        uint heightMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        return new HeightMap(myConfiguration, myShaderBuffers, heightMapSize);
     }
 
     public unsafe void GenerateHeightMapShaderBuffer()
     {
         HeightMapParameters heightMapParameters = new HeightMapParameters()
         {
-            Seed = (uint)myConfigration.Seed,
-            SideLength = myConfigration.HeightMapSideLength,
-            Scale = myConfigration.NoiseScale,
-            Octaves = myConfigration.NoiseOctaves,
-            Persistence = myConfigration.NoisePersistence,
-            Lacunarity = myConfigration.NoiseLacunarity
+            Seed = (uint)myConfiguration.Seed,
+            SideLength = myConfiguration.HeightMapSideLength,
+            Scale = myConfiguration.NoiseScale,
+            Octaves = myConfiguration.NoiseOctaves,
+            Persistence = myConfiguration.NoisePersistence,
+            Lacunarity = myConfiguration.NoiseLacunarity
         };
         uint heightMapParametersBufferSize = (uint)sizeof(HeightMapParameters);
         uint heightMapParametersBufferId = Rlgl.LoadShaderBuffer(heightMapParametersBufferSize, &heightMapParameters, Rlgl.DYNAMIC_COPY);
 
-        uint heightMapSize = myConfigration.HeightMapSideLength * myConfigration.HeightMapSideLength;
+        uint heightMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
         uint heightMapBufferSize = heightMapSize * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
