@@ -30,6 +30,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "Noise;Tectonics", (value) => configuration.MapGeneration = (MapGenerationTypes)value, (int)configuration.MapGeneration));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Side Length", (value) => configuration.HeightMapSideLength = (uint)value, (int)configuration.HeightMapSideLength, 32, 8192));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => configuration.HeightMultiplier = (uint)value, (int)configuration.HeightMultiplier, 1, 150));
+        myMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => configuration.SeaLevel = (uint)value, (int)configuration.SeaLevel));
 
         myProcessorTypePanel = new PanelWithElements("Processor Type");
         myProcessorTypePanel.Add(new ToggleSliderWithLabel("Erosion Simulation", "GPU;CPU", (value) => configuration.ErosionSimulation = (ProcessorTypes)value, (int)configuration.ErosionSimulation));

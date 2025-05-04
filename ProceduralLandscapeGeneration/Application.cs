@@ -3,6 +3,7 @@ using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;
 using Raylib_cs;
+using System.Numerics;
 
 namespace ProceduralLandscapeGeneration;
 
@@ -75,9 +76,9 @@ internal class Application : IApplication
             myRenderer.Update();
 
             Raylib.BeginDrawing();
-            Raylib.ClearBackground(Color.SkyBlue);
-            myRenderer.Draw();
-            myConfigurationGUI.Draw();
+                Raylib.ClearBackground(Color.SkyBlue);
+                myRenderer.Draw();
+                myConfigurationGUI.Draw();
             Raylib.EndDrawing();
         }
 

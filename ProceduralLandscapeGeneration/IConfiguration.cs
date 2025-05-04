@@ -9,6 +9,8 @@ internal interface IConfiguration
     ProcessorTypes ErosionSimulation { get; set; }
     ProcessorTypes MeshCreation { get; set; }
 
+    float SeaLevel { get; set; }
+
     int Seed { get; set; }
     uint HeightMapSideLength { get; set; }
     uint HeightMultiplier { get; set; }

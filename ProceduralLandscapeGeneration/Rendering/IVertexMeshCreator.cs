@@ -5,5 +5,6 @@ namespace ProceduralLandscapeGeneration.Rendering;
 
 internal interface IVertexMeshCreator
 {
-    Mesh CreateMesh(HeightMap heightMap);
+    Mesh CreateHeightMapMesh(HeightMap heightMap);
+    Mesh CreateSeaLevelMesh();
 }

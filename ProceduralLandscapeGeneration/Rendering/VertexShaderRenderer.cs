@@ -15,7 +15,8 @@ internal class VertexShaderRenderer : IRenderer
     private readonly IShaderBuffers myShaderBufferIds;
 
     private RenderTexture2D myShadowMap;
-    private Model myModel;
+    private Model myHeightMap;
+    private Model mySeaLevel;
     private Shader mySceneShader;
     private Shader myShadowMapShader;
     private int myLightSpaceMatrixLocation;
@@ -105,8 +106,9 @@ internal class VertexShaderRenderer : IRenderer
 
     private void InitiateModel()
     {
-        Mesh mesh = myVertexMeshCreator.CreateMesh(GetHeightMap());
-        myModel = Raylib.LoadModelFromMesh(mesh);
+        Mesh heightMapMesh = myVertexMeshCreator.CreateHeightMapMesh(GetHeightMap());
+        myHeightMap = Raylib.LoadModelFromMesh(heightMapMesh);
+        mySeaLevel = Raylib.LoadModelFromMesh(myVertexMeshCreator.CreateSeaLevelMesh());
     }
 
     private void OnErosionIterationFinished(object? sender, EventArgs e)
@@ -118,7 +120,7 @@ internal class VertexShaderRenderer : IRenderer
     {
         if (myIsUpdateAvailable)
         {
-            UpdateModel();
+            UpdateModels();
             UpdateShadowMap();
 
             myIsUpdateAvailable = false;
@@ -129,11 +131,13 @@ internal class VertexShaderRenderer : IRenderer
         Raylib.SetShaderValue(mySceneShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
     }
 
-    private void UpdateModel()
+    private void UpdateModels()
     {
-        Raylib.UnloadModel(myModel);
-        Mesh mesh = myVertexMeshCreator.CreateMesh(GetHeightMap());
-        myModel = Raylib.LoadModelFromMesh(mesh);
+        Raylib.UnloadModel(myHeightMap);
+        Raylib.UnloadModel(mySeaLevel);
+        Mesh heightMapMesh = myVertexMeshCreator.CreateHeightMapMesh(GetHeightMap());
+        myHeightMap = Raylib.LoadModelFromMesh(heightMapMesh);
+        mySeaLevel = Raylib.LoadModelFromMesh(myVertexMeshCreator.CreateSeaLevelMesh());
     }
 
     private HeightMap GetHeightMap()
@@ -161,12 +165,12 @@ internal class VertexShaderRenderer : IRenderer
     private unsafe void UpdateShadowMap()
     {
         Raylib.BeginTextureMode(myShadowMap);
-        Raylib.ClearBackground(Color.White);
-        Raylib.BeginMode3D(myLightCamera);
-        Matrix4x4 lightProjection = Rlgl.GetMatrixProjection();
-        Matrix4x4 lightView = Rlgl.GetMatrixModelview();
-        DrawScene(myShadowMapShader);
-        Raylib.EndMode3D();
+            Raylib.ClearBackground(Color.White);
+            Raylib.BeginMode3D(myLightCamera);
+                Matrix4x4 lightProjection = Rlgl.GetMatrixProjection();
+                Matrix4x4 lightView = Rlgl.GetMatrixModelview();
+                DrawScene(myShadowMapShader);
+            Raylib.EndMode3D();
         Raylib.EndTextureMode();
         Matrix4x4 lightSpaceMatrix = Matrix4x4.Multiply(lightProjection, lightView);
         Raylib.SetShaderValueMatrix(mySceneShader, myLightSpaceMatrixLocation, lightSpaceMatrix);
@@ -188,8 +192,10 @@ internal class VertexShaderRenderer : IRenderer
 
     private unsafe void DrawScene(Shader shader)
     {
-        myModel.Materials[0].Shader = shader;
-        Raylib.DrawModel(myModel, Vector3.Zero, 1.0f, Color.White);
+        myHeightMap.Materials[0].Shader = shader;
+        Raylib.DrawModel(myHeightMap, Vector3.Zero, 1.0f, Color.White);
+        mySeaLevel.Materials[0].Shader = shader;
+        Raylib.DrawModel(mySeaLevel, Vector3.Zero, 1.0f, Color.White);
     }
 
     public void Dispose()
@@ -203,7 +209,8 @@ internal class VertexShaderRenderer : IRenderer
         myErosionSimulator.ErosionIterationFinished -= OnErosionIterationFinished;
 
         Raylib.UnloadRenderTexture(myShadowMap);
-        Raylib.UnloadModel(myModel);
+        Raylib.UnloadModel(myHeightMap);
+        Raylib.UnloadModel(mySeaLevel);
         Raylib.UnloadShader(mySceneShader);
         Raylib.UnloadShader(myShadowMapShader);
 

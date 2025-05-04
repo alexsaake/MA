@@ -64,6 +64,21 @@ internal class Configuration : IConfiguration
         }
     }
 
+    private float mySeaLevel;
+    public float SeaLevel
+    {
+        get => mySeaLevel;
+        set
+        {
+            if (mySeaLevel == value)
+            {
+                return;
+            }
+            mySeaLevel = value;
+            ErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     private int mySeed;
     public int Seed
     {
