@@ -27,7 +27,13 @@
 	  <None Update="raylib.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
+	  <None Update="Rendering\Shaders\SeaLevelMeshFragmentShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	  <None Update="Rendering\Shaders\SeaLevelFragmentShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Rendering\Shaders\SeaLevelMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Rendering\Shaders\SeaLevelVertexShader.glsl">
@@ -75,10 +81,10 @@
 	  <None Update="Simulation\GPU\Shaders\HeightMapGeneratorComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Rendering\Shaders\TerrainMeshShader.glsl">
+	  <None Update="Rendering\Shaders\HeightMapMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Rendering\Shaders\FragmentShader.glsl">
+	  <None Update="Rendering\Shaders\HeightMapMeshFragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Rendering\Shaders\HeightMapFragmentShader.glsl">

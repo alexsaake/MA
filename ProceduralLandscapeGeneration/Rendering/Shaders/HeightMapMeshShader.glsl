@@ -70,15 +70,79 @@ vec3 getScaledNormal(uint x, uint y)
     return normalize(normal);
 }
 
+vec3 oceanCliff = vec3(0.2, 0.2, 0.1);
+vec3 beachColor = vec3(1.0, 0.9, 0.6);
+vec3 pastureColor = vec3(0.5, 0.6, 0.4);
+vec3 woodsColor = vec3(0.2, 0.3, 0.2);
+vec3 mountainColor = vec3(0.6, 0.6, 0.6);
+vec3 snowColor = vec3(1.0, 0.9, 0.9);
+
 void addVertex(uint vertex, uint x, uint y)
 {
     uint index = getIndex(x, y);
-    vec4 position = mvp * vec4(x, y, heightMap[index] * configuration.HeightMultiplier, 1.0);
+    float height = heightMap[index];
+    float terrainHeight = height * configuration.HeightMultiplier;
+    float waterHeight = configuration.SeaLevel * configuration.HeightMultiplier;
+    vec3 normal = getScaledNormal(x, y);
+    vec4 position = mvp * vec4(x, y, terrainHeight, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
     v_out[vertex].position = position;
-    v_out[vertex].color = vec4(1.0, 1.0, 1.0, 1.0);
-    v_out[vertex].normal = vec4(getScaledNormal(x, y), 1.0);
+    vec3 terrainColor = vec3(1.0);
+    if(configuration.IsColorEnabled == 1)
+    {
+        if(terrainHeight < waterHeight + 0.3)
+        {
+            if(normal.z > 0.3)
+            {
+                terrainColor = beachColor;
+            }
+            else
+            {
+                terrainColor = oceanCliff;
+            }
+        }
+        else
+        {
+            if(normal.z > 0.4)
+            {
+                if(height > 0.9)
+                {
+                    terrainColor = snowColor;
+                }
+                else if(height > 0.7)
+                {
+                    terrainColor = mountainColor;
+                }
+                else
+                {
+                    terrainColor = woodsColor;
+                }
+            }
+            else if(normal.z > 0.3)
+            {
+                if(height > 0.9)
+                {
+                    terrainColor = snowColor;
+                }
+                else if(height > 0.8)
+                {
+                    terrainColor = mountainColor;
+                }
+                else
+                {
+                    terrainColor = pastureColor;
+                }
+            }
+            else
+            {
+                terrainColor = mountainColor;
+            }
+        }
+    }
+
+    v_out[vertex].color = vec4(terrainColor, 1.0);
+    v_out[vertex].normal = vec4(normal, 1.0);
 }
 
 void main()

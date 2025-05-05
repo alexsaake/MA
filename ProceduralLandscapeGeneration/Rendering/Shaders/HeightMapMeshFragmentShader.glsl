@@ -2,7 +2,7 @@
 
 #version 450
 
-layout(location = 0) out vec4 FragColor;
+layout(location = 0) out vec4 TexelColor;
 
 in PerVertexData
 {
@@ -31,5 +31,5 @@ void main()
     vec3 specular = spec * lightColor;
 
     vec3 result =  (ambient + diffuse + specular) * fragIn.color.rgb;
-    FragColor = vec4(result, fragIn.color.a);
+    TexelColor = vec4(result, fragIn.color.a);
 }
