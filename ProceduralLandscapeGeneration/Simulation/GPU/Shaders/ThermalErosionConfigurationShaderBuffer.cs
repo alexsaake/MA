@@ -1,6 +1,6 @@
 ﻿namespace ProceduralLandscapeGeneration.Simulation.GPU.Shaders;
 
-internal struct ThermalErosionConfiguration
+internal struct ThermalErosionConfigurationShaderBuffer
 {
     public float TangensThresholdAngle;
     public float HeightChange;

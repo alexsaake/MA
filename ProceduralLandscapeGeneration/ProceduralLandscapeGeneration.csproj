@@ -27,6 +27,12 @@
 	  <None Update="raylib.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
+	  <None Update="Rendering\Shaders\SeaLevelFragmentShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Rendering\Shaders\SeaLevelVertexShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	  <None Update="Rendering\Shaders\SedimentMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
@@ -75,7 +81,7 @@
 	  <None Update="Rendering\Shaders\FragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Rendering\Shaders\SceneFragmentShader.glsl">
+	  <None Update="Rendering\Shaders\HeightMapFragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Rendering\Shaders\HeightMapVertexShader.glsl">

@@ -24,9 +24,15 @@ layout(std430, binding = 1) readonly restrict buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-layout(std430, binding = 2) readonly restrict buffer erosionConfigurationShaderBuffer
+struct Configuration
 {
-    uint heightMultiplier;
+    float HeightMultiplier;
+    float SeaLevel;
+};
+
+layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
+{
+    Configuration configuration;
 };
 
 uniform mat4 mvp;
@@ -56,8 +62,8 @@ vec3 getScaledNormal(uint x, uint y)
     float xym1 = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    heightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
-    heightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
+    configuration.HeightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
+    configuration.HeightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
     1.0);
 
     return normalize(normal);
@@ -66,7 +72,7 @@ vec3 getScaledNormal(uint x, uint y)
 void addVertex(uint vertex, uint x, uint y)
 {
     uint index = getIndex(x, y);
-    vec4 position = mvp * vec4(x, y, heightMap[index] * heightMultiplier, 1.0);
+    vec4 position = mvp * vec4(x, y, heightMap[index] * configuration.HeightMultiplier, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
     v_out[vertex].position = position;

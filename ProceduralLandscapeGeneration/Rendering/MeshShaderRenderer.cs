@@ -1,5 +1,4 @@
-﻿using ProceduralLandscapeGeneration.Simulation;
-using ProceduralLandscapeGeneration.Simulation.GPU;
+﻿using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;
 
@@ -8,8 +7,7 @@ namespace ProceduralLandscapeGeneration.Rendering;
 internal class MeshShaderRenderer : IRenderer
 {
     private readonly IConfiguration myConfiguration;
-    private readonly IErosionSimulator myErosionSimulator;
-    private readonly IShaderBuffers myShaderBufferIds;
+    private readonly IShaderBuffers myShaderBuffers;
 
     private Shader myTerrainMeshShader;
     private Shader myWaterMeshShader;
@@ -19,16 +17,15 @@ internal class MeshShaderRenderer : IRenderer
 
     private uint myMeshletCount;
 
-    public MeshShaderRenderer(IConfiguration configuration, IErosionSimulator erosionSimulator, IShaderBuffers shaderBufferIds)
+    public MeshShaderRenderer(IConfiguration configuration, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
-        myErosionSimulator = erosionSimulator;
-        myShaderBufferIds = shaderBufferIds;
+        myShaderBuffers = shaderBuffers;
     }
 
     public unsafe void Initialize()
     {
-        myConfiguration.ErosionConfigurationChanged += OnErosionConfigurationChanged;
+        myConfiguration.ConfigurationChanged += OnConfigurationChanged;
 
         myTerrainMeshShader = Raylib.LoadMeshShader("Rendering/Shaders/TerrainMeshShader.glsl", "Rendering/Shaders/FragmentShader.glsl");
         myWaterMeshShader = Raylib.LoadMeshShader("Rendering/Shaders/WaterMeshShader.glsl", "Rendering/Shaders/FragmentShader.glsl");
@@ -50,19 +47,23 @@ internal class MeshShaderRenderer : IRenderer
 
         myMeshletCount = CalculateMeshletCount();
 
-        myShaderBufferIds.Add(ShaderBufferTypes.ErosionConfiguration, sizeof(uint));
-        UpdateErosionConfiguration();
+        myShaderBuffers.Add(ShaderBufferTypes.Configuration, (uint)sizeof(ConfigurationShaderBuffer));
+        UpdateConfiguration();
     }
 
-    private void OnErosionConfigurationChanged(object? sender, EventArgs e)
+    private void OnConfigurationChanged(object? sender, EventArgs e)
     {
-        UpdateErosionConfiguration();
+        UpdateConfiguration();
     }
 
-    private unsafe void UpdateErosionConfiguration()
+    private unsafe void UpdateConfiguration()
     {
-        uint heightMultiplierValue = myConfiguration.HeightMultiplier;
-        Rlgl.UpdateShaderBuffer(myShaderBufferIds[ShaderBufferTypes.ErosionConfiguration], &heightMultiplierValue, sizeof(uint), 0);
+        ConfigurationShaderBuffer configuration = new ConfigurationShaderBuffer()
+        {
+            HeightMultiplier = myConfiguration.HeightMultiplier,
+            SeaLevel = myConfiguration.SeaLevel
+        };
+        Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.Configuration], &configuration, (uint)sizeof(ConfigurationShaderBuffer), 0);
     }
 
     private uint CalculateMeshletCount()
@@ -88,17 +89,17 @@ internal class MeshShaderRenderer : IRenderer
         {
             Raylib.BeginShaderMode(mySedimentMeshShader);
             Rlgl.EnableShader(mySedimentMeshShader.Id);
-            Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
-            Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridErosionConfiguration], 2);
-            Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.ErosionConfiguration], 3);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridErosionConfiguration], 2);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.Configuration], 3);
             Raylib.DrawMeshTasks(0, myMeshletCount);
             Rlgl.DisableShader();
             Raylib.EndShaderMode();
         }
         Raylib.BeginShaderMode(myTerrainMeshShader);
         Rlgl.EnableShader(myTerrainMeshShader.Id);
-        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
-        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.ErosionConfiguration], 2);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.Configuration], 2);
         Raylib.DrawMeshTasks(0, myMeshletCount);
         Rlgl.DisableShader();
         Raylib.EndShaderMode();
@@ -106,9 +107,9 @@ internal class MeshShaderRenderer : IRenderer
         {
             Raylib.BeginShaderMode(myWaterMeshShader);
             Rlgl.EnableShader(myWaterMeshShader.Id);
-            Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
-            Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridErosionConfiguration], 2);
-            Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.ErosionConfiguration], 3);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridErosionConfiguration], 2);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.Configuration], 3);
             Raylib.DrawMeshTasks(0, myMeshletCount);
             Rlgl.DisableShader();
             Raylib.EndShaderMode();
@@ -118,7 +119,7 @@ internal class MeshShaderRenderer : IRenderer
 
     public void Dispose()
     {
-        myConfiguration.ErosionConfigurationChanged -= OnErosionConfigurationChanged;
+        myConfiguration.ConfigurationChanged -= OnConfigurationChanged;
 
         Raylib.UnloadShader(myTerrainMeshShader);
     }

@@ -49,6 +49,21 @@ internal class Configuration : IConfiguration
         }
     }
 
+    private uint myHeightMultiplier;
+    public uint HeightMultiplier
+    {
+        get => myHeightMultiplier;
+        set
+        {
+            if (myHeightMultiplier == value)
+            {
+                return;
+            }
+            myHeightMultiplier = value;
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     private float mySeaLevel;
     public float SeaLevel
     {
@@ -60,7 +75,7 @@ internal class Configuration : IConfiguration
                 return;
             }
             mySeaLevel = value;
-            ErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -91,21 +106,6 @@ internal class Configuration : IConfiguration
             }
             myHeightMapSideLength = value;
             ResetRequired?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    private uint myHeightMultiplier;
-    public uint HeightMultiplier
-    {
-        get => myHeightMultiplier;
-        set
-        {
-            if (myHeightMultiplier == value)
-            {
-                return;
-            }
-            myHeightMultiplier = value;
-            ErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -404,6 +404,7 @@ internal class Configuration : IConfiguration
     }
 
     public event EventHandler? ResetRequired;
+    public event EventHandler? ConfigurationChanged;
     public event EventHandler? ErosionConfigurationChanged;
     public event EventHandler? ThermalErosionConfigurationChanged;
     public event EventHandler? GridErosionConfigurationChanged;

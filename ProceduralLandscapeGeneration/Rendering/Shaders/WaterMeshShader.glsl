@@ -50,9 +50,15 @@ layout(std430, binding = 2) buffer gridPointsShaderBuffer
     GridPoint[] gridPoints;
 };
 
-layout(std430, binding = 3) readonly restrict buffer erosionConfigurationShaderBuffer
+struct Configuration
 {
-    uint heightMultiplier;
+    float HeightMultiplier;
+    float SeaLevel;
+};
+
+layout(std430, binding = 3) readonly restrict buffer configurationShaderBuffer
+{
+    Configuration configuration;
 };
 
 uniform mat4 mvp;
@@ -68,7 +74,7 @@ void addVertex(uint vertex, uint x, uint y)
 {
     float zOffset = 0.01;
     uint index = getIndex(x, y);
-    vec4 position = mvp * vec4(x, y, (heightMap[index] - zOffset + gridPoints[index].WaterHeight) * heightMultiplier, 1.0);
+    vec4 position = mvp * vec4(x, y, (heightMap[index] - zOffset + gridPoints[index].WaterHeight) * configuration.HeightMultiplier, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
     v_out[vertex].position = position;

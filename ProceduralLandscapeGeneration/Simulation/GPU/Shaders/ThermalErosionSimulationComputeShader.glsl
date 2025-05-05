@@ -7,20 +7,26 @@ layout(std430, binding = 1) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-layout(std430, binding = 2) readonly restrict buffer erosionConfigurationShaderBuffer
+struct Configuration
 {
-    uint heightMultiplier;
+    float HeightMultiplier;
+    float SeaLevel;
+};
+
+layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
+{
+    Configuration configuration;
 };
 
 struct ThermalErosionConfiguration
 {
-    float tangensThresholdAngle;
-    float heightChange;
+    float TangensThresholdAngle;
+    float HeightChange;
 };
 
 layout(std430, binding = 3) readonly restrict buffer thermalErosionConfigurationShaderBuffer
 {
-    ThermalErosionConfiguration configuration;
+    ThermalErosionConfiguration thermalErosionConfiguration;
 };
 
 uint myHeightMapSideLength;
@@ -55,8 +61,8 @@ vec3 getScaledNormal(uint x, uint y)
     float xym1 = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    heightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
-    heightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
+    configuration.HeightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
+    configuration.HeightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
     1.0);
 
     return normalize(normal);
@@ -96,12 +102,12 @@ void main()
     {
         return;
     }
-    float neighborHeight = heightMap[neighborIndex] * heightMultiplier;
-    float zDiff = heightMap[id] * heightMultiplier - neighborHeight;
+    float neighborHeight = heightMap[neighborIndex] * configuration.HeightMultiplier;
+    float zDiff = heightMap[id] * configuration.HeightMultiplier - neighborHeight;
 
-    if (zDiff > configuration.tangensThresholdAngle)
+    if (zDiff > thermalErosionConfiguration.TangensThresholdAngle)
     {
-        heightMap[id] -= configuration.heightChange;
-        heightMap[neighborIndex] += configuration.heightChange;
+        heightMap[id] -= thermalErosionConfiguration.HeightChange;
+        heightMap[neighborIndex] += thermalErosionConfiguration.HeightChange;
     }
 }

@@ -5,9 +5,15 @@ layout(std430, binding = 1) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-layout(std430, binding = 2) readonly restrict buffer erosionConfigurationShaderBuffer
+struct Configuration
 {
-    uint heightMultiplier;
+    float HeightMultiplier;
+    float SeaLevel;
+};
+
+layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
+{
+    Configuration configuration;
 };
 
 uint myHeightMapSideLength;
@@ -35,15 +41,14 @@ vec3 getScaledNormal(uint x, uint y)
     float xym1 = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    heightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
-    heightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
+    configuration.HeightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
+    configuration.HeightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
     1.0);
 
     return normalize(normal);
 }
 
 in vec3 vertexPosition;
-in vec3 vertexNormal;
 in vec4 vertexColor;
 
 uniform mat4 mvp;
@@ -63,7 +68,7 @@ void main()
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
 
-    float height = heightMap[index] * heightMultiplier;
+    float height = heightMap[index] * configuration.HeightMultiplier;
     fragPosition = vec3(matModel * vec4(vertexPosition.xy, height, 1.0));
     fragNormal = transpose(inverse(mat3(matModel))) * getScaledNormal(x, y);
     fragColor = vertexColor;

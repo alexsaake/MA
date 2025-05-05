@@ -7,9 +7,15 @@ layout(std430, binding = 1) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-layout(std430, binding = 2) readonly restrict buffer erosionConfigurationShaderBuffer
+struct Configuration
 {
-    uint heightMultiplier;
+    float HeightMultiplier;
+    float SeaLevel;
+};
+
+layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
+{
+    Configuration configuration;
 };
 
 struct GridPoint
@@ -91,13 +97,13 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
-	vec3 dhdx = vec3(gridErosionConfiguration.CellSizeX, 0.0, (heightMap[getIndex(x + 1, y)] - heightMap[getIndex(x - 1, y)]) * heightMultiplier);
-	vec3 dhdy = vec3(0.0, gridErosionConfiguration.CellSizeY, (heightMap[getIndex(x, y + 1)] - heightMap[getIndex(x, y - 1)]) * heightMultiplier);
+	vec3 dhdx = vec3(gridErosionConfiguration.CellSizeX, 0.0, (heightMap[getIndex(x + 1, y)] - heightMap[getIndex(x - 1, y)]) * configuration.HeightMultiplier);
+	vec3 dhdy = vec3(0.0, gridErosionConfiguration.CellSizeY, (heightMap[getIndex(x, y + 1)] - heightMap[getIndex(x, y - 1)]) * configuration.HeightMultiplier);
 	vec3 normal = cross(dhdx, dhdy);
 
 	float sinTiltAngle = abs(normal.z) / length(normal);
 	
-	float lmax = clamp(1.0 - max(0.0, gridErosionConfiguration.MaximalErosionDepth - gridPoint.WaterHeight * heightMultiplier) / gridErosionConfiguration.MaximalErosionDepth, 0.0, 1.0);
+	float lmax = clamp(1.0 - max(0.0, gridErosionConfiguration.MaximalErosionDepth - gridPoint.WaterHeight * configuration.HeightMultiplier) / gridErosionConfiguration.MaximalErosionDepth, 0.0, 1.0);
 	float sedimentTransportCapacity = gridErosionConfiguration.SedimentCapacity * length(vec2(gridPoint.VelocityX, gridPoint.VelocityY)) * sinTiltAngle * lmax;
 
 	if (gridPoint.SuspendedSediment < sedimentTransportCapacity)

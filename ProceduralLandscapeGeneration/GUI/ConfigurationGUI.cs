@@ -30,7 +30,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Mesh Creation", "GPU;CPU", (value) => configuration.MeshCreation = (ProcessorTypes)value, (int)configuration.MeshCreation));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Side Length", (value) => configuration.HeightMapSideLength = (uint)value, (int)configuration.HeightMapSideLength, 32, 8192));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => configuration.HeightMultiplier = (uint)value, (int)configuration.HeightMultiplier, 1, 150));
-        myMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => configuration.SeaLevel = (uint)value, (int)configuration.SeaLevel));
+        myMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => configuration.SeaLevel = value, configuration.SeaLevel));
 
         myNoiseMapGenerationPanel = new PanelWithElements("Noise Map Generation");
         myNoiseMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "GPU;CPU", (value) => configuration.HeightMapGeneration = (ProcessorTypes)value, (int)configuration.HeightMapGeneration));

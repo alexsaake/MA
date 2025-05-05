@@ -14,7 +14,7 @@ internal class Application : IApplication
     private readonly ILifetimeScope myLifetimeScope;
     private IRenderer myRenderer;
 
-    private bool myIsModuleResetRequired;
+    private bool myIsResetRequired;
 
     public Application(IConfiguration configuration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
     {
@@ -43,12 +43,12 @@ internal class Application : IApplication
 
         while (!Raylib.WindowShouldClose())
         {
-            if (myIsModuleResetRequired)
+            if (myIsResetRequired)
             {
                 DisposeModules();
                 ResolveModules();
                 InitializeModules();
-                myIsModuleResetRequired = false;
+                myIsResetRequired = false;
             }
 
             if (Raylib.IsKeyDown(KeyboardKey.One))
@@ -75,9 +75,9 @@ internal class Application : IApplication
             myRenderer.Update();
 
             Raylib.BeginDrawing();
-            Raylib.ClearBackground(Color.SkyBlue);
-            myRenderer.Draw();
-            myConfigurationGUI.Draw();
+                Raylib.ClearBackground(Color.SkyBlue);
+                myRenderer.Draw();
+                myConfigurationGUI.Draw();
             Raylib.EndDrawing();
         }
 
@@ -96,7 +96,7 @@ internal class Application : IApplication
 
     private void OnResetRequired(object? sender, EventArgs e)
     {
-        myIsModuleResetRequired = true;
+        myIsResetRequired = true;
     }
 
     private void DisposeModules()

@@ -52,6 +52,7 @@ internal interface IConfiguration
     uint GetIndex(uint x, uint y);
 
     event EventHandler? ResetRequired;
+    event EventHandler? ConfigurationChanged;
     event EventHandler? ErosionConfigurationChanged;
     event EventHandler? ThermalErosionConfigurationChanged;
     event EventHandler? GridErosionConfigurationChanged;
