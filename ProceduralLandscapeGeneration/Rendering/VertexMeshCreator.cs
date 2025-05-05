@@ -46,7 +46,7 @@ internal class VertexMeshCreator : IVertexMeshCreator
 
         int indexIndex = 0;
         int vertexIndex = 0;
-        Color waterColor = new Color(0, 0, 127, 127);
+        Color waterColor = new Color(0, 94, 184, 127);
         AddQuadIndices(mesh, ref indexIndex, vertexIndex, 2);
         AddVertex(mesh, ref vertexIndex, new Vector3(0, 0, 0), waterColor);
         AddVertex(mesh, ref vertexIndex, new Vector3((int)myConfiguration.HeightMapSideLength, 0, 0), waterColor);

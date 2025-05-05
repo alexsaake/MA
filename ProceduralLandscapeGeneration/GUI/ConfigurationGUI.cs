@@ -31,6 +31,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Side Length", (value) => configuration.HeightMapSideLength = (uint)value, (int)configuration.HeightMapSideLength, 32, 8192));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => configuration.HeightMultiplier = (uint)value, (int)configuration.HeightMultiplier, 1, 150));
         myMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => configuration.SeaLevel = value, configuration.SeaLevel));
+        myMapGenerationPanel.Add(new ToggleSliderWithLabel("Camera Mode", "Still;Orbital", (value) => configuration.CameraMode = value == 0 ? CameraMode.Custom : CameraMode.Orbital, (int)configuration.CameraMode));
 
         myNoiseMapGenerationPanel = new PanelWithElements("Noise Map Generation");
         myNoiseMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "GPU;CPU", (value) => configuration.HeightMapGeneration = (ProcessorTypes)value, (int)configuration.HeightMapGeneration));

@@ -1,4 +1,5 @@
 ﻿using ProceduralLandscapeGeneration.Common;
+using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration;
 
@@ -8,11 +9,12 @@ internal interface IConfiguration
     ProcessorTypes HeightMapGeneration { get; set; }
     ProcessorTypes MeshCreation { get; set; }
 
-    float SeaLevel { get; set; }
-
-    int Seed { get; set; }
     uint HeightMapSideLength { get; set; }
     uint HeightMultiplier { get; set; }
+    float SeaLevel { get; set; }
+    CameraMode CameraMode { get; set; }
+
+    int Seed { get; set; }
     float NoiseScale { get; set; }
     uint NoiseOctaves { get; set; }
     float NoisePersistence { get; set; }

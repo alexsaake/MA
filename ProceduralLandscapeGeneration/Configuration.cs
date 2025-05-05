@@ -1,4 +1,5 @@
 ﻿using ProceduralLandscapeGeneration.Common;
+using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration;
 
@@ -75,6 +76,21 @@ internal class Configuration : IConfiguration
                 return;
             }
             mySeaLevel = value;
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private CameraMode myCameraMode;
+    public CameraMode CameraMode
+    {
+        get => myCameraMode;
+        set
+        {
+            if (myCameraMode == value)
+            {
+                return;
+            }
+            myCameraMode = value;
             ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
@@ -414,9 +430,12 @@ internal class Configuration : IConfiguration
         HeightMapGeneration = ProcessorTypes.GPU;
         MeshCreation = ProcessorTypes.CPU;
 
+        HeightMapSideLength = 256;
+        HeightMultiplier = 32;
+        SeaLevel = 0.2f;
+        CameraMode = CameraMode.Custom;
+
         Seed = 1337;
-        HeightMapSideLength = 32;
-        HeightMultiplier = 16;
         NoiseScale = 2.0f;
         NoiseOctaves = 8;
         NoisePersistence = 0.5f;

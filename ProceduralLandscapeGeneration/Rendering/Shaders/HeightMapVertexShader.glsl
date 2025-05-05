@@ -49,7 +49,6 @@ vec3 getScaledNormal(uint x, uint y)
 }
 
 in vec3 vertexPosition;
-in vec4 vertexColor;
 
 uniform mat4 mvp;
 uniform mat4 matModel;
@@ -60,6 +59,13 @@ out vec3 fragNormal;
 out vec4 fragColor;
 out vec4 fragPosLightSpace;
 
+vec3 oceanCliff = vec3(0.2, 0.2, 0.1);
+vec3 beachColor = vec3(1.0, 0.9, 0.6);
+vec3 pastureColor = vec3(0.5, 0.6, 0.4);
+vec3 woodsColor = vec3(0.2, 0.3, 0.2);
+vec3 mountainColor = vec3(0.6, 0.6, 0.6);
+vec3 snowColor = vec3(1.0, 0.9, 0.9);
+
 void main()
 {
     uint index = gl_VertexID;
@@ -68,10 +74,62 @@ void main()
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
 
-    float height = heightMap[index] * configuration.HeightMultiplier;
-    fragPosition = vec3(matModel * vec4(vertexPosition.xy, height, 1.0));
-    fragNormal = transpose(inverse(mat3(matModel))) * getScaledNormal(x, y);
-    fragColor = vertexColor;
+    float height = heightMap[index];
+    float terrainHeight = height * configuration.HeightMultiplier;
+    float waterHeight = configuration.SeaLevel * configuration.HeightMultiplier;
+    fragPosition = vec3(matModel * vec4(vertexPosition.xy, terrainHeight, 1.0));
+    vec3 normal = getScaledNormal(x, y);
+    fragNormal = transpose(inverse(mat3(matModel))) * normal;
+    vec3 terrainColor = vec3(1.0);
+    if(terrainHeight < waterHeight + 0.3)
+    {
+        if(normal.z > 0.3)
+        {
+            terrainColor = beachColor;
+        }
+        else
+        {
+            terrainColor = oceanCliff;
+        }
+    }
+    else
+    {
+        if(normal.z > 0.4)
+        {
+            if(height > 0.9)
+            {
+                terrainColor = snowColor;
+            }
+            else if(height > 0.7)
+            {
+                terrainColor = mountainColor;
+            }
+            else
+            {
+                terrainColor = woodsColor;
+            }
+        }
+        else if(normal.z > 0.3)
+        {
+            if(height > 0.9)
+            {
+                terrainColor = snowColor;
+            }
+            else if(height > 0.8)
+            {
+                terrainColor = mountainColor;
+            }
+            else
+            {
+                terrainColor = pastureColor;
+            }
+        }
+        else
+        {
+            terrainColor = mountainColor;
+        }
+    }
+    fragColor = vec4(terrainColor, 1.0);
     fragPosLightSpace = lightSpaceMatrix * vec4(fragPosition, 1.0);
-    gl_Position = mvp * vec4(vertexPosition.xy, height, 1.0);
+    gl_Position = mvp * vec4(vertexPosition.xy, terrainHeight, 1.0);
 }

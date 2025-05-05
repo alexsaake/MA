@@ -118,7 +118,7 @@ internal class VertexShaderRenderer : IRenderer
     {
         Vector3 cameraPosition = heightMapCenter + new Vector3(myConfiguration.HeightMapSideLength / 2, -myConfiguration.HeightMapSideLength / 2, myConfiguration.HeightMapSideLength / 2);
         myCamera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
-        Raylib.UpdateCamera(ref myCamera, CameraMode.Custom);
+        Raylib.UpdateCamera(ref myCamera, myConfiguration.CameraMode);
     }
 
     private unsafe void InitiateModel()
@@ -163,7 +163,7 @@ internal class VertexShaderRenderer : IRenderer
 
     private unsafe void UpdateCamera()
     {
-        Raylib.UpdateCamera(ref myCamera, CameraMode.Custom);
+        Raylib.UpdateCamera(ref myCamera, myConfiguration.CameraMode);
         Vector3 viewPosition = myCamera.Position;
         Raylib.SetShaderValue(myHeightMapShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
     }
