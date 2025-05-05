@@ -28,6 +28,7 @@ struct Configuration
 {
     float HeightMultiplier;
     float SeaLevel;
+    float IsColorEnabled;
 };
 
 layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer

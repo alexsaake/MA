@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using ProceduralLandscapeGeneration.Config;
 using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;
@@ -32,9 +33,9 @@ internal class Application : IApplication
 
     public void Run()
     {
-        myConfiguration.ResetRequired += OnResetRequired;
-
         Raylib.InitWindow(myConfiguration.ScreenWidth, myConfiguration.ScreenHeight, "Procedural Landscape Generation");
+
+        myConfiguration.ResetRequired += OnResetRequired;
 
         InitializeModules();
 
@@ -90,6 +91,7 @@ internal class Application : IApplication
 
     private void InitializeModules()
     {
+        myConfiguration.Initialize();
         myErosionSimulator.Initialize();
         myRenderer.Initialize();
     }
@@ -103,5 +105,6 @@ internal class Application : IApplication
     {
         myRenderer.Dispose();
         myErosionSimulator.Dispose();
+        myConfiguration.Dispose();
     }
 }

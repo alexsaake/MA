@@ -1,10 +1,14 @@
-﻿using ProceduralLandscapeGeneration.Common;
+﻿using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration;
+namespace ProceduralLandscapeGeneration.Config;
 
 internal class Configuration : IConfiguration
 {
+    private IShaderBuffers myShaderBuffers;
+
+    private bool myIsDisposed;
+
     private MapGenerationTypes myMapGeneration;
     public MapGenerationTypes MapGeneration
     {
@@ -61,7 +65,7 @@ internal class Configuration : IConfiguration
                 return;
             }
             myHeightMultiplier = value;
-            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            UpdateConfigurationShaderBuffer();
         }
     }
 
@@ -76,7 +80,22 @@ internal class Configuration : IConfiguration
                 return;
             }
             mySeaLevel = value;
-            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            UpdateConfigurationShaderBuffer();
+        }
+    }
+
+    private bool myIsColorEnabled;
+    public bool IsColorEnabled
+    {
+        get => myIsColorEnabled;
+        set
+        {
+            if (myIsColorEnabled == value)
+            {
+                return;
+            }
+            myIsColorEnabled = value;
+            UpdateConfigurationShaderBuffer();
         }
     }
 
@@ -91,7 +110,7 @@ internal class Configuration : IConfiguration
                 return;
             }
             myCameraMode = value;
-            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            UpdateConfigurationShaderBuffer();
         }
     }
 
@@ -250,9 +269,9 @@ internal class Configuration : IConfiguration
     public int SimulationCallbackEachIterations { get; set; } = 1000;
     public int ShadowMapResolution { get; set; } = 1028;
 
-    public bool ShowWater { get; set; }
-    public bool ShowSediment { get; set; }
-    public bool AddRain { get; set; }
+    public bool IsWaterDisplayed { get; set; }
+    public bool IsSedimentDisplayed { get; set; }
+    public bool IsRainAdded { get; set; }
 
     public float WaterIncrease { get; set; }
 
@@ -420,20 +439,22 @@ internal class Configuration : IConfiguration
     }
 
     public event EventHandler? ResetRequired;
-    public event EventHandler? ConfigurationChanged;
     public event EventHandler? ErosionConfigurationChanged;
     public event EventHandler? ThermalErosionConfigurationChanged;
     public event EventHandler? GridErosionConfigurationChanged;
 
-    public Configuration()
+    public Configuration(IShaderBuffers shaderBuffers)
     {
+        myShaderBuffers = shaderBuffers;
+
         HeightMapGeneration = ProcessorTypes.GPU;
         MeshCreation = ProcessorTypes.CPU;
 
         HeightMapSideLength = 256;
-        HeightMultiplier = 32;
-        SeaLevel = 0.2f;
+        myHeightMultiplier = 32;
+        mySeaLevel = 0.2f;
         CameraMode = CameraMode.Custom;
+        myIsColorEnabled = true;
 
         Seed = 1337;
         NoiseScale = 2.0f;
@@ -461,9 +482,43 @@ internal class Configuration : IConfiguration
         SedimentSofteningRate = 0;
         EvaporationRate = 0.0125f;
     }
+    public void Initialize()
+    {
+        UpdateConfigurationShaderBuffer();
+        
+        myIsDisposed = false;
+    }
+
+    private unsafe void UpdateConfigurationShaderBuffer()
+    {
+        if (!myShaderBuffers.ContainsKey(ShaderBufferTypes.Configuration))
+        {
+            myShaderBuffers.Add(ShaderBufferTypes.Configuration, (uint)sizeof(ConfigurationShaderBuffer));
+        }
+        ConfigurationShaderBuffer configurationShaderBuffer = new ConfigurationShaderBuffer()
+        {
+            HeightMultiplier = HeightMultiplier,
+            SeaLevel = SeaLevel,
+            IsColorEnabled = IsColorEnabled ? 1 : 0
+        };
+        Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.Configuration], &configurationShaderBuffer, (uint)sizeof(ConfigurationShaderBuffer), 0);
+    }
 
     public uint GetIndex(uint x, uint y)
     {
-        return (y * HeightMapSideLength) + x;
+        return y * HeightMapSideLength + x;
+    }
+
+    public void Dispose()
+    {
+        if (myIsDisposed)
+        {
+            return;
+        }
+
+        Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.Configuration]);
+        myShaderBuffers.Remove(ShaderBufferTypes.Configuration);
+
+        myIsDisposed = true;
     }
 }

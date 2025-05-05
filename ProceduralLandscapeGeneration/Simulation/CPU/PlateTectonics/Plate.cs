@@ -1,4 +1,5 @@
 ﻿using ProceduralLandscapeGeneration.Common;
+using ProceduralLandscapeGeneration.Config;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;

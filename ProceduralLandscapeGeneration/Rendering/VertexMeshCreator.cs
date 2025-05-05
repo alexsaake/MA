@@ -1,4 +1,5 @@
-﻿using Raylib_cs;
+﻿using ProceduralLandscapeGeneration.Config;
+using Raylib_cs;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Rendering;

@@ -1,9 +1,8 @@
-﻿using ProceduralLandscapeGeneration.Common;
-using Raylib_cs;
+﻿using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration;
+namespace ProceduralLandscapeGeneration.Config;
 
-internal interface IConfiguration
+internal interface IConfiguration : IDisposable
 {
     MapGenerationTypes MapGeneration { get; set; }
     ProcessorTypes HeightMapGeneration { get; set; }
@@ -13,6 +12,7 @@ internal interface IConfiguration
     uint HeightMultiplier { get; set; }
     float SeaLevel { get; set; }
     CameraMode CameraMode { get; set; }
+    bool IsColorEnabled { get; set; }
 
     int Seed { get; set; }
     float NoiseScale { get; set; }
@@ -34,9 +34,9 @@ internal interface IConfiguration
     int ScreenWidth { get; set; }
     int ShadowMapResolution { get; set; }
 
-    bool ShowWater { get; set; }
-    bool ShowSediment { get; set; }
-    bool AddRain { get; set; }
+    bool IsWaterDisplayed { get; set; }
+    bool IsSedimentDisplayed { get; set; }
+    bool IsRainAdded { get; set; }
 
     float WaterIncrease { get; set; }
     float TimeDelta { get; set; }
@@ -51,10 +51,10 @@ internal interface IConfiguration
     float SedimentSofteningRate { get; set; }
     float EvaporationRate { get; set; }
 
+    void Initialize();
     uint GetIndex(uint x, uint y);
 
     event EventHandler? ResetRequired;
-    event EventHandler? ConfigurationChanged;
     event EventHandler? ErosionConfigurationChanged;
     event EventHandler? ThermalErosionConfigurationChanged;
     event EventHandler? GridErosionConfigurationChanged;

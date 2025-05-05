@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.Simulation.GPU;
+﻿namespace ProceduralLandscapeGeneration.Config;
 
 enum ShaderBufferTypes
 {

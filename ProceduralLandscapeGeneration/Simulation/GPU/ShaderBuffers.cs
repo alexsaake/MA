@@ -1,4 +1,5 @@
-﻿using Raylib_cs;
+﻿using ProceduralLandscapeGeneration.Config;
+using Raylib_cs;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 
@@ -41,7 +42,7 @@ class ShaderBuffers : IDictionary<ShaderBufferTypes, uint>, IShaderBuffers
 
     public bool ContainsKey(ShaderBufferTypes key)
     {
-        throw new NotImplementedException();
+        return myShaderBufferIds.ContainsKey(key);
     }
 
     public void CopyTo(KeyValuePair<ShaderBufferTypes, uint>[] array, int arrayIndex)
@@ -56,7 +57,7 @@ class ShaderBuffers : IDictionary<ShaderBufferTypes, uint>, IShaderBuffers
 
     public bool Remove(ShaderBufferTypes key)
     {
-        throw new NotImplementedException();
+        return myShaderBufferIds.Remove(key);
     }
 
     public bool Remove(KeyValuePair<ShaderBufferTypes, uint> item)
@@ -72,15 +73,5 @@ class ShaderBuffers : IDictionary<ShaderBufferTypes, uint>, IShaderBuffers
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
-    }
-
-    public void Dispose()
-    {
-        foreach (uint shaderBufferId in myShaderBufferIds.Values)
-        {
-            Rlgl.UnloadShaderBuffer(shaderBufferId);
-        }
-
-        myShaderBufferIds.Clear();
     }
 }

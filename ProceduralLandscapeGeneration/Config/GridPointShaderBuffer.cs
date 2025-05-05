@@ -1,6 +1,6 @@
-﻿namespace ProceduralLandscapeGeneration.Simulation.CPU.Grid;
+﻿namespace ProceduralLandscapeGeneration.Config;
 
-public struct GridPoint
+public struct GridPointShaderBuffer
 {
     public float WaterHeight;
     public float SuspendedSediment;

@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.Common;
+﻿namespace ProceduralLandscapeGeneration.Config;
 
 internal enum ProcessorTypes
 {

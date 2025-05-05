@@ -1,4 +1,6 @@
-﻿namespace ProceduralLandscapeGeneration.Simulation;
+﻿using ProceduralLandscapeGeneration.Config;
+
+namespace ProceduralLandscapeGeneration.Simulation;
 
 internal class Random : IRandom
 {

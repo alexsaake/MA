@@ -1,8 +1,8 @@
 ﻿using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
+using ProceduralLandscapeGeneration.Config;
 using ProceduralLandscapeGeneration.Simulation;
-using ProceduralLandscapeGeneration.Simulation.CPU.Grid;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using ProceduralLandscapeGeneration.Simulation.GPU.Grid;
 using Raylib_cs;
@@ -28,10 +28,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void Flow_Flat3x3HeightMapWithoutWater_AllFlowIsZero()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -39,8 +39,8 @@ public class HydraulicErosionTests
 
         testee.Flow();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
-        foreach (GridPoint gridPoint in gridPoints)
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        foreach (GridPointShaderBuffer gridPoint in gridPoints)
         {
             Assert.That(gridPoint.FlowLeft, Is.Zero);
             Assert.That(gridPoint.FlowRight, Is.Zero);
@@ -52,10 +52,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void Flow_Flat2x2HeightMapWithWater_AllFlowIsZero()
     {
-        IConfiguration configuration = SetUpConfiguration(2);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(2, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -67,8 +67,8 @@ public class HydraulicErosionTests
 
         testee.Flow();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
-        foreach (GridPoint gridPoint in gridPoints)
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        foreach (GridPointShaderBuffer gridPoint in gridPoints)
         {
             Assert.That(gridPoint.FlowLeft, Is.Zero);
             Assert.That(gridPoint.FlowRight, Is.Zero);
@@ -80,11 +80,11 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void Flow_FlatChannel1x2WithWaterLeft_OutflowRightIsEqualWaterHeight()
     {
-        IConfiguration configuration = SetUpConfiguration(2);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(2, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
         uint heightMapSize = mapSize * sizeof(float);
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatChannelHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -93,19 +93,19 @@ public class HydraulicErosionTests
 
         testee.Flow();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
         float expectedFlow = configuration.WaterIncrease;
-        GridPoint leftBottomGridPoint = gridPoints[configuration.GetIndex(0, 0)];
+        GridPointShaderBuffer leftBottomGridPoint = gridPoints[configuration.GetIndex(0, 0)];
         Assert.That(leftBottomGridPoint.FlowRight, Is.EqualTo(expectedFlow));
     }
 
     [Test]
     public unsafe void Flow_Flat3x3HeightMapWithWaterInMiddle_OutflowIsEqualInAllDirections()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -114,9 +114,9 @@ public class HydraulicErosionTests
 
         testee.Flow();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
         float expectedFlow = configuration.WaterIncrease / (4 * configuration.TimeDelta);
-        GridPoint centerGridPoint = gridPoints[configuration.GetIndex(1, 1)];
+        GridPointShaderBuffer centerGridPoint = gridPoints[configuration.GetIndex(1, 1)];
         Assert.That(centerGridPoint.FlowLeft, Is.EqualTo(expectedFlow));
         Assert.That(centerGridPoint.FlowRight, Is.EqualTo(expectedFlow));
         Assert.That(centerGridPoint.FlowTop, Is.EqualTo(expectedFlow));
@@ -126,10 +126,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void Flow_SlopedChannel1x3HeightMapWithWaterInMiddle_OutflowIsHigherDownSlope()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpSlopedChannelHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -138,9 +138,9 @@ public class HydraulicErosionTests
 
         testee.Flow();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
         float expectedFlow = configuration.WaterIncrease / (2 * configuration.TimeDelta);
-        GridPoint centerGridPoint = gridPoints[configuration.GetIndex(1, 0)];
+        GridPointShaderBuffer centerGridPoint = gridPoints[configuration.GetIndex(1, 0)];
         Assert.That(centerGridPoint.FlowLeft, Is.EqualTo(expectedFlow + configuration.WaterIncrease / 2.0f));
         Assert.That(centerGridPoint.FlowRight, Is.EqualTo(expectedFlow - configuration.WaterIncrease / 2.0f));
     }
@@ -148,10 +148,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void VelocityMap_Flat3x3HeightMapWithoutWater_AllVelocityIsZero()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -160,8 +160,8 @@ public class HydraulicErosionTests
 
         testee.VelocityMap();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
-        foreach (GridPoint gridPoint in gridPoints)
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        foreach (GridPointShaderBuffer gridPoint in gridPoints)
         {
             Assert.That(gridPoint.VelocityX, Is.Zero);
             Assert.That(gridPoint.VelocityY, Is.Zero);
@@ -171,10 +171,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void VelocityMap_Flat3x3HeightMapWithWaterInMiddle_VelocityIsEqualInAllDirections()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -184,21 +184,21 @@ public class HydraulicErosionTests
 
         testee.VelocityMap();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
         float expectedVelocity = 1.0f;
-        GridPoint centerGridPoint = gridPoints[configuration.GetIndex(1, 1)];
+        GridPointShaderBuffer centerGridPoint = gridPoints[configuration.GetIndex(1, 1)];
         Assert.That(centerGridPoint.VelocityX, Is.EqualTo(0));
         Assert.That(centerGridPoint.VelocityY, Is.EqualTo(0));
-        GridPoint leftGridPoint = gridPoints[configuration.GetIndex(0, 1)];
+        GridPointShaderBuffer leftGridPoint = gridPoints[configuration.GetIndex(0, 1)];
         Assert.That(leftGridPoint.VelocityX, Is.EqualTo(-expectedVelocity));
         Assert.That(leftGridPoint.VelocityY, Is.EqualTo(0));
-        GridPoint rightGridPoint = gridPoints[configuration.GetIndex(2, 1)];
+        GridPointShaderBuffer rightGridPoint = gridPoints[configuration.GetIndex(2, 1)];
         Assert.That(rightGridPoint.VelocityX, Is.EqualTo(expectedVelocity));
         Assert.That(rightGridPoint.VelocityY, Is.EqualTo(0));
-        GridPoint topGridPoint = gridPoints[configuration.GetIndex(1, 2)];
+        GridPointShaderBuffer topGridPoint = gridPoints[configuration.GetIndex(1, 2)];
         Assert.That(topGridPoint.VelocityX, Is.EqualTo(0));
         Assert.That(topGridPoint.VelocityY, Is.EqualTo(expectedVelocity));
-        GridPoint bottomGridPoint = gridPoints[configuration.GetIndex(1, 0)];
+        GridPointShaderBuffer bottomGridPoint = gridPoints[configuration.GetIndex(1, 0)];
         Assert.That(bottomGridPoint.VelocityX, Is.EqualTo(0));
         Assert.That(bottomGridPoint.VelocityY, Is.EqualTo(-expectedVelocity));
     }
@@ -206,10 +206,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void VelocityMap_SlopedChannel1x3HeightMapWithWaterInMiddle_VelocityIsHigherDownSlope()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpSlopedChannelHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -219,15 +219,15 @@ public class HydraulicErosionTests
 
         testee.VelocityMap();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
         float expectedVelocity = 0.0045f;
-        GridPoint leftGridPoint = gridPoints[configuration.GetIndex(0, 0)];
+        GridPointShaderBuffer leftGridPoint = gridPoints[configuration.GetIndex(0, 0)];
         Assert.That(leftGridPoint.VelocityX, Is.EqualTo(-expectedVelocity).Within(0.0002f));
         Assert.That(leftGridPoint.VelocityY, Is.EqualTo(0));
-        GridPoint centerGridPoint = gridPoints[configuration.GetIndex(1, 0)];
+        GridPointShaderBuffer centerGridPoint = gridPoints[configuration.GetIndex(1, 0)];
         Assert.That(centerGridPoint.VelocityX, Is.EqualTo(0));
         Assert.That(centerGridPoint.VelocityY, Is.EqualTo(0));
-        GridPoint rightGridPoint = gridPoints[configuration.GetIndex(2, 0)];
+        GridPointShaderBuffer rightGridPoint = gridPoints[configuration.GetIndex(2, 0)];
         Assert.That(rightGridPoint.VelocityX, Is.EqualTo(expectedVelocity / 3.0f).Within(0.0002f));
         Assert.That(rightGridPoint.VelocityY, Is.EqualTo(0));
     }
@@ -235,10 +235,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void SuspendDeposite_Flat3x3HeightMapWithoutWater_AllSuspendedSedimentIsZeroAndHeightMapIsUnchanged()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -248,8 +248,8 @@ public class HydraulicErosionTests
 
         testee.SuspendDeposite();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
-        foreach (GridPoint gridPoint in gridPoints)
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        foreach (GridPointShaderBuffer gridPoint in gridPoints)
         {
             Assert.That(gridPoint.SuspendedSediment, Is.Zero);
         }
@@ -264,10 +264,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void SuspendDeposite_Flat3x3HeightMapWithWaterInMiddle_SuspendedSedimentAndHeightMapChangesAreEqualInAllDirections()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -278,22 +278,22 @@ public class HydraulicErosionTests
 
         testee.SuspendDeposite();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
         float expectedSuspendedSediment = 0.025f;
         uint centerIndex = configuration.GetIndex(1, 1);
-        GridPoint centerGridPoint = gridPoints[centerIndex];
+        GridPointShaderBuffer centerGridPoint = gridPoints[centerIndex];
         Assert.That(centerGridPoint.SuspendedSediment, Is.EqualTo(0));
         uint leftIndex = configuration.GetIndex(0, 1);
-        GridPoint leftGridPoint = gridPoints[leftIndex];
+        GridPointShaderBuffer leftGridPoint = gridPoints[leftIndex];
         Assert.That(leftGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
         uint rightIndex = configuration.GetIndex(2, 1);
-        GridPoint rightGridPoint = gridPoints[rightIndex];
+        GridPointShaderBuffer rightGridPoint = gridPoints[rightIndex];
         Assert.That(rightGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
         uint topIndex = configuration.GetIndex(1, 2);
-        GridPoint topGridPoint = gridPoints[topIndex];
+        GridPointShaderBuffer topGridPoint = gridPoints[topIndex];
         Assert.That(topGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
         uint bottomIndex = configuration.GetIndex(1, 0);
-        GridPoint bottomGridPoint = gridPoints[bottomIndex];
+        GridPointShaderBuffer bottomGridPoint = gridPoints[bottomIndex];
         Assert.That(bottomGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
 
         float[] heightMapValuesAfterSimulation = ReadHeightMapShaderBuffer(shaderBuffers, configuration);
@@ -313,10 +313,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void SuspendDeposite_SlopedChannel1x3HeightMapWithWaterInMiddle_SuspendedSedimentAndHeightMapChangesAreEqualAndHigherDownSlope()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpSlopedChannelHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -327,16 +327,16 @@ public class HydraulicErosionTests
 
         testee.SuspendDeposite();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
         float expectedSuspendedSediment = 0.025f;
         uint centerIndex = configuration.GetIndex(1, 0);
-        GridPoint centerGridPoint = gridPoints[centerIndex];
+        GridPointShaderBuffer centerGridPoint = gridPoints[centerIndex];
         Assert.That(centerGridPoint.SuspendedSediment, Is.EqualTo(0));
         uint leftIndex = configuration.GetIndex(0, 0);
-        GridPoint leftGridPoint = gridPoints[leftIndex];
+        GridPointShaderBuffer leftGridPoint = gridPoints[leftIndex];
         Assert.That(leftGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment + 0.01f).Within(0.001f));
         uint rightIndex = configuration.GetIndex(2, 0);
-        GridPoint rightGridPoint = gridPoints[rightIndex];
+        GridPointShaderBuffer rightGridPoint = gridPoints[rightIndex];
         Assert.That(rightGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment - 0.0125f).Within(0.001f));
 
         float[] heightMapValuesAfterSimulation = ReadHeightMapShaderBuffer(shaderBuffers, configuration);
@@ -351,10 +351,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void SuspendDeposite_Flat3x3HeightMapWithWaterInMiddle_DepositedSedimentAndHeightMapChangesAreEqualInAllDirections()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -373,22 +373,22 @@ public class HydraulicErosionTests
 
         testee.SuspendDeposite();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
         float expectedSuspendedSediment = 0.0125f;
         uint centerIndex = configuration.GetIndex(1, 1);
-        GridPoint centerGridPoint = gridPoints[centerIndex];
+        GridPointShaderBuffer centerGridPoint = gridPoints[centerIndex];
         Assert.That(centerGridPoint.SuspendedSediment, Is.EqualTo(0));
         uint leftIndex = configuration.GetIndex(0, 1);
-        GridPoint leftGridPoint = gridPoints[leftIndex];
+        GridPointShaderBuffer leftGridPoint = gridPoints[leftIndex];
         Assert.That(leftGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
         uint rightIndex = configuration.GetIndex(2, 1);
-        GridPoint rightGridPoint = gridPoints[rightIndex];
+        GridPointShaderBuffer rightGridPoint = gridPoints[rightIndex];
         Assert.That(rightGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
         uint topIndex = configuration.GetIndex(1, 2);
-        GridPoint topGridPoint = gridPoints[topIndex];
+        GridPointShaderBuffer topGridPoint = gridPoints[topIndex];
         Assert.That(topGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
         uint bottomIndex = configuration.GetIndex(1, 0);
-        GridPoint bottomGridPoint = gridPoints[bottomIndex];
+        GridPointShaderBuffer bottomGridPoint = gridPoints[bottomIndex];
         Assert.That(bottomGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
 
         float[] heightMapValuesAfterSimulation = ReadHeightMapShaderBuffer(shaderBuffers, configuration);
@@ -408,10 +408,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void SuspendDeposite_SlopedChannel1x3HeightMapWithWaterInMiddle_DepositedSedimentAndHeightMapChangesAreEqualAndHigherDownSlope()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpSlopedChannelHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -426,16 +426,16 @@ public class HydraulicErosionTests
 
         testee.SuspendDeposite();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
         float expectedSuspendedSediment = 0.0175f;
         uint centerIndex = configuration.GetIndex(1, 0);
-        GridPoint centerGridPoint = gridPoints[centerIndex];
+        GridPointShaderBuffer centerGridPoint = gridPoints[centerIndex];
         Assert.That(centerGridPoint.SuspendedSediment, Is.EqualTo(0));
         uint leftIndex = configuration.GetIndex(0, 0);
-        GridPoint leftGridPoint = gridPoints[leftIndex];
+        GridPointShaderBuffer leftGridPoint = gridPoints[leftIndex];
         Assert.That(leftGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
         uint rightIndex = configuration.GetIndex(2, 0);
-        GridPoint rightGridPoint = gridPoints[rightIndex];
+        GridPointShaderBuffer rightGridPoint = gridPoints[rightIndex];
         Assert.That(rightGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment - 0.01125f).Within(0.001f));
 
         float[] heightMapValuesAfterSimulation = ReadHeightMapShaderBuffer(shaderBuffers, configuration);
@@ -451,10 +451,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void Evaporate_Flat3x3HeightMapWithoutWater_AllWaterHeightIsZero()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -465,8 +465,8 @@ public class HydraulicErosionTests
 
         testee.Evaporate();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
-        foreach (GridPoint gridPoint in gridPoints)
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        foreach (GridPointShaderBuffer gridPoint in gridPoints)
         {
             Assert.That(gridPoint.WaterHeight, Is.Zero);
             Assert.That(gridPoint.WaterHeight, Is.Zero);
@@ -478,10 +478,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void Evaporate_Flat3x3HeightMapWithWaterInMiddle_WaterHeightChangesAreEqualInAllDirections()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -491,17 +491,17 @@ public class HydraulicErosionTests
         testee.VelocityMap();
         testee.SuspendDeposite();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
         float expectedWaterHeight = configuration.WaterIncrease / 4;
-        GridPoint centerGridPoint = gridPoints[configuration.GetIndex(1, 1)];
+        GridPointShaderBuffer centerGridPoint = gridPoints[configuration.GetIndex(1, 1)];
         Assert.That(centerGridPoint.WaterHeight, Is.EqualTo(0));
-        GridPoint leftGridPoint = gridPoints[configuration.GetIndex(0, 1)];
+        GridPointShaderBuffer leftGridPoint = gridPoints[configuration.GetIndex(0, 1)];
         Assert.That(leftGridPoint.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(0.001f));
-        GridPoint rightGridPoint = gridPoints[configuration.GetIndex(2, 1)];
+        GridPointShaderBuffer rightGridPoint = gridPoints[configuration.GetIndex(2, 1)];
         Assert.That(rightGridPoint.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(0.001f));
-        GridPoint topGridPoint = gridPoints[configuration.GetIndex(1, 2)];
+        GridPointShaderBuffer topGridPoint = gridPoints[configuration.GetIndex(1, 2)];
         Assert.That(topGridPoint.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(0.001f));
-        GridPoint bottomGridPoint = gridPoints[configuration.GetIndex(1, 0)];
+        GridPointShaderBuffer bottomGridPoint = gridPoints[configuration.GetIndex(1, 0)];
         Assert.That(bottomGridPoint.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(0.001f));
 
         testee.Evaporate();
@@ -523,9 +523,9 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void MoveSediment_Flat3x3HeightMapWithoutWater_AllSuspendedSedimentIsZero()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
-        uint heightMapSideLength = configuration.HeightMapSideLength;
         ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
+        uint heightMapSideLength = configuration.HeightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -537,8 +537,8 @@ public class HydraulicErosionTests
 
         testee.MoveSediment();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
-        foreach (GridPoint gridPoint in gridPoints)
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        foreach (GridPointShaderBuffer gridPoint in gridPoints)
         {
             Assert.That(gridPoint.SuspendedSediment, Is.Zero);
             Assert.That(gridPoint.SuspendedSediment, Is.Zero);
@@ -550,10 +550,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void MoveSediment_FlatChannel1x2WithWaterLeft_SuspendedSedimentIsHalfed()
     {
-        IConfiguration configuration = SetUpConfiguration(2);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(2, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -564,11 +564,11 @@ public class HydraulicErosionTests
         testee.SuspendDeposite();
         testee.Evaporate();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
         float expectedSuspendedSediment = 0.02f;
-        GridPoint leftBottomGridPoint = gridPoints[configuration.GetIndex(0, 0)];
+        GridPointShaderBuffer leftBottomGridPoint = gridPoints[configuration.GetIndex(0, 0)];
         Assert.That(leftBottomGridPoint.SuspendedSediment, Is.EqualTo(0));
-        GridPoint rightBottomGridPoint = gridPoints[configuration.GetIndex(1, 0)];
+        GridPointShaderBuffer rightBottomGridPoint = gridPoints[configuration.GetIndex(1, 0)];
         Assert.That(rightBottomGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
 
         testee.MoveSediment();
@@ -584,10 +584,10 @@ public class HydraulicErosionTests
     [Test]
     public unsafe void MoveSediment_Flat3x3HeightMapWithWaterInMiddle_SuspendedSedimentIsHalfedInAllDirections()
     {
-        IConfiguration configuration = SetUpConfiguration(3);
+        ShaderBuffers shaderBuffers = new ShaderBuffers();
+        IConfiguration configuration = SetUpConfiguration(3, shaderBuffers);
         uint heightMapSideLength = configuration.HeightMapSideLength;
         uint mapSize = heightMapSideLength * heightMapSideLength;
-        ShaderBuffers shaderBuffers = new ShaderBuffers();
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
         HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
@@ -598,17 +598,17 @@ public class HydraulicErosionTests
         testee.SuspendDeposite();
         testee.Evaporate();
 
-        GridPoint[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
+        GridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer(shaderBuffers, configuration);
         float expectedSuspendedSediment = 0.025f;
-        GridPoint centerGridPoint = gridPoints[configuration.GetIndex(1, 1)];
+        GridPointShaderBuffer centerGridPoint = gridPoints[configuration.GetIndex(1, 1)];
         Assert.That(centerGridPoint.SuspendedSediment, Is.EqualTo(0));
-        GridPoint leftGridPoint = gridPoints[configuration.GetIndex(0, 1)];
+        GridPointShaderBuffer leftGridPoint = gridPoints[configuration.GetIndex(0, 1)];
         Assert.That(leftGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
-        GridPoint rightGridPoint = gridPoints[configuration.GetIndex(2, 1)];
+        GridPointShaderBuffer rightGridPoint = gridPoints[configuration.GetIndex(2, 1)];
         Assert.That(rightGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
-        GridPoint topGridPoint = gridPoints[configuration.GetIndex(1, 2)];
+        GridPointShaderBuffer topGridPoint = gridPoints[configuration.GetIndex(1, 2)];
         Assert.That(topGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
-        GridPoint bottomGridPoint = gridPoints[configuration.GetIndex(1, 0)];
+        GridPointShaderBuffer bottomGridPoint = gridPoints[configuration.GetIndex(1, 0)];
         Assert.That(bottomGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
 
         testee.MoveSediment();
@@ -673,7 +673,7 @@ public class HydraulicErosionTests
         {
             for (uint x = 0; x < configuration.HeightMapSideLength; x++)
             {
-                if(y == 0)
+                if (y == 0)
                 {
                     heightMapValues[configuration.GetIndex(x, y)] = x * configuration.WaterIncrease / 2.0f;
                 }
@@ -689,21 +689,21 @@ public class HydraulicErosionTests
         }
     }
 
-    IConfiguration SetUpConfiguration(uint heightMapSideLength)
+    IConfiguration SetUpConfiguration(uint heightMapSideLength, IShaderBuffers shaderBuffers)
     {
-        Configuration configuration = new Configuration()
+        Configuration configuration = new Configuration(shaderBuffers)
         {
             HeightMapSideLength = heightMapSideLength
         };
         return configuration;
     }
 
-    private unsafe GridPoint[] ReadGridPointShaderBuffer(ShaderBuffers shaderBuffers, IConfiguration configuration)
+    private unsafe GridPointShaderBuffer[] ReadGridPointShaderBuffer(ShaderBuffers shaderBuffers, IConfiguration configuration)
     {
         uint mapSize = configuration.HeightMapSideLength * configuration.HeightMapSideLength;
         uint heightMapSize = mapSize * sizeof(float);
-        uint gridPointSize = (uint)(mapSize * sizeof(GridPoint));
-        GridPoint[] gridPoints = new GridPoint[mapSize];
+        uint gridPointSize = (uint)(mapSize * sizeof(GridPointShaderBuffer));
+        GridPointShaderBuffer[] gridPoints = new GridPointShaderBuffer[mapSize];
         fixed (void* gridPointsPointer = gridPoints)
         {
             Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, gridPointSize, 0);

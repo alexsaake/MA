@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Common;
+using ProceduralLandscapeGeneration.Config;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;
@@ -253,6 +254,5 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     {
         mySegments = null;
         myPlates.Clear();
-        myShaderBuffers.Dispose();
     }
 }

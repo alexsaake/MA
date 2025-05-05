@@ -9,6 +9,7 @@ struct Configuration
 {
     float HeightMultiplier;
     float SeaLevel;
+    float IsColorEnabled;
 };
 
 layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
@@ -81,52 +82,55 @@ void main()
     vec3 normal = getScaledNormal(x, y);
     fragNormal = transpose(inverse(mat3(matModel))) * normal;
     vec3 terrainColor = vec3(1.0);
-    if(terrainHeight < waterHeight + 0.3)
+    if(configuration.IsColorEnabled == 1)
     {
-        if(normal.z > 0.3)
+        if(terrainHeight < waterHeight + 0.3)
         {
-            terrainColor = beachColor;
-        }
-        else
-        {
-            terrainColor = oceanCliff;
-        }
-    }
-    else
-    {
-        if(normal.z > 0.4)
-        {
-            if(height > 0.9)
+            if(normal.z > 0.3)
             {
-                terrainColor = snowColor;
-            }
-            else if(height > 0.7)
-            {
-                terrainColor = mountainColor;
+                terrainColor = beachColor;
             }
             else
             {
-                terrainColor = woodsColor;
-            }
-        }
-        else if(normal.z > 0.3)
-        {
-            if(height > 0.9)
-            {
-                terrainColor = snowColor;
-            }
-            else if(height > 0.8)
-            {
-                terrainColor = mountainColor;
-            }
-            else
-            {
-                terrainColor = pastureColor;
+                terrainColor = oceanCliff;
             }
         }
         else
         {
-            terrainColor = mountainColor;
+            if(normal.z > 0.4)
+            {
+                if(height > 0.9)
+                {
+                    terrainColor = snowColor;
+                }
+                else if(height > 0.7)
+                {
+                    terrainColor = mountainColor;
+                }
+                else
+                {
+                    terrainColor = woodsColor;
+                }
+            }
+            else if(normal.z > 0.3)
+            {
+                if(height > 0.9)
+                {
+                    terrainColor = snowColor;
+                }
+                else if(height > 0.8)
+                {
+                    terrainColor = mountainColor;
+                }
+                else
+                {
+                    terrainColor = pastureColor;
+                }
+            }
+            else
+            {
+                terrainColor = mountainColor;
+            }
         }
     }
     fragColor = vec4(terrainColor, 1.0);

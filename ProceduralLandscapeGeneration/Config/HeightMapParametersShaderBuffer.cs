@@ -1,6 +1,6 @@
-﻿namespace ProceduralLandscapeGeneration.Simulation.GPU;
+﻿namespace ProceduralLandscapeGeneration.Config;
 
-internal struct HeightMapParameters
+internal struct HeightMapParametersShaderBuffer
 {
     public uint Seed;
     public uint SideLength;

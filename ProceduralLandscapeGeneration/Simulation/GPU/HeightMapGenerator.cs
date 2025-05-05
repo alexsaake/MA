@@ -1,4 +1,5 @@
-﻿using Raylib_cs;
+﻿using ProceduralLandscapeGeneration.Config;
+using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Simulation.GPU;
 
@@ -7,6 +8,8 @@ internal class HeightMapGenerator : IHeightMapGenerator
     private readonly IConfiguration myConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
     private readonly IShaderBuffers myShaderBuffers;
+
+    private bool myIsDisposed;
 
     public HeightMapGenerator(IConfiguration configuration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
     {
@@ -17,7 +20,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     public unsafe void GenerateHeightMap()
     {
-        HeightMapParameters heightMapParameters = new HeightMapParameters()
+        HeightMapParametersShaderBuffer heightMapParameters = new HeightMapParametersShaderBuffer()
         {
             Seed = (uint)myConfiguration.Seed,
             SideLength = myConfiguration.HeightMapSideLength,
@@ -26,7 +29,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
             Persistence = myConfiguration.NoisePersistence,
             Lacunarity = myConfiguration.NoiseLacunarity
         };
-        uint heightMapParametersBufferSize = (uint)sizeof(HeightMapParameters);
+        uint heightMapParametersBufferSize = (uint)sizeof(HeightMapParametersShaderBuffer);
         uint heightMapParametersBufferId = Rlgl.LoadShaderBuffer(heightMapParametersBufferSize, &heightMapParameters, Rlgl.DYNAMIC_COPY);
 
         uint heightMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
@@ -50,11 +53,13 @@ internal class HeightMapGenerator : IHeightMapGenerator
         normalizeComputeShaderProgram.Dispose();
 
         Rlgl.UnloadShaderBuffer(heightMapParametersBufferId);
+
+        myIsDisposed = false;
     }
 
     public unsafe void GenerateHeatMap()
     {
-        HeightMapParameters heatMapParameters = new HeightMapParameters()
+        HeightMapParametersShaderBuffer heatMapParameters = new HeightMapParametersShaderBuffer()
         {
             Seed = (uint)myConfiguration.Seed,
             SideLength = myConfiguration.HeightMapSideLength,
@@ -63,7 +68,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
             Persistence = myConfiguration.NoisePersistence,
             Lacunarity = myConfiguration.NoiseLacunarity
         };
-        uint heatMapParametersBufferSize = (uint)sizeof(HeightMapParameters);
+        uint heatMapParametersBufferSize = (uint)sizeof(HeightMapParametersShaderBuffer);
         uint heatMapParametersBufferId = Rlgl.LoadShaderBuffer(heatMapParametersBufferSize, &heatMapParameters, Rlgl.DYNAMIC_COPY);
 
         uint heatMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
@@ -87,10 +92,28 @@ internal class HeightMapGenerator : IHeightMapGenerator
         normalizeComputeShaderProgram.Dispose();
 
         Rlgl.UnloadShaderBuffer(heatMapParametersBufferId);
+
+        myIsDisposed = false;
     }
 
     public void Dispose()
     {
-        myShaderBuffers.Dispose();
+        if (myIsDisposed)
+        {
+            return;
+        }
+
+        if (myShaderBuffers.ContainsKey(ShaderBufferTypes.HeightMap))
+        {
+            Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap]);
+            myShaderBuffers.Remove(ShaderBufferTypes.HeightMap);
+        }
+        if (myShaderBuffers.ContainsKey(ShaderBufferTypes.HeatMap))
+        {
+            Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeatMap]);
+            myShaderBuffers.Remove(ShaderBufferTypes.HeatMap);
+        }
+
+        myIsDisposed = true;
     }
 }

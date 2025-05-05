@@ -1,6 +1,6 @@
-﻿namespace ProceduralLandscapeGeneration.Simulation.GPU.Grid;
+﻿namespace ProceduralLandscapeGeneration.Config;
 
-public struct GridErosionConfiguration
+public struct GridErosionConfigurationShaderBuffer
 {
     public float TimeDelta;
     public float CellSizeX;

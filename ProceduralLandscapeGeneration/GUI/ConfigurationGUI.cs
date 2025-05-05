@@ -1,4 +1,4 @@
-﻿using ProceduralLandscapeGeneration.Common;
+﻿using ProceduralLandscapeGeneration.Config;
 using Raylib_cs;
 using System.Numerics;
 
@@ -32,6 +32,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => configuration.HeightMultiplier = (uint)value, (int)configuration.HeightMultiplier, 1, 150));
         myMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => configuration.SeaLevel = value, configuration.SeaLevel));
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Camera Mode", "Still;Orbital", (value) => configuration.CameraMode = value == 0 ? CameraMode.Custom : CameraMode.Orbital, (int)configuration.CameraMode));
+        myMapGenerationPanel.Add(new ToggleSliderWithLabel("Color Enabled", "Off;On", (value) => configuration.IsColorEnabled = value == 1, configuration.IsColorEnabled ? 0 : 1));
 
         myNoiseMapGenerationPanel = new PanelWithElements("Noise Map Generation");
         myNoiseMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "GPU;CPU", (value) => configuration.HeightMapGeneration = (ProcessorTypes)value, (int)configuration.HeightMapGeneration));
@@ -60,9 +61,9 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Height Change", (value) => configuration.ThermalErosionHeightChange = value, configuration.ThermalErosionHeightChange));
 
         myGridErosionPanel = new PanelWithElements("Grid Erosion");
-        myGridErosionPanel.Add(new ToggleSliderWithLabel("Show Water", "Off;On", (value) => configuration.ShowWater = value == 1, configuration.ShowWater ? 0 : 1));
-        myGridErosionPanel.Add(new ToggleSliderWithLabel("Show Sediment", "Off;On", (value) => configuration.ShowSediment = value == 1, configuration.ShowSediment ? 0 : 1));
-        myGridErosionPanel.Add(new ToggleSliderWithLabel("Add Rain", "Off;On", (value) => configuration.AddRain = value == 1, configuration.AddRain ? 0 : 1));
+        myGridErosionPanel.Add(new ToggleSliderWithLabel("Water Displayed", "Off;On", (value) => configuration.IsWaterDisplayed = value == 1, configuration.IsWaterDisplayed ? 0 : 1));
+        myGridErosionPanel.Add(new ToggleSliderWithLabel("Sediment Displayed", "Off;On", (value) => configuration.IsSedimentDisplayed = value == 1, configuration.IsSedimentDisplayed ? 0 : 1));
+        myGridErosionPanel.Add(new ToggleSliderWithLabel("Rain Added", "Off;On", (value) => configuration.IsRainAdded = value == 1, configuration.IsRainAdded ? 0 : 1));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Water Increase", (value) => configuration.WaterIncrease = value, configuration.WaterIncrease));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => configuration.TimeDelta = value, configuration.TimeDelta));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Cell Size X", (value) => configuration.CellSizeX = value, configuration.CellSizeX));

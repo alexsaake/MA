@@ -1,4 +1,5 @@
 ﻿using DotnetNoise;
+using ProceduralLandscapeGeneration.Config;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;
@@ -12,6 +13,7 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
     private readonly IShaderBuffers myShaderBuffers;
 
     private readonly FastNoise myNoiseGenerator;
+    private bool myIsDisposed;
 
     public HeightMapGeneratorCPU(IConfiguration configuration, IRandom random, IShaderBuffers shaderBuffers)
     {
@@ -104,6 +106,22 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
 
     public void Dispose()
     {
-        myShaderBuffers.Dispose();
+        if (myIsDisposed)
+        {
+            return;
+        }
+
+        if (myShaderBuffers.ContainsKey(ShaderBufferTypes.HeightMap))
+        {
+            Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap]);
+            myShaderBuffers.Remove(ShaderBufferTypes.HeightMap);
+        }
+        if (myShaderBuffers.ContainsKey(ShaderBufferTypes.HeatMap))
+        {
+            Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeatMap]);
+            myShaderBuffers.Remove(ShaderBufferTypes.HeatMap);
+        }
+
+        myIsDisposed = true;
     }
 }
