@@ -157,10 +157,10 @@ internal class ErosionSimulator : IErosionSimulator
         CreateRandomIndicesAlongBorder();
 
         Rlgl.EnableShader(myWindErosionParticleSimulationComputeShaderProgram!.Id);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-        Rlgl.BindShaderBuffer(myHeightMapIndicesShaderBufferId, 2);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ErosionConfiguration], 3);
-        Rlgl.ComputeShaderDispatch(myConfiguration.SimulationIterations / 64, 1, 1);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
+            Rlgl.BindShaderBuffer(myHeightMapIndicesShaderBufferId, 2);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ErosionConfiguration], 3);
+            Rlgl.ComputeShaderDispatch(myConfiguration.SimulationIterations / 64, 1, 1);
         Rlgl.DisableShader();
 
         ErosionIterationFinished?.Invoke(this, EventArgs.Empty);

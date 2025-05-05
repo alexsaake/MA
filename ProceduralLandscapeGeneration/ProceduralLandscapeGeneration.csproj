@@ -78,7 +78,7 @@
 	  <None Update="Rendering\Shaders\SceneFragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Rendering\Shaders\SceneVertexShader.glsl">
+	  <None Update="Rendering\Shaders\HeightMapVertexShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Rendering\Shaders\ShadowMapFragmentShader.glsl">
