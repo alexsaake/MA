@@ -14,7 +14,6 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
     private IConfiguration myConfiguration;
 
     private readonly PanelWithElements myMapGenerationPanel;
-    private readonly PanelWithElements myProcessorTypePanel;
     private readonly PanelWithElements myNoiseMapGenerationPanel;
     private readonly PanelWithElements myHeatMapGenerationPanel;
     private readonly PanelWithElements myPlateTectonicsMapGenerationPanel;
@@ -28,13 +27,10 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
 
         myMapGenerationPanel = new PanelWithElements("Map Generation");
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "Noise;Tectonics", (value) => configuration.MapGeneration = (MapGenerationTypes)value, (int)configuration.MapGeneration));
+        myMapGenerationPanel.Add(new ToggleSliderWithLabel("Mesh Creation", "GPU;CPU", (value) => configuration.MeshCreation = (ProcessorTypes)value, (int)configuration.MeshCreation));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Side Length", (value) => configuration.HeightMapSideLength = (uint)value, (int)configuration.HeightMapSideLength, 32, 8192));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => configuration.HeightMultiplier = (uint)value, (int)configuration.HeightMultiplier, 1, 150));
         myMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => configuration.SeaLevel = (uint)value, (int)configuration.SeaLevel));
-
-        myProcessorTypePanel = new PanelWithElements("Processor Type");
-        myProcessorTypePanel.Add(new ToggleSliderWithLabel("Erosion Simulation", "GPU;CPU", (value) => configuration.ErosionSimulation = (ProcessorTypes)value, (int)configuration.ErosionSimulation));
-        myProcessorTypePanel.Add(new ToggleSliderWithLabel("Mesh Creation", "GPU;CPU", (value) => configuration.MeshCreation = (ProcessorTypes)value, (int)configuration.MeshCreation));
 
         myNoiseMapGenerationPanel = new PanelWithElements("Noise Map Generation");
         myNoiseMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "GPU;CPU", (value) => configuration.HeightMapGeneration = (ProcessorTypes)value, (int)configuration.HeightMapGeneration));
@@ -45,6 +41,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myNoiseMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Lacunarity", (value) => configuration.NoiseLacunarity = value, configuration.NoiseLacunarity));
 
         myHeatMapGenerationPanel = new PanelWithElements("Heat Map Generation");
+        myHeatMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "GPU;CPU", (value) => configuration.HeightMapGeneration = (ProcessorTypes)value, (int)configuration.HeightMapGeneration));
         myHeatMapGenerationPanel.Add(new ValueBoxIntWithLabel("Seed", (value) => configuration.Seed = value, configuration.Seed, int.MinValue, int.MaxValue));
         myHeatMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Scale", (value) => configuration.NoiseScale = value, configuration.NoiseScale));
         myHeatMapGenerationPanel.Add(new ValueBoxIntWithLabel("Octaves", (value) => configuration.NoiseOctaves = (uint)value, (int)configuration.NoiseOctaves, 1, 16));
@@ -82,16 +79,15 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
     public unsafe void Draw()
     {
         myMapGenerationPanel.Draw(Vector2.Zero);
-        myProcessorTypePanel.Draw(myMapGenerationPanel.BottomLeft);
         Vector2? offset = null;
         switch (myConfiguration.MapGeneration)
         {
             case MapGenerationTypes.Noise:
-                myNoiseMapGenerationPanel.Draw(myProcessorTypePanel.BottomLeft);
+                myNoiseMapGenerationPanel.Draw(myMapGenerationPanel.BottomLeft);
                 offset = myNoiseMapGenerationPanel.BottomLeft;
                 break;
             case MapGenerationTypes.Tectonics:
-                myHeatMapGenerationPanel.Draw(myProcessorTypePanel.BottomLeft);
+                myHeatMapGenerationPanel.Draw(myMapGenerationPanel.BottomLeft);
                 myPlateTectonicsMapGenerationPanel.Draw(myHeatMapGenerationPanel.BottomLeft);
                 offset = myPlateTectonicsMapGenerationPanel.BottomLeft;
                 break;

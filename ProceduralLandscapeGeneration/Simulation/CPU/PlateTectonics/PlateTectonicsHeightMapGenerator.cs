@@ -1,4 +1,5 @@
-﻿using ProceduralLandscapeGeneration.Common;
+﻿using Autofac;
+using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;
@@ -11,43 +12,55 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private readonly IConfiguration myConfiguration;
     private readonly IRandom myRandom;
     private readonly IShaderBuffers myShaderBuffers;
-    private readonly IHeightMapGenerator myHeatMapGenerator;
+    private readonly ILifetimeScope myLifetimeScope;
 
-    private readonly List<Segment> mySegments;
+    private Segment?[]? mySegments;
     private readonly List<Plate> myPlates;
-    private HeightMap? myHeatMap;
-    private HeightMap? myHeightMap;
 
-    public PlateTectonicsHeightMapGenerator(IConfiguration configuration, IRandom random, IShaderBuffers shaderBuffers, IHeightMapGenerator heatMapGenerator)
+    public PlateTectonicsHeightMapGenerator(IConfiguration configuration, IRandom random, IShaderBuffers shaderBuffers, ILifetimeScope lifetimeScope)
     {
         myConfiguration = configuration;
         myRandom = random;
         myShaderBuffers = shaderBuffers;
-        myHeatMapGenerator = heatMapGenerator;
+        myLifetimeScope = lifetimeScope;
 
-        mySegments = new List<Segment>();
         myPlates = new List<Plate>();
     }
 
-    public HeightMap GenerateHeightMap()
+    public void GenerateHeightMap()
     {
-        float[,] heightMap = new float[myConfiguration.HeightMapSideLength, myConfiguration.HeightMapSideLength];
-        myHeatMap = myHeatMapGenerator.GenerateHeightMap();
+        IHeightMapGenerator heightMapGenerator = myLifetimeScope.ResolveKeyed<IHeightMapGenerator>(myConfiguration.HeightMapGeneration);
+        heightMapGenerator.GenerateHeatMap();
 
+        CreateSegments();
+        CreatePlates();
+        AddSegmentsToNearesPlate();
+        CreateEmptyHeightMapShaderBuffer();
+    }
+
+    private void CreateSegments()
+    {
+        mySegments = new Segment[myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength];
         for (uint y = 0; y < myConfiguration.HeightMapSideLength; y++)
         {
             for (uint x = 0; x < myConfiguration.HeightMapSideLength; x++)
             {
-                mySegments.Add(new Segment(x, y));
+                mySegments[x + y * myConfiguration.HeightMapSideLength] = new Segment(x, y, myConfiguration, myShaderBuffers);
             }
         }
+    }
 
+    private void CreatePlates()
+    {
         for (int i = 0; i < myConfiguration.PlateCount; i++)
         {
-            myPlates.Add(new Plate(new Vector2(myRandom.Next((int)myConfiguration.HeightMapSideLength), myRandom.Next((int)myConfiguration.HeightMapSideLength))));
+            myPlates.Add(new Plate(new Vector2(myRandom.Next((int)myConfiguration.HeightMapSideLength), myRandom.Next((int)myConfiguration.HeightMapSideLength)),myConfiguration, myShaderBuffers));
         }
+    }
 
-        foreach (Segment segment in mySegments)
+    private void AddSegmentsToNearesPlate()
+    {
+        foreach (Segment segment in mySegments!)
         {
             float distance = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
             Plate? nearestPlate = null;
@@ -68,25 +81,26 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
         {
             plate.Recenter();
         }
-
-        myHeightMap = new HeightMap(myConfiguration, heightMap);
-        return myHeightMap;
     }
 
-    public unsafe void GenerateHeightMapShaderBuffer()
+    private void CreateEmptyHeightMapShaderBuffer()
     {
-        HeightMap heightMap = GenerateHeightMap();
-        float[] heightMapValues = heightMap.Get1DHeightMapValues();
-
-        uint heightMapShaderBufferSize = (uint)heightMapValues.Length * sizeof(float);
-        myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapShaderBufferSize);
-        fixed (float* heightMapValuesPointer = heightMapValues)
-        {
-            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapShaderBufferSize, 0);
-        }
+        uint heightMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength * sizeof(float);
+        myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapSize);
     }
 
-    public HeightMap SimulatePlateTectonics()
+    public void SimulatePlateTectonics()
+    {
+        MarkOutOfBoundsSegmentsAsDeadAndRemoveFromPlates();
+        RemoveEmptyPlates();
+        RemoveDeadSegmentsFromHeightMap();
+        MovePlates();
+        FloatSegments();
+        FillSegmentGaps();
+        UpdateHeightMap();
+    }
+
+    private void MarkOutOfBoundsSegmentsAsDeadAndRemoveFromPlates()
     {
         foreach (Plate plate in myPlates)
         {
@@ -115,7 +129,10 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
                 plate.Recenter();
             }
         }
+    }
 
+    private void RemoveEmptyPlates()
+    {
         for (int plate = 0; plate < myPlates.Count; plate++)
         {
             if (myPlates[plate].Segments.Count == 0)
@@ -125,21 +142,56 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
                 continue;
             }
         }
+    }
 
-        mySegments.RemoveAll(x => !x.IsAlive);
+    private void RemoveDeadSegmentsFromHeightMap()
+    {
+        for (int segment = 0; segment < mySegments!.Length; segment++)
+        {
+            if (mySegments[segment] is null)
+            {
+                continue;
+            }
+            if (!mySegments[segment]!.IsAlive)
+            {
+                mySegments[segment] = null;
+            }
+        }
+    }
 
+    private void MovePlates()
+    {
         foreach (Plate plate in myPlates)
         {
-            plate.Update(myHeatMap!, mySegments, myConfiguration.HeightMapSideLength);
+            plate.Move(mySegments!);
         }
-        foreach (Segment segment in mySegments)
+    }
+
+    private void FloatSegments()
+    {
+        foreach (Segment segment in mySegments!)
         {
-            segment.Update(myHeightMap!, myHeatMap!, myConfiguration.HeightMapSideLength);
+            if (segment is null)
+            {
+                continue;
+            }
+            segment.Float();
+        }
+    }
+
+    private unsafe void FillSegmentGaps()
+    {
+        const float generationCooling = -0.1f;
+
+        uint heatMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint heatMapBufferSize = heatMapSize * sizeof(float);
+        float[] heatMap = new float[heatMapSize];
+        Rlgl.MemoryBarrier();
+        fixed (float* heatMapPointer = heatMap)
+        {
+            Rlgl.ReadShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeatMap], heatMapPointer, heatMapBufferSize, 0);
         }
 
-        //Fill Gaps
-
-        const float generationCooling = -0.1f;
         foreach (Plate plate in myPlates)
         {
             foreach (Segment segment in plate.Segments.ToList())
@@ -155,25 +207,51 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
                 }
 
                 IVector2 scanIntegerPosition = new IVector2(scanPosition);
-                if (myHeightMap!.Height[scanIntegerPosition.X, scanIntegerPosition.Y] == 0)
+                if (mySegments![scanIntegerPosition.X + scanIntegerPosition.Y * myConfiguration.HeightMapSideLength] is null)
                 {
-                    Segment newSegment = new Segment(scanPosition);
-                    mySegments.Add(newSegment);
+                    Segment newSegment = new Segment(scanPosition, myConfiguration, myShaderBuffers);
+                    mySegments![scanIntegerPosition.X + scanIntegerPosition.Y * myConfiguration.HeightMapSideLength] = newSegment;
                     plate.Segments.Add(newSegment);
                     newSegment.Parent = plate;
                     plate.Recenter();
-                    newSegment.Update(myHeightMap, myHeatMap, myConfiguration.HeightMapSideLength);
-                    myHeatMap.Height[scanIntegerPosition.X, scanIntegerPosition.Y] += generationCooling;
+                    newSegment.Float();
+                    heatMap[scanIntegerPosition.X + scanIntegerPosition.Y * myConfiguration.HeightMapSideLength] += generationCooling;
                 }
             }
         }
 
-        return myHeightMap!;
+        fixed (float* heatMapPointer = heatMap)
+        {
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeatMap], heatMapPointer, heatMapBufferSize, 0);
+        }
+        Rlgl.MemoryBarrier();
+    }
+
+    private unsafe void UpdateHeightMap()
+    {
+        uint heightMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint heightMapBufferSize = heightMapSize * sizeof(float);
+        float[] heightMap = new float[heightMapSize];
+        for (int segment = 0; segment < mySegments!.Length; segment++)
+        {
+            if(mySegments![segment] is null)
+            {
+                heightMap[segment] = 0;
+                continue;
+            }
+            heightMap[segment] = mySegments![segment]!.Height;
+        }
+
+        fixed (float* heightMapPointer = heightMap)
+        {
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, heightMapBufferSize, 0);
+        }
+        Rlgl.MemoryBarrier();
     }
 
     public void Dispose()
     {
-        mySegments.Clear();
+        mySegments = null;
         myPlates.Clear();
         myShaderBuffers.Dispose();
     }

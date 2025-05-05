@@ -34,21 +34,6 @@ internal class Configuration : IConfiguration
         }
     }
 
-    private ProcessorTypes myErosionSimulation;
-    public ProcessorTypes ErosionSimulation
-    {
-        get => myErosionSimulation;
-        set
-        {
-            if (myErosionSimulation == value)
-            {
-                return;
-            }
-            myErosionSimulation = value;
-            ResetRequired?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
     private ProcessorTypes myMeshCreation;
     public ProcessorTypes MeshCreation
     {
@@ -426,7 +411,6 @@ internal class Configuration : IConfiguration
     public Configuration()
     {
         HeightMapGeneration = ProcessorTypes.GPU;
-        ErosionSimulation = ProcessorTypes.GPU;
         MeshCreation = ProcessorTypes.CPU;
 
         Seed = 1337;

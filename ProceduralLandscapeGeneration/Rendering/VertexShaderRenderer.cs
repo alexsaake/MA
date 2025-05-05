@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Simulation;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
@@ -28,10 +27,10 @@ internal class VertexShaderRenderer : IRenderer
     private bool myIsUpdateAvailable;
     private bool myIsDisposed;
 
-    public VertexShaderRenderer(IConfiguration configuration, ILifetimeScope lifetimeScope, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBuffers)
+    public VertexShaderRenderer(IConfiguration configuration, IErosionSimulator erosionSimulator, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
-        myErosionSimulator = lifetimeScope.ResolveKeyed<IErosionSimulator>(myConfiguration.ErosionSimulation);
+        myErosionSimulator = erosionSimulator;
         myVertexMeshCreator = vertexMeshCreator;
         myShaderBuffers = shaderBuffers;
     }
@@ -106,8 +105,7 @@ internal class VertexShaderRenderer : IRenderer
 
     private void InitiateModel()
     {
-        Mesh heightMapMesh = myVertexMeshCreator.CreateHeightMapMesh(GetHeightMap());
-        myHeightMap = Raylib.LoadModelFromMesh(heightMapMesh);
+        myHeightMap = Raylib.LoadModelFromMesh(myVertexMeshCreator.CreateHeightMapMesh());
         mySeaLevel = Raylib.LoadModelFromMesh(myVertexMeshCreator.CreateSeaLevelMesh());
     }
 
@@ -137,37 +135,15 @@ internal class VertexShaderRenderer : IRenderer
         mySeaLevel = Raylib.LoadModelFromMesh(myVertexMeshCreator.CreateSeaLevelMesh());
     }
 
-    private HeightMap GetHeightMap()
-    {
-        if (myErosionSimulator is ErosionSimulator)
-        {
-            return GetHeightMapFromShaderBuffer();
-        }
-        return myErosionSimulator.HeightMap!;
-    }
-
-    private unsafe HeightMap GetHeightMapFromShaderBuffer()
-    {
-        uint heightMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
-        float[] heightMapValues = new float[heightMapSize];
-        uint heightMapShaderBufferSize = heightMapSize * sizeof(float);
-        fixed (float* heightMapValuesPointer = heightMapValues)
-        {
-            Rlgl.ReadShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapShaderBufferSize, 0);
-        }
-
-        return new HeightMap(myConfiguration, heightMapValues);
-    }
-
     private unsafe void UpdateShadowMap()
     {
         Raylib.BeginTextureMode(myShadowMap);
-            Raylib.ClearBackground(Color.White);
-            Raylib.BeginMode3D(myLightCamera);
-                Matrix4x4 lightProjection = Rlgl.GetMatrixProjection();
-                Matrix4x4 lightView = Rlgl.GetMatrixModelview();
-                DrawScene(myShadowMapShader);
-            Raylib.EndMode3D();
+        Raylib.ClearBackground(Color.White);
+        Raylib.BeginMode3D(myLightCamera);
+        Matrix4x4 lightProjection = Rlgl.GetMatrixProjection();
+        Matrix4x4 lightView = Rlgl.GetMatrixModelview();
+        DrawScene(myShadowMapShader);
+        Raylib.EndMode3D();
         Raylib.EndTextureMode();
         Matrix4x4 lightSpaceMatrix = Matrix4x4.Multiply(lightProjection, lightView);
         Raylib.SetShaderValueMatrix(myHeightMapShader, myLightSpaceMatrixLocation, lightSpaceMatrix);
@@ -183,9 +159,9 @@ internal class VertexShaderRenderer : IRenderer
     public void Draw()
     {
         Raylib.BeginMode3D(myCamera);
-            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ErosionConfiguration], 2);
-            DrawScene(myHeightMapShader);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ErosionConfiguration], 2);
+        DrawScene(myHeightMapShader);
         Raylib.EndMode3D();
     }
 
@@ -205,7 +181,6 @@ internal class VertexShaderRenderer : IRenderer
         }
 
         myConfiguration.ErosionConfigurationChanged -= OnErosionConfigurationChanged;
-        myErosionSimulator.ErosionIterationFinished -= OnErosionIterationFinished;
 
         Raylib.UnloadRenderTexture(myShadowMap);
         Raylib.UnloadModel(myHeightMap);

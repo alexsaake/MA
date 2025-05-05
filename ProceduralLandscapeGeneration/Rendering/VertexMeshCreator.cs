@@ -1,5 +1,4 @@
-﻿using ProceduralLandscapeGeneration.Common;
-using Raylib_cs;
+﻿using Raylib_cs;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Rendering;
@@ -13,17 +12,17 @@ internal class VertexMeshCreator : IVertexMeshCreator
         myConfiguration = configuration;
     }
 
-    public unsafe Mesh CreateHeightMapMesh(HeightMap heightMap)
+    public unsafe Mesh CreateHeightMapMesh()
     {
         Mesh mesh = new();
-        int vertexCount = heightMap.Width * heightMap.Depth;
-        int triangleCount = (heightMap.Width - 1) * (heightMap.Depth - 1) * 2;
+        int vertexCount = (int)(myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength);
+        int triangleCount = (int)((myConfiguration.HeightMapSideLength - 1) * (myConfiguration.HeightMapSideLength - 1) * 2);
         AllocateMeshData(&mesh, vertexCount, triangleCount);
 
         int vertexIndex = 0;
-        for (int y = 0; y < heightMap.Depth; y++)
+        for (int y = 0; y < myConfiguration.HeightMapSideLength; y++)
         {
-            for (int x = 0; x < heightMap.Width; x++)
+            for (int x = 0; x < myConfiguration.HeightMapSideLength; x++)
             {
                 AddVertex(mesh, vertexIndex, new Vector3(x, y, 0), Color.White);
                 vertexIndex++;
@@ -31,11 +30,11 @@ internal class VertexMeshCreator : IVertexMeshCreator
         }
         int indexIndex = 0;
         vertexIndex = 0;
-        for (int y = 0; y < heightMap.Depth - 1; y++)
+        for (int y = 0; y < myConfiguration.HeightMapSideLength - 1; y++)
         {
-            for (int x = 0; x < heightMap.Width; x++)
+            for (int x = 0; x < myConfiguration.HeightMapSideLength; x++)
             {
-                if(x < heightMap.Width - 1)
+                if (x < myConfiguration.HeightMapSideLength - 1)
                 {
                     AddQuadIndices(mesh, indexIndex, vertexIndex);
                     indexIndex++;

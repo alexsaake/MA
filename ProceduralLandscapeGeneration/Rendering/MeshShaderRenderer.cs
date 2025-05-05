@@ -1,7 +1,4 @@
-﻿using Autofac;
-using ProceduralLandscapeGeneration.Common;
-using ProceduralLandscapeGeneration.Simulation;
-using ProceduralLandscapeGeneration.Simulation.CPU;
+﻿using ProceduralLandscapeGeneration.Simulation;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;
@@ -20,17 +17,12 @@ internal class MeshShaderRenderer : IRenderer
     private int myViewPositionLocation;
     private Camera3D myCamera;
 
-    private uint myHeightMapShaderBufferId;
-    private uint myGridPointsShaderBufferId;
-    private uint myConfigurationShaderBufferId;
     private uint myMeshletCount;
-    private bool myIsUpdateAvailable;
-    private bool myIsDisposed;
 
-    public MeshShaderRenderer(IConfiguration configuration, ILifetimeScope lifetimeScope, IShaderBuffers shaderBufferIds)
+    public MeshShaderRenderer(IConfiguration configuration, IErosionSimulator erosionSimulator, IShaderBuffers shaderBufferIds)
     {
         myConfiguration = configuration;
-        myErosionSimulator = lifetimeScope.ResolveKeyed<IErosionSimulator>(myConfiguration.ErosionSimulation);
+        myErosionSimulator = erosionSimulator;
         myShaderBufferIds = shaderBufferIds;
     }
 
@@ -45,12 +37,11 @@ internal class MeshShaderRenderer : IRenderer
         Vector3 heightMapCenter = new Vector3(myConfiguration.HeightMapSideLength / 2, myConfiguration.HeightMapSideLength / 2, 0);
         Vector3 lightDirection = new Vector3(0, myConfiguration.HeightMapSideLength, -myConfiguration.HeightMapSideLength / 2);
         int lightDirectionLocation = Raylib.GetShaderLocation(myTerrainMeshShader, "lightDirection");
-        unsafe
-        {
-            Raylib.SetShaderValue(myTerrainMeshShader, lightDirectionLocation, &lightDirection, ShaderUniformDataType.Vec3);
-            Raylib.SetShaderValue(myWaterMeshShader, lightDirectionLocation, &lightDirection, ShaderUniformDataType.Vec3);
-            Raylib.SetShaderValue(mySedimentMeshShader, lightDirectionLocation, &lightDirection, ShaderUniformDataType.Vec3);
-        }
+
+        Raylib.SetShaderValue(myTerrainMeshShader, lightDirectionLocation, &lightDirection, ShaderUniformDataType.Vec3);
+        Raylib.SetShaderValue(myWaterMeshShader, lightDirectionLocation, &lightDirection, ShaderUniformDataType.Vec3);
+        Raylib.SetShaderValue(mySedimentMeshShader, lightDirectionLocation, &lightDirection, ShaderUniformDataType.Vec3);
+
         myViewPositionLocation = Raylib.GetShaderLocation(myTerrainMeshShader, "viewPosition");
 
         Vector3 cameraPosition = heightMapCenter + new Vector3(myConfiguration.HeightMapSideLength / 2, -myConfiguration.HeightMapSideLength / 2, myConfiguration.HeightMapSideLength / 2);
@@ -59,41 +50,19 @@ internal class MeshShaderRenderer : IRenderer
 
         myMeshletCount = CalculateMeshletCount();
 
-        if (myErosionSimulator is ErosionSimulatorCPU)
-        {
-            myErosionSimulator.ErosionIterationFinished += OnErosionIterationFinished;
-            CreateShaderBuffer();
-        }
-        else
-        {
-            myHeightMapShaderBufferId = myShaderBufferIds[ShaderBufferTypes.HeightMap];
-            myGridPointsShaderBufferId = myShaderBufferIds[ShaderBufferTypes.GridPoints];
-            uint heightMultiplierValue = myConfiguration.HeightMultiplier;
-            myConfigurationShaderBufferId = Rlgl.LoadShaderBuffer(sizeof(uint), &heightMultiplierValue, Rlgl.DYNAMIC_COPY);
-        }
+        myShaderBufferIds.Add(ShaderBufferTypes.ErosionConfiguration, sizeof(uint));
+        UpdateErosionConfiguration();
     }
 
-    private unsafe void OnErosionConfigurationChanged(object? sender, EventArgs e)
+    private void OnErosionConfigurationChanged(object? sender, EventArgs e)
+    {
+        UpdateErosionConfiguration();
+    }
+
+    private unsafe void UpdateErosionConfiguration()
     {
         uint heightMultiplierValue = myConfiguration.HeightMultiplier;
-        Rlgl.UpdateShaderBuffer(myConfigurationShaderBufferId, &heightMultiplierValue, sizeof(uint), 0);
-    }
-
-    private unsafe void CreateShaderBuffer()
-    {
-        HeightMap heightMap = myErosionSimulator.HeightMap!;
-        float[] heightMapValues = heightMap!.Get1DHeightMapValues();
-
-        uint heightMapShaderBufferSize = (uint)heightMapValues.Length * sizeof(float);
-        fixed (float* heightMapValuesPointer = heightMapValues)
-        {
-            myHeightMapShaderBufferId = Rlgl.LoadShaderBuffer(heightMapShaderBufferSize, heightMapValuesPointer, Rlgl.DYNAMIC_COPY);
-        }
-    }
-
-    private void OnErosionIterationFinished(object? sender, EventArgs e)
-    {
-        myIsUpdateAvailable = true;
+        Rlgl.UpdateShaderBuffer(myShaderBufferIds[ShaderBufferTypes.ErosionConfiguration], &heightMultiplierValue, sizeof(uint), 0);
     }
 
     private uint CalculateMeshletCount()
@@ -105,13 +74,6 @@ internal class MeshShaderRenderer : IRenderer
 
     public unsafe void Update()
     {
-        if (myIsUpdateAvailable)
-        {
-            UpdateShaderBuffer();
-
-            myIsUpdateAvailable = false;
-        }
-
         Raylib.UpdateCamera(ref myCamera, CameraMode.Custom);
         Vector3 viewPosition = myCamera.Position;
         Raylib.SetShaderValue(myTerrainMeshShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
@@ -119,69 +81,45 @@ internal class MeshShaderRenderer : IRenderer
         Raylib.SetShaderValue(mySedimentMeshShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
     }
 
-    private unsafe void UpdateShaderBuffer()
-    {
-        HeightMap heightMap = myErosionSimulator.HeightMap!;
-        float[] heightMapValues = heightMap.Get1DHeightMapValues();
-
-        uint heightMapShaderBufferSize = (uint)heightMapValues.Length * sizeof(float);
-        fixed (float* heightMapValuesPointer = heightMapValues)
-        {
-            Rlgl.UpdateShaderBuffer(myHeightMapShaderBufferId, heightMapValuesPointer, heightMapShaderBufferSize, 0);
-        }
-    }
-
     public void Draw()
     {
         Raylib.BeginMode3D(myCamera);
-            if (myConfiguration.ShowSediment)
-            {
-                Raylib.BeginShaderMode(mySedimentMeshShader);
-                    Rlgl.EnableShader(mySedimentMeshShader.Id);
-                        Rlgl.BindShaderBuffer(myHeightMapShaderBufferId, 1);
-                        Rlgl.BindShaderBuffer(myGridPointsShaderBufferId, 2);
-                        Rlgl.BindShaderBuffer(myConfigurationShaderBufferId, 3);
-                        Raylib.DrawMeshTasks(0, myMeshletCount);
-                    Rlgl.DisableShader();
-                Raylib.EndShaderMode();
-            }
-            Raylib.BeginShaderMode(myTerrainMeshShader);
-                Rlgl.EnableShader(myTerrainMeshShader.Id);
-                    Rlgl.BindShaderBuffer(myHeightMapShaderBufferId, 1);
-                    Rlgl.BindShaderBuffer(myConfigurationShaderBufferId, 2);
-                    Raylib.DrawMeshTasks(0, myMeshletCount);
-                Rlgl.DisableShader();
+        if (myConfiguration.ShowSediment)
+        {
+            Raylib.BeginShaderMode(mySedimentMeshShader);
+            Rlgl.EnableShader(mySedimentMeshShader.Id);
+            Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
+            Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridErosionConfiguration], 2);
+            Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.ErosionConfiguration], 3);
+            Raylib.DrawMeshTasks(0, myMeshletCount);
+            Rlgl.DisableShader();
             Raylib.EndShaderMode();
-            if (myConfiguration.ShowWater)
-            {
-                Raylib.BeginShaderMode(myWaterMeshShader);
-                    Rlgl.EnableShader(myWaterMeshShader.Id);
-                        Rlgl.BindShaderBuffer(myHeightMapShaderBufferId, 1);
-                        Rlgl.BindShaderBuffer(myGridPointsShaderBufferId, 2);
-                        Rlgl.BindShaderBuffer(myConfigurationShaderBufferId, 3);
-                        Raylib.DrawMeshTasks(0, myMeshletCount);
-                    Rlgl.DisableShader();
-                Raylib.EndShaderMode();
-            }
+        }
+        Raylib.BeginShaderMode(myTerrainMeshShader);
+        Rlgl.EnableShader(myTerrainMeshShader.Id);
+        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
+        Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.ErosionConfiguration], 2);
+        Raylib.DrawMeshTasks(0, myMeshletCount);
+        Rlgl.DisableShader();
+        Raylib.EndShaderMode();
+        if (myConfiguration.ShowWater)
+        {
+            Raylib.BeginShaderMode(myWaterMeshShader);
+            Rlgl.EnableShader(myWaterMeshShader.Id);
+            Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.HeightMap], 1);
+            Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.GridErosionConfiguration], 2);
+            Rlgl.BindShaderBuffer(myShaderBufferIds[ShaderBufferTypes.ErosionConfiguration], 3);
+            Raylib.DrawMeshTasks(0, myMeshletCount);
+            Rlgl.DisableShader();
+            Raylib.EndShaderMode();
+        }
         Raylib.EndMode3D();
     }
 
     public void Dispose()
     {
-        if (myIsDisposed)
-        {
-            return;
-        }
-
         myConfiguration.ErosionConfigurationChanged -= OnErosionConfigurationChanged;
-        myErosionSimulator.ErosionIterationFinished -= OnErosionIterationFinished;
 
-        if (myErosionSimulator is ErosionSimulatorCPU)
-        {
-            Rlgl.UnloadShaderBuffer(myHeightMapShaderBufferId);
-        }
         Raylib.UnloadShader(myTerrainMeshShader);
-
-        myIsDisposed = true;
     }
 }

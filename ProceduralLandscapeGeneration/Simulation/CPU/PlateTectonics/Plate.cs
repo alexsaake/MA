@@ -1,4 +1,6 @@
 ﻿using ProceduralLandscapeGeneration.Common;
+using ProceduralLandscapeGeneration.Simulation.GPU;
+using Raylib_cs;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Simulation.CPU.PlateTectonics;
@@ -6,23 +8,27 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU.PlateTectonics;
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 internal class Plate
 {
-
     private const float Convection = 10.0f;
     private const float Growth = 0.05f;
 
+    private IConfiguration myConfiguration;
+    private IShaderBuffers myShaderBuffers;
+
     public Vector2 Position { get; private set; }
+
     private Vector2 mySpeed = Vector2.Zero;
     private float myRotation = 0.0f;
     private float myAngularVelocity = 0.0f;
     private float myMass = 0.0f;
-    private float myArea = 0.0f;
     private float myInertia = 0.0f;
-    private float myHeight = 0.0f;
 
     public List<Segment> Segments { get; private set; }
 
-    public Plate(Vector2 position)
+    public Plate(Vector2 position, IConfiguration configuration, IShaderBuffers shaderBuffers)
     {
+        myConfiguration = configuration;
+        myShaderBuffers = shaderBuffers;
+
         Position = position;
 
         Segments = new List<Segment>();
@@ -31,81 +37,24 @@ internal class Plate
     public void Recenter()
     {
         Position = Vector2.Zero;
-        myHeight = 0.0f;
         myInertia = 0.0f;
         myMass = 0.0f;
-        myArea = 0.0f;
 
         foreach (Segment segment in Segments)
         {
             Position += segment.Position;
             myMass += segment.Mass;
-            myArea += segment.Area;
             myInertia += MathF.Pow((Position - segment.Position).Length(), 2) * segment.Mass;
-            myHeight += segment.Height;
         }
 
         Position /= Segments.Count;
-        myHeight /= Segments.Count;
     }
 
-    public void Update(HeightMap heatMap, List<Segment> allSegments, uint size)
+    public unsafe void Move(Segment[] allSegments)
     {
-        Vector2 acc = Vector2.Zero;
-        float torque = 0.0f;
+        float[] heatMap = ReadHeatMap();
 
-        //Collide
-
-        for (int segment = 0; segment < Segments.Count; segment++)
-        {
-
-            IVector2 ipos = new IVector2(Segments[segment].Position);
-
-            if (ipos.X >= size || ipos.X < 0 ||
-                ipos.Y >= size || ipos.Y < 0)
-            {
-                Segments[segment].IsAlive = false;
-                continue;
-            }
-
-            const float collisionRadius = 1f;
-            const float subductionHeating = 0.1f;
-            int n = 12;
-            for (int j = 0; j < n; j++)
-            {
-                IVector2 scanIntegerPosition = new IVector2(Segments[segment].Position);
-                scanIntegerPosition += size * collisionRadius * new IVector2(MathF.Cos(j / n * 2.0f * MathF.PI), MathF.Sin(j / n * 2.0f * MathF.PI));
-
-                if (scanIntegerPosition.X >= size || scanIntegerPosition.X < 0 ||
-                    scanIntegerPosition.Y >= size || scanIntegerPosition.Y < 0) continue;
-
-                Segment? collidingSegment = allSegments.SingleOrDefault(segment => new IVector2(segment.Position).Equals(scanIntegerPosition));
-                if (collidingSegment is null)
-                {
-                    continue;
-                }
-                if (Segments[segment].Parent! == collidingSegment.Parent)
-                {
-                    continue;
-                }
-
-                //Two Segments are Colliding, Subduce the Denser One
-                if (Segments[segment].Density > collidingSegment.Density && !collidingSegment.IsColliding)
-                {
-
-                    float mdiff = Segments[segment].Height * Segments[segment].Density * Segments[segment].Area;
-                    float hdiff = Segments[segment].Height;
-
-                    collidingSegment.Thickness += hdiff;  //Move Mass
-                    collidingSegment.Mass += mdiff;
-                    collidingSegment.Buoyancy();
-
-                    collidingSegment.IsColliding = true;
-                    Segments[segment].IsAlive = false;
-                    heatMap.Height[scanIntegerPosition.X, scanIntegerPosition.Y] += subductionHeating;
-                }
-            }
-        }
+        CollideSegments(heatMap, allSegments);
 
         //Cascade
         //for (auto & s: cluster.segs)
@@ -153,15 +102,93 @@ internal class Plate
 
         //}
 
-        //Grow
+        GrowSegments(heatMap);
+        MoveSegments(heatMap);
 
+        WriteHeatMap(heatMap);
+    }
+
+    private unsafe float[] ReadHeatMap()
+    {
+        uint heatMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint heatMapBufferSize = heatMapSize * sizeof(float);
+        float[] heatMap = new float[heatMapSize];
+        Rlgl.MemoryBarrier();
+        fixed (float* heatMapPointer = heatMap)
+        {
+            Rlgl.ReadShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeatMap], heatMapPointer, heatMapBufferSize, 0);
+        }
+
+        return heatMap;
+    }
+
+    private void CollideSegments(float[] heatMap, Segment[] allSegments)
+    {
         for (int segment = 0; segment < Segments.Count; segment++)
         {
+            IVector2 segmentPosition = new IVector2(Segments[segment].Position);
 
-            if (!Segments[segment].IsAlive) continue;
+            if (segmentPosition.X >= myConfiguration.HeightMapSideLength || segmentPosition.X < 0 ||
+                segmentPosition.Y >= myConfiguration.HeightMapSideLength || segmentPosition.Y < 0)
+            {
+                Segments[segment].IsAlive = false;
+                continue;
+            }
 
-            IVector2 ip = new IVector2(Segments[segment].Position);
-            float nd = heatMap.Height[ip.X, ip.Y];              //Heat Value!
+            const float subductionHeating = 0.1f;
+
+            for (int y = -1; y <= 1; y++)
+            {
+                for (int x = -1; x <= 1; x++)
+                {
+                    IVector2 scanPosition = new IVector2(x, y) + segmentPosition;
+                    if (scanPosition.X >= myConfiguration.HeightMapSideLength || scanPosition.X < 0 ||
+                        scanPosition.Y >= myConfiguration.HeightMapSideLength || scanPosition.Y < 0)
+                    {
+                        continue;
+                    }
+
+                    Segment? collidingSegment = allSegments[scanPosition.X + scanPosition.Y * myConfiguration.HeightMapSideLength];
+                    if (collidingSegment is null)
+                    {
+                        continue;
+                    }
+                    if (Segments[segment].Parent! == collidingSegment.Parent)
+                    {
+                        continue;
+                    }
+
+                    //Two Segments are Colliding, Subduce the Denser One
+                    if (Segments[segment].Density > collidingSegment.Density && !collidingSegment.IsColliding)
+                    {
+
+                        float mdiff = Segments[segment].Height * Segments[segment].Density * Segments[segment].Area;
+                        float hdiff = Segments[segment].Height;
+
+                        collidingSegment.Thickness += hdiff;  //Move Mass
+                        collidingSegment.Mass += mdiff;
+                        collidingSegment.Buoyancy();
+
+                        collidingSegment.IsColliding = true;
+                        Segments[segment].IsAlive = false;
+                        heatMap[scanPosition.X + scanPosition.Y * myConfiguration.HeightMapSideLength] += subductionHeating;
+                    }
+                }
+            }
+        }
+    }
+
+    private void GrowSegments(float[] heatMap)
+    {
+        for (int segment = 0; segment < Segments.Count; segment++)
+        {
+            if (!Segments[segment].IsAlive)
+            {
+                continue;
+            }
+
+            IVector2 position = new IVector2(Segments[segment].Position);
+            float nd = heatMap[position.X + position.Y * myConfiguration.HeightMapSideLength];              //Heat Value!
 
 
             //LINEAR GROWTH RATE [m / s]
@@ -176,26 +203,32 @@ internal class Plate
 
             Segments[segment].Density = Segments[segment].Mass / (Segments[segment].Area * Segments[segment].Thickness);
             Segments[segment].Height = Segments[segment].Thickness * (1.0f - Segments[segment].Density);
-
         }
+    }
 
-        //Convect
+    private static float Langmuir(float k, float x)
+    {
+        return k * x / (1.0f + k * x);
+    }
 
+    private void MoveSegments(float[] heatMap)
+    {
+        Vector2 acc = Vector2.Zero;
+        float torque = 0.0f;
         foreach (Segment segment in Segments)
         {
-
-            Vector2 f = Force(new IVector2(segment.Position), heatMap, size);
+            Vector2 force = Force(new IVector2(segment.Position), heatMap);
             Vector2 dir = segment.Position - Position;
 
-            acc -= Convection * f;
-            torque -= Convection * dir.Length() * f.Length() * MathF.Sin(Angle(f) - Angle(dir));
+            acc -= Convection * force;
+            torque -= Convection * dir.Length() * force.Length() * MathF.Sin(Angle(force) - Angle(dir));
 
         }
 
         const float DT = 0.025f;
 
         mySpeed += DT * acc / myMass;
-        if(myInertia == 0)
+        if (myInertia == 0)
         {
             return;
         }
@@ -219,32 +252,27 @@ internal class Plate
         }
     }
 
-    private static float Langmuir(float k, float x)
-    {
-        return k * x / (1.0f + k * x);
-    }
-
-    private Vector2 Force(IVector2 i, HeightMap heatMap, uint size)
+    private Vector2 Force(IVector2 position, float[] heatMap)
     {
         float fx = 0.0f;
         float fy = 0.0f;
 
-        if (i.X > 0 && i.X < size - 2 && i.Y > 0 && i.Y < size - 2)
+        if (position.X > 0 && position.X < myConfiguration.HeightMapSideLength - 2 && position.Y > 0 && position.Y < myConfiguration.HeightMapSideLength - 2)
         {
-            fx = (heatMap.Height[i.X + 1, i.Y] - heatMap.Height[i.X - 1, i.Y]) / 2.0f;
-            fy = -(heatMap.Height[i.X, i.Y + 1] - heatMap.Height[i.X, i.Y - 1]) / 2.0f;
+            fx = (heatMap[position.X + 1 + position.Y * myConfiguration.HeightMapSideLength] - heatMap[position.X - 1 + position.Y * myConfiguration.HeightMapSideLength]) / 2.0f;
+            fy = -(heatMap[position.X + (position.Y + 1) * myConfiguration.HeightMapSideLength] - heatMap[position.X + (position.Y - 1) * myConfiguration.HeightMapSideLength]) / 2.0f;
         }
 
         //Out-of-Bounds
-        if (i.X <= 0) fx = 0.0f;
-        else if (i.X >= size - 1) fx = -0.0f;
-        if (i.Y <= 0) fy = 0.0f;
-        else if (i.Y >= size - 1) fy = -0.0f;
+        if (position.X <= 0) fx = 0.0f;
+        else if (position.X >= myConfiguration.HeightMapSideLength - 1) fx = -0.0f;
+        if (position.Y <= 0) fy = 0.0f;
+        else if (position.Y >= myConfiguration.HeightMapSideLength - 1) fy = -0.0f;
 
         return new Vector2(fx, fy);
     }
 
-    float Angle(Vector2 d)
+    private static float Angle(Vector2 d)
     {
         if (d.X == 0 && d.Y == 0) return 0.0f;
         if (d.X == 0 && d.Y > 0) return MathF.PI / 2.0f;
@@ -255,5 +283,16 @@ internal class Plate
         if (d.X < 0) a += MathF.PI;
 
         return a;
+    }
+
+    private unsafe void WriteHeatMap(float[] heatMap)
+    {
+        uint heatMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint heatMapBufferSize = heatMapSize * sizeof(float);
+        fixed (float* heatMapPointer = heatMap)
+        {
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeatMap], heatMapPointer, heatMapBufferSize, 0);
+        }
+        Rlgl.MemoryBarrier();
     }
 }

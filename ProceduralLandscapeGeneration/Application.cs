@@ -3,7 +3,6 @@ using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;
 using Raylib_cs;
-using System.Numerics;
 
 namespace ProceduralLandscapeGeneration;
 
@@ -11,23 +10,23 @@ internal class Application : IApplication
 {
     private readonly IConfiguration myConfiguration;
     private readonly IConfigurationGUI myConfigurationGUI;
+    private readonly IErosionSimulator myErosionSimulator;
     private readonly ILifetimeScope myLifetimeScope;
-    private IErosionSimulator myErosionSimulator;
     private IRenderer myRenderer;
 
     private bool myIsModuleResetRequired;
 
-    public Application(IConfiguration configuration, IConfigurationGUI configurationGUI, ILifetimeScope lifetimeScope)
+    public Application(IConfiguration configuration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
     {
         myConfiguration = configuration;
         myConfigurationGUI = configurationGUI;
+        myErosionSimulator = erosionSimulator;
         myLifetimeScope = lifetimeScope;
         ResolveModules();
     }
 
     private void ResolveModules()
     {
-        myErosionSimulator = myLifetimeScope.ResolveKeyed<IErosionSimulator>(myConfiguration.ErosionSimulation);
         myRenderer = myLifetimeScope.ResolveKeyed<IRenderer>(myConfiguration.MeshCreation);
     }
 
@@ -76,9 +75,9 @@ internal class Application : IApplication
             myRenderer.Update();
 
             Raylib.BeginDrawing();
-                Raylib.ClearBackground(Color.SkyBlue);
-                myRenderer.Draw();
-                myConfigurationGUI.Draw();
+            Raylib.ClearBackground(Color.SkyBlue);
+            myRenderer.Draw();
+            myConfigurationGUI.Draw();
             Raylib.EndDrawing();
         }
 

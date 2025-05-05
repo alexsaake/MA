@@ -1,5 +1,4 @@
 ﻿using DotnetNoise;
-using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;
@@ -23,9 +22,33 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
         myNoiseGenerator = new FastNoise(myConfiguration.Seed);
     }
 
-    public HeightMap GenerateHeightMap()
+    public unsafe void GenerateHeightMap()
     {
-        float[,] noiseMap = new float[myConfiguration.HeightMapSideLength, myConfiguration.HeightMapSideLength];
+        float[] heightMap = GenerateNoiseMap();
+
+        uint heightMapShaderBufferSize = (uint)heightMap.Length * sizeof(float);
+        myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapShaderBufferSize);
+        fixed (float* heightMapValuesPointer = heightMap)
+        {
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapShaderBufferSize, 0);
+        }
+    }
+
+    public unsafe void GenerateHeatMap()
+    {
+        float[] heatMap = GenerateNoiseMap();
+
+        uint heatMapShaderBufferSize = (uint)heatMap.Length * sizeof(float);
+        myShaderBuffers.Add(ShaderBufferTypes.HeatMap, heatMapShaderBufferSize);
+        fixed (float* heatMapValuesPointer = heatMap)
+        {
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeatMap], heatMapValuesPointer, heatMapShaderBufferSize, 0);
+        }
+    }
+
+    private float[] GenerateNoiseMap()
+    {
+        float[] noiseMap = new float[myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength];
 
         Vector2[] octaveOffsets = new Vector2[myConfiguration.NoiseOctaves];
         for (int octave = 0; octave < myConfiguration.NoiseOctaves; octave++)
@@ -64,7 +87,7 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
                 {
                     minNoiseHeight = noiseHeight;
                 }
-                noiseMap[x, y] = noiseHeight;
+                noiseMap[x + y * myConfiguration.HeightMapSideLength] = noiseHeight;
             }
         }
 
@@ -72,24 +95,11 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
         {
             for (int x = 0; x < myConfiguration.HeightMapSideLength; x++)
             {
-                noiseMap[x, y] = Math.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
+                noiseMap[x + y * myConfiguration.HeightMapSideLength] = Math.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x + y * myConfiguration.HeightMapSideLength]);
             }
         }
 
-        return new HeightMap(myConfiguration, noiseMap);
-    }
-
-    public unsafe void GenerateHeightMapShaderBuffer()
-    {
-        HeightMap heightMap = GenerateHeightMap();
-        float[] heightMapValues = heightMap.Get1DHeightMapValues();
-
-        uint heightMapShaderBufferSize = (uint)heightMapValues.Length * sizeof(float);
-        myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapShaderBufferSize);
-        fixed (float* heightMapValuesPointer = heightMapValues)
-        {
-            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapShaderBufferSize, 0);
-        }
+        return noiseMap;
     }
 
     public void Dispose()

@@ -6,7 +6,6 @@ internal interface IConfiguration
 {
     MapGenerationTypes MapGeneration { get; set; }
     ProcessorTypes HeightMapGeneration { get; set; }
-    ProcessorTypes ErosionSimulation { get; set; }
     ProcessorTypes MeshCreation { get; set; }
 
     float SeaLevel { get; set; }

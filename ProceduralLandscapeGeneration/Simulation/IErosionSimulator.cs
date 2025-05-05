@@ -1,11 +1,7 @@
-﻿using ProceduralLandscapeGeneration.Common;
-
-namespace ProceduralLandscapeGeneration.Simulation;
+﻿namespace ProceduralLandscapeGeneration.Simulation;
 
 internal interface IErosionSimulator : IDisposable
 {
-    HeightMap? HeightMap { get; }
-
     event EventHandler? ErosionIterationFinished;
 
     void Initialize();

@@ -19,16 +19,10 @@ internal class DependencyInjectionContainer
         containerBuilder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ConfigurationGUI>().As<IConfigurationGUI>();
 
+        containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>().SingleInstance();
+        containerBuilder.RegisterType<PlateTectonicsHeightMapGenerator>().As<IPlateTectonicsHeightMapGenerator>();
         containerBuilder.RegisterType<HeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorTypes.GPU);
         containerBuilder.RegisterType<HeightMapGeneratorCPU>().Keyed<IHeightMapGenerator>(ProcessorTypes.CPU);
-        containerBuilder.Register(context => new PlateTectonicsHeightMapGenerator(
-                                                    context.Resolve<IConfiguration>(),
-                                                    context.Resolve<IRandom>(),
-                                                    context.Resolve<IShaderBuffers>(),
-                                                    context.ResolveKeyed<IHeightMapGenerator>(ProcessorTypes.CPU)))
-                        .As<IPlateTectonicsHeightMapGenerator>();
-        containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorTypes.GPU);
-        containerBuilder.RegisterType<ErosionSimulatorCPU>().As<IErosionSimulator>().SingleInstance().Keyed<IErosionSimulator>(ProcessorTypes.CPU);
         containerBuilder.RegisterType<MeshShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorTypes.GPU);
         containerBuilder.RegisterType<VertexShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorTypes.CPU);
 

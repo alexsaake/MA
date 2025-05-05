@@ -1,9 +1,7 @@
-﻿using ProceduralLandscapeGeneration.Common;
-
-namespace ProceduralLandscapeGeneration.Simulation;
+﻿namespace ProceduralLandscapeGeneration.Simulation;
 
 internal interface IHeightMapGenerator : IDisposable
 {
-    HeightMap GenerateHeightMap();
-    void GenerateHeightMapShaderBuffer();
+    void GenerateHeightMap();
+    void GenerateHeatMap();
 }
