@@ -27,7 +27,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
 
         myMapGenerationPanel = new PanelWithElements("Map Generation");
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "Noise;Tectonics", (value) => configuration.MapGeneration = (MapGenerationTypes)value, (int)configuration.MapGeneration));
-        myMapGenerationPanel.Add(new ToggleSliderWithLabel("Mesh Creation", "GPU;CPU", (value) => configuration.MeshCreation = (ProcessorTypes)value, (int)configuration.MeshCreation));
+        myMapGenerationPanel.Add(new ToggleSliderWithLabel("Mesh Creation", "CPU;GPU", (value) => configuration.MeshCreation = (ProcessorTypes)value, (int)configuration.MeshCreation));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Side Length", (value) => configuration.HeightMapSideLength = (uint)value, (int)configuration.HeightMapSideLength, 32, 8192));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => configuration.HeightMultiplier = (uint)value, (int)configuration.HeightMultiplier, 1, 512));
         myMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => configuration.SeaLevel = value, configuration.SeaLevel));
@@ -35,7 +35,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Color Enabled", "Off;On", (value) => configuration.IsColorEnabled = value == 1, configuration.IsColorEnabled ? 0 : 1));
 
         myNoiseMapGenerationPanel = new PanelWithElements("Noise Map Generation");
-        myNoiseMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "GPU;CPU", (value) => configuration.HeightMapGeneration = (ProcessorTypes)value, (int)configuration.HeightMapGeneration));
+        myNoiseMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "CPU;GPU", (value) => configuration.HeightMapGeneration = (ProcessorTypes)value, (int)configuration.HeightMapGeneration));
         myNoiseMapGenerationPanel.Add(new ValueBoxIntWithLabel("Seed", (value) => configuration.Seed = value, configuration.Seed, int.MinValue, int.MaxValue));
         myNoiseMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Scale", (value) => configuration.NoiseScale = value, configuration.NoiseScale));
         myNoiseMapGenerationPanel.Add(new ValueBoxIntWithLabel("Octaves", (value) => configuration.NoiseOctaves = (uint)value, (int)configuration.NoiseOctaves, 1, 16));
@@ -43,7 +43,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myNoiseMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Lacunarity", (value) => configuration.NoiseLacunarity = value, configuration.NoiseLacunarity));
 
         myHeatMapGenerationPanel = new PanelWithElements("Heat Map Generation");
-        myHeatMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "GPU;CPU", (value) => configuration.HeightMapGeneration = (ProcessorTypes)value, (int)configuration.HeightMapGeneration));
+        myHeatMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "CPU;GPU", (value) => configuration.HeightMapGeneration = (ProcessorTypes)value, (int)configuration.HeightMapGeneration));
         myHeatMapGenerationPanel.Add(new ValueBoxIntWithLabel("Seed", (value) => configuration.Seed = value, configuration.Seed, int.MinValue, int.MaxValue));
         myHeatMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Scale", (value) => configuration.NoiseScale = value, configuration.NoiseScale));
         myHeatMapGenerationPanel.Add(new ValueBoxIntWithLabel("Octaves", (value) => configuration.NoiseOctaves = (uint)value, (int)configuration.NoiseOctaves, 1, 16));
