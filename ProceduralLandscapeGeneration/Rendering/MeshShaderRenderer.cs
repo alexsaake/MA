@@ -45,7 +45,7 @@ internal class MeshShaderRenderer : IRenderer
 
         Vector3 cameraPosition = heightMapCenter + new Vector3(myConfiguration.HeightMapSideLength / 2, -myConfiguration.HeightMapSideLength / 2, myConfiguration.HeightMapSideLength / 2);
         myCamera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
-        Raylib.UpdateCamera(ref myCamera, CameraMode.Custom);
+        Raylib.UpdateCamera(ref myCamera, myConfiguration.CameraMode);
 
         myMeshletCount = CalculateMeshletCount();
 
@@ -61,7 +61,7 @@ internal class MeshShaderRenderer : IRenderer
 
     public unsafe void Update()
     {
-        Raylib.UpdateCamera(ref myCamera, CameraMode.Custom);
+        Raylib.UpdateCamera(ref myCamera, myConfiguration.CameraMode);
         Vector3 viewPosition = myCamera.Position;
         Raylib.SetShaderValue(myHeightMapMeshShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
         Raylib.SetShaderValue(myWaterMeshShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);

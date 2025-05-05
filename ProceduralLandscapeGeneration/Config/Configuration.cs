@@ -263,11 +263,11 @@ internal class Configuration : IConfiguration
         }
     }
 
-    public int ScreenWidth { get; set; } = 1920;
-    public int ScreenHeight { get; set; } = 1080;
-    public int ParallelExecutions { get; set; } = 10;
-    public int SimulationCallbackEachIterations { get; set; } = 1000;
-    public int ShadowMapResolution { get; set; } = 1028;
+    public int ScreenWidth { get; set; }
+    public int ScreenHeight { get; set; }
+    public int ParallelExecutions { get; set; }
+    public int SimulationCallbackEachIterations { get; set; }
+    public int ShadowMapResolution { get; set; }
 
     public bool IsWaterDisplayed { get; set; }
     public bool IsSedimentDisplayed { get; set; }
@@ -453,7 +453,7 @@ internal class Configuration : IConfiguration
         HeightMapSideLength = 256;
         myHeightMultiplier = 32;
         mySeaLevel = 0.2f;
-        CameraMode = CameraMode.Custom;
+        myCameraMode = CameraMode.Custom;
         myIsColorEnabled = true;
 
         Seed = 1337;
@@ -469,6 +469,10 @@ internal class Configuration : IConfiguration
         TalusAngle = 33;
         ThermalErosionHeightChange = 0.001f;
 
+        IsWaterDisplayed = false;
+        IsSedimentDisplayed = false;
+        IsRainAdded = true;
+
         WaterIncrease = 0.0125f;
         TimeDelta = 1;
         CellSizeX = 1;
@@ -481,11 +485,18 @@ internal class Configuration : IConfiguration
         DepositionRate = 0.1f;
         SedimentSofteningRate = 0;
         EvaporationRate = 0.0125f;
+
+
+        ScreenWidth = 1920;
+        ScreenHeight = 1080;
+        ParallelExecutions = 10;
+        SimulationCallbackEachIterations = 1000;
+        ShadowMapResolution = 1028;
     }
     public void Initialize()
     {
         UpdateConfigurationShaderBuffer();
-        
+
         myIsDisposed = false;
     }
 
