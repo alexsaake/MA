@@ -39,7 +39,7 @@ internal class Application : IApplication
 
         InitializeModules();
 
-        Rlgl.SetClipPlanes(0.001f, 10000.0f);
+        Rlgl.SetClipPlanes(5, myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength);
         Raylib.SetTargetFPS(60);
 
         while (!Raylib.WindowShouldClose())
