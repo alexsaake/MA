@@ -9,7 +9,7 @@ namespace ProceduralLandscapeGeneration.Config
         float Gravity { get; set; }
         float MaxDiff { get; set; }
         float Settling { get; set; }
-        Vector3 PersistentSpeed { get; set; }
+        Vector2 PersistentSpeed { get; set; }
 
         void Initialize();
     }

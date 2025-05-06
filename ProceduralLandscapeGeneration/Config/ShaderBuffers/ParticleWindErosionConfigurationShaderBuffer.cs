@@ -12,5 +12,5 @@ internal struct ParticleWindErosionConfigurationShaderBuffer
     public float padding1;
     public float padding2;
     public float padding3;
-    public Vector3 PersistentSpeed;
+    public Vector2 PersistentSpeed;
 }

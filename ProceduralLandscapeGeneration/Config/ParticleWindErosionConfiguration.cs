@@ -87,8 +87,8 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
         }
     }
 
-    private Vector3 myPersistentSpeed;
-    public Vector3 PersistentSpeed
+    private Vector2 myPersistentSpeed;
+    public Vector2 PersistentSpeed
     {
         get => myPersistentSpeed;
         set
@@ -111,7 +111,7 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
         myGravity = 0.025f;
         myMaxDiff = 0.005f;
         mySettling = 0.25f;
-        myPersistentSpeed = new Vector3(0.0f, 0.125f, 0.0f);
+        myPersistentSpeed = new Vector2(0.0f, 0.125f);
     }
 
     public void Initialize()

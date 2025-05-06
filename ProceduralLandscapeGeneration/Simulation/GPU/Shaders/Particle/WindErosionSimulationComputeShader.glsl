@@ -34,7 +34,7 @@ struct ParticleWindErosionConfiguration
     uint padding1;
     uint padding2;
     uint padding3;
-    vec3 PersistentSpeed;
+    vec2 PersistentSpeed;
 };
 
 layout(std430, binding = 4) readonly restrict buffer particleWindErosionConfigurationShaderBuffer
@@ -228,16 +228,17 @@ bool Move()
     if (myAge == 0 || myPosition.z < height)
     {
         myPosition.z = height;
-    }    
+    }
+    vec3 persistentSpeed = vec3(particleWindErosionConfiguration.PersistentSpeed, 0.0);
     const vec3 normal = getScaledNormal(position.x, position.y);
     const float hfac = exp(-(myPosition.z - height) / BoundaryLayer);
-    const float shadow = 1.0 - max(0.0, dot(normalize(particleWindErosionConfiguration.PersistentSpeed), normal));
+    const float shadow = 1.0 - max(0.0, dot(normalize(persistentSpeed), normal));
     const float collision = max(0.0, -dot(normalize(mySpeed), normal));
     const vec3 rspeed = cross(normal, cross((1.0 - collision) * mySpeed, normal));
 
     // Apply Base Prevailign Wind-Speed w. Shadowing
 
-    mySpeed += 0.05 * ((0.1 + 0.9 * shadow) * particleWindErosionConfiguration.PersistentSpeed - mySpeed);
+    mySpeed += 0.05 * ((0.1 + 0.9 * shadow) * persistentSpeed - mySpeed);
 
     // Apply Gravity
 
@@ -252,7 +253,7 @@ bool Move()
 
     // Speed is accelerated by terrain features
 
-    mySpeed += 0.9 * (shadow * mix(particleWindErosionConfiguration.PersistentSpeed, rspeed, shadow * hfac) - mySpeed);
+    mySpeed += 0.9 * (shadow * mix(persistentSpeed, rspeed, shadow * hfac) - mySpeed);
 
     // Turbulence
 

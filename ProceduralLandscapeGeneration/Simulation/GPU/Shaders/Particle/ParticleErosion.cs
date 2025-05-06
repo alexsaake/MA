@@ -8,6 +8,7 @@ internal class ParticleErosion : IParticleErosion
 {
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
+    private readonly IParticleWindErosionConfiguration myParticleWindErosionConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
     private readonly IShaderBuffers myShaderBuffers;
     private readonly IRandom myRandom;
@@ -19,10 +20,11 @@ internal class ParticleErosion : IParticleErosion
     private uint myHeightMapIndicesShaderBufferSize;
     private bool myIsDisposed;
 
-    public ParticleErosion(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers, IRandom random)
+    public ParticleErosion(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers, IRandom random)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
+        myParticleWindErosionConfiguration = particleWindErosionConfiguration;
         myComputeShaderProgramFactory = computeShaderProgramFactory;
         myShaderBuffers = shaderBuffers;
         myRandom = random;
@@ -68,6 +70,11 @@ internal class ParticleErosion : IParticleErosion
 
     public void SimulateWindErosion()
     {
+        if (myParticleWindErosionConfiguration.PersistentSpeed.Length() == 0)
+        {
+            Console.WriteLine($"WARN: Simulation not possible. Wind speed is zero.");
+            return;
+        }
         CreateRandomIndicesAlongBorder();
 
         Rlgl.EnableShader(myWindErosionParticleSimulationComputeShaderProgram!.Id);
@@ -84,12 +91,78 @@ internal class ParticleErosion : IParticleErosion
         uint[] randomHeightMapIndices = new uint[myConfiguration.SimulationIterations];
         for (uint i = 0; i < myConfiguration.SimulationIterations; i++)
         {
-            randomHeightMapIndices[i] = (uint)myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength);
+            if (myParticleWindErosionConfiguration.PersistentSpeed.X == 0)
+            {
+                if (myParticleWindErosionConfiguration.PersistentSpeed.Y > 0)
+                {
+                    randomHeightMapIndices[i] = GetRandomBottomIndex();
+                }
+                if (myParticleWindErosionConfiguration.PersistentSpeed.Y < 0)
+                {
+                    randomHeightMapIndices[i] = GetRandomTopIndex();
+                }
+            }
+            else if (myParticleWindErosionConfiguration.PersistentSpeed.Y == 0)
+            {
+                if (myParticleWindErosionConfiguration.PersistentSpeed.X > 0)
+                {
+                    randomHeightMapIndices[i] = GetRandomLeftIndex();
+                }
+                if (myParticleWindErosionConfiguration.PersistentSpeed.X < 0)
+                {
+                    randomHeightMapIndices[i] = GetRandomRightIndex();
+                }
+            }
+            else
+            {
+                if(myRandom.Next(2) == 0)
+                {
+                    if (myParticleWindErosionConfiguration.PersistentSpeed.X > 0)
+                    {
+                        randomHeightMapIndices[i] = GetRandomLeftIndex();
+                    }
+                    if (myParticleWindErosionConfiguration.PersistentSpeed.X < 0)
+                    {
+                        randomHeightMapIndices[i] = GetRandomRightIndex();
+                    }
+                }
+                else
+                {
+                    if (myParticleWindErosionConfiguration.PersistentSpeed.Y > 0)
+                    {
+                        randomHeightMapIndices[i] = GetRandomBottomIndex();
+                    }
+                    if (myParticleWindErosionConfiguration.PersistentSpeed.Y < 0)
+                    {
+                        randomHeightMapIndices[i] = GetRandomTopIndex();
+                    }
+                }
+            }
         }
         fixed (uint* randomHeightMapIndicesPointer = randomHeightMapIndices)
         {
             Rlgl.UpdateShaderBuffer(myHeightMapIndicesShaderBufferId, randomHeightMapIndicesPointer, myHeightMapIndicesShaderBufferSize, 0);
         }
+    }
+
+    private uint GetRandomBottomIndex()
+    {
+        return (uint)myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength);
+    }
+
+    private uint GetRandomTopIndex()
+    {
+        return (uint)myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength) + myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength - myMapGenerationConfiguration.HeightMapSideLength;
+    }
+
+    private uint GetRandomLeftIndex()
+    {
+        return (uint)myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength) * myMapGenerationConfiguration.HeightMapSideLength;
+    }
+
+    private uint GetRandomRightIndex()
+    {
+        return (uint)myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength) * myMapGenerationConfiguration.HeightMapSideLength + myMapGenerationConfiguration.HeightMapSideLength - 1;
     }
 
     public void Dispose()
