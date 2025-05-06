@@ -22,10 +22,10 @@ class ValueBoxFloatWithLabel : IGUIElement
     public unsafe void Draw(Vector2 position)
     {
         float floatValue;
-        Raygui.GuiLabel(new Rectangle(position, 100, 20), myName);
+        Raygui.GuiLabel(new Rectangle(position, ConfigurationGUI.LabelSize), myName);
         fixed (byte* noiseScaleByteValuePointer = myValue)
         {
-            if (Raygui.GuiValueBoxFloat(new Rectangle(position + ConfigurationGUI.LabelWidth, 50, 20), null, (char*)noiseScaleByteValuePointer, &floatValue, myEditMode) == 1)
+            if (Raygui.GuiValueBoxFloat(new Rectangle(position + new Vector2(ConfigurationGUI.LabelSize.X, 0), ConfigurationGUI.ElementSize), null, (char*)noiseScaleByteValuePointer, &floatValue, myEditMode) == 1)
             {
                 myEditMode = !myEditMode;
                 string value = Utf8StringUtils.GetUTF8String((sbyte*)noiseScaleByteValuePointer);

@@ -6,10 +6,11 @@ namespace ProceduralLandscapeGeneration.GUI;
 
 internal unsafe class ConfigurationGUI : IConfigurationGUI
 {
-    internal static Vector2 PanelHeader = new Vector2(0, 25);
+    internal static Vector2 PanelSize = new Vector2(170, 25);
     internal static Vector2 ElementXOffset = new Vector2(10, 5);
     internal static Vector2 ElementYMargin = new Vector2(0, 25);
-    internal static Vector2 LabelWidth = new Vector2(100, 0);
+    internal static Vector2 LabelSize = new Vector2(100, 20);
+    internal static Vector2 ElementSize = new Vector2(50, 20);
 
     private IConfiguration myConfiguration;
 
@@ -80,6 +81,12 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
 
     public unsafe void Draw()
     {
+        DrawMapGenerationPanels();
+        DrawErosionPanels();
+    }
+
+    private void DrawMapGenerationPanels()
+    {
         myMapGenerationPanel.Draw(Vector2.Zero);
         Vector2? offset = null;
         switch (myConfiguration.MapGeneration)
@@ -94,13 +101,24 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
                 offset = myPlateTectonicsMapGenerationPanel.BottomLeft;
                 break;
             case MapGenerationTypes.Cube:
-                offset = myHeatMapGenerationPanel.BottomLeft;
+                offset = myMapGenerationPanel.BottomLeft;
                 break;
         }
-        myErosionPanel.Draw(offset!.Value);
+    }
+
+    private void DrawErosionPanels()
+    {
+        myErosionPanel.Draw(new Vector2(myConfiguration.ScreenWidth - PanelSize.X, 0));
         myThermalErosionPanel.Draw(myErosionPanel.BottomLeft);
         myGridErosionPanel.Draw(myThermalErosionPanel.BottomLeft);
-
-        Raygui.GuiEnable();
+        switch (myConfiguration.MapGeneration)
+        {
+            case MapGenerationTypes.Noise:
+                break;
+            case MapGenerationTypes.Tectonics:
+                break;
+            case MapGenerationTypes.Cube:
+                break;
+        }
     }
 }

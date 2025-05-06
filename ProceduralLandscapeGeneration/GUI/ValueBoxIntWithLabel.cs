@@ -24,9 +24,9 @@ class ValueBoxIntWithLabel : IGUIElement
 
     public unsafe void Draw(Vector2 position)
     {
-        Raygui.GuiLabel(new Rectangle(position, 100, 20), myName);
+        Raygui.GuiLabel(new Rectangle(position, ConfigurationGUI.LabelSize), myName);
         int intValue = myValue;
-        if (Raygui.GuiValueBox(new Rectangle(position + ConfigurationGUI.LabelWidth, 50, 20), null, &intValue, myMinValue, myMaxValue, myEditMode) == 1)
+        if (Raygui.GuiValueBox(new Rectangle(position + new Vector2(ConfigurationGUI.LabelSize.X, 0), ConfigurationGUI.ElementSize), null, &intValue, myMinValue, myMaxValue, myEditMode) == 1)
         {
             myEditMode = !myEditMode;
             myValueDelegate(intValue);
