@@ -52,18 +52,18 @@ vec3 getScaledNormal(uint x, uint y)
         return vec3(0.0, 0.0, 1.0);
     }
 
-    float xp1ym1 = heightMap[getIndex(x + 1, y - 1)];
-    float xm1ym1 = heightMap[getIndex(x - 1, y - 1)];
-    float xp1y = heightMap[getIndex(x + 1, y)];
-    float xm1y = heightMap[getIndex(x - 1, y)];
-    float xp1yp1 = heightMap[getIndex(x + 1, y + 1)];
-    float xm1yp1 = heightMap[getIndex(x - 1, y + 1)];
-    float xyp1 = heightMap[getIndex(x, y + 1)];
-    float xym1 = heightMap[getIndex(x, y - 1)];
+    float rb = heightMap[getIndex(x + 1, y - 1)];
+    float lb = heightMap[getIndex(x - 1, y - 1)];
+    float r = heightMap[getIndex(x + 1, y)];
+    float l = heightMap[getIndex(x - 1, y)];
+    float rt = heightMap[getIndex(x + 1, y + 1)];
+    float lt = heightMap[getIndex(x - 1, y + 1)];
+    float t = heightMap[getIndex(x, y + 1)];
+    float b = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    configuration.HeightMultiplier * -(xp1ym1 - xm1ym1 + 2 * (xp1y - xm1y) + xp1yp1 - xm1yp1),
-    configuration.HeightMultiplier * -(xm1yp1 - xm1ym1 + 2 * (xyp1 - xym1) + xp1yp1 - xp1ym1),
+    configuration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
+    configuration.HeightMultiplier * -(lt - lb + 2 * (t - b) + rt - rb),
     1.0);
 
     return normalize(normal);
@@ -82,21 +82,50 @@ void main()
     uint y = id / myHeightMapSideLength;
 
     vec2 normal = getScaledNormal(x, y).xy;
+    float tolerance = 0.025;
     if(normal.x > 0)
     {
-        normal.x = ceil(normal.x);
+        if(normal.x < tolerance)
+        {
+            normal.x = 0;
+        }
+        else
+        {
+            normal.x = 1;
+        }
     }
-    else
+    else if(normal.x < 0)
     {
-        normal.x = floor(normal.x);
+        if(normal.x > -tolerance)
+        {
+            normal.x = 0;
+        }
+        else
+        {
+            normal.x = -1;
+        }
     }
     if(normal.y > 0)
     {
-        normal.y = ceil(normal.y);
+        if(normal.y < tolerance)
+        {
+            normal.y = 0;
+        }
+        else
+        {
+            normal.y = 1;
+        }
     }
-    else
+    else if(normal.y < 0)
     {
-        normal.y = floor(normal.y);
+        if(normal.y > -tolerance)
+        {
+            normal.y = 0;
+        }
+        else
+        {
+            normal.y = -1;
+        }
     }
     uint neighborIndex = getIndex(x + int(normal.x), y + int(normal.y));
     if(neighborIndex < 0 || neighborIndex > heightMap.length())
