@@ -26,7 +26,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myConfiguration = configuration;
 
         myMapGenerationPanel = new PanelWithElements("Map Generation");
-        myMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "Noise;Tectonics", (value) => configuration.MapGeneration = (MapGenerationTypes)value, (int)configuration.MapGeneration));
+        myMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "Noise;Tectonics;Cube", (value) => configuration.MapGeneration = (MapGenerationTypes)value, (int)configuration.MapGeneration));
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Mesh Creation", "CPU;GPU", (value) => configuration.MeshCreation = (ProcessorTypes)value, (int)configuration.MeshCreation));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Side Length", (value) => configuration.HeightMapSideLength = (uint)value, (int)configuration.HeightMapSideLength, 32, 8192));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => configuration.HeightMultiplier = (uint)value, (int)configuration.HeightMultiplier, 1, 512));
@@ -92,6 +92,9 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
                 myHeatMapGenerationPanel.Draw(myMapGenerationPanel.BottomLeft);
                 myPlateTectonicsMapGenerationPanel.Draw(myHeatMapGenerationPanel.BottomLeft);
                 offset = myPlateTectonicsMapGenerationPanel.BottomLeft;
+                break;
+            case MapGenerationTypes.Cube:
+                offset = myHeatMapGenerationPanel.BottomLeft;
                 break;
         }
         myErosionPanel.Draw(offset!.Value);

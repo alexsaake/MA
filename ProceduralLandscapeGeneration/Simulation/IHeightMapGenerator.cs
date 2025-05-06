@@ -2,6 +2,7 @@
 
 internal interface IHeightMapGenerator : IDisposable
 {
-    void GenerateHeightMap();
-    void GenerateHeatMap();
+    void GenerateNoiseHeightMap();
+    void GenerateNoiseHeatMap();
+    void GenerateCubeHeightMap();
 }

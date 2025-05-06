@@ -3,5 +3,6 @@
 internal enum MapGenerationTypes
 {
     Noise,
-    Tectonics
+    Tectonics,
+    Cube
 }

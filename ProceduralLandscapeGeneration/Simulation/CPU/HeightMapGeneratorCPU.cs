@@ -24,7 +24,7 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
         myNoiseGenerator = new FastNoise(myConfiguration.Seed);
     }
 
-    public unsafe void GenerateHeightMap()
+    public unsafe void GenerateNoiseHeightMap()
     {
         float[] heightMap = GenerateNoiseMap();
 
@@ -36,7 +36,7 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
         }
     }
 
-    public unsafe void GenerateHeatMap()
+    public unsafe void GenerateNoiseHeatMap()
     {
         float[] heatMap = GenerateNoiseMap();
 
@@ -102,6 +102,40 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
         }
 
         return noiseMap;
+    }
+
+    public unsafe void GenerateCubeHeightMap()
+    {
+        float[] heightMap = GenerateCubeMap();
+
+        uint heightMapShaderBufferSize = (uint)heightMap.Length * sizeof(float);
+        myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapShaderBufferSize);
+        fixed (float* heightMapValuesPointer = heightMap)
+        {
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapShaderBufferSize, 0);
+        }
+    }
+
+    private float[] GenerateCubeMap()
+    {
+        float[] map = new float[myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength];
+
+        int cudeSideLength = (int)MathF.Sqrt(myConfiguration.HeightMapSideLength);
+        int index = 0;
+        for (int y = 0; y < myConfiguration.HeightMapSideLength; y++)
+        {
+            for (int x = 0; x < myConfiguration.HeightMapSideLength; x++)
+            {
+                if (x > myConfiguration.HeightMapSideLength / 2 - cudeSideLength / 2 && x < myConfiguration.HeightMapSideLength / 2 + cudeSideLength / 2
+                && y > myConfiguration.HeightMapSideLength / 2 - cudeSideLength / 2 && y < myConfiguration.HeightMapSideLength / 2 + cudeSideLength / 2)
+                {
+                    map[index] = 1;
+                }
+                index++;
+            }
+        }
+
+        return map;
     }
 
     public void Dispose()

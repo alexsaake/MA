@@ -49,10 +49,13 @@ internal class ErosionSimulator : IErosionSimulator
         switch (myConfiguration.MapGeneration)
         {
             case MapGenerationTypes.Noise:
-                myHeightMapGenerator.GenerateHeightMap();
+                myHeightMapGenerator.GenerateNoiseHeightMap();
                 break;
             case MapGenerationTypes.Tectonics:
                 myPlateTectonicsHeightMapGenerator.GenerateHeightMap();
+                break;
+            case MapGenerationTypes.Cube:
+                myHeightMapGenerator.GenerateCubeHeightMap();
                 break;
         }
 
