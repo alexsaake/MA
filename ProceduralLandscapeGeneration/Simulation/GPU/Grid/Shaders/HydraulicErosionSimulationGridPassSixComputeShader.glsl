@@ -23,9 +23,8 @@ struct GridPoint
     float ThermalRight;
     float ThermalTop;
     float ThermalBottom;
-
-    float VelocityX;
-    float VelocityY;
+	
+    vec2 Velocity;
 };
 
 layout(std430, binding = 2) buffer gridPointsShaderBuffer

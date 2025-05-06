@@ -26,7 +26,7 @@ struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     float SeaLevel;
-    float IsColorEnabled;
+    bool IsColorEnabled;
 };
 
 layout(std430, binding = 2) readonly restrict buffer MapGenerationConfigurationShaderBuffer

@@ -1,22 +1,21 @@
 ﻿using ProceduralLandscapeGeneration.Config.Types;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Config
+namespace ProceduralLandscapeGeneration.Config;
+
+internal interface IMapGenerationConfiguration : IDisposable
 {
-    internal interface IMapGenerationConfiguration : IDisposable
-    {
-        MapGenerationTypes MapGeneration { get; set; }
-        ProcessorTypes MeshCreation { get; set; }
+    MapGenerationTypes MapGeneration { get; set; }
+    ProcessorTypes MeshCreation { get; set; }
 
-        uint HeightMapSideLength { get; set; }
-        uint HeightMultiplier { get; set; }
-        float SeaLevel { get; set; }
-        CameraMode CameraMode { get; set; }
-        bool IsColorEnabled { get; set; }
+    uint HeightMapSideLength { get; set; }
+    uint HeightMultiplier { get; set; }
+    float SeaLevel { get; set; }
+    CameraMode CameraMode { get; set; }
+    bool IsColorEnabled { get; set; }
 
-        event EventHandler? ResetRequired;
+    event EventHandler? ResetRequired;
 
-        void Initialize();
-        uint GetIndex(uint x, uint y);
-    }
+    void Initialize();
+    uint GetIndex(uint x, uint y);
 }

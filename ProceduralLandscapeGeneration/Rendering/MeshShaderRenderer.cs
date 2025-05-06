@@ -8,7 +8,6 @@ namespace ProceduralLandscapeGeneration.Rendering;
 
 internal class MeshShaderRenderer : IRenderer
 {
-    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IGridErosionConfiguration myGridErosionConfiguration;
     private readonly IShaderBuffers myShaderBuffers;
@@ -23,9 +22,8 @@ internal class MeshShaderRenderer : IRenderer
     private uint myMeshletCount;
     private bool myIsDisposed;
 
-    public MeshShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IGridErosionConfiguration gridErosionConfiguration, IShaderBuffers shaderBuffers)
+    public MeshShaderRenderer(IMapGenerationConfiguration mapGenerationConfiguration, IGridErosionConfiguration gridErosionConfiguration, IShaderBuffers shaderBuffers)
     {
-        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myGridErosionConfiguration = gridErosionConfiguration;
         myShaderBuffers = shaderBuffers;
@@ -34,8 +32,8 @@ internal class MeshShaderRenderer : IRenderer
     public unsafe void Initialize()
     {
         myTerrainHeightMapMeshShader = Raylib.LoadMeshShader("Rendering/Shaders/MeshShaders/TerrainHeightMapMeshShader.glsl", "Rendering/Shaders/MeshShaders/TerrainHeightMapMeshFragmentShader.glsl");
-        myWaterHeightMapMeshShader = Raylib.LoadMeshShader("Rendering/Shaders//MeshShadersWaterHeightMapMeshShader.glsl", "Rendering/Shaders/MeshShaders/TerrainHeightMapMeshFragmentShader.glsl");
-        mySedimentMeshShader = Raylib.LoadMeshShader("Rendering/Shaders/MeshShaders/SedimentMeshShader.glsl", "Rendering/Shaders/MeshShaders/HeightMapMeshFragmentShader.glsl");
+        myWaterHeightMapMeshShader = Raylib.LoadMeshShader("Rendering/Shaders/MeshShaders/WaterHeightMapMeshShader.glsl", "Rendering/Shaders/MeshShaders/TerrainHeightMapMeshFragmentShader.glsl");
+        mySedimentMeshShader = Raylib.LoadMeshShader("Rendering/Shaders/MeshShaders/SedimentMeshShader.glsl", "Rendering/Shaders/MeshShaders/TerrainHeightMapMeshFragmentShader.glsl");
         mySeaLevelQuadMeshShader = Raylib.LoadMeshShader("Rendering/Shaders/MeshShaders/SeaLevelQuadMeshShader.glsl", "Rendering/Shaders/MeshShaders/SeaLevelQuadMeshFragmentShader.glsl");
 
         Vector3 heightMapCenter = new Vector3(myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 2, 0);

@@ -23,9 +23,10 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
     private readonly PanelWithElements myErosionPanel;
     private readonly PanelWithElements myThermalErosionPanel;
     private readonly PanelWithElements myGridErosionPanel;
-    private readonly PanelWithElements myParticleErosionPanel;
+    private readonly PanelWithElements myParticleHydraulicErosionPanel;
+    private readonly PanelWithElements myParticleWindErosionPanel;
 
-    public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration)
+    public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
@@ -66,7 +67,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myThermalErosionPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => configuration.TalusAngle = value, configuration.TalusAngle, 0, 89));
         myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Height Change", (value) => configuration.ThermalErosionHeightChange = value, configuration.ThermalErosionHeightChange));
 
-        myGridErosionPanel = new PanelWithElements("Grid Erosion");
+        myGridErosionPanel = new PanelWithElements("Grid Hydraulic Erosion");
         myGridErosionPanel.Add(new ToggleSliderWithLabel("Water Displayed", "Off;On", (value) => gridErosionConfiguration.IsWaterDisplayed = value == 1, gridErosionConfiguration.IsWaterDisplayed ? 1 : 0));
         myGridErosionPanel.Add(new ToggleSliderWithLabel("Sediment Displayed", "Off;On", (value) => gridErosionConfiguration.IsSedimentDisplayed = value == 1, gridErosionConfiguration.IsSedimentDisplayed ? 1 : 0));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Water Increase", (value) => gridErosionConfiguration.WaterIncrease = value, gridErosionConfiguration.WaterIncrease));
@@ -82,14 +83,21 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Sediment Softening Rate", (value) => gridErosionConfiguration.SedimentSofteningRate = value, gridErosionConfiguration.SedimentSofteningRate));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => gridErosionConfiguration.EvaporationRate = value, gridErosionConfiguration.EvaporationRate));
 
-        myParticleErosionPanel = new PanelWithElements("Particle Erosion");
-        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Maximum Age", (value)=>particleHydraulicErosionConfiguration.MaxAge = (int)value, (int)particleHydraulicErosionConfiguration.MaxAge));
-        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => particleHydraulicErosionConfiguration.EvaporationRate = value, particleHydraulicErosionConfiguration.EvaporationRate));
-        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Deposition Rate", (value) => particleHydraulicErosionConfiguration.DepositionRate = value, particleHydraulicErosionConfiguration.DepositionRate));
-        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Minimum Volume", (value) => particleHydraulicErosionConfiguration.MinimumVolume = value, particleHydraulicErosionConfiguration.MinimumVolume));
-        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => particleHydraulicErosionConfiguration.Gravity = value, particleHydraulicErosionConfiguration.Gravity));
-        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Maximum Difference", (value) => particleHydraulicErosionConfiguration.MaxDiff = value, particleHydraulicErosionConfiguration.MaxDiff));
-        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Settling", (value) => particleHydraulicErosionConfiguration.Settling = value, particleHydraulicErosionConfiguration.Settling));
+        myParticleHydraulicErosionPanel = new PanelWithElements("Particle Hydraulic Erosion");
+        myParticleHydraulicErosionPanel.Add(new ValueBoxIntWithLabel("Maximum Age", (value) => particleHydraulicErosionConfiguration.MaxAge = (uint)value, (int)particleHydraulicErosionConfiguration.MaxAge, 1, 1024));
+        myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => particleHydraulicErosionConfiguration.EvaporationRate = value, particleHydraulicErosionConfiguration.EvaporationRate));
+        myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Deposition Rate", (value) => particleHydraulicErosionConfiguration.DepositionRate = value, particleHydraulicErosionConfiguration.DepositionRate));
+        myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Minimum Volume", (value) => particleHydraulicErosionConfiguration.MinimumVolume = value, particleHydraulicErosionConfiguration.MinimumVolume));
+        myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => particleHydraulicErosionConfiguration.Gravity = value, particleHydraulicErosionConfiguration.Gravity));
+        myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Maximum Difference", (value) => particleHydraulicErosionConfiguration.MaxDiff = value, particleHydraulicErosionConfiguration.MaxDiff));
+        myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Settling", (value) => particleHydraulicErosionConfiguration.Settling = value, particleHydraulicErosionConfiguration.Settling));
+
+        myParticleWindErosionPanel = new PanelWithElements("Particle Wind Erosion");
+        myParticleWindErosionPanel.Add(new ValueBoxIntWithLabel("Maximum Age", (value) => particleWindErosionConfiguration.MaxAge = (uint)value, (int)particleWindErosionConfiguration.MaxAge, 1, 1024));
+        myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => particleWindErosionConfiguration.Suspension = value, particleWindErosionConfiguration.Suspension));
+        myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => particleWindErosionConfiguration.Gravity = value, particleWindErosionConfiguration.Gravity));
+        myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Maximum Difference", (value) => particleWindErosionConfiguration.MaxDiff = value, particleWindErosionConfiguration.MaxDiff));
+        myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Settling", (value) => particleWindErosionConfiguration.Settling = value, particleWindErosionConfiguration.Settling));
     }
 
     public unsafe void Draw()
@@ -109,9 +117,9 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
                 offset = myNoiseMapGenerationPanel.BottomLeft;
                 break;
             case MapGenerationTypes.Tectonics:
-                myHeatMapGenerationPanel.Draw(myMapGenerationPanel.BottomLeft);
-                myPlateTectonicsMapGenerationPanel.Draw(myHeatMapGenerationPanel.BottomLeft);
-                offset = myPlateTectonicsMapGenerationPanel.BottomLeft;
+                myPlateTectonicsMapGenerationPanel.Draw(myMapGenerationPanel.BottomLeft);
+                myHeatMapGenerationPanel.Draw(myPlateTectonicsMapGenerationPanel.BottomLeft);
+                offset = myHeatMapGenerationPanel.BottomLeft;
                 break;
             case MapGenerationTypes.Cube:
                 offset = myMapGenerationPanel.BottomLeft;
@@ -124,7 +132,8 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myErosionPanel.Draw(new Vector2(myConfiguration.ScreenWidth - PanelSize.X, 0));
         myThermalErosionPanel.Draw(myErosionPanel.BottomLeft);
         myGridErosionPanel.Draw(myThermalErosionPanel.BottomLeft);
-        myParticleErosionPanel.Draw(myGridErosionPanel.BottomLeft);
+        myParticleHydraulicErosionPanel.Draw(myGridErosionPanel.BottomLeft);
+        myParticleWindErosionPanel.Draw(myParticleHydraulicErosionPanel.BottomLeft);
         switch (myMapGenerationConfiguration.MapGeneration)
         {
             case MapGenerationTypes.Noise:

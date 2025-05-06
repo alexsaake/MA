@@ -16,12 +16,30 @@ struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     float SeaLevel;
-    float IsColorEnabled;
+    bool IsColorEnabled;
 };
 
 layout(std430, binding = 3) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
     MapGenerationConfiguration mapGenerationConfiguration;
+};
+
+struct ParticleWindErosionConfiguration
+{
+    float Suspension;
+    float Gravity;
+    float MaxDiff;
+    float Settling;
+    uint MaxAge;
+    uint padding1;
+    uint padding2;
+    uint padding3;
+    vec3 PersistentSpeed;
+};
+
+layout(std430, binding = 4) readonly restrict buffer particleWindErosionConfigurationShaderBuffer
+{
+    ParticleWindErosionConfiguration particleWindErosionConfiguration;
 };
 
 uint myHeightMapSideLength;
@@ -42,13 +60,7 @@ bool isOutOfBounds(ivec2 position)
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/wind.hpp
-const vec3 persistentSpeed = vec3(0.0, 0.125, 0.0);
-const uint MaxAge = 102400;
 const float BoundaryLayer = 2.0;
-const float Suspension = 0.05;
-const float Gravity = 0.025;
-const float MaxDiff = 0.005;
-const float Settling = 0.25;
 vec3 myPosition;
 vec3 mySpeed;
 int myAge;
@@ -152,14 +164,14 @@ void Cascade(ivec2 ipos)
 
         // The Amount of Excess Difference!
         float excess = 0.0f;
-        excess = abs(diff) - sn[i].d * MaxDiff;
+        excess = abs(diff) - sn[i].d * particleWindErosionConfiguration.MaxDiff;
         if (excess <= 0)
         {
             continue;
         }
 
         // Actual Amount Transferred
-        float transfer = Settling * excess / 2.0;
+        float transfer = particleWindErosionConfiguration.Settling * excess / 2.0;
         heightMap[tindex] -= transfer;
         heightMap[bindex] += transfer;
     }
@@ -203,7 +215,7 @@ bool Move()
         return false;
     }
 
-    if(myAge > MaxAge)
+    if(myAge > particleWindErosionConfiguration.MaxAge)
     {
         heightMap[getIndexV(position)] += mySediment;
         Cascade(position);
@@ -219,19 +231,19 @@ bool Move()
     }    
     const vec3 normal = getScaledNormal(position.x, position.y);
     const float hfac = exp(-(myPosition.z - height) / BoundaryLayer);
-    const float shadow = 1.0 - max(0.0, dot(normalize(persistentSpeed), normal));
+    const float shadow = 1.0 - max(0.0, dot(normalize(particleWindErosionConfiguration.PersistentSpeed), normal));
     const float collision = max(0.0, -dot(normalize(mySpeed), normal));
     const vec3 rspeed = cross(normal, cross((1.0 - collision) * mySpeed, normal));
 
     // Apply Base Prevailign Wind-Speed w. Shadowing
 
-    mySpeed += 0.05 * ((0.1 + 0.9 * shadow) * persistentSpeed - mySpeed);
+    mySpeed += 0.05 * ((0.1 + 0.9 * shadow) * particleWindErosionConfiguration.PersistentSpeed - mySpeed);
 
     // Apply Gravity
 
     if (myPosition.z > height)
     {
-        mySpeed.z -= Gravity * mySediment;
+        mySpeed.z -= particleWindErosionConfiguration.Gravity * mySediment;
     }
 
     // Compute Collision Factor
@@ -240,7 +252,7 @@ bool Move()
 
     // Speed is accelerated by terrain features
 
-    mySpeed += 0.9 * (shadow * mix(persistentSpeed, rspeed, shadow * hfac) - mySpeed);
+    mySpeed += 0.9 * (shadow * mix(particleWindErosionConfiguration.PersistentSpeed, rspeed, shadow * hfac) - mySpeed);
 
     // Turbulence
 
@@ -284,8 +296,8 @@ bool Interact()
 
     float diff = capacity - mySediment;
 
-    mySediment += Suspension * diff;
-    heightMap[getIndexV(currentPosition)] -= Suspension * diff;
+    mySediment += particleWindErosionConfiguration.Suspension * diff;
+    heightMap[getIndexV(currentPosition)] -= particleWindErosionConfiguration.Suspension * diff;
 
     Cascade(currentPosition);
 

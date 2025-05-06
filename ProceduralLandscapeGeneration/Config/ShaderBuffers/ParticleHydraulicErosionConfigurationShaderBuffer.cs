@@ -2,7 +2,7 @@
 
 internal struct ParticleHydraulicErosionConfigurationShaderBuffer
 {
-    public float MaxAge;
+    public uint MaxAge;
     public float EvaporationRate;
     public float DepositionRate;
     public float MinimumVolume;

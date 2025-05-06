@@ -1,9 +1,8 @@
-﻿namespace ProceduralLandscapeGeneration.Simulation.GPU.Shaders.Particle
+﻿namespace ProceduralLandscapeGeneration.Simulation.GPU.Shaders.Particle;
+
+internal interface IParticleErosion : IDisposable
 {
-    internal interface IParticleErosion : IDisposable
-    {
-        void Initialize();
-        void SimulateHydraulicErosion();
-        void SimulateWindErosion();
-    }
+    void Initialize();
+    void SimulateHydraulicErosion();
+    void SimulateWindErosion();
 }

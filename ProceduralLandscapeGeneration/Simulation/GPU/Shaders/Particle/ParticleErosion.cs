@@ -74,6 +74,7 @@ internal class ParticleErosion : IParticleErosion
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myHeightMapIndicesShaderBufferId, 2);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 3);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleWindErosionConfiguration], 4);
         Rlgl.ComputeShaderDispatch(myConfiguration.SimulationIterations / 64, 1, 1);
         Rlgl.DisableShader();
     }

@@ -11,7 +11,7 @@ struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     float SeaLevel;
-    float IsColorEnabled;
+    bool IsColorEnabled;
 };
 
 layout(std430, binding = 2) readonly restrict buffer mapGenerationConfigurationShaderBuffer
@@ -35,9 +35,8 @@ struct GridPoint
     float ThermalRight;
     float ThermalTop;
     float ThermalBottom;
-
-    float VelocityX;
-    float VelocityY;
+    
+    vec2 Velocity;
 };
 
 layout(std430, binding = 3) buffer gridPointsShaderBuffer
@@ -105,7 +104,7 @@ void main()
 	float sinTiltAngle = abs(normal.z) / length(normal);
 	
 	float lmax = clamp(1.0 - max(0.0, gridErosionConfiguration.MaximalErosionDepth - gridPoint.WaterHeight * mapGenerationConfiguration.HeightMultiplier) / gridErosionConfiguration.MaximalErosionDepth, 0.0, 1.0);
-	float sedimentTransportCapacity = gridErosionConfiguration.SedimentCapacity * length(vec2(gridPoint.VelocityX, gridPoint.VelocityY)) * sinTiltAngle * lmax;
+	float sedimentTransportCapacity = gridErosionConfiguration.SedimentCapacity * length(gridPoint.Velocity) * sinTiltAngle * lmax;
 
 	if (gridPoint.SuspendedSediment < sedimentTransportCapacity)
 	{

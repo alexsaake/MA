@@ -11,8 +11,8 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
 
     private bool myIsDisposed;
 
-    private float myMaxAge;
-    public float MaxAge
+    private uint myMaxAge;
+    public uint MaxAge
     {
         get => myMaxAge;
         set
@@ -120,7 +120,7 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
     {
         myShaderBuffers = shaderBuffers;
 
-        myMaxAge = 1024f;
+        myMaxAge = 1024;
         myEvaporationRate = 0.001f;
         myDepositionRate = 0.05f;
         myMinimumVolume = 0.001f;

@@ -1,4 +1,6 @@
-﻿namespace ProceduralLandscapeGeneration.Config;
+﻿using System.Numerics;
+
+namespace ProceduralLandscapeGeneration.Config;
 
 public struct GridPointShaderBuffer
 {
@@ -17,6 +19,5 @@ public struct GridPointShaderBuffer
     public float ThermalTop;
     public float ThermalBottom;
 
-    public float VelocityX;
-    public float VelocityY;
+    public Vector2 Velocity;
 }

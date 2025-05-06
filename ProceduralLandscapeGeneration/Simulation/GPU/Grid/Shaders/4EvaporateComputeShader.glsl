@@ -23,9 +23,8 @@ struct GridPoint
     float ThermalRight;
     float ThermalTop;
     float ThermalBottom;
-
-    float VelocityX;
-    float VelocityY;
+    
+    vec2 Velocity;
 };
 
 layout(std430, binding = 2) buffer gridPointsShaderBuffer
@@ -97,7 +96,7 @@ void main()
     GridPoint gridPoint = gridPoints[id];
 
 	gridPoint.WaterHeight = max(0.0, gridPoint.WaterHeight * (1.0 - gridErosionConfiguration.EvaporationRate * gridErosionConfiguration.TimeDelta));
-	gridPoint.TempSediment = SampleBilinear(vec2(x, y) - vec2(gridPoint.VelocityX, gridPoint.VelocityY) * gridErosionConfiguration.TimeDelta);
+	gridPoint.TempSediment = SampleBilinear(vec2(x, y) - gridPoint.Velocity * gridErosionConfiguration.TimeDelta);
 
     gridPoints[id] = gridPoint;
     

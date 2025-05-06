@@ -23,9 +23,8 @@ struct GridPoint
     float ThermalRight;
     float ThermalTop;
     float ThermalBottom;
-
-    float VelocityX;
-    float VelocityY;
+    
+    vec2 Velocity;
 };
 
 layout(std430, binding = 2) buffer gridPointsShaderBuffer
@@ -89,13 +88,11 @@ void main()
 
     if(gridPoint.WaterHeight > 0)
     {
-        gridPoint.VelocityX = 0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight) / gridErosionConfiguration.CellSizeY;
-        gridPoint.VelocityY = 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop) / gridErosionConfiguration.CellSizeX;
+        gridPoint.Velocity = vec2(0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight) / gridErosionConfiguration.CellSizeY, 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop) / gridErosionConfiguration.CellSizeX);
     }
     else
     {
-        gridPoint.VelocityX = 0;
-        gridPoint.VelocityY = 0;
+        gridPoint.Velocity = vec2(0);
     }
     
     gridPoints[id] = gridPoint;

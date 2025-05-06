@@ -7,6 +7,7 @@ internal class Configuration : IConfiguration
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IGridErosionConfiguration myGridErosionConfiguration;
     private readonly IParticleHydraulicErosionConfiguration myParticleHydraulicErosionConfiguration;
+    private readonly IParticleWindErosionConfiguration myParticleWindErosionConfiguration;
 
     private bool myIsDisposed;
 
@@ -170,11 +171,12 @@ internal class Configuration : IConfiguration
     public event EventHandler? ResetRequired;
     public event EventHandler? ThermalErosionConfigurationChanged;
 
-    public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration)
+    public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myGridErosionConfiguration = gridErosionConfiguration;
         myParticleHydraulicErosionConfiguration = particleHydraulicErosionConfiguration;
+        myParticleWindErosionConfiguration = particleWindErosionConfiguration;
 
         myHeightMapGeneration = ProcessorTypes.CPU;
 
@@ -207,6 +209,7 @@ internal class Configuration : IConfiguration
         myMapGenerationConfiguration.Initialize();
         myGridErosionConfiguration.Initialize();
         myParticleHydraulicErosionConfiguration.Initialize();
+        myParticleWindErosionConfiguration.Initialize();
 
         myIsDisposed = false;
     }

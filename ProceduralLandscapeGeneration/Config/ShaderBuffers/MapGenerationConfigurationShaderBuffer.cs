@@ -4,5 +4,5 @@ internal struct MapGenerationConfigurationShaderBuffer
 {
     public float HeightMultiplier;
     public float SeaLevel;
-    public float IsColorEnabled;
+    public bool IsColorEnabled;
 }

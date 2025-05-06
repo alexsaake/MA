@@ -16,7 +16,7 @@ struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     float SeaLevel;
-    float IsColorEnabled;
+    bool IsColorEnabled;
 };
 
 layout(std430, binding = 3) readonly restrict buffer mapGenerationConfigurationShaderBuffer
@@ -26,7 +26,7 @@ layout(std430, binding = 3) readonly restrict buffer mapGenerationConfigurationS
 
 struct ParticleHydraulicErosionConfiguration
 {
-    float MaxAge;
+    uint MaxAge;
     float EvaporationRate;
     float DepositionRate;
     float MinimumVolume;

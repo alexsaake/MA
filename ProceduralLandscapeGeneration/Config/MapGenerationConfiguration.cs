@@ -149,7 +149,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         {
             HeightMultiplier = HeightMultiplier,
             SeaLevel = SeaLevel,
-            IsColorEnabled = IsColorEnabled ? 1 : 0
+            IsColorEnabled = IsColorEnabled
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], &mapGenerationConfigurationShaderBuffer, (uint)sizeof(MapGenerationConfigurationShaderBuffer), 0);
     }

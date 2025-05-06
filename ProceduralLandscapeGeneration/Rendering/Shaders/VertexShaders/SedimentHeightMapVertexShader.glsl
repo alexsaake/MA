@@ -9,7 +9,7 @@ struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     float SeaLevel;
-    float IsColorEnabled;
+    bool IsColorEnabled;
 };
 
 layout(std430, binding = 2) readonly restrict buffer mapGenerationConfigurationShaderBuffer
@@ -33,9 +33,8 @@ struct GridPoint
     float ThermalRight;
     float ThermalTop;
     float ThermalBottom;
-
-    float VelocityX;
-    float VelocityY;
+    
+    vec2 Velocity;
 };
 
 layout(std430, binding = 3) buffer gridPointsShaderBuffer
