@@ -71,14 +71,17 @@ uint getIndex(uint x, uint y)
     return (y * myMapSize) + x;
 }
 
+vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
+
 void addVertex(uint vertex, uint x, uint y)
 {
     uint index = getIndex(x, y);
-    vec4 position = mvp * vec4(x, y, (heightMap[index] + gridPoints[index].SuspendedSediment) * configuration.HeightMultiplier, 1.0);
+    float zOffset = 0.01;
+    vec4 position = mvp * vec4(x, y, (heightMap[index] - zOffset + gridPoints[index].SuspendedSediment) * configuration.HeightMultiplier, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
     v_out[vertex].position = position;
-    v_out[vertex].color = vec4(0.3, 0.2, 0.1, 0.5);
+    v_out[vertex].color = sedimentColor;
     v_out[vertex].normal = vec4(0.0, 0.0, 1.0, 1.0);
 }
 

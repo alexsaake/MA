@@ -77,14 +77,14 @@ void main()
 
     float height = heightMap[index];
     float terrainHeight = height * configuration.HeightMultiplier;
-    float waterHeight = configuration.SeaLevel * configuration.HeightMultiplier;
+    float seaLevelHeight = configuration.SeaLevel * configuration.HeightMultiplier;
     fragPosition = vec3(matModel * vec4(vertexPosition.xy, terrainHeight, 1.0));
     vec3 normal = getScaledNormal(x, y);
     fragNormal = transpose(inverse(mat3(matModel))) * normal;
     vec3 terrainColor = vec3(1.0);
     if(configuration.IsColorEnabled == 1)
     {
-        if(terrainHeight < waterHeight + 0.3)
+        if(terrainHeight < seaLevelHeight + 0.3)
         {
             if(normal.z > 0.3)
             {

@@ -1,0 +1,61 @@
+#version 430
+
+layout(std430, binding = 1) readonly restrict buffer heightMapShaderBuffer
+{
+    float[] heightMap;
+};
+
+struct Configuration
+{
+    float HeightMultiplier;
+    float SeaLevel;
+    float IsColorEnabled;
+};
+
+layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
+{
+    Configuration configuration;
+};
+
+struct GridPoint
+{
+    float WaterHeight;
+    float SuspendedSediment;
+    float TempSediment;
+    float Hardness;
+
+    float FlowLeft;
+    float FlowRight;
+    float FlowTop;
+    float FlowBottom;
+
+    float ThermalLeft;
+    float ThermalRight;
+    float ThermalTop;
+    float ThermalBottom;
+
+    float VelocityX;
+    float VelocityY;
+};
+
+layout(std430, binding = 3) buffer gridPointsShaderBuffer
+{
+    GridPoint[] gridPoints;
+};
+
+in vec3 vertexPosition;
+
+uniform mat4 mvp;
+
+out vec4 fragColor;
+
+vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
+
+void main()
+{
+    uint index = gl_VertexID;
+
+    fragColor = sedimentColor;
+    float zOffset = 0.01;
+    gl_Position =  mvp * vec4(vertexPosition.xy, (heightMap[index] - zOffset + gridPoints[index].SuspendedSediment) * configuration.HeightMultiplier, 1.0);
+}

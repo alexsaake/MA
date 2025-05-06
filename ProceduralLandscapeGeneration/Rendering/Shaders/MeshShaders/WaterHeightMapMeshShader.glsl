@@ -24,6 +24,32 @@ layout(std430, binding = 1) readonly restrict buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
+struct GridPoint
+{
+    float WaterHeight;
+    float SuspendedSediment;
+    float TempSediment;
+    float Hardness;
+
+    float FlowLeft;
+    float FlowRight;
+    float FlowTop;
+    float FlowBottom;
+
+    float ThermalLeft;
+    float ThermalRight;
+    float ThermalTop;
+    float ThermalBottom;
+
+    float VelocityX;
+    float VelocityY;
+};
+
+layout(std430, binding = 2) buffer gridPointsShaderBuffer
+{
+    GridPoint[] gridPoints;
+};
+
 struct Configuration
 {
     float HeightMultiplier;
@@ -31,7 +57,7 @@ struct Configuration
     float IsColorEnabled;
 };
 
-layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
+layout(std430, binding = 3) readonly restrict buffer configurationShaderBuffer
 {
     Configuration configuration;
 };
@@ -45,104 +71,18 @@ uint getIndex(uint x, uint y)
     return (y * myMapSize) + x;
 }
 
-vec3 getScaledNormal(uint x, uint y)
-{
-    if (x < 1 || x > myMapSize - 2
-        || y < 1 || y > myMapSize - 2)
-    {
-        return vec3(0.0, 0.0, 1.0);
-    }
-
-    float rb = heightMap[getIndex(x + 1, y - 1)];
-    float lb = heightMap[getIndex(x - 1, y - 1)];
-    float r = heightMap[getIndex(x + 1, y)];
-    float l = heightMap[getIndex(x - 1, y)];
-    float rt = heightMap[getIndex(x + 1, y + 1)];
-    float lt = heightMap[getIndex(x - 1, y + 1)];
-    float t = heightMap[getIndex(x, y + 1)];
-    float b = heightMap[getIndex(x, y - 1)];
-
-    vec3 normal = vec3(
-    configuration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
-    configuration.HeightMultiplier * -(lt - lb + 2 * (t - b) + rt - rb),
-    1.0);
-
-    return normalize(normal);
-}
-
-vec3 oceanCliff = vec3(0.2, 0.2, 0.1);
-vec3 beachColor = vec3(1.0, 0.9, 0.6);
-vec3 pastureColor = vec3(0.5, 0.6, 0.4);
-vec3 woodsColor = vec3(0.2, 0.3, 0.2);
-vec3 mountainColor = vec3(0.6, 0.6, 0.6);
-vec3 snowColor = vec3(1.0, 0.9, 0.9);
+vec4 waterColor = vec4(0.0, 0.0, 1.0, 0.25);
 
 void addVertex(uint vertex, uint x, uint y)
 {
     uint index = getIndex(x, y);
-    float height = heightMap[index];
-    float terrainHeight = height * configuration.HeightMultiplier;
-    float waterHeight = configuration.SeaLevel * configuration.HeightMultiplier;
-    vec3 normal = getScaledNormal(x, y);
-    vec4 position = mvp * vec4(x, y, terrainHeight, 1.0);
+    float zOffset = 0.01;
+    vec4 position = mvp * vec4(x, y, (heightMap[index] - zOffset + gridPoints[index].WaterHeight) * configuration.HeightMultiplier, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
     v_out[vertex].position = position;
-    vec3 terrainColor = vec3(1.0);
-    if(configuration.IsColorEnabled == 1)
-    {
-        if(terrainHeight < waterHeight + 0.3)
-        {
-            if(normal.z > 0.3)
-            {
-                terrainColor = beachColor;
-            }
-            else
-            {
-                terrainColor = oceanCliff;
-            }
-        }
-        else
-        {
-            if(normal.z > 0.4)
-            {
-                if(height > 0.9)
-                {
-                    terrainColor = snowColor;
-                }
-                else if(height > 0.7)
-                {
-                    terrainColor = mountainColor;
-                }
-                else
-                {
-                    terrainColor = woodsColor;
-                }
-            }
-            else if(normal.z > 0.3)
-            {
-                if(height > 0.9)
-                {
-                    terrainColor = snowColor;
-                }
-                else if(height > 0.8)
-                {
-                    terrainColor = mountainColor;
-                }
-                else
-                {
-                    terrainColor = pastureColor;
-                }
-            }
-            else
-            {
-                terrainColor = mountainColor;
-            }
-        }
-    }
-
-    v_out[vertex].color = vec4(terrainColor, 1.0);
-    v_out[vertex].normal = vec4(normal, 1.0);
+    v_out[vertex].color = waterColor;
+    v_out[vertex].normal = vec4(0.0, 0.0, 1.0, 1.0);
 }
 
 void main()
