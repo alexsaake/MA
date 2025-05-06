@@ -21,8 +21,9 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
     private readonly PanelWithElements myErosionPanel;
     private readonly PanelWithElements myThermalErosionPanel;
     private readonly PanelWithElements myGridErosionPanel;
+    private readonly PanelWithElements myParticleErosionPanel;
 
-    public ConfigurationGUI(IConfiguration configuration)
+    public ConfigurationGUI(IConfiguration configuration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration)
     {
         myConfiguration = configuration;
 
@@ -77,6 +78,15 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Deposition Rate", (value) => configuration.DepositionRate = value, configuration.DepositionRate));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Sediment Softening Rate", (value) => configuration.SedimentSofteningRate = value, configuration.SedimentSofteningRate));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => configuration.EvaporationRate = value, configuration.EvaporationRate));
+
+        myParticleErosionPanel = new PanelWithElements("Particle Erosion");
+        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Maximum Age", (value)=>particleHydraulicErosionConfiguration.MaxAge = (int)value, (int)particleHydraulicErosionConfiguration.MaxAge));
+        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => particleHydraulicErosionConfiguration.EvaporationRate = value, particleHydraulicErosionConfiguration.EvaporationRate));
+        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Deposition Rate", (value) => particleHydraulicErosionConfiguration.DepositionRate = value, particleHydraulicErosionConfiguration.DepositionRate));
+        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Minimum Volume", (value) => particleHydraulicErosionConfiguration.MinimumVolume = value, particleHydraulicErosionConfiguration.MinimumVolume));
+        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => particleHydraulicErosionConfiguration.Gravity = value, particleHydraulicErosionConfiguration.Gravity));
+        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Maximum Difference", (value) => particleHydraulicErosionConfiguration.MaxDiff = value, particleHydraulicErosionConfiguration.MaxDiff));
+        myParticleErosionPanel.Add(new ValueBoxFloatWithLabel("Settling", (value) => particleHydraulicErosionConfiguration.Settling = value, particleHydraulicErosionConfiguration.Settling));
     }
 
     public unsafe void Draw()
@@ -111,6 +121,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myErosionPanel.Draw(new Vector2(myConfiguration.ScreenWidth - PanelSize.X, 0));
         myThermalErosionPanel.Draw(myErosionPanel.BottomLeft);
         myGridErosionPanel.Draw(myThermalErosionPanel.BottomLeft);
+        myParticleErosionPanel.Draw(myGridErosionPanel.BottomLeft);
         switch (myConfiguration.MapGeneration)
         {
             case MapGenerationTypes.Noise:

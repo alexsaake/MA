@@ -34,7 +34,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
 
         testee.Flow();
@@ -58,7 +58,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.AddWater(0, 0, configuration.WaterIncrease);
         testee.AddWater(1, 0, configuration.WaterIncrease);
@@ -87,7 +87,7 @@ public class HydraulicErosionTests
         uint heightMapSize = mapSize * sizeof(float);
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatChannelHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.AddWater(0, 0, configuration.WaterIncrease);
 
@@ -108,7 +108,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.AddWater(1, 1, configuration.WaterIncrease);
 
@@ -132,7 +132,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpSlopedChannelHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.AddWater(1, 0, configuration.WaterIncrease);
 
@@ -154,7 +154,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.Flow();
 
@@ -177,7 +177,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.AddWater(1, 1, configuration.WaterIncrease);
         testee.Flow();
@@ -212,7 +212,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpSlopedChannelHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.AddWater(1, 0, configuration.WaterIncrease);
         testee.Flow();
@@ -241,7 +241,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.Flow();
         testee.VelocityMap();
@@ -270,7 +270,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.AddWater(1, 1, configuration.WaterIncrease);
         testee.Flow();
@@ -319,7 +319,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpSlopedChannelHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.AddWater(1, 0, configuration.WaterIncrease);
         testee.Flow();
@@ -357,7 +357,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.AddWater(1, 1, configuration.WaterIncrease);
         testee.Flow();
@@ -414,7 +414,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpSlopedChannelHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.AddWater(1, 0, configuration.WaterIncrease);
         testee.Flow();
@@ -457,7 +457,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.Flow();
         testee.VelocityMap();
@@ -484,7 +484,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.AddWater(1, 1, configuration.WaterIncrease);
         testee.Flow();
@@ -528,7 +528,7 @@ public class HydraulicErosionTests
         uint heightMapSideLength = configuration.HeightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.Flow();
         testee.VelocityMap();
@@ -556,7 +556,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.AddWater(0, 0, configuration.WaterIncrease);
         testee.Flow();
@@ -590,7 +590,7 @@ public class HydraulicErosionTests
         uint mapSize = heightMapSideLength * heightMapSideLength;
         SetUpConfigurationShaderBuffer(shaderBuffers, configuration);
         SetUpFlatHeightMap(shaderBuffers, configuration);
-        HydraulicErosion testee = new HydraulicErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
+        GridErosion testee = new GridErosion(new ComputeShaderProgramFactory(), configuration, shaderBuffers, Mock.Of<IRandom>());
         testee.Initialize();
         testee.AddWater(1, 1, configuration.WaterIncrease);
         testee.Flow();

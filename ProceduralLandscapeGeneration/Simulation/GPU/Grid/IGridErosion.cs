@@ -1,6 +1,6 @@
 ﻿namespace ProceduralLandscapeGeneration.Simulation.GPU.Grid;
 
-internal interface IHydraulicErosion : IDisposable
+internal interface IGridErosion : IDisposable
 {
     void Initialize();
     void Flow();

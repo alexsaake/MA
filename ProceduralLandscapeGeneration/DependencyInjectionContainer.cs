@@ -8,6 +8,7 @@ using ProceduralLandscapeGeneration.Simulation.CPU;
 using ProceduralLandscapeGeneration.Simulation.CPU.PlateTectonics;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using ProceduralLandscapeGeneration.Simulation.GPU.Grid;
+using ProceduralLandscapeGeneration.Simulation.GPU.Shaders.Particle;
 
 namespace ProceduralLandscapeGeneration;
 
@@ -18,6 +19,7 @@ internal class DependencyInjectionContainer
         var containerBuilder = new ContainerBuilder();
         containerBuilder.RegisterType<Application>().As<IApplication>();
         containerBuilder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
+        containerBuilder.RegisterType<ParticleHydraulicErosionConfiguration>().As<IParticleHydraulicErosionConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ConfigurationGUI>().As<IConfigurationGUI>();
 
         containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>().SingleInstance();
@@ -27,7 +29,8 @@ internal class DependencyInjectionContainer
         containerBuilder.RegisterType<MeshShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorTypes.GPU);
         containerBuilder.RegisterType<VertexShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorTypes.CPU);
 
-        containerBuilder.RegisterType<HydraulicErosion>().As<IHydraulicErosion>();
+        containerBuilder.RegisterType<GridErosion>().As<IGridErosion>();
+        containerBuilder.RegisterType<ParticleErosion>().As<IParticleErosion>();
         containerBuilder.RegisterType<ShaderBuffers>().As<IShaderBuffers>().SingleInstance();
         containerBuilder.RegisterType<ComputeShaderProgram>().As<IComputeShaderProgram>();
         containerBuilder.RegisterType<ComputeShaderProgramFactory>().As<IComputeShaderProgramFactory>();

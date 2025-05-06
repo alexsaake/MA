@@ -24,6 +24,22 @@ layout(std430, binding = 3) readonly restrict buffer configurationShaderBuffer
     Configuration configuration;
 };
 
+struct ParticleHydraulicErosionConfiguration
+{
+    float MaxAge;
+    float EvaporationRate;
+    float DepositionRate;
+    float MinimumVolume;
+    float Gravity;
+    float MaxDiff;
+    float Settling;
+};
+
+layout(std430, binding = 4) readonly restrict buffer particleHydraulicErosionConfigurationShaderBuffer
+{
+    ParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration;
+};
+
 uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
@@ -42,13 +58,6 @@ bool isOutOfBounds(ivec2 position)
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/water.hpp
-const uint MaxAge = 1024;
-const float EvaporationRate = 0.001;
-const float DepositionRate = 0.05;
-const float MinimumVolume = 0.001;
-const float Gravity = 2.0;
-const float MaxDiff = 0.8;
-const float Settling = 1.0;
 vec2 myPosition;
 vec2 myOriginalPosition;
 vec2 mySpeed;
@@ -154,14 +163,14 @@ void Cascade(ivec2 ipos)
 
         // The Amount of Excess Difference!
         float excess = 0.0f;
-        excess = abs(diff) - sn[i].d * MaxDiff;
+        excess = abs(diff) - sn[i].d * particleHydraulicErosionConfiguration.MaxDiff;
         if (excess <= 0)
         {
             continue;
         }
 
         // Actual Amount Transferred
-        float transfer = Settling * excess / 2.0f;
+        float transfer = particleHydraulicErosionConfiguration.Settling * excess / 2.0f;
         heightMap[tindex] -= transfer;
         heightMap[bindex] += transfer;
     }
@@ -176,8 +185,8 @@ bool Move()
         return false;
     }
 
-    if(myAge > MaxAge
-    || myVolume < MinimumVolume)
+    if(myAge > particleHydraulicErosionConfiguration.MaxAge
+    || myVolume < particleHydraulicErosionConfiguration.MinimumVolume)
     {
         heightMap[getIndexV(position)] += mySediment;
         Cascade(position);
@@ -186,7 +195,7 @@ bool Move()
 
     const vec3 normal = getScaledNormal(position.x, position.y);
 
-    mySpeed += Gravity * normal.xy / myVolume;
+    mySpeed += particleHydraulicErosionConfiguration.Gravity * normal.xy / myVolume;
 
     if(length(mySpeed) > 0)
     {
@@ -227,7 +236,7 @@ bool Interact()
 
     float cDiff = (cEq * myVolume - mySediment);
 
-    float effD = DepositionRate;
+    float effD = particleHydraulicErosionConfiguration.DepositionRate;
     if(effD < 0)
     {
         effD = 0;
@@ -244,7 +253,7 @@ bool Interact()
     mySediment += effD * cDiff;
     heightMap[getIndexV(position)] -= effD * cDiff;
 
-    myVolume *= (1.0 - EvaporationRate);
+    myVolume *= (1.0 - particleHydraulicErosionConfiguration.EvaporationRate);
 
     Cascade(position);
 

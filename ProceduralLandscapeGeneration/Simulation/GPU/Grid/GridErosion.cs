@@ -4,7 +4,7 @@ using Raylib_cs;
 namespace ProceduralLandscapeGeneration.Simulation.GPU.Grid;
 
 
-internal class HydraulicErosion : IHydraulicErosion
+internal class GridErosion : IGridErosion
 {
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
     private readonly IConfiguration myConfiguration;
@@ -23,7 +23,7 @@ internal class HydraulicErosion : IHydraulicErosion
 
     private uint myMapSize => myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
 
-    public HydraulicErosion(IComputeShaderProgramFactory computeShaderProgramFactory, IConfiguration configuration, IShaderBuffers shaderBuffers, IRandom random)
+    public GridErosion(IComputeShaderProgramFactory computeShaderProgramFactory, IConfiguration configuration, IShaderBuffers shaderBuffers, IRandom random)
     {
         myComputeShaderProgramFactory = computeShaderProgramFactory;
         myConfiguration = configuration;

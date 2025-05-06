@@ -1,6 +1,4 @@
-﻿using static System.Net.Mime.MediaTypeNames;
-
-namespace ProceduralLandscapeGeneration.Simulation.CPU;
+﻿namespace ProceduralLandscapeGeneration.Simulation.CPU;
 
 internal class FlexibleTerrain
 {

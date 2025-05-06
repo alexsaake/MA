@@ -6,6 +6,7 @@ namespace ProceduralLandscapeGeneration.Config;
 internal class Configuration : IConfiguration
 {
     private IShaderBuffers myShaderBuffers;
+    private IParticleHydraulicErosionConfiguration myParticleHydraulicErosionConfiguration;
 
     private bool myIsDisposed;
 
@@ -443,9 +444,10 @@ internal class Configuration : IConfiguration
     public event EventHandler? ThermalErosionConfigurationChanged;
     public event EventHandler? GridErosionConfigurationChanged;
 
-    public Configuration(IShaderBuffers shaderBuffers)
+    public Configuration(IShaderBuffers shaderBuffers, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration)
     {
         myShaderBuffers = shaderBuffers;
+        myParticleHydraulicErosionConfiguration = particleHydraulicErosionConfiguration;
 
         HeightMapGeneration = ProcessorTypes.GPU;
         MeshCreation = ProcessorTypes.CPU;
@@ -495,6 +497,7 @@ internal class Configuration : IConfiguration
     }
     public void Initialize()
     {
+        myParticleHydraulicErosionConfiguration.Initialize();
         UpdateConfigurationShaderBuffer();
 
         myIsDisposed = false;
