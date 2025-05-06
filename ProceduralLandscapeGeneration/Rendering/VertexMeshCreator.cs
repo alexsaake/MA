@@ -6,30 +6,30 @@ namespace ProceduralLandscapeGeneration.Rendering;
 
 internal class VertexMeshCreator : IVertexMeshCreator
 {
-    private readonly IConfiguration myConfiguration;
+    private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
 
-    public VertexMeshCreator(IConfiguration configuration)
+    public VertexMeshCreator(IMapGenerationConfiguration mapGenerationConfiguration)
     {
-        myConfiguration = configuration;
+        myMapGenerationConfiguration = mapGenerationConfiguration;
     }
 
     public unsafe Mesh CreateHeightMapMesh()
     {
         Mesh mesh = new();
-        int vertexCount = (int)(myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength);
-        int triangleCount = (int)((myConfiguration.HeightMapSideLength - 1) * (myConfiguration.HeightMapSideLength - 1) * 2);
+        int vertexCount = (int)(myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength);
+        int triangleCount = (int)((myMapGenerationConfiguration.HeightMapSideLength - 1) * (myMapGenerationConfiguration.HeightMapSideLength - 1) * 2);
         AllocateMeshData(&mesh, vertexCount, triangleCount);
 
         int indexIndex = 0;
         int vertexIndex = 0;
-        for (int y = 0; y < myConfiguration.HeightMapSideLength; y++)
+        for (int y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
         {
-            for (int x = 0; x < myConfiguration.HeightMapSideLength; x++)
+            for (int x = 0; x < myMapGenerationConfiguration.HeightMapSideLength; x++)
             {
-                if (x < myConfiguration.HeightMapSideLength - 1
-                    && y < myConfiguration.HeightMapSideLength - 1)
+                if (x < myMapGenerationConfiguration.HeightMapSideLength - 1
+                    && y < myMapGenerationConfiguration.HeightMapSideLength - 1)
                 {
-                    AddQuadIndices(mesh, ref indexIndex, vertexIndex , myConfiguration.HeightMapSideLength);
+                    AddQuadIndices(mesh, ref indexIndex, vertexIndex, myMapGenerationConfiguration.HeightMapSideLength);
                 }
                 AddVertex(mesh, ref vertexIndex, new Vector3(x, y, 0), Color.White);
             }
@@ -50,9 +50,9 @@ internal class VertexMeshCreator : IVertexMeshCreator
         Color oceanColor = new Color(0, 94, 184, 127);
         AddQuadIndices(mesh, ref indexIndex, vertexIndex, 2);
         AddVertex(mesh, ref vertexIndex, new Vector3(0, 0, 0), oceanColor);
-        AddVertex(mesh, ref vertexIndex, new Vector3((int)myConfiguration.HeightMapSideLength, 0, 0), oceanColor);
-        AddVertex(mesh, ref vertexIndex, new Vector3(0, (int)myConfiguration.HeightMapSideLength, 0), oceanColor);
-        AddVertex(mesh, ref vertexIndex, new Vector3((int)myConfiguration.HeightMapSideLength, (int)myConfiguration.HeightMapSideLength, 0), oceanColor);
+        AddVertex(mesh, ref vertexIndex, new Vector3((int)myMapGenerationConfiguration.HeightMapSideLength, 0, 0), oceanColor);
+        AddVertex(mesh, ref vertexIndex, new Vector3(0, (int)myMapGenerationConfiguration.HeightMapSideLength, 0), oceanColor);
+        AddVertex(mesh, ref vertexIndex, new Vector3((int)myMapGenerationConfiguration.HeightMapSideLength, (int)myMapGenerationConfiguration.HeightMapSideLength, 0), oceanColor);
 
         Raylib.UploadMesh(&mesh, false);
 

@@ -5,16 +5,16 @@ layout(std430, binding = 1) readonly restrict buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-struct Configuration
+struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     float SeaLevel;
     float IsColorEnabled;
 };
 
-layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
+layout(std430, binding = 2) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
-    Configuration configuration;
+    MapGenerationConfiguration mapGenerationConfiguration;
 };
 
 struct GridPoint
@@ -57,5 +57,5 @@ void main()
 
     fragColor = waterColor;
     float zOffset = 0.01;
-    gl_Position =  mvp * vec4(vertexPosition.xy, (heightMap[index] - zOffset + gridPoints[index].WaterHeight) * configuration.HeightMultiplier, 1.0);
+    gl_Position =  mvp * vec4(vertexPosition.xy, (heightMap[index] - zOffset + gridPoints[index].WaterHeight) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 }

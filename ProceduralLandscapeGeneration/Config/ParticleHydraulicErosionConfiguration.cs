@@ -1,4 +1,6 @@
-﻿using ProceduralLandscapeGeneration.Simulation.GPU;
+﻿using ProceduralLandscapeGeneration.Config.ShaderBuffers;
+using ProceduralLandscapeGeneration.Config.Types;
+using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Config;

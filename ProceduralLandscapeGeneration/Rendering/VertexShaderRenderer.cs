@@ -1,4 +1,5 @@
 ﻿using ProceduralLandscapeGeneration.Config;
+using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.Simulation;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
@@ -9,6 +10,8 @@ namespace ProceduralLandscapeGeneration.Rendering;
 internal class VertexShaderRenderer : IRenderer
 {
     private readonly IConfiguration myConfiguration;
+    private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
+    private readonly IGridErosionConfiguration myGridErosionConfiguration;
     private readonly IErosionSimulator myErosionSimulator;
     private readonly IVertexMeshCreator myVertexMeshCreator;
     private readonly IShaderBuffers myShaderBuffers;
@@ -32,9 +35,11 @@ internal class VertexShaderRenderer : IRenderer
     private bool myIsUpdateAvailable;
     private bool myIsDisposed;
 
-    public VertexShaderRenderer(IConfiguration configuration, IErosionSimulator erosionSimulator, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBuffers)
+    public VertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IGridErosionConfiguration gridErosionConfiguration, IErosionSimulator erosionSimulator, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
+        myMapGenerationConfiguration = mapGenerationConfiguration;
+        myGridErosionConfiguration = gridErosionConfiguration;
         myErosionSimulator = erosionSimulator;
         myVertexMeshCreator = vertexMeshCreator;
         myShaderBuffers = shaderBuffers;
@@ -46,8 +51,8 @@ internal class VertexShaderRenderer : IRenderer
 
         LoadShaders();
 
-        Vector3 heightMapCenter = new Vector3(myConfiguration.HeightMapSideLength / 2, myConfiguration.HeightMapSideLength / 2, 0);
-        Vector3 lightDirection = new Vector3(0, myConfiguration.HeightMapSideLength, -myConfiguration.HeightMapSideLength / 2);
+        Vector3 heightMapCenter = new Vector3(myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 2, 0);
+        Vector3 lightDirection = new Vector3(0, myMapGenerationConfiguration.HeightMapSideLength, -myMapGenerationConfiguration.HeightMapSideLength / 2);
 
         SetHeightMapShaderValues(heightMapCenter, lightDirection);
         SetShadowMapShaderValues(heightMapCenter, lightDirection);
@@ -123,9 +128,9 @@ internal class VertexShaderRenderer : IRenderer
 
     private unsafe void SetCamera(Vector3 heightMapCenter)
     {
-        Vector3 cameraPosition = heightMapCenter + new Vector3(myConfiguration.HeightMapSideLength / 2, -myConfiguration.HeightMapSideLength / 2, myConfiguration.HeightMapSideLength / 2);
+        Vector3 cameraPosition = heightMapCenter + new Vector3(myMapGenerationConfiguration.HeightMapSideLength / 2, -myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 2);
         myCamera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
-        Raylib.UpdateCamera(ref myCamera, myConfiguration.CameraMode);
+        Raylib.UpdateCamera(ref myCamera, myMapGenerationConfiguration.CameraMode);
     }
 
     private unsafe void InitiateModel()
@@ -174,7 +179,7 @@ internal class VertexShaderRenderer : IRenderer
 
     private unsafe void UpdateCamera()
     {
-        Raylib.UpdateCamera(ref myCamera, myConfiguration.CameraMode);
+        Raylib.UpdateCamera(ref myCamera, myMapGenerationConfiguration.CameraMode);
         Vector3 viewPosition = myCamera.Position;
         Raylib.SetShaderValue(myTerrainHeightMapShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
     }
@@ -183,14 +188,14 @@ internal class VertexShaderRenderer : IRenderer
     {
         Raylib.BeginMode3D(myCamera);
             Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.Configuration], 2);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
             Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints], 3);
             DrawTerrainHeightMap(myTerrainHeightMapShader);
-            if (myConfiguration.IsWaterDisplayed)
+            if (myGridErosionConfiguration.IsWaterDisplayed)
             {
                 Raylib.DrawModel(myWaterHeightMap, Vector3.Zero, 1.0f, Color.White);
             }
-            if (myConfiguration.IsSedimentDisplayed)
+            if (myGridErosionConfiguration.IsSedimentDisplayed)
             {
                 Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
             }

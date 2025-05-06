@@ -24,16 +24,16 @@ layout(std430, binding = 1) readonly restrict buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-struct Configuration
+struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     float SeaLevel;
     float IsColorEnabled;
 };
 
-layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
+layout(std430, binding = 2) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
-    Configuration configuration;
+    MapGenerationConfiguration mapGenerationConfiguration;
 };
 
 uniform mat4 mvp;
@@ -63,8 +63,8 @@ vec3 getScaledNormal(uint x, uint y)
     float b = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    configuration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
-    configuration.HeightMultiplier * -(lt - lb + 2 * (t - b) + rt - rb),
+    mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
+    mapGenerationConfiguration.HeightMultiplier * -(lt - lb + 2 * (t - b) + rt - rb),
     1.0);
 
     return normalize(normal);
@@ -81,15 +81,15 @@ void addVertex(uint vertex, uint x, uint y)
 {
     uint index = getIndex(x, y);
     float height = heightMap[index];
-    float terrainHeight = height * configuration.HeightMultiplier;
-    float seaLevelHeight = configuration.SeaLevel * configuration.HeightMultiplier;
+    float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
+    float seaLevelHeight = mapGenerationConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     vec3 normal = getScaledNormal(x, y);
     vec4 position = mvp * vec4(x, y, terrainHeight, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
     v_out[vertex].position = position;
     vec3 terrainColor = vec3(1.0);
-    if(configuration.IsColorEnabled == 1)
+    if(mapGenerationConfiguration.IsColorEnabled == 1)
     {
         if(terrainHeight < seaLevelHeight + 0.3)
         {

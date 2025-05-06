@@ -1,4 +1,6 @@
 ﻿using ProceduralLandscapeGeneration.Config;
+using ProceduralLandscapeGeneration.Config.ShaderBuffers;
+using ProceduralLandscapeGeneration.Config.Types;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Simulation.GPU;
@@ -6,14 +8,16 @@ namespace ProceduralLandscapeGeneration.Simulation.GPU;
 internal class HeightMapGenerator : IHeightMapGenerator
 {
     private readonly IConfiguration myConfiguration;
+    private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
     private readonly IShaderBuffers myShaderBuffers;
 
     private bool myIsDisposed;
 
-    public HeightMapGenerator(IConfiguration configuration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
+    public HeightMapGenerator(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
+        myMapGenerationConfiguration = mapGenerationConfiguration;
         myComputeShaderProgramFactory = computeShaderProgramFactory;
         myShaderBuffers = shaderBuffers;
     }
@@ -23,7 +27,6 @@ internal class HeightMapGenerator : IHeightMapGenerator
         HeightMapParametersShaderBuffer heightMapParameters = new HeightMapParametersShaderBuffer()
         {
             Seed = (uint)myConfiguration.Seed,
-            SideLength = myConfiguration.HeightMapSideLength,
             Scale = myConfiguration.NoiseScale,
             Octaves = myConfiguration.NoiseOctaves,
             Persistence = myConfiguration.NoisePersistence,
@@ -32,7 +35,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
         uint heightMapParametersBufferSize = (uint)sizeof(HeightMapParametersShaderBuffer);
         uint heightMapParametersBufferId = Rlgl.LoadShaderBuffer(heightMapParametersBufferSize, &heightMapParameters, Rlgl.DYNAMIC_COPY);
 
-        uint heightMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint heightMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
         uint heightMapBufferSize = heightMapSize * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
@@ -62,7 +65,6 @@ internal class HeightMapGenerator : IHeightMapGenerator
         HeightMapParametersShaderBuffer heatMapParameters = new HeightMapParametersShaderBuffer()
         {
             Seed = (uint)myConfiguration.Seed,
-            SideLength = myConfiguration.HeightMapSideLength,
             Scale = myConfiguration.NoiseScale,
             Octaves = myConfiguration.NoiseOctaves,
             Persistence = myConfiguration.NoisePersistence,
@@ -71,7 +73,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
         uint heatMapParametersBufferSize = (uint)sizeof(HeightMapParametersShaderBuffer);
         uint heatMapParametersBufferId = Rlgl.LoadShaderBuffer(heatMapParametersBufferSize, &heatMapParameters, Rlgl.DYNAMIC_COPY);
 
-        uint heatMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint heatMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
         uint heatMapBufferSize = heatMapSize * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeatMap, heatMapBufferSize);
 
@@ -110,16 +112,16 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateCubeMap()
     {
-        float[] map = new float[myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength];
+        float[] map = new float[myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength];
 
-        int cudeSideLength = (int)MathF.Sqrt(myConfiguration.HeightMapSideLength);
+        int cudeSideLength = (int)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
         int index = 0;
-        for (int y = 0; y < myConfiguration.HeightMapSideLength; y++)
+        for (int y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
         {
-            for (int x = 0; x < myConfiguration.HeightMapSideLength; x++)
+            for (int x = 0; x < myMapGenerationConfiguration.HeightMapSideLength; x++)
             {
-                if (x > myConfiguration.HeightMapSideLength / 2 - cudeSideLength / 2 && x < myConfiguration.HeightMapSideLength / 2 + cudeSideLength / 2
-                && y > myConfiguration.HeightMapSideLength / 2 - cudeSideLength / 2 && y < myConfiguration.HeightMapSideLength / 2 + cudeSideLength / 2)
+                if (x > myMapGenerationConfiguration.HeightMapSideLength / 2 - cudeSideLength / 2 && x < myMapGenerationConfiguration.HeightMapSideLength / 2 + cudeSideLength / 2
+                && y > myMapGenerationConfiguration.HeightMapSideLength / 2 - cudeSideLength / 2 && y < myMapGenerationConfiguration.HeightMapSideLength / 2 + cudeSideLength / 2)
                 {
                     map[index] = 1;
                 }

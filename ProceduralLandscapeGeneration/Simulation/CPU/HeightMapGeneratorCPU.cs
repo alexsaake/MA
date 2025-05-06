@@ -1,5 +1,6 @@
 ﻿using DotnetNoise;
 using ProceduralLandscapeGeneration.Config;
+using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;
@@ -9,15 +10,17 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU;
 internal class HeightMapGeneratorCPU : IHeightMapGenerator
 {
     private readonly IConfiguration myConfiguration;
+    private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IRandom myRandom;
     private readonly IShaderBuffers myShaderBuffers;
 
     private readonly FastNoise myNoiseGenerator;
     private bool myIsDisposed;
 
-    public HeightMapGeneratorCPU(IConfiguration configuration, IRandom random, IShaderBuffers shaderBuffers)
+    public HeightMapGeneratorCPU(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IRandom random, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
+        myMapGenerationConfiguration = mapGenerationConfiguration;
         myRandom = random;
         myShaderBuffers = shaderBuffers;
 
@@ -50,7 +53,7 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
 
     private float[] GenerateNoiseMap()
     {
-        float[] noiseMap = new float[myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength];
+        float[] noiseMap = new float[myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength];
 
         Vector2[] octaveOffsets = new Vector2[myConfiguration.NoiseOctaves];
         for (int octave = 0; octave < myConfiguration.NoiseOctaves; octave++)
@@ -61,9 +64,9 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
         float maxNoiseHeight = float.MinValue;
         float minNoiseHeight = float.MaxValue;
 
-        for (int y = 0; y < myConfiguration.HeightMapSideLength; y++)
+        for (int y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
         {
-            for (int x = 0; x < myConfiguration.HeightMapSideLength; x++)
+            for (int x = 0; x < myMapGenerationConfiguration.HeightMapSideLength; x++)
             {
                 float amplitude = 1;
                 float frequency = 1;
@@ -89,15 +92,15 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
                 {
                     minNoiseHeight = noiseHeight;
                 }
-                noiseMap[x + y * myConfiguration.HeightMapSideLength] = noiseHeight;
+                noiseMap[x + y * myMapGenerationConfiguration.HeightMapSideLength] = noiseHeight;
             }
         }
 
-        for (int y = 0; y < myConfiguration.HeightMapSideLength; y++)
+        for (int y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
         {
-            for (int x = 0; x < myConfiguration.HeightMapSideLength; x++)
+            for (int x = 0; x < myMapGenerationConfiguration.HeightMapSideLength; x++)
             {
-                noiseMap[x + y * myConfiguration.HeightMapSideLength] = Math.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x + y * myConfiguration.HeightMapSideLength]);
+                noiseMap[x + y * myMapGenerationConfiguration.HeightMapSideLength] = Math.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x + y * myMapGenerationConfiguration.HeightMapSideLength]);
             }
         }
 
@@ -118,16 +121,16 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
 
     private float[] GenerateCubeMap()
     {
-        float[] map = new float[myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength];
+        float[] map = new float[myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength];
 
-        int cudeSideLength = (int)MathF.Sqrt(myConfiguration.HeightMapSideLength);
+        int cudeSideLength = (int)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
         int index = 0;
-        for (int y = 0; y < myConfiguration.HeightMapSideLength; y++)
+        for (int y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
         {
-            for (int x = 0; x < myConfiguration.HeightMapSideLength; x++)
+            for (int x = 0; x < myMapGenerationConfiguration.HeightMapSideLength; x++)
             {
-                if (x > myConfiguration.HeightMapSideLength / 2 - cudeSideLength / 2 && x < myConfiguration.HeightMapSideLength / 2 + cudeSideLength / 2
-                && y > myConfiguration.HeightMapSideLength / 2 - cudeSideLength / 2 && y < myConfiguration.HeightMapSideLength / 2 + cudeSideLength / 2)
+                if (x > myMapGenerationConfiguration.HeightMapSideLength / 2 - cudeSideLength / 2 && x < myMapGenerationConfiguration.HeightMapSideLength / 2 + cudeSideLength / 2
+                && y > myMapGenerationConfiguration.HeightMapSideLength / 2 - cudeSideLength / 2 && y < myMapGenerationConfiguration.HeightMapSideLength / 2 + cudeSideLength / 2)
                 {
                     map[index] = 1;
                 }

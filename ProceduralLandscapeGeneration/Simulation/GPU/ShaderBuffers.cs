@@ -1,4 +1,4 @@
-﻿using ProceduralLandscapeGeneration.Config;
+﻿using ProceduralLandscapeGeneration.Config.Types;
 using Raylib_cs;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;

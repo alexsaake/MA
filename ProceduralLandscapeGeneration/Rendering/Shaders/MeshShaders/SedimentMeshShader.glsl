@@ -50,16 +50,16 @@ layout(std430, binding = 2) buffer gridPointsShaderBuffer
     GridPoint[] gridPoints;
 };
 
-struct Configuration
+struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     float SeaLevel;
     float IsColorEnabled;
 };
 
-layout(std430, binding = 3) readonly restrict buffer configurationShaderBuffer
+layout(std430, binding = 3) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
-    Configuration configuration;
+    MapGenerationConfiguration mapGenerationConfiguration;
 };
 
 uniform mat4 mvp;
@@ -77,7 +77,7 @@ void addVertex(uint vertex, uint x, uint y)
 {
     uint index = getIndex(x, y);
     float zOffset = 0.01;
-    vec4 position = mvp * vec4(x, y, (heightMap[index] - zOffset + gridPoints[index].SuspendedSediment) * configuration.HeightMultiplier, 1.0);
+    vec4 position = mvp * vec4(x, y, (heightMap[index] - zOffset + gridPoints[index].SuspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
     v_out[vertex].position = position;

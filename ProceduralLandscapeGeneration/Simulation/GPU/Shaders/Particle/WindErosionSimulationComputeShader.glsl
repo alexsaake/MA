@@ -12,16 +12,16 @@ layout(std430, binding = 2) readonly restrict buffer heightMapIndicesShaderBuffe
     uint[] heightMapIndices;
 };
 
-struct Configuration
+struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     float SeaLevel;
     float IsColorEnabled;
 };
 
-layout(std430, binding = 3) readonly restrict buffer configurationShaderBuffer
+layout(std430, binding = 3) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
-    Configuration configuration;
+    MapGenerationConfiguration mapGenerationConfiguration;
 };
 
 uint myHeightMapSideLength;
@@ -72,8 +72,8 @@ vec3 getScaledNormal(uint x, uint y)
     float b = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    configuration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
-    configuration.HeightMultiplier * -(lt - lb + 2 * (t - b) + rt - rb),
+    mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
+    mapGenerationConfiguration.HeightMultiplier * -(lt - lb + 2 * (t - b) + rt - rb),
     1.0);
 
     return normalize(normal);

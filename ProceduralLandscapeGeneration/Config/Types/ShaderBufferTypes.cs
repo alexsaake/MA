@@ -1,11 +1,11 @@
-﻿namespace ProceduralLandscapeGeneration.Config;
+﻿namespace ProceduralLandscapeGeneration.Config.Types;
 
 enum ShaderBufferTypes
 {
     HeightMap,
     GridPoints,
     GridErosionConfiguration,
-    Configuration,
+    MapGenerationConfiguration,
     HeatMap,
     ParticleHydraulicErosionConfiguration
 }

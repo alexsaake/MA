@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Config;
+using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;
@@ -19,6 +20,8 @@ internal class DependencyInjectionContainer
         var containerBuilder = new ContainerBuilder();
         containerBuilder.RegisterType<Application>().As<IApplication>();
         containerBuilder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
+        containerBuilder.RegisterType<MapGenerationConfiguration>().As<IMapGenerationConfiguration>().SingleInstance();
+        containerBuilder.RegisterType<GridErosionConfiguration>().As<IGridErosionConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ParticleHydraulicErosionConfiguration>().As<IParticleHydraulicErosionConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ConfigurationGUI>().As<IConfigurationGUI>();
 

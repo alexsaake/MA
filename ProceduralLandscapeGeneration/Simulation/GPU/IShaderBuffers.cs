@@ -1,4 +1,4 @@
-﻿using ProceduralLandscapeGeneration.Config;
+﻿using ProceduralLandscapeGeneration.Config.Types;
 
 namespace ProceduralLandscapeGeneration.Simulation.GPU;
 

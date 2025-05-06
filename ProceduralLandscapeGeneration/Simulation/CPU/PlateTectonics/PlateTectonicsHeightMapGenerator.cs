@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Config;
+using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;
@@ -11,6 +12,7 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU.PlateTectonics;
 internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenerator
 {
     private readonly IConfiguration myConfiguration;
+    private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IRandom myRandom;
     private readonly IShaderBuffers myShaderBuffers;
     private readonly ILifetimeScope myLifetimeScope;
@@ -18,9 +20,10 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private Segment?[]? mySegments;
     private readonly List<Plate> myPlates;
 
-    public PlateTectonicsHeightMapGenerator(IConfiguration configuration, IRandom random, IShaderBuffers shaderBuffers, ILifetimeScope lifetimeScope)
+    public PlateTectonicsHeightMapGenerator(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IRandom random, IShaderBuffers shaderBuffers, ILifetimeScope lifetimeScope)
     {
         myConfiguration = configuration;
+        myMapGenerationConfiguration = mapGenerationConfiguration;
         myRandom = random;
         myShaderBuffers = shaderBuffers;
         myLifetimeScope = lifetimeScope;
@@ -41,12 +44,12 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     private void CreateSegments()
     {
-        mySegments = new Segment[myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength];
-        for (uint y = 0; y < myConfiguration.HeightMapSideLength; y++)
+        mySegments = new Segment[myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength];
+        for (uint y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
         {
-            for (uint x = 0; x < myConfiguration.HeightMapSideLength; x++)
+            for (uint x = 0; x < myMapGenerationConfiguration.HeightMapSideLength; x++)
             {
-                mySegments[x + y * myConfiguration.HeightMapSideLength] = new Segment(x, y, myConfiguration, myShaderBuffers);
+                mySegments[x + y * myMapGenerationConfiguration.HeightMapSideLength] = new Segment(x, y, myMapGenerationConfiguration, myShaderBuffers);
             }
         }
     }
@@ -55,7 +58,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     {
         for (int i = 0; i < myConfiguration.PlateCount; i++)
         {
-            myPlates.Add(new Plate(new Vector2(myRandom.Next((int)myConfiguration.HeightMapSideLength), myRandom.Next((int)myConfiguration.HeightMapSideLength)),myConfiguration, myShaderBuffers));
+            myPlates.Add(new Plate(new Vector2(myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength), myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength)),myMapGenerationConfiguration, myShaderBuffers));
         }
     }
 
@@ -63,7 +66,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     {
         foreach (Segment segment in mySegments!)
         {
-            float distance = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+            float distance = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
             Plate? nearestPlate = null;
             foreach (Plate plate in myPlates)
             {
@@ -86,7 +89,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     private void CreateEmptyHeightMapShaderBuffer()
     {
-        uint heightMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength * sizeof(float);
+        uint heightMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapSize);
     }
 
@@ -108,8 +111,8 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
             for (int segment = 0; segment < plate.Segments.Count; segment++)
             {
                 IVector2 position = new IVector2(plate.Segments[segment].Position);
-                if (position.X < 0 || position.X > myConfiguration.HeightMapSideLength - 1 ||
-                position.Y < 0 || position.Y > myConfiguration.HeightMapSideLength - 1)
+                if (position.X < 0 || position.X > myMapGenerationConfiguration.HeightMapSideLength - 1 ||
+                position.Y < 0 || position.Y > myMapGenerationConfiguration.HeightMapSideLength - 1)
                 {
                     plate.Segments[segment].IsAlive = false;
                 }
@@ -184,7 +187,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     {
         const float generationCooling = -0.1f;
 
-        uint heatMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint heatMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
         uint heatMapBufferSize = heatMapSize * sizeof(float);
         float[] heatMap = new float[heatMapSize];
         Rlgl.MemoryBarrier();
@@ -201,22 +204,22 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
                 Vector2 scanPosition = segment.Position;
                 scanPosition += 2.0f * new Vector2(MathF.Cos(angle), MathF.Sin(angle));
 
-                if (scanPosition.X < 0 || scanPosition.X >= myConfiguration.HeightMapSideLength ||
-                scanPosition.Y < 0 || scanPosition.Y >= myConfiguration.HeightMapSideLength)
+                if (scanPosition.X < 0 || scanPosition.X >= myMapGenerationConfiguration.HeightMapSideLength ||
+                scanPosition.Y < 0 || scanPosition.Y >= myMapGenerationConfiguration.HeightMapSideLength)
                 {
                     continue;
                 }
 
                 IVector2 scanIntegerPosition = new IVector2(scanPosition);
-                if (mySegments![scanIntegerPosition.X + scanIntegerPosition.Y * myConfiguration.HeightMapSideLength] is null)
+                if (mySegments![scanIntegerPosition.X + scanIntegerPosition.Y * myMapGenerationConfiguration.HeightMapSideLength] is null)
                 {
-                    Segment newSegment = new Segment(scanPosition, myConfiguration, myShaderBuffers);
-                    mySegments![scanIntegerPosition.X + scanIntegerPosition.Y * myConfiguration.HeightMapSideLength] = newSegment;
+                    Segment newSegment = new Segment(scanPosition, myMapGenerationConfiguration, myShaderBuffers);
+                    mySegments![scanIntegerPosition.X + scanIntegerPosition.Y * myMapGenerationConfiguration.HeightMapSideLength] = newSegment;
                     plate.Segments.Add(newSegment);
                     newSegment.Parent = plate;
                     plate.Recenter();
                     newSegment.Float();
-                    heatMap[scanIntegerPosition.X + scanIntegerPosition.Y * myConfiguration.HeightMapSideLength] += generationCooling;
+                    heatMap[scanIntegerPosition.X + scanIntegerPosition.Y * myMapGenerationConfiguration.HeightMapSideLength] += generationCooling;
                 }
             }
         }
@@ -230,7 +233,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     private unsafe void UpdateHeightMap()
     {
-        uint heightMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint heightMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
         uint heightMapBufferSize = heightMapSize * sizeof(float);
         float[] heightMap = new float[heightMapSize];
         for (int segment = 0; segment < mySegments!.Length; segment++)

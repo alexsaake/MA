@@ -1,5 +1,6 @@
 ﻿using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Config;
+using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;
@@ -11,7 +12,7 @@ internal class Segment
 {
     private const float Growth = 0.05f;
 
-    private readonly IConfiguration myConfiguration;
+    private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IShaderBuffers myShaderBuffers;
 
     public Plate? Parent { get; set; }
@@ -25,11 +26,11 @@ internal class Segment
     public bool IsAlive { get; set; } = true;
     public bool IsColliding { get; set; } = false;
 
-    public Segment(uint x, uint y, IConfiguration configuration, IShaderBuffers shaderBuffers) : this(new Vector2(x, y), configuration, shaderBuffers) { }
+    public Segment(uint x, uint y, IMapGenerationConfiguration mapGenerationConfiguration, IShaderBuffers shaderBuffers) : this(new Vector2(x, y), mapGenerationConfiguration, shaderBuffers) { }
 
-    public Segment(Vector2 position, IConfiguration configuration, IShaderBuffers shaderBuffers)
+    public Segment(Vector2 position, IMapGenerationConfiguration mapGenerationConfiguration, IShaderBuffers shaderBuffers)
     {
-        myConfiguration = configuration;
+        myMapGenerationConfiguration = mapGenerationConfiguration;
         myShaderBuffers = shaderBuffers;
 
         Position = position;
@@ -43,13 +44,13 @@ internal class Segment
         }
 
         IVector2 position = new IVector2(Position);
-        if (position.X < 0 || position.X > myConfiguration.HeightMapSideLength - 1
-            || position.Y < 0 || position.Y > myConfiguration.HeightMapSideLength - 1)
+        if (position.X < 0 || position.X > myMapGenerationConfiguration.HeightMapSideLength - 1
+            || position.Y < 0 || position.Y > myMapGenerationConfiguration.HeightMapSideLength - 1)
         {
             return;
         }
         float[] heatMap = ReadHeatMap();
-        float heatValue = heatMap[position.X + position.Y * myConfiguration.HeightMapSideLength];
+        float heatValue = heatMap[position.X + position.Y * myMapGenerationConfiguration.HeightMapSideLength];
 
         float rate = Growth * (1.0f - heatValue);
         float G = rate * (1.0f - heatValue - Density * Thickness);
@@ -65,7 +66,7 @@ internal class Segment
 
     private unsafe float[] ReadHeatMap()
     {
-        uint heatMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint heatMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
         uint heatMapBufferSize = heatMapSize * sizeof(float);
         float[] heatMap = new float[heatMapSize];
         Rlgl.MemoryBarrier();

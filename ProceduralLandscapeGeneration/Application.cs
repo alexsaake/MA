@@ -10,16 +10,18 @@ namespace ProceduralLandscapeGeneration;
 internal class Application : IApplication
 {
     private readonly IConfiguration myConfiguration;
+    private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IConfigurationGUI myConfigurationGUI;
     private readonly IErosionSimulator myErosionSimulator;
     private readonly ILifetimeScope myLifetimeScope;
-    private IRenderer myRenderer;
+    private IRenderer? myRenderer;
 
     private bool myIsResetRequired;
 
-    public Application(IConfiguration configuration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
+    public Application(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
     {
         myConfiguration = configuration;
+        myMapGenerationConfiguration = mapGenerationConfiguration;
         myConfigurationGUI = configurationGUI;
         myErosionSimulator = erosionSimulator;
         myLifetimeScope = lifetimeScope;
@@ -28,7 +30,7 @@ internal class Application : IApplication
 
     private void ResolveModules()
     {
-        myRenderer = myLifetimeScope.ResolveKeyed<IRenderer>(myConfiguration.MeshCreation);
+        myRenderer = myLifetimeScope.ResolveKeyed<IRenderer>(myMapGenerationConfiguration.MeshCreation);
     }
 
     public void Run()
@@ -36,10 +38,11 @@ internal class Application : IApplication
         Raylib.InitWindow(myConfiguration.ScreenWidth, myConfiguration.ScreenHeight, "Procedural Landscape Generation");
 
         myConfiguration.ResetRequired += OnResetRequired;
+        myMapGenerationConfiguration.ResetRequired += OnResetRequired;
 
         InitializeModules();
 
-        Rlgl.SetClipPlanes(5, myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength);
+        Rlgl.SetClipPlanes(5, myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength);
         Raylib.SetTargetFPS(60);
 
         while (!Raylib.WindowShouldClose())
@@ -73,16 +76,17 @@ internal class Application : IApplication
                 myErosionSimulator.SimulatePlateTectonics();
             }
 
-            myRenderer.Update();
+            myRenderer!.Update();
 
             Raylib.BeginDrawing();
-                Raylib.ClearBackground(Color.SkyBlue);
-                myRenderer.Draw();
-                myConfigurationGUI.Draw();
+            Raylib.ClearBackground(Color.SkyBlue);
+            myRenderer.Draw();
+            myConfigurationGUI.Draw();
             Raylib.EndDrawing();
         }
 
         myConfiguration.ResetRequired -= OnResetRequired;
+        myMapGenerationConfiguration.ResetRequired -= OnResetRequired;
 
         DisposeModules();
 
@@ -93,7 +97,7 @@ internal class Application : IApplication
     {
         myConfiguration.Initialize();
         myErosionSimulator.Initialize();
-        myRenderer.Initialize();
+        myRenderer!.Initialize();
     }
 
     private void OnResetRequired(object? sender, EventArgs e)
@@ -103,8 +107,8 @@ internal class Application : IApplication
 
     private void DisposeModules()
     {
-        myRenderer.Dispose();
+        myRenderer!.Dispose();
         myErosionSimulator.Dispose();
-        myConfiguration.Dispose();
+        myMapGenerationConfiguration.Dispose();
     }
 }

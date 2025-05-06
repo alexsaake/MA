@@ -1,9 +1,8 @@
-﻿namespace ProceduralLandscapeGeneration.Config;
+﻿namespace ProceduralLandscapeGeneration.Config.ShaderBuffers;
 
 internal struct HeightMapParametersShaderBuffer
 {
     public uint Seed;
-    public uint SideLength;
     public float Scale;
     public uint Octaves;
     public float Persistence;

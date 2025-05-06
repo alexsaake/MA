@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Config;
+using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.Simulation.CPU.PlateTectonics;
 using ProceduralLandscapeGeneration.Simulation.GPU.Grid;
 using ProceduralLandscapeGeneration.Simulation.GPU.Shaders;
@@ -11,6 +12,7 @@ namespace ProceduralLandscapeGeneration.Simulation.GPU;
 internal class ErosionSimulator : IErosionSimulator
 {
     private readonly IConfiguration myConfiguration;
+    private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly ILifetimeScope myLifetimeScope;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
     private readonly IGridErosion myGridErosion;
@@ -26,9 +28,10 @@ internal class ErosionSimulator : IErosionSimulator
 
     private bool myIsDisposed;
 
-    public ErosionSimulator(IConfiguration configuration, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory, IGridErosion gridErosion, IParticleErosion particleErosion, IShaderBuffers shaderBuffers, IPlateTectonicsHeightMapGenerator plateTectonicsHeightMapGenerator)
+    public ErosionSimulator(IConfiguration configuration,IMapGenerationConfiguration mapGenerationConfiguration, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory, IGridErosion gridErosion, IParticleErosion particleErosion, IShaderBuffers shaderBuffers, IPlateTectonicsHeightMapGenerator plateTectonicsHeightMapGenerator)
     {
         myConfiguration = configuration;
+        myMapGenerationConfiguration = mapGenerationConfiguration;
         myLifetimeScope = lifetimeScope;
         myComputeShaderProgramFactory = computeShaderProgramFactory;
         myGridErosion = gridErosion;
@@ -42,7 +45,7 @@ internal class ErosionSimulator : IErosionSimulator
         myConfiguration.ThermalErosionConfigurationChanged += OnThermalErosionConfigurationChanged;
 
         myHeightMapGenerator = myLifetimeScope.ResolveKeyed<IHeightMapGenerator>(myConfiguration.HeightMapGeneration);
-        switch (myConfiguration.MapGeneration)
+        switch (myMapGenerationConfiguration.MapGeneration)
         {
             case MapGenerationTypes.Noise:
                 myHeightMapGenerator.GenerateNoiseHeightMap();
@@ -95,11 +98,11 @@ internal class ErosionSimulator : IErosionSimulator
     {
         Console.WriteLine($"INFO: Simulating thermal erosion on each cell of the height map.");
 
-        uint mapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
 
         Rlgl.EnableShader(myThermalErosionSimulationComputeShaderProgram!.Id);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.Configuration], 2);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
         Rlgl.BindShaderBuffer(myThermalErosionConfigurationShaderBufferId, 3);
         Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
         Rlgl.DisableShader();
@@ -130,7 +133,7 @@ internal class ErosionSimulator : IErosionSimulator
         //{
         if (myConfiguration.IsRainAdded)
         {
-            myGridErosion.AddRain(myConfiguration.WaterIncrease);
+            myGridErosion.AddRain();
         }
         myGridErosion.Flow();
         myGridErosion.VelocityMap();

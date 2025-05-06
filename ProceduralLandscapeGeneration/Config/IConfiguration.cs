@@ -1,18 +1,10 @@
-﻿using Raylib_cs;
+﻿using ProceduralLandscapeGeneration.Config.Types;
 
 namespace ProceduralLandscapeGeneration.Config;
 
 internal interface IConfiguration : IDisposable
 {
-    MapGenerationTypes MapGeneration { get; set; }
     ProcessorTypes HeightMapGeneration { get; set; }
-    ProcessorTypes MeshCreation { get; set; }
-
-    uint HeightMapSideLength { get; set; }
-    uint HeightMultiplier { get; set; }
-    float SeaLevel { get; set; }
-    CameraMode CameraMode { get; set; }
-    bool IsColorEnabled { get; set; }
 
     int Seed { get; set; }
     float NoiseScale { get; set; }
@@ -34,28 +26,10 @@ internal interface IConfiguration : IDisposable
     int ScreenWidth { get; set; }
     int ShadowMapResolution { get; set; }
 
-    bool IsWaterDisplayed { get; set; }
-    bool IsSedimentDisplayed { get; set; }
     bool IsRainAdded { get; set; }
 
-    float WaterIncrease { get; set; }
-    float TimeDelta { get; set; }
-    float CellSizeX { get; set; }
-    float CellSizeY { get; set; }
-    float Gravity { get; set; }
-    float Friction { get; set; }
-    float MaximalErosionDepth { get; set; }
-    float SedimentCapacity { get; set; }
-    float SuspensionRate { get; set; }
-    float DepositionRate { get; set; }
-    float SedimentSofteningRate { get; set; }
-    float EvaporationRate { get; set; }
-
     void Initialize();
-    uint GetIndex(uint x, uint y);
 
     event EventHandler? ResetRequired;
-    event EventHandler? ErosionConfigurationChanged;
     event EventHandler? ThermalErosionConfigurationChanged;
-    event EventHandler? GridErosionConfigurationChanged;
 }

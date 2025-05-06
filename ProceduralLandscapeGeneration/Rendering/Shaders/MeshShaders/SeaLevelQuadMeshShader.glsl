@@ -22,16 +22,16 @@ layout(std430, binding = 1) readonly restrict buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-struct Configuration
+struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     float SeaLevel;
     float IsColorEnabled;
 };
 
-layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
+layout(std430, binding = 2) readonly restrict buffer MapGenerationConfigurationShaderBuffer
 {
-    Configuration configuration;
+    MapGenerationConfiguration mapGenerationConfiguration;
 };
 
 uniform mat4 mvp;
@@ -40,7 +40,7 @@ vec4 oceanColor = vec4(0, 0.4, 0.8, 0.5);
 
 void addVertex(uint vertex, uint x, uint y)
 {
-    float waterHeight = configuration.SeaLevel * configuration.HeightMultiplier;
+    float waterHeight = mapGenerationConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     vec4 position = mvp * vec4(x, y, waterHeight, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;

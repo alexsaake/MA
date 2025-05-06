@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.Config;
+﻿namespace ProceduralLandscapeGeneration.Config.ShaderBuffers;
 
 public struct GridErosionConfigurationShaderBuffer
 {

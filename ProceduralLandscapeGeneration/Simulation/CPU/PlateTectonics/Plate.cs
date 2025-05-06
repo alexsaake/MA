@@ -1,5 +1,6 @@
 ﻿using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Config;
+using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;
@@ -12,7 +13,7 @@ internal class Plate
     private const float Convection = 10.0f;
     private const float Growth = 0.05f;
 
-    private IConfiguration myConfiguration;
+    private IMapGenerationConfiguration myMapGenerationConfiguration;
     private IShaderBuffers myShaderBuffers;
 
     public Vector2 Position { get; private set; }
@@ -25,9 +26,9 @@ internal class Plate
 
     public List<Segment> Segments { get; private set; }
 
-    public Plate(Vector2 position, IConfiguration configuration, IShaderBuffers shaderBuffers)
+    public Plate(Vector2 position, IMapGenerationConfiguration mapGenerationConfiguration, IShaderBuffers shaderBuffers)
     {
-        myConfiguration = configuration;
+        myMapGenerationConfiguration = mapGenerationConfiguration;
         myShaderBuffers = shaderBuffers;
 
         Position = position;
@@ -111,7 +112,7 @@ internal class Plate
 
     private unsafe float[] ReadHeatMap()
     {
-        uint heatMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint heatMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
         uint heatMapBufferSize = heatMapSize * sizeof(float);
         float[] heatMap = new float[heatMapSize];
         Rlgl.MemoryBarrier();
@@ -129,8 +130,8 @@ internal class Plate
         {
             IVector2 segmentPosition = new IVector2(Segments[segment].Position);
 
-            if (segmentPosition.X >= myConfiguration.HeightMapSideLength || segmentPosition.X < 0 ||
-                segmentPosition.Y >= myConfiguration.HeightMapSideLength || segmentPosition.Y < 0)
+            if (segmentPosition.X >= myMapGenerationConfiguration.HeightMapSideLength || segmentPosition.X < 0 ||
+                segmentPosition.Y >= myMapGenerationConfiguration.HeightMapSideLength || segmentPosition.Y < 0)
             {
                 Segments[segment].IsAlive = false;
                 continue;
@@ -143,13 +144,13 @@ internal class Plate
                 for (int x = -1; x <= 1; x++)
                 {
                     IVector2 scanPosition = new IVector2(x, y) + segmentPosition;
-                    if (scanPosition.X >= myConfiguration.HeightMapSideLength || scanPosition.X < 0 ||
-                        scanPosition.Y >= myConfiguration.HeightMapSideLength || scanPosition.Y < 0)
+                    if (scanPosition.X >= myMapGenerationConfiguration.HeightMapSideLength || scanPosition.X < 0 ||
+                        scanPosition.Y >= myMapGenerationConfiguration.HeightMapSideLength || scanPosition.Y < 0)
                     {
                         continue;
                     }
 
-                    Segment? collidingSegment = allSegments[scanPosition.X + scanPosition.Y * myConfiguration.HeightMapSideLength];
+                    Segment? collidingSegment = allSegments[scanPosition.X + scanPosition.Y * myMapGenerationConfiguration.HeightMapSideLength];
                     if (collidingSegment is null)
                     {
                         continue;
@@ -172,7 +173,7 @@ internal class Plate
 
                         collidingSegment.IsColliding = true;
                         Segments[segment].IsAlive = false;
-                        heatMap[scanPosition.X + scanPosition.Y * myConfiguration.HeightMapSideLength] += subductionHeating;
+                        heatMap[scanPosition.X + scanPosition.Y * myMapGenerationConfiguration.HeightMapSideLength] += subductionHeating;
                     }
                 }
             }
@@ -189,7 +190,7 @@ internal class Plate
             }
 
             IVector2 position = new IVector2(Segments[segment].Position);
-            float nd = heatMap[position.X + position.Y * myConfiguration.HeightMapSideLength];              //Heat Value!
+            float nd = heatMap[position.X + position.Y * myMapGenerationConfiguration.HeightMapSideLength];              //Heat Value!
 
 
             //LINEAR GROWTH RATE [m / s]
@@ -258,17 +259,17 @@ internal class Plate
         float fx = 0.0f;
         float fy = 0.0f;
 
-        if (position.X > 0 && position.X < myConfiguration.HeightMapSideLength - 2 && position.Y > 0 && position.Y < myConfiguration.HeightMapSideLength - 2)
+        if (position.X > 0 && position.X < myMapGenerationConfiguration.HeightMapSideLength - 2 && position.Y > 0 && position.Y < myMapGenerationConfiguration.HeightMapSideLength - 2)
         {
-            fx = (heatMap[position.X + 1 + position.Y * myConfiguration.HeightMapSideLength] - heatMap[position.X - 1 + position.Y * myConfiguration.HeightMapSideLength]) / 2.0f;
-            fy = -(heatMap[position.X + (position.Y + 1) * myConfiguration.HeightMapSideLength] - heatMap[position.X + (position.Y - 1) * myConfiguration.HeightMapSideLength]) / 2.0f;
+            fx = (heatMap[position.X + 1 + position.Y * myMapGenerationConfiguration.HeightMapSideLength] - heatMap[position.X - 1 + position.Y * myMapGenerationConfiguration.HeightMapSideLength]) / 2.0f;
+            fy = -(heatMap[position.X + (position.Y + 1) * myMapGenerationConfiguration.HeightMapSideLength] - heatMap[position.X + (position.Y - 1) * myMapGenerationConfiguration.HeightMapSideLength]) / 2.0f;
         }
 
         //Out-of-Bounds
         if (position.X <= 0) fx = 0.0f;
-        else if (position.X >= myConfiguration.HeightMapSideLength - 1) fx = -0.0f;
+        else if (position.X >= myMapGenerationConfiguration.HeightMapSideLength - 1) fx = -0.0f;
         if (position.Y <= 0) fy = 0.0f;
-        else if (position.Y >= myConfiguration.HeightMapSideLength - 1) fy = -0.0f;
+        else if (position.Y >= myMapGenerationConfiguration.HeightMapSideLength - 1) fy = -0.0f;
 
         return new Vector2(fx, fy);
     }
@@ -288,7 +289,7 @@ internal class Plate
 
     private unsafe void WriteHeatMap(float[] heatMap)
     {
-        uint heatMapSize = myConfiguration.HeightMapSideLength * myConfiguration.HeightMapSideLength;
+        uint heatMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
         uint heatMapBufferSize = heatMapSize * sizeof(float);
         fixed (float* heatMapPointer = heatMap)
         {

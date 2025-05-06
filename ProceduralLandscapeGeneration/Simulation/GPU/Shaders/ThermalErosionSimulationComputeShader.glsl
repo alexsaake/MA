@@ -7,16 +7,16 @@ layout(std430, binding = 1) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-struct Configuration
+struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     float SeaLevel;
     float IsColorEnabled;
 };
 
-layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
+layout(std430, binding = 2) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
-    Configuration configuration;
+    MapGenerationConfiguration mapGenerationConfiguration;
 };
 
 struct ThermalErosionConfiguration
@@ -62,8 +62,8 @@ vec3 getScaledNormal(uint x, uint y)
     float b = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    configuration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
-    configuration.HeightMultiplier * -(lt - lb + 2 * (t - b) + rt - rb),
+    mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
+    mapGenerationConfiguration.HeightMultiplier * -(lt - lb + 2 * (t - b) + rt - rb),
     1.0);
 
     return normalize(normal);
@@ -132,8 +132,8 @@ void main()
     {
         return;
     }
-    float neighborHeight = heightMap[neighborIndex] * configuration.HeightMultiplier;
-    float zDiff = heightMap[id] * configuration.HeightMultiplier - neighborHeight;
+    float neighborHeight = heightMap[neighborIndex] * mapGenerationConfiguration.HeightMultiplier;
+    float zDiff = heightMap[id] * mapGenerationConfiguration.HeightMultiplier - neighborHeight;
 
     if (zDiff > thermalErosionConfiguration.TangensThresholdAngle)
     {

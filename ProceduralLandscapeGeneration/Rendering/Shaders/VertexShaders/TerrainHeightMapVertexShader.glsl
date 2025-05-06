@@ -5,16 +5,16 @@ layout(std430, binding = 1) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-struct Configuration
+struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     float SeaLevel;
     float IsColorEnabled;
 };
 
-layout(std430, binding = 2) readonly restrict buffer configurationShaderBuffer
+layout(std430, binding = 2) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
-    Configuration configuration;
+    MapGenerationConfiguration mapGenerationConfiguration;
 };
 
 uint myHeightMapSideLength;
@@ -42,8 +42,8 @@ vec3 getScaledNormal(uint x, uint y)
     float b = heightMap[getIndex(x, y - 1)];
 
     vec3 normal = vec3(
-    configuration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
-    configuration.HeightMultiplier * -(lt - lb + 2 * (t - b) + rt - rb),
+    mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
+    mapGenerationConfiguration.HeightMultiplier * -(lt - lb + 2 * (t - b) + rt - rb),
     1.0);
 
     return normalize(normal);
@@ -76,13 +76,13 @@ void main()
     uint y = index / myHeightMapSideLength;
 
     float height = heightMap[index];
-    float terrainHeight = height * configuration.HeightMultiplier;
-    float seaLevelHeight = configuration.SeaLevel * configuration.HeightMultiplier;
+    float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
+    float seaLevelHeight = mapGenerationConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     fragPosition = vec3(matModel * vec4(vertexPosition.xy, terrainHeight, 1.0));
     vec3 normal = getScaledNormal(x, y);
     fragNormal = transpose(inverse(mat3(matModel))) * normal;
     vec3 terrainColor = vec3(1.0);
-    if(configuration.IsColorEnabled == 1)
+    if(mapGenerationConfiguration.IsColorEnabled == 1)
     {
         if(terrainHeight < seaLevelHeight + 0.3)
         {
