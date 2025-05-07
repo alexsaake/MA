@@ -2,7 +2,9 @@
 using ProceduralLandscapeGeneration.Config.Particles;
 using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.Simulation.GPU.ComputeShaders;
+using ProceduralLandscapeGeneration.Simulation.GPU.Particles;
 using Raylib_cs;
+using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Simulation.GPU.Particle;
 
@@ -10,6 +12,7 @@ internal class ParticleErosion : IParticleErosion
 {
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
+    private readonly IParticleHydraulicErosionConfiguration myParticleHydraulicErosionConfiguration;
     private readonly IParticleWindErosionConfiguration myParticleWindErosionConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
     private readonly IShaderBuffers myShaderBuffers;
@@ -22,10 +25,11 @@ internal class ParticleErosion : IParticleErosion
     private uint myHeightMapIndicesShaderBufferSize;
     private bool myIsDisposed;
 
-    public ParticleErosion(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers, IRandom random)
+    public ParticleErosion(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers, IRandom random)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
+        myParticleHydraulicErosionConfiguration = particleHydraulicErosionConfiguration;
         myParticleWindErosionConfiguration = particleWindErosionConfiguration;
         myComputeShaderProgramFactory = computeShaderProgramFactory;
         myShaderBuffers = shaderBuffers;
@@ -34,40 +38,85 @@ internal class ParticleErosion : IParticleErosion
 
     public unsafe void Initialize()
     {
+        myParticleHydraulicErosionConfiguration.ParticlesChanged += OnParticlesChangedChanged;
+
         myHydraulicErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Particles/Shaders/HydraulicErosionSimulationComputeShader.glsl");
         myWindErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Particles/Shaders/WindErosionSimulationComputeShader.glsl");
 
-        myHeightMapIndicesShaderBufferSize = myConfiguration.SimulationIterations * sizeof(uint);
+        myHeightMapIndicesShaderBufferSize = myParticleHydraulicErosionConfiguration.Particles * sizeof(uint);
         myHeightMapIndicesShaderBufferId = Rlgl.LoadShaderBuffer(myHeightMapIndicesShaderBufferSize, null, Rlgl.DYNAMIC_COPY);
+
+        AddParticlesHydraulicErosionShaderBuffer();
+        myHydraulicErosionAge = myParticleHydraulicErosionConfiguration.MaxAge;
 
         myIsDisposed = false;
     }
 
+    private unsafe void AddParticlesHydraulicErosionShaderBuffer()
+    {
+        myShaderBuffers.Add(ShaderBufferTypes.ParticlesHydraulicErosion, (uint)(myParticleHydraulicErosionConfiguration.Particles * sizeof(ParticleHydraulicErosionShaderBuffer)));
+    }
+
+    private void OnParticlesChangedChanged(object? sender, EventArgs e)
+    {
+        RemoveParticlesHydraulicErosionShaderBuffer();
+        AddParticlesHydraulicErosionShaderBuffer();
+        myHydraulicErosionAge = myParticleHydraulicErosionConfiguration.MaxAge;
+    }
+
+    private uint myHydraulicErosionAge;
     public void SimulateHydraulicErosion()
     {
-        CreateRandomIndices();
+        if (myConfiguration.IsRainAdded
+            && myHydraulicErosionAge == myParticleHydraulicErosionConfiguration.MaxAge)
+        {
+            CreateParticles();
+            myHydraulicErosionAge = 0;
+        }
 
         Rlgl.EnableShader(myHydraulicErosionParticleSimulationComputeShaderProgram!.Id);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-        Rlgl.BindShaderBuffer(myHeightMapIndicesShaderBufferId, 2);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 3);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleHydraulicErosionConfiguration], 4);
-        Rlgl.ComputeShaderDispatch(myConfiguration.SimulationIterations / 64, 1, 1);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleHydraulicErosionConfiguration], 3);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticlesHydraulicErosion], 4);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myParticleHydraulicErosionConfiguration.Particles / 64f), 1, 1);
         Rlgl.DisableShader();
+
+        myHydraulicErosionAge++;
     }
 
-    private unsafe void CreateRandomIndices()
+    private unsafe void CreateParticles()
     {
-        uint heightMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        uint[] randomHeightMapIndices = new uint[myConfiguration.SimulationIterations];
-        for (uint i = 0; i < myConfiguration.SimulationIterations; i++)
+        uint particleCount = myParticleHydraulicErosionConfiguration.Particles;
+
+        ParticleHydraulicErosionShaderBuffer[] particlesHydraulicErosion = new ParticleHydraulicErosionShaderBuffer[particleCount];
+        Rlgl.MemoryBarrier();
+        fixed (void* particlesHydraulicErosionPointer = particlesHydraulicErosion)
         {
-            randomHeightMapIndices[i] = (uint)myRandom.Next((int)heightMapSize);
+            Rlgl.ReadShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticlesHydraulicErosion], particlesHydraulicErosionPointer, particleCount * (uint)sizeof(ParticleHydraulicErosionShaderBuffer), 0);
         }
-        fixed (uint* randomHeightMapIndicesPointer = randomHeightMapIndices)
+
+        for(int particle = 0; particle < particleCount; particle++)
         {
-            Rlgl.UpdateShaderBuffer(myHeightMapIndicesShaderBufferId, randomHeightMapIndicesPointer, myHeightMapIndicesShaderBufferSize, 0);
+            if (particlesHydraulicErosion[particle].Age > myParticleHydraulicErosionConfiguration.MaxAge
+                || particlesHydraulicErosion[particle].Volume == 0)
+            {
+                particlesHydraulicErosion[particle] = new ParticleHydraulicErosionShaderBuffer()
+                {
+                    Age = 0,
+                    Volume = myParticleHydraulicErosionConfiguration.WaterIncrease,
+                    Sediment = 0,
+                    Position = new Vector2(myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength), myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength)),
+                    Speed = Vector2.Zero
+                };
+            }
         }
+
+        fixed (void* particlesHydraulicErosionPointer = particlesHydraulicErosion)
+        {
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticlesHydraulicErosion], particlesHydraulicErosionPointer, particleCount * (uint)sizeof(ParticleHydraulicErosionShaderBuffer), 0);
+        }
+        Rlgl.MemoryBarrier();
     }
 
     public void SimulateWindErosion()
@@ -84,14 +133,14 @@ internal class ParticleErosion : IParticleErosion
         Rlgl.BindShaderBuffer(myHeightMapIndicesShaderBufferId, 2);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 3);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleWindErosionConfiguration], 4);
-        Rlgl.ComputeShaderDispatch(myConfiguration.SimulationIterations / 64, 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myParticleHydraulicErosionConfiguration.Particles / 64f), 1, 1);
         Rlgl.DisableShader();
     }
 
     private unsafe void CreateRandomIndicesAlongBorder()
     {
-        uint[] randomHeightMapIndices = new uint[myConfiguration.SimulationIterations];
-        for (uint i = 0; i < myConfiguration.SimulationIterations; i++)
+        uint[] randomHeightMapIndices = new uint[myParticleHydraulicErosionConfiguration.Particles];
+        for (uint i = 0; i < myParticleHydraulicErosionConfiguration.Particles; i++)
         {
             if (myParticleWindErosionConfiguration.PersistentSpeed.X == 0)
             {
@@ -174,10 +223,20 @@ internal class ParticleErosion : IParticleErosion
             return;
         }
 
+        myParticleHydraulicErosionConfiguration.ParticlesChanged -= OnParticlesChangedChanged;
+
         Rlgl.UnloadShaderBuffer(myHeightMapIndicesShaderBufferId);
+
+        RemoveParticlesHydraulicErosionShaderBuffer();
+
         myHydraulicErosionParticleSimulationComputeShaderProgram?.Dispose();
         myWindErosionParticleSimulationComputeShaderProgram?.Dispose();
 
         myIsDisposed = true;
+    }
+    private void RemoveParticlesHydraulicErosionShaderBuffer()
+    {
+        Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticlesHydraulicErosion]);
+        myShaderBuffers.Remove(ShaderBufferTypes.ParticlesHydraulicErosion);
     }
 }

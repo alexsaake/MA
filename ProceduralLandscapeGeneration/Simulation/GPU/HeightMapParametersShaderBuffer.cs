@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.Config.ShaderBuffers;
+﻿namespace ProceduralLandscapeGeneration.Simulation.GPU;
 
 internal struct HeightMapParametersShaderBuffer
 {

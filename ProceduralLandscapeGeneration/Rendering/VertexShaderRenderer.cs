@@ -188,19 +188,20 @@ internal class VertexShaderRenderer : IRenderer
     public void Draw()
     {
         Raylib.BeginMode3D(myCamera);
-            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
-            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints], 3);
-            DrawTerrainHeightMap(myTerrainHeightMapShader);
-            if (myGridErosionConfiguration.IsWaterDisplayed)
-            {
-                Raylib.DrawModel(myWaterHeightMap, Vector3.Zero, 1.0f, Color.White);
-            }
-            if (myGridErosionConfiguration.IsSedimentDisplayed)
-            {
-                Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
-            }
-            Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints], 3);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticlesHydraulicErosion], 4);
+        DrawTerrainHeightMap(myTerrainHeightMapShader);
+        if (myConfiguration.IsWaterDisplayed)
+        {
+            Raylib.DrawModel(myWaterHeightMap, Vector3.Zero, 1.0f, Color.White);
+        }
+        if (myConfiguration.IsSedimentDisplayed)
+        {
+            Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
+        }
+        Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
         Raylib.EndMode3D();
     }
 

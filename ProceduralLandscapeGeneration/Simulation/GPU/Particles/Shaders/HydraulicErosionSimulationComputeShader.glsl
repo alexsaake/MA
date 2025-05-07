@@ -7,11 +7,6 @@ layout(std430, binding = 1) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-layout(std430, binding = 2) readonly restrict buffer heightMapIndicesShaderBuffer
-{
-    uint[] heightMapIndices;
-};
-
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
@@ -19,7 +14,7 @@ struct MapGenerationConfiguration
     bool IsColorEnabled;
 };
 
-layout(std430, binding = 3) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+layout(std430, binding = 2) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
     MapGenerationConfiguration mapGenerationConfiguration;
 };
@@ -30,14 +25,29 @@ struct ParticleHydraulicErosionConfiguration
     float EvaporationRate;
     float DepositionRate;
     float MinimumVolume;
+    float MaximalErosionDepth;
     float Gravity;
     float MaxDiff;
     float Settling;
 };
 
-layout(std430, binding = 4) readonly restrict buffer particleHydraulicErosionConfigurationShaderBuffer
+layout(std430, binding = 3) readonly restrict buffer particleHydraulicErosionConfigurationShaderBuffer
 {
     ParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration;
+};
+
+struct ParticleHydraulicErosion
+{
+    int Age;
+    float Volume;
+    float Sediment;
+    vec2 Position;
+    vec2 Speed;
+};
+
+layout(std430, binding = 4) buffer particleHydraulicErosionShaderBuffer
+{
+    ParticleHydraulicErosion[] particlesHydraulicErosion;
 };
 
 uint myHeightMapSideLength;
@@ -58,12 +68,8 @@ bool isOutOfBounds(ivec2 position)
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/water.hpp
-vec2 myPosition;
+ParticleHydraulicErosion myParticleHydraulicErosion;
 vec2 myOriginalPosition;
-vec2 mySpeed;
-int myAge;
-float myVolume;
-float mySediment;
 
 vec3 getScaledNormal(uint x, uint y)
 {
@@ -178,32 +184,35 @@ void Cascade(ivec2 ipos)
 
 bool Move()
 {
-    const ivec2 position = ivec2(myPosition);
+    const ivec2 position = ivec2(myParticleHydraulicErosion.Position);
 
     if(isOutOfBounds(position))
     {
         return false;
     }
 
-    if(myAge > particleHydraulicErosionConfiguration.MaxAge
-    || myVolume < particleHydraulicErosionConfiguration.MinimumVolume)
+    if(myParticleHydraulicErosion.Age > particleHydraulicErosionConfiguration.MaxAge
+    || myParticleHydraulicErosion.Volume < particleHydraulicErosionConfiguration.MinimumVolume
+    || heightMap[getIndexV(position)] <= mapGenerationConfiguration.SeaLevel - particleHydraulicErosionConfiguration.MaximalErosionDepth)
     {
-        heightMap[getIndexV(position)] += mySediment;
+        heightMap[getIndexV(position)] += myParticleHydraulicErosion.Sediment;
+        myParticleHydraulicErosion.Sediment = 0;
+        myParticleHydraulicErosion.Volume = 0;
         Cascade(position);
         return false;
     }
 
     const vec3 normal = getScaledNormal(position.x, position.y);
 
-    mySpeed += particleHydraulicErosionConfiguration.Gravity * normal.xy / myVolume;
+    myParticleHydraulicErosion.Speed += particleHydraulicErosionConfiguration.Gravity * normal.xy / myParticleHydraulicErosion.Volume;
 
-    if(length(mySpeed) > 0)
+    if(length(myParticleHydraulicErosion.Speed) > 0)
     {
-        mySpeed = sqrt(2.0) * normalize(mySpeed);
+        myParticleHydraulicErosion.Speed = sqrt(2.0) * normalize(myParticleHydraulicErosion.Speed);
     }
 
-    myOriginalPosition = myPosition;
-    myPosition += mySpeed;
+    myOriginalPosition = myParticleHydraulicErosion.Position;
+    myParticleHydraulicErosion.Position += myParticleHydraulicErosion.Speed;
 
     return true;
 }
@@ -218,13 +227,13 @@ bool Interact()
     }
 
     float h2;
-    if(isOutOfBounds(ivec2(myPosition)))
+    if(isOutOfBounds(ivec2(myParticleHydraulicErosion.Position)))
     {
         h2 = 0.99f * heightMap[getIndexV(position)];
     }
     else
     {
-        ivec2 currentPosition = ivec2(myPosition);
+        ivec2 currentPosition = ivec2(myParticleHydraulicErosion.Position);
         h2 = heightMap[getIndexV(currentPosition)];
     }
 
@@ -234,7 +243,7 @@ bool Interact()
         cEq = 0;
     }
 
-    float cDiff = (cEq * myVolume - mySediment);
+    float cDiff = (cEq * myParticleHydraulicErosion.Volume - myParticleHydraulicErosion.Sediment);
 
     float effD = particleHydraulicErosionConfiguration.DepositionRate;
     if(effD < 0)
@@ -244,20 +253,20 @@ bool Interact()
 
     if(effD * cDiff < 0)
     {
-        if(effD * cDiff < -mySediment)
+        if(effD * cDiff < -myParticleHydraulicErosion.Sediment)
         {
-            cDiff = -mySediment / effD;
+            cDiff = -myParticleHydraulicErosion.Sediment / effD;
         }
     }
 
-    mySediment += effD * cDiff;
+    myParticleHydraulicErosion.Sediment += effD * cDiff;
     heightMap[getIndexV(position)] -= effD * cDiff;
 
-    myVolume *= (1.0 - particleHydraulicErosionConfiguration.EvaporationRate);
+    myParticleHydraulicErosion.Volume *= (1.0 - particleHydraulicErosionConfiguration.EvaporationRate);
 
     Cascade(position);
 
-    myAge++;
+    myParticleHydraulicErosion.Age++;
 
     return true;
 }
@@ -266,26 +275,17 @@ void main()
 {
     uint id = gl_GlobalInvocationID.x;
     myHeightMapSideLength = uint(sqrt(heightMap.length()));
-
-    uint index = heightMapIndices[id];
-    uint x = index % myHeightMapSideLength;
-    uint y = index / myHeightMapSideLength;
-    myPosition = vec2(x, y);
-    myOriginalPosition = vec2(0.0, 0.0);
-    mySpeed = vec2(0.0, 0.0);
-    myAge = 0;
-    myVolume = 1.0;
-    mySediment = 0.0;
-
-    while(true)
+    if(id >= particlesHydraulicErosion.length())
     {
-        if(!Move())
-        {
-            break;
-        }
-        if(!Interact())
-        {
-            break;
-        }
+        return;
     }
+
+    myParticleHydraulicErosion = particlesHydraulicErosion[id];
+
+    if(Move())
+    {
+        Interact();
+    }
+    
+    particlesHydraulicErosion[id] = myParticleHydraulicErosion;
 }

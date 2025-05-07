@@ -3,10 +3,11 @@
 enum ShaderBufferTypes
 {
     HeightMap,
+    HeatMap,
     GridPoints,
+    ParticlesHydraulicErosion,
     GridErosionConfiguration,
     MapGenerationConfiguration,
-    HeatMap,
     ParticleHydraulicErosionConfiguration,
     ParticleWindErosionConfiguration
 }

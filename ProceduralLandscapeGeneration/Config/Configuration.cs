@@ -27,20 +27,6 @@ internal class Configuration : IConfiguration
         }
     }
 
-    private uint mySimulationIterations;
-    public uint SimulationIterations
-    {
-        get => mySimulationIterations;
-        set
-        {
-            if (mySimulationIterations == value)
-            {
-                return;
-            }
-            mySimulationIterations = value;
-        }
-    }
-
     private int myTalusAngle;
     public int TalusAngle
     {
@@ -78,6 +64,8 @@ internal class Configuration : IConfiguration
     public int ShadowMapResolution { get; set; }
 
     public bool IsRainAdded { get; set; }
+    public bool IsWaterDisplayed { get; set; }
+    public bool IsSedimentDisplayed { get; set; }
 
     public event EventHandler? ResetRequired;
     public event EventHandler? ThermalErosionConfigurationChanged;
@@ -91,8 +79,6 @@ internal class Configuration : IConfiguration
 
         PlateCount = 10;
 
-        SimulationIterations = 100;
-
         TalusAngle = 33;
         ThermalErosionHeightChange = 0.001f;
 
@@ -103,6 +89,8 @@ internal class Configuration : IConfiguration
         ShadowMapResolution = 1028;
 
         IsRainAdded = true;
+        IsWaterDisplayed = true;
+        IsSedimentDisplayed = false;
     }
 
     public void Initialize()

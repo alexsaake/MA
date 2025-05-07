@@ -1,5 +1,4 @@
 ﻿using ProceduralLandscapeGeneration.Config;
-using ProceduralLandscapeGeneration.Config.Grid;
 using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
@@ -9,8 +8,8 @@ namespace ProceduralLandscapeGeneration.Rendering;
 
 internal class MeshShaderRenderer : IRenderer
 {
+    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
-    private readonly IGridErosionConfiguration myGridErosionConfiguration;
     private readonly IShaderBuffers myShaderBuffers;
 
     private Shader myTerrainHeightMapMeshShader;
@@ -23,10 +22,10 @@ internal class MeshShaderRenderer : IRenderer
     private uint myMeshletCount;
     private bool myIsDisposed;
 
-    public MeshShaderRenderer(IMapGenerationConfiguration mapGenerationConfiguration, IGridErosionConfiguration gridErosionConfiguration, IShaderBuffers shaderBuffers)
+    public MeshShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IShaderBuffers shaderBuffers)
     {
+        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
-        myGridErosionConfiguration = gridErosionConfiguration;
         myShaderBuffers = shaderBuffers;
     }
 
@@ -75,42 +74,42 @@ internal class MeshShaderRenderer : IRenderer
     public void Draw()
     {
         Raylib.BeginMode3D(myCamera);
-            if (myGridErosionConfiguration.IsSedimentDisplayed)
-            {
-                Raylib.BeginShaderMode(mySedimentMeshShader);
-                    Rlgl.EnableShader(mySedimentMeshShader.Id);
-                        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-                        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridErosionConfiguration], 2);
-                        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 3);
-                        Raylib.DrawMeshTasks(0, myMeshletCount);
-                    Rlgl.DisableShader();
-                Raylib.EndShaderMode();
-            }
-            Raylib.BeginShaderMode(myTerrainHeightMapMeshShader);
-                Rlgl.EnableShader(myTerrainHeightMapMeshShader.Id);
-                    Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-                    Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
-                    Raylib.DrawMeshTasks(0, myMeshletCount);
-                Rlgl.DisableShader();
+        if (myConfiguration.IsSedimentDisplayed)
+        {
+            Raylib.BeginShaderMode(mySedimentMeshShader);
+            Rlgl.EnableShader(mySedimentMeshShader.Id);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridErosionConfiguration], 2);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 3);
+            Raylib.DrawMeshTasks(0, myMeshletCount);
+            Rlgl.DisableShader();
             Raylib.EndShaderMode();
-            if (myGridErosionConfiguration.IsWaterDisplayed)
-            {
-                Raylib.BeginShaderMode(myWaterHeightMapMeshShader);
-                    Rlgl.EnableShader(myWaterHeightMapMeshShader.Id);
-                        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-                        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridErosionConfiguration], 2);
-                        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 3);
-                        Raylib.DrawMeshTasks(0, myMeshletCount);
-                    Rlgl.DisableShader();
-                Raylib.EndShaderMode();
-            }
-            Raylib.BeginShaderMode(mySeaLevelQuadMeshShader);
-                Rlgl.EnableShader(mySeaLevelQuadMeshShader.Id);
-                    Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-                    Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
-                    Raylib.DrawMeshTasks(0, 1);
-                Rlgl.DisableShader();
+        }
+        Raylib.BeginShaderMode(myTerrainHeightMapMeshShader);
+        Rlgl.EnableShader(myTerrainHeightMapMeshShader.Id);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
+        Raylib.DrawMeshTasks(0, myMeshletCount);
+        Rlgl.DisableShader();
+        Raylib.EndShaderMode();
+        if (myConfiguration.IsWaterDisplayed)
+        {
+            Raylib.BeginShaderMode(myWaterHeightMapMeshShader);
+            Rlgl.EnableShader(myWaterHeightMapMeshShader.Id);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridErosionConfiguration], 2);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 3);
+            Raylib.DrawMeshTasks(0, myMeshletCount);
+            Rlgl.DisableShader();
             Raylib.EndShaderMode();
+        }
+        Raylib.BeginShaderMode(mySeaLevelQuadMeshShader);
+        Rlgl.EnableShader(mySeaLevelQuadMeshShader.Id);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
+        Raylib.DrawMeshTasks(0, 1);
+        Rlgl.DisableShader();
+        Raylib.EndShaderMode();
         Raylib.EndMode3D();
     }
 

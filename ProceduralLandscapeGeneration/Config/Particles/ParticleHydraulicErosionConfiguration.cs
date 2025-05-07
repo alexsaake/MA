@@ -11,6 +11,23 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
 
     private bool myIsDisposed;
 
+    private uint myParticles;
+    public uint Particles
+    {
+        get => myParticles;
+        set
+        {
+            if (myParticles == value)
+            {
+                return;
+            }
+            myParticles = value;
+            ParticlesChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public float WaterIncrease { get; set; }
+
     private uint myMaxAge;
     public uint MaxAge
     {
@@ -71,6 +88,21 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
         }
     }
 
+    private float myMaximalErosionDepth;
+    public float MaximalErosionDepth
+    {
+        get => myMaximalErosionDepth;
+        set
+        {
+            if (myMaximalErosionDepth == value)
+            {
+                return;
+            }
+            myMaximalErosionDepth = value;
+            UpdateShaderBuffer();
+        }
+    }
+
     private float myGravity;
     public float Gravity
     {
@@ -116,15 +148,20 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
         }
     }
 
+    public event EventHandler<EventArgs>? ParticlesChanged;
+
     public ParticleHydraulicErosionConfiguration(IShaderBuffers shaderBuffers)
     {
         myShaderBuffers = shaderBuffers;
 
-        myMaxAge = 1024;
+        Particles = 10000;
+        WaterIncrease = 0.1f;
+        myMaxAge = 64;
         myEvaporationRate = 0.001f;
         myDepositionRate = 0.05f;
         myMinimumVolume = 0.001f;
-        myGravity = 2.0f;
+        myMaximalErosionDepth = 0.5f;
+        myGravity = 9.81f;
         myMaxDiff = 0.8f;
         mySettling = 1.0f;
     }
@@ -148,6 +185,7 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
             EvaporationRate = EvaporationRate,
             DepositionRate = DepositionRate,
             MinimumVolume = MinimumVolume,
+            MaximalErosionDepth = MaximalErosionDepth,
             Gravity = Gravity,
             MaxDiff = MaxDiff,
             Settling = Settling

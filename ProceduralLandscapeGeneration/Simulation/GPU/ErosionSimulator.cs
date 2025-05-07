@@ -92,7 +92,7 @@ internal class ErosionSimulator : IErosionSimulator
         myParticleErosion.SimulateHydraulicErosion();
 
         ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-        Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
+        Console.WriteLine($"INFO: End of simulation.");
     }
 
     public void SimulateThermalErosion()
@@ -119,7 +119,7 @@ internal class ErosionSimulator : IErosionSimulator
         myParticleErosion.SimulateWindErosion();
 
         ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-        Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
+        Console.WriteLine($"INFO: End of simulation.");
     }
 
     public void SimulateHydraulicErosionGrid()
@@ -130,8 +130,6 @@ internal class ErosionSimulator : IErosionSimulator
 
         Console.WriteLine($"INFO: Simulating hydraulic erosion grid.");
 
-        //for (uint i = 0; i < myConfiguration.SimulationIterations; i++)
-        //{
         if (myConfiguration.IsRainAdded)
         {
             myGridErosion.AddRain();
@@ -141,11 +139,9 @@ internal class ErosionSimulator : IErosionSimulator
         myGridErosion.SuspendDeposite();
         myGridErosion.Evaporate();
         myGridErosion.MoveSediment();
-        //myGridErosion.Erode();
-        //}
 
         ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-        Console.WriteLine($"INFO: End of simulation after {myConfiguration.SimulationIterations} iterations.");
+        Console.WriteLine($"INFO: End of simulation.");
     }
 
     public unsafe void SimulatePlateTectonics()

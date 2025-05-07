@@ -2,9 +2,11 @@
 
 internal interface IConfiguration : IDisposable
 {
-    int PlateCount { get; set; }
+    bool IsRainAdded { get; set; }
+    bool IsWaterDisplayed { get; set; }
+    bool IsSedimentDisplayed { get; set; }
 
-    uint SimulationIterations { get; set; }
+    int PlateCount { get; set; }
 
     int TalusAngle { get; set; }
     float ThermalErosionHeightChange { get; set; }
@@ -15,8 +17,6 @@ internal interface IConfiguration : IDisposable
     int ScreenHeight { get; set; }
     int ScreenWidth { get; set; }
     int ShadowMapResolution { get; set; }
-
-    bool IsRainAdded { get; set; }
 
     void Initialize();
 

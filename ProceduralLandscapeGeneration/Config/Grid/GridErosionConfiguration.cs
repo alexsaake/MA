@@ -176,28 +176,22 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         }
     }
 
-    public bool IsWaterDisplayed { get; set; }
-    public bool IsSedimentDisplayed { get; set; }
-
     public GridErosionConfiguration(IShaderBuffers shaderBuffers)
     {
         myShaderBuffers = shaderBuffers;
 
-        WaterIncrease = 0.0125f;
+        WaterIncrease = 0.1f;
         myTimeDelta = 1;
         myCellSizeX = 1;
         myCellSizeY = 1;
         myGravity = 9.81f;
         myFriction = 1.0f;
-        myMaximalErosionDepth = 0.2f;
+        myMaximalErosionDepth = 0.01f;
         mySedimentCapacity = 0.1f;
         mySuspensionRate = 0.1f;
-        myDepositionRate = 0.1f;
+        myDepositionRate = 0.05f;
         mySedimentSofteningRate = 0;
-        myEvaporationRate = 0.0125f;
-
-        IsWaterDisplayed = false;
-        IsSedimentDisplayed = false;
+        myEvaporationRate = 0.001f;
     }
 
     public void Initialize()

@@ -2,9 +2,6 @@
 
 internal interface IGridErosionConfiguration : IDisposable
 {
-    bool IsWaterDisplayed { get; set; }
-    bool IsSedimentDisplayed { get; set; }
-
     float WaterIncrease { get; set; }
     float TimeDelta { get; set; }
     float CellSizeX { get; set; }
