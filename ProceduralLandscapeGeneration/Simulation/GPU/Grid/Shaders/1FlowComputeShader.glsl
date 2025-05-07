@@ -95,6 +95,12 @@ void main()
     if(height <= mapGenerationConfiguration.SeaLevel)
     {
         gridPoint.WaterHeight = mapGenerationConfiguration.SeaLevel - height;
+        gridPoint.FlowLeft = 0.0;
+        gridPoint.FlowRight = 0.0;
+        gridPoint.FlowBottom = 0.0;
+        gridPoint.FlowTop = 0.0;
+
+        return;
     }
 
     float totalHeight = height + gridPoint.WaterHeight;

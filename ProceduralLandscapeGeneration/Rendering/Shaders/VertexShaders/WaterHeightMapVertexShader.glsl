@@ -55,6 +55,6 @@ void main()
     uint index = gl_VertexID;
 
     fragColor = waterColor;
-    float zOffset = 0.01;
+    float zOffset = 0.00004;
     gl_Position =  mvp * vec4(vertexPosition.xy, (heightMap[index] - zOffset + gridPoints[index].WaterHeight) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 }
