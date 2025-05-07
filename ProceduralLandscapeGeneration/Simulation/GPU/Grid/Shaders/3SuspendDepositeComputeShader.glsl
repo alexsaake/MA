@@ -103,7 +103,7 @@ void main()
 
 	float sinTiltAngle = abs(normal.z) / length(normal);
 	
-	float lmax = clamp(1.0 - max(0.0, gridErosionConfiguration.MaximalErosionDepth - gridPoint.WaterHeight * mapGenerationConfiguration.HeightMultiplier) / gridErosionConfiguration.MaximalErosionDepth, 0.0, 1.0);
+	float lmax = clamp(1.0 - max(0.0, gridErosionConfiguration.MaximalErosionDepth - gridPoint.WaterHeight) / gridErosionConfiguration.MaximalErosionDepth, 0.0, 1.0);
 	float sedimentTransportCapacity = gridErosionConfiguration.SedimentCapacity * length(gridPoint.Velocity) * sinTiltAngle * lmax;
 
 	if (gridPoint.SuspendedSediment < sedimentTransportCapacity)

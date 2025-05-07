@@ -9,7 +9,6 @@ namespace ProceduralLandscapeGeneration.Simulation.CPU;
 
 internal class HeightMapGeneratorCPU : IHeightMapGenerator
 {
-    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IRandom myRandom;
     private readonly IShaderBuffers myShaderBuffers;
@@ -17,14 +16,13 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
     private readonly FastNoise myNoiseGenerator;
     private bool myIsDisposed;
 
-    public HeightMapGeneratorCPU(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IRandom random, IShaderBuffers shaderBuffers)
+    public HeightMapGeneratorCPU(IMapGenerationConfiguration mapGenerationConfiguration, IRandom random, IShaderBuffers shaderBuffers)
     {
-        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myRandom = random;
         myShaderBuffers = shaderBuffers;
 
-        myNoiseGenerator = new FastNoise(myConfiguration.Seed);
+        myNoiseGenerator = new FastNoise(myMapGenerationConfiguration.Seed);
     }
 
     public unsafe void GenerateNoiseHeightMap()
@@ -55,8 +53,8 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
     {
         float[] noiseMap = new float[myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength];
 
-        Vector2[] octaveOffsets = new Vector2[myConfiguration.NoiseOctaves];
-        for (int octave = 0; octave < myConfiguration.NoiseOctaves; octave++)
+        Vector2[] octaveOffsets = new Vector2[myMapGenerationConfiguration.NoiseOctaves];
+        for (int octave = 0; octave < myMapGenerationConfiguration.NoiseOctaves; octave++)
         {
             octaveOffsets[octave] = new Vector2(myRandom.Next(-100000, 100000), myRandom.Next(-100000, 100000));
         }
@@ -72,16 +70,16 @@ internal class HeightMapGeneratorCPU : IHeightMapGenerator
                 float frequency = 1;
                 float noiseHeight = 0;
 
-                for (int octave = 0; octave < myConfiguration.NoiseOctaves; octave++)
+                for (int octave = 0; octave < myMapGenerationConfiguration.NoiseOctaves; octave++)
                 {
-                    float sampleX = x / myConfiguration.NoiseScale * frequency + octaveOffsets[octave].X;
-                    float sampleY = y / myConfiguration.NoiseScale * frequency + octaveOffsets[octave].Y;
+                    float sampleX = x / myMapGenerationConfiguration.NoiseScale * frequency + octaveOffsets[octave].X;
+                    float sampleY = y / myMapGenerationConfiguration.NoiseScale * frequency + octaveOffsets[octave].Y;
 
                     float perlinValue = myNoiseGenerator.GetPerlin(sampleX, sampleY);
                     noiseHeight += perlinValue * amplitude;
 
-                    amplitude *= myConfiguration.NoisePersistence;
-                    frequency *= myConfiguration.NoiseLacunarity;
+                    amplitude *= myMapGenerationConfiguration.NoisePersistence;
+                    frequency *= myMapGenerationConfiguration.NoiseLacunarity;
                 }
 
                 if (noiseHeight > maxNoiseHeight)

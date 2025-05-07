@@ -1,4 +1,5 @@
-﻿using ProceduralLandscapeGeneration.Config.Types;
+﻿using ProceduralLandscapeGeneration.Config.Grid;
+using ProceduralLandscapeGeneration.Config.Particles;
 
 namespace ProceduralLandscapeGeneration.Config;
 
@@ -10,96 +11,6 @@ internal class Configuration : IConfiguration
     private readonly IParticleWindErosionConfiguration myParticleWindErosionConfiguration;
 
     private bool myIsDisposed;
-
-    private ProcessorTypes myHeightMapGeneration;
-    public ProcessorTypes HeightMapGeneration
-    {
-        get => myHeightMapGeneration;
-        set
-        {
-            if (myHeightMapGeneration == value)
-            {
-                return;
-            }
-            myHeightMapGeneration = value;
-            ResetRequired?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    private int mySeed;
-    public int Seed
-    {
-        get => mySeed;
-        set
-        {
-            if (mySeed == value)
-            {
-                return;
-            }
-            mySeed = value;
-            ResetRequired?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    private float myNoiseScale;
-    public float NoiseScale
-    {
-        get => myNoiseScale;
-        set
-        {
-            if (myNoiseScale == value)
-            {
-                return;
-            }
-            myNoiseScale = value;
-            ResetRequired?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    private uint myNoiseOctaves;
-    public uint NoiseOctaves
-    {
-        get => myNoiseOctaves;
-        set
-        {
-            if (myNoiseOctaves == value)
-            {
-                return;
-            }
-            myNoiseOctaves = value;
-            ResetRequired?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    private float myNoisePersistance;
-    public float NoisePersistence
-    {
-        get => myNoisePersistance;
-        set
-        {
-            if (myNoisePersistance == value)
-            {
-                return;
-            }
-            myNoisePersistance = value;
-            ResetRequired?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    private float myNoiseLacunarity;
-    public float NoiseLacunarity
-    {
-        get => myNoiseLacunarity;
-        set
-        {
-            if (myNoiseLacunarity == value)
-            {
-                return;
-            }
-            myNoiseLacunarity = value;
-            ResetRequired?.Invoke(this, EventArgs.Empty);
-        }
-    }
 
     private int myPlateCount;
     public int PlateCount
@@ -171,20 +82,12 @@ internal class Configuration : IConfiguration
     public event EventHandler? ResetRequired;
     public event EventHandler? ThermalErosionConfigurationChanged;
 
-    public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
+    public Configuration(IMapGenerationConfiguration mapGenerationConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myGridErosionConfiguration = gridErosionConfiguration;
         myParticleHydraulicErosionConfiguration = particleHydraulicErosionConfiguration;
         myParticleWindErosionConfiguration = particleWindErosionConfiguration;
-
-        myHeightMapGeneration = ProcessorTypes.CPU;
-
-        Seed = 1337;
-        NoiseScale = 2.0f;
-        NoiseOctaves = 8;
-        NoisePersistence = 0.5f;
-        NoiseLacunarity = 2.0f;
 
         PlateCount = 10;
 

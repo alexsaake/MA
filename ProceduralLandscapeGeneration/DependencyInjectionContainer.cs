@@ -1,6 +1,8 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Config;
+using ProceduralLandscapeGeneration.Config.Grid;
+using ProceduralLandscapeGeneration.Config.Particles;
 using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.Rendering;
@@ -8,8 +10,9 @@ using ProceduralLandscapeGeneration.Simulation;
 using ProceduralLandscapeGeneration.Simulation.CPU;
 using ProceduralLandscapeGeneration.Simulation.CPU.PlateTectonics;
 using ProceduralLandscapeGeneration.Simulation.GPU;
+using ProceduralLandscapeGeneration.Simulation.GPU.ComputeShaders;
 using ProceduralLandscapeGeneration.Simulation.GPU.Grid;
-using ProceduralLandscapeGeneration.Simulation.GPU.Shaders.Particle;
+using ProceduralLandscapeGeneration.Simulation.GPU.Particle;
 
 namespace ProceduralLandscapeGeneration;
 

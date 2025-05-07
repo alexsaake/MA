@@ -3,7 +3,7 @@ using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Config;
+namespace ProceduralLandscapeGeneration.Config.Particles;
 
 internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosionConfiguration
 {

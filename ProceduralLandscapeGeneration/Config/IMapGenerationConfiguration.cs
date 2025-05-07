@@ -7,6 +7,13 @@ internal interface IMapGenerationConfiguration : IDisposable
 {
     MapGenerationTypes MapGeneration { get; set; }
     ProcessorTypes MeshCreation { get; set; }
+    ProcessorTypes HeightMapGeneration { get; set; }
+
+    int Seed { get; set; }
+    float NoiseScale { get; set; }
+    uint NoiseOctaves { get; set; }
+    float NoisePersistence { get; set; }
+    float NoiseLacunarity { get; set; }
 
     uint HeightMapSideLength { get; set; }
     uint HeightMultiplier { get; set; }

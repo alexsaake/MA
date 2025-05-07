@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.Simulation.GPU.Shaders.Particle;
+﻿namespace ProceduralLandscapeGeneration.Simulation.GPU.Particle;
 
 internal interface IParticleErosion : IDisposable
 {

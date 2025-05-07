@@ -72,7 +72,7 @@
 	  <None Update="Simulation\GPU\Grid\Shaders\1FlowComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Simulation\GPU\Shaders\Particle\HydraulicErosionSimulationComputeShader.glsl">
+	  <None Update="Simulation\GPU\Particles\Shaders\HydraulicErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Simulation\GPU\Shaders\NormalizeComputeShader.glsl">
@@ -81,7 +81,7 @@
 	  <None Update="Simulation\GPU\Shaders\ThermalErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Simulation\GPU\Shaders\Particle\WindErosionSimulationComputeShader.glsl">
+	  <None Update="Simulation\GPU\Particles\Shaders\WindErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Simulation\GPU\Shaders\HeightMapGeneratorComputeShader.glsl">

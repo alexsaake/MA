@@ -1,10 +1,11 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Config;
+using ProceduralLandscapeGeneration.Config.ShaderBuffers;
 using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.Simulation.CPU.PlateTectonics;
+using ProceduralLandscapeGeneration.Simulation.GPU.ComputeShaders;
 using ProceduralLandscapeGeneration.Simulation.GPU.Grid;
-using ProceduralLandscapeGeneration.Simulation.GPU.Shaders;
-using ProceduralLandscapeGeneration.Simulation.GPU.Shaders.Particle;
+using ProceduralLandscapeGeneration.Simulation.GPU.Particle;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Simulation.GPU;
@@ -44,7 +45,7 @@ internal class ErosionSimulator : IErosionSimulator
     {
         myConfiguration.ThermalErosionConfigurationChanged += OnThermalErosionConfigurationChanged;
 
-        myHeightMapGenerator = myLifetimeScope.ResolveKeyed<IHeightMapGenerator>(myConfiguration.HeightMapGeneration);
+        myHeightMapGenerator = myLifetimeScope.ResolveKeyed<IHeightMapGenerator>(myMapGenerationConfiguration.HeightMapGeneration);
         switch (myMapGenerationConfiguration.MapGeneration)
         {
             case MapGenerationTypes.Noise:
@@ -140,7 +141,7 @@ internal class ErosionSimulator : IErosionSimulator
         myGridErosion.SuspendDeposite();
         myGridErosion.Evaporate();
         myGridErosion.MoveSediment();
-        myGridErosion.Erode();
+        //myGridErosion.Erode();
         //}
 
         ErosionIterationFinished?.Invoke(this, EventArgs.Empty);

@@ -11,6 +11,21 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
 
     private bool myIsDisposed;
 
+    private MapGenerationTypes myMapGeneration;
+    public MapGenerationTypes MapGeneration
+    {
+        get => myMapGeneration;
+        set
+        {
+            if (myMapGeneration == value)
+            {
+                return;
+            }
+            myMapGeneration = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     private ProcessorTypes myMeshCreation;
     public ProcessorTypes MeshCreation
     {
@@ -26,17 +41,91 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
-    private MapGenerationTypes myMapGeneration;
-    public MapGenerationTypes MapGeneration
+    private ProcessorTypes myHeightMapGeneration;
+    public ProcessorTypes HeightMapGeneration
     {
-        get => myMapGeneration;
+        get => myHeightMapGeneration;
         set
         {
-            if (myMapGeneration == value)
+            if (myHeightMapGeneration == value)
             {
                 return;
             }
-            myMapGeneration = value;
+            myHeightMapGeneration = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+    private int mySeed;
+    public int Seed
+    {
+        get => mySeed;
+        set
+        {
+            if (mySeed == value)
+            {
+                return;
+            }
+            mySeed = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myNoiseScale;
+    public float NoiseScale
+    {
+        get => myNoiseScale;
+        set
+        {
+            if (myNoiseScale == value)
+            {
+                return;
+            }
+            myNoiseScale = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private uint myNoiseOctaves;
+    public uint NoiseOctaves
+    {
+        get => myNoiseOctaves;
+        set
+        {
+            if (myNoiseOctaves == value)
+            {
+                return;
+            }
+            myNoiseOctaves = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myNoisePersistance;
+    public float NoisePersistence
+    {
+        get => myNoisePersistance;
+        set
+        {
+            if (myNoisePersistance == value)
+            {
+                return;
+            }
+            myNoisePersistance = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myNoiseLacunarity;
+    public float NoiseLacunarity
+    {
+        get => myNoiseLacunarity;
+        set
+        {
+            if (myNoiseLacunarity == value)
+            {
+                return;
+            }
+            myNoiseLacunarity = value;
             ResetRequired?.Invoke(this, EventArgs.Empty);
         }
     }
@@ -122,8 +211,15 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
     {
         myShaderBuffers = shaderBuffers;
 
-        myMeshCreation = ProcessorTypes.CPU;
         myMapGeneration = MapGenerationTypes.Noise;
+        myMeshCreation = ProcessorTypes.CPU;
+        myHeightMapGeneration = ProcessorTypes.CPU;
+
+        Seed = 1337;
+        NoiseScale = 2.0f;
+        NoiseOctaves = 8;
+        NoisePersistence = 0.5f;
+        NoiseLacunarity = 2.0f;
 
         HeightMapSideLength = 256;
         myHeightMultiplier = 32;

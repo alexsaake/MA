@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.Simulation.GPU.Shaders;
+﻿namespace ProceduralLandscapeGeneration.Config.ShaderBuffers;
 
 internal struct ThermalErosionConfigurationShaderBuffer
 {

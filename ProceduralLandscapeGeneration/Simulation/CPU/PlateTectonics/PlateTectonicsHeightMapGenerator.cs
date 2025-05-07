@@ -33,7 +33,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     public void GenerateHeightMap()
     {
-        IHeightMapGenerator heightMapGenerator = myLifetimeScope.ResolveKeyed<IHeightMapGenerator>(myConfiguration.HeightMapGeneration);
+        IHeightMapGenerator heightMapGenerator = myLifetimeScope.ResolveKeyed<IHeightMapGenerator>(myMapGenerationConfiguration.HeightMapGeneration);
         heightMapGenerator.GenerateNoiseHeatMap();
 
         CreateSegments();

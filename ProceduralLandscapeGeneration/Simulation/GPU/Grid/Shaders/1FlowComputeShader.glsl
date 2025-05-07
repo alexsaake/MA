@@ -52,6 +52,18 @@ layout(std430, binding = 3) buffer gridErosionConfigurationShaderBuffer
     GridErosionConfiguration gridErosionConfiguration;
 };
 
+struct MapGenerationConfiguration
+{
+    float HeightMultiplier;
+    float SeaLevel;
+    bool IsColorEnabled;
+};
+
+layout(std430, binding = 4) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+{
+    MapGenerationConfiguration mapGenerationConfiguration;
+};
+
 uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
@@ -78,8 +90,14 @@ void main()
     uint y = id / myHeightMapSideLength;
     
     GridPoint gridPoint = gridPoints[id];
+    
+    float height = heightMap[id];
+    if(height <= mapGenerationConfiguration.SeaLevel)
+    {
+        gridPoint.WaterHeight = mapGenerationConfiguration.SeaLevel - height;
+    }
 
-    float totalHeight = heightMap[id] + gridPoint.WaterHeight;
+    float totalHeight = height + gridPoint.WaterHeight;
     float frictionFactor = pow(1 - gridErosionConfiguration.Friction, gridErosionConfiguration.TimeDelta);
 
     if(x > 0)

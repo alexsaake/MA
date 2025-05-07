@@ -6,9 +6,9 @@ internal class Random : IRandom
 {
     private readonly System.Random myRandom;
 
-    public Random(IConfiguration configuration)
+    public Random(IMapGenerationConfiguration mapGenerationConfiguration)
     {
-        myRandom = new System.Random(configuration.Seed);
+        myRandom = new System.Random(mapGenerationConfiguration.Seed);
     }
 
     public int Next(int maxValue)

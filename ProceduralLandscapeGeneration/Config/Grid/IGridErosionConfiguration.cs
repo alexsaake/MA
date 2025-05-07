@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.Config;
+﻿namespace ProceduralLandscapeGeneration.Config.Grid;
 
 internal interface IGridErosionConfiguration : IDisposable
 {

@@ -79,9 +79,9 @@ internal class Application : IApplication
             myRenderer!.Update();
 
             Raylib.BeginDrawing();
-            Raylib.ClearBackground(Color.SkyBlue);
-            myRenderer.Draw();
-            myConfigurationGUI.Draw();
+                Raylib.ClearBackground(Color.SkyBlue);
+                myRenderer.Draw();
+                myConfigurationGUI.Draw();
             Raylib.EndDrawing();
         }
 

@@ -4,7 +4,7 @@ using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.Config;
+namespace ProceduralLandscapeGeneration.Config.Particles;
 
 internal class ParticleWindErosionConfiguration : IParticleWindErosionConfiguration
 {

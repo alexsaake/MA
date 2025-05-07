@@ -1,17 +1,7 @@
-﻿using ProceduralLandscapeGeneration.Config.Types;
-
-namespace ProceduralLandscapeGeneration.Config;
+﻿namespace ProceduralLandscapeGeneration.Config;
 
 internal interface IConfiguration : IDisposable
 {
-    ProcessorTypes HeightMapGeneration { get; set; }
-
-    int Seed { get; set; }
-    float NoiseScale { get; set; }
-    uint NoiseOctaves { get; set; }
-    float NoisePersistence { get; set; }
-    float NoiseLacunarity { get; set; }
-
     int PlateCount { get; set; }
 
     uint SimulationIterations { get; set; }

@@ -3,7 +3,7 @@ using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.Simulation.GPU;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Config;
+namespace ProceduralLandscapeGeneration.Config.Grid;
 
 internal class GridErosionConfiguration : IGridErosionConfiguration
 {
@@ -189,7 +189,7 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         myCellSizeY = 1;
         myGravity = 9.81f;
         myFriction = 1.0f;
-        myMaximalErosionDepth = 10;
+        myMaximalErosionDepth = 0.2f;
         mySedimentCapacity = 0.1f;
         mySuspensionRate = 0.1f;
         myDepositionRate = 0.1f;

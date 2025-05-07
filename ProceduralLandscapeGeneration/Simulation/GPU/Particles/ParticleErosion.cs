@@ -1,8 +1,10 @@
 ﻿using ProceduralLandscapeGeneration.Config;
+using ProceduralLandscapeGeneration.Config.Particles;
 using ProceduralLandscapeGeneration.Config.Types;
+using ProceduralLandscapeGeneration.Simulation.GPU.ComputeShaders;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Simulation.GPU.Shaders.Particle;
+namespace ProceduralLandscapeGeneration.Simulation.GPU.Particle;
 
 internal class ParticleErosion : IParticleErosion
 {
@@ -32,8 +34,8 @@ internal class ParticleErosion : IParticleErosion
 
     public unsafe void Initialize()
     {
-        myHydraulicErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/Particle/HydraulicErosionSimulationComputeShader.glsl");
-        myWindErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/Particle/WindErosionSimulationComputeShader.glsl");
+        myHydraulicErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Particles/Shaders/HydraulicErosionSimulationComputeShader.glsl");
+        myWindErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Particles/Shaders/WindErosionSimulationComputeShader.glsl");
 
         myHeightMapIndicesShaderBufferSize = myConfiguration.SimulationIterations * sizeof(uint);
         myHeightMapIndicesShaderBufferId = Rlgl.LoadShaderBuffer(myHeightMapIndicesShaderBufferSize, null, Rlgl.DYNAMIC_COPY);
@@ -115,7 +117,7 @@ internal class ParticleErosion : IParticleErosion
             }
             else
             {
-                if(myRandom.Next(2) == 0)
+                if (myRandom.Next(2) == 0)
                 {
                     if (myParticleWindErosionConfiguration.PersistentSpeed.X > 0)
                     {

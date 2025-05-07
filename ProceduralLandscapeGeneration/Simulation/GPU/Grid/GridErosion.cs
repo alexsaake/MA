@@ -1,5 +1,7 @@
 ﻿using ProceduralLandscapeGeneration.Config;
+using ProceduralLandscapeGeneration.Config.Grid;
 using ProceduralLandscapeGeneration.Config.Types;
+using ProceduralLandscapeGeneration.Simulation.GPU.ComputeShaders;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Simulation.GPU.Grid;
@@ -65,6 +67,8 @@ internal class GridErosion : IGridErosion
         Rlgl.EnableShader(myFlow!.Id);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints], 2);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridErosionConfiguration], 3);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 4);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();

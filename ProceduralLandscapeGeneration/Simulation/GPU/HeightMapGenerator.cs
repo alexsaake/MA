@@ -1,22 +1,21 @@
 ﻿using ProceduralLandscapeGeneration.Config;
 using ProceduralLandscapeGeneration.Config.ShaderBuffers;
 using ProceduralLandscapeGeneration.Config.Types;
+using ProceduralLandscapeGeneration.Simulation.GPU.ComputeShaders;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Simulation.GPU;
 
 internal class HeightMapGenerator : IHeightMapGenerator
 {
-    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
     private readonly IShaderBuffers myShaderBuffers;
 
     private bool myIsDisposed;
 
-    public HeightMapGenerator(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
+    public HeightMapGenerator(IMapGenerationConfiguration mapGenerationConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
     {
-        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myComputeShaderProgramFactory = computeShaderProgramFactory;
         myShaderBuffers = shaderBuffers;
@@ -26,11 +25,11 @@ internal class HeightMapGenerator : IHeightMapGenerator
     {
         HeightMapParametersShaderBuffer heightMapParameters = new HeightMapParametersShaderBuffer()
         {
-            Seed = (uint)myConfiguration.Seed,
-            Scale = myConfiguration.NoiseScale,
-            Octaves = myConfiguration.NoiseOctaves,
-            Persistence = myConfiguration.NoisePersistence,
-            Lacunarity = myConfiguration.NoiseLacunarity
+            Seed = (uint)myMapGenerationConfiguration.Seed,
+            Scale = myMapGenerationConfiguration.NoiseScale,
+            Octaves = myMapGenerationConfiguration.NoiseOctaves,
+            Persistence = myMapGenerationConfiguration.NoisePersistence,
+            Lacunarity = myMapGenerationConfiguration.NoiseLacunarity
         };
         uint heightMapParametersBufferSize = (uint)sizeof(HeightMapParametersShaderBuffer);
         uint heightMapParametersBufferId = Rlgl.LoadShaderBuffer(heightMapParametersBufferSize, &heightMapParameters, Rlgl.DYNAMIC_COPY);
@@ -64,11 +63,11 @@ internal class HeightMapGenerator : IHeightMapGenerator
     {
         HeightMapParametersShaderBuffer heatMapParameters = new HeightMapParametersShaderBuffer()
         {
-            Seed = (uint)myConfiguration.Seed,
-            Scale = myConfiguration.NoiseScale,
-            Octaves = myConfiguration.NoiseOctaves,
-            Persistence = myConfiguration.NoisePersistence,
-            Lacunarity = myConfiguration.NoiseLacunarity
+            Seed = (uint)myMapGenerationConfiguration.Seed,
+            Scale = myMapGenerationConfiguration.NoiseScale,
+            Octaves = myMapGenerationConfiguration.NoiseOctaves,
+            Persistence = myMapGenerationConfiguration.NoisePersistence,
+            Lacunarity = myMapGenerationConfiguration.NoiseLacunarity
         };
         uint heatMapParametersBufferSize = (uint)sizeof(HeightMapParametersShaderBuffer);
         uint heatMapParametersBufferId = Rlgl.LoadShaderBuffer(heatMapParametersBufferSize, &heatMapParameters, Rlgl.DYNAMIC_COPY);
