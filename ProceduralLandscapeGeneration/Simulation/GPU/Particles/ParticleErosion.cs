@@ -47,7 +47,6 @@ internal class ParticleErosion : IParticleErosion
         myHeightMapIndicesShaderBufferId = Rlgl.LoadShaderBuffer(myHeightMapIndicesShaderBufferSize, null, Rlgl.DYNAMIC_COPY);
 
         AddParticlesHydraulicErosionShaderBuffer();
-        myHydraulicErosionAge = myParticleHydraulicErosionConfiguration.MaxAge;
 
         myIsDisposed = false;
     }
@@ -61,17 +60,13 @@ internal class ParticleErosion : IParticleErosion
     {
         RemoveParticlesHydraulicErosionShaderBuffer();
         AddParticlesHydraulicErosionShaderBuffer();
-        myHydraulicErosionAge = myParticleHydraulicErosionConfiguration.MaxAge;
     }
 
-    private uint myHydraulicErosionAge;
     public void SimulateHydraulicErosion()
     {
-        if (myConfiguration.IsRainAdded
-            && myHydraulicErosionAge == myParticleHydraulicErosionConfiguration.MaxAge)
+        if (myConfiguration.IsRainAdded)
         {
             CreateParticles();
-            myHydraulicErosionAge = 0;
         }
 
         Rlgl.EnableShader(myHydraulicErosionParticleSimulationComputeShaderProgram!.Id);
@@ -81,8 +76,6 @@ internal class ParticleErosion : IParticleErosion
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticlesHydraulicErosion], 4);
         Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myParticleHydraulicErosionConfiguration.Particles / 64f), 1, 1);
         Rlgl.DisableShader();
-
-        myHydraulicErosionAge++;
     }
 
     private unsafe void CreateParticles()

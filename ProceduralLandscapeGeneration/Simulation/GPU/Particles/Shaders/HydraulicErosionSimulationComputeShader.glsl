@@ -188,6 +188,8 @@ bool Move()
 
     if(isOutOfBounds(position))
     {
+        myParticleHydraulicErosion.Sediment = 0;
+        myParticleHydraulicErosion.Volume = 0;
         return false;
     }
 

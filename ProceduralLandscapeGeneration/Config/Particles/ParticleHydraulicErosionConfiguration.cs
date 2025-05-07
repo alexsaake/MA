@@ -154,13 +154,13 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
     {
         myShaderBuffers = shaderBuffers;
 
-        Particles = 10000;
+        myParticles = 10000;
         WaterIncrease = 0.1f;
         myMaxAge = 64;
         myEvaporationRate = 0.001f;
         myDepositionRate = 0.05f;
         myMinimumVolume = 0.001f;
-        myMaximalErosionDepth = 0.5f;
+        myMaximalErosionDepth = 0.05f;
         myGravity = 9.81f;
         myMaxDiff = 0.8f;
         mySettling = 1.0f;

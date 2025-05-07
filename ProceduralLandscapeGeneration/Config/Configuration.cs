@@ -120,6 +120,7 @@ internal class Configuration : IConfiguration
         myMapGenerationConfiguration.Dispose();
         myGridErosionConfiguration.Dispose();
         myParticleHydraulicErosionConfiguration.Dispose();
+        myParticleWindErosionConfiguration.Dispose();
 
         myIsDisposed = true;
     }

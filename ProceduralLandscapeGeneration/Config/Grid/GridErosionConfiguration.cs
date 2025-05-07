@@ -186,7 +186,7 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         myCellSizeY = 1;
         myGravity = 9.81f;
         myFriction = 1.0f;
-        myMaximalErosionDepth = 0.01f;
+        myMaximalErosionDepth = 0.05f;
         mySedimentCapacity = 0.1f;
         mySuspensionRate = 0.1f;
         myDepositionRate = 0.05f;
