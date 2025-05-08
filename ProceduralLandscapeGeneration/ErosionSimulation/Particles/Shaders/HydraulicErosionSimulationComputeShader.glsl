@@ -239,7 +239,7 @@ bool Interact()
     float h2;
     if(isOutOfBounds(ivec2(myParticleHydraulicErosion.Position)))
     {
-        h2 = 0.99f * heightMap[getIndexV(position)];
+        h2 = 0.99 * heightMap[getIndexV(position)];
     }
     else
     {

@@ -180,18 +180,18 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
     {
         myShaderBuffers = shaderBuffers;
 
-        WaterIncrease = 0.1f;
+        WaterIncrease = 0.00025f;
+        myEvaporationRate = 0.001f;
+        mySedimentCapacity = 0.01f;
+        mySuspensionRate = 0.01f;
+        myDepositionRate = 0.025f;
+        myMaximalErosionDepth = 0.05f;
+        myGravity = 9.81f;
         myTimeDelta = 1;
         myCellSizeX = 1;
         myCellSizeY = 1;
-        myGravity = 9.81f;
         myFriction = 1.0f;
-        myMaximalErosionDepth = 0.05f;
-        mySedimentCapacity = 0.1f;
-        mySuspensionRate = 0.1f;
-        myDepositionRate = 0.05f;
         mySedimentSofteningRate = 0;
-        myEvaporationRate = 0.001f;
     }
 
     public void Initialize()

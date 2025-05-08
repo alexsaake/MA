@@ -91,25 +91,13 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
     
-    float height = heightMap[id];
-    if(height <= mapGenerationConfiguration.SeaLevel)
-    {
-        gridPoint.WaterHeight = mapGenerationConfiguration.SeaLevel - height;
-        gridPoint.FlowLeft = 0.0;
-        gridPoint.FlowRight = 0.0;
-        gridPoint.FlowBottom = 0.0;
-        gridPoint.FlowTop = 0.0;
-
-        return;
-    }
-
-    float totalHeight = height + gridPoint.WaterHeight;
+    float totalHeight = heightMap[id] + gridPoint.WaterHeight;
     float frictionFactor = pow(1 - gridErosionConfiguration.Friction, gridErosionConfiguration.TimeDelta);
 
     if(x > 0)
     {
         float totalHeightLeft = heightMap[getIndex(x - 1, y)] + gridPoints[getIndex(x - 1, y)].WaterHeight;
-        gridPoint.FlowLeft = max(0.0, gridPoint.FlowLeft * frictionFactor + (totalHeight - totalHeightLeft) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeX);
+        gridPoint.FlowLeft = max(0.0, gridPoint.FlowLeft * frictionFactor + (totalHeight - totalHeightLeft) * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeX);
     }
     else
     {
@@ -119,7 +107,7 @@ void main()
     if(x < myHeightMapSideLength - 1)
     {
         float totalHeightRight = heightMap[getIndex(x + 1, y)] + gridPoints[getIndex(x + 1, y)].WaterHeight;
-        gridPoint.FlowRight = max(0.0, gridPoint.FlowRight * frictionFactor + (totalHeight - totalHeightRight) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeX);
+        gridPoint.FlowRight = max(0.0, gridPoint.FlowRight * frictionFactor + (totalHeight - totalHeightRight) * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeX);
     }
     else
     {
@@ -129,7 +117,7 @@ void main()
     if(y > 0)
     {
         float totalHeightBottom = heightMap[getIndex(x, y - 1)] + gridPoints[getIndex(x, y - 1)].WaterHeight;
-        gridPoint.FlowBottom = max(0.0, gridPoint.FlowBottom * frictionFactor + (totalHeight - totalHeightBottom) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeY);
+        gridPoint.FlowBottom = max(0.0, gridPoint.FlowBottom * frictionFactor + (totalHeight - totalHeightBottom) * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeY);
     }
     else
     {
@@ -139,7 +127,7 @@ void main()
     if(y < myHeightMapSideLength - 1)
     {
         float totalHeightTop = heightMap[getIndex(x, y + 1)] + gridPoints[getIndex(x, y + 1)].WaterHeight;
-        gridPoint.FlowTop = max(0.0, gridPoint.FlowTop * frictionFactor + (totalHeight - totalHeightTop) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeY);
+        gridPoint.FlowTop = max(0.0, gridPoint.FlowTop * frictionFactor + (totalHeight - totalHeightTop) * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeY);
     }
     else
     {
@@ -147,9 +135,9 @@ void main()
     }
 
     float totalOutflow = gridPoint.FlowLeft + gridPoint.FlowRight + gridPoint.FlowBottom + gridPoint.FlowTop;
-    if (totalOutflow > gridPoint.WaterHeight)
+    if (totalOutflow > gridPoint.WaterHeight * mapGenerationConfiguration.HeightMultiplier)
     {
-        float scale = min(1.0, gridPoint.WaterHeight * gridErosionConfiguration.CellSizeX * gridErosionConfiguration.CellSizeY / (totalOutflow * gridErosionConfiguration.TimeDelta));
+        float scale = min(1.0, gridPoint.WaterHeight * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.CellSizeX * gridErosionConfiguration.CellSizeY / (totalOutflow * gridErosionConfiguration.TimeDelta));
         
         gridPoint.FlowLeft *= scale;
         gridPoint.FlowRight *= scale;

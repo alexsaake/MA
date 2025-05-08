@@ -52,6 +52,18 @@ layout(std430, binding = 3) buffer gridErosionConfigurationShaderBuffer
     GridErosionConfiguration gridErosionConfiguration;
 };
 
+struct MapGenerationConfiguration
+{
+    float HeightMultiplier;
+    float SeaLevel;
+    bool IsColorEnabled;
+};
+
+layout(std430, binding = 4) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+{
+    MapGenerationConfiguration mapGenerationConfiguration;
+};
+
 uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
@@ -82,7 +94,7 @@ void main()
     float flowIn = gridPoints[getIndex(x - 1, y)].FlowRight + gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoints[getIndex(x, y - 1)].FlowTop + gridPoints[getIndex(x, y + 1)].FlowBottom;
     float flowOut = gridPoint.FlowRight + gridPoint.FlowLeft + gridPoint.FlowTop + gridPoint.FlowBottom;
 
-	float volumeDelta = gridErosionConfiguration.TimeDelta * (flowIn - flowOut);
+	float volumeDelta = gridErosionConfiguration.TimeDelta * (flowIn - flowOut) / mapGenerationConfiguration.HeightMultiplier;
 
 	gridPoint.WaterHeight = max(0, gridPoint.WaterHeight + volumeDelta / (gridErosionConfiguration.CellSizeX * gridErosionConfiguration.CellSizeY));
 
