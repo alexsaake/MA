@@ -1,7 +1,7 @@
 ﻿using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.GUI;
+namespace ProceduralLandscapeGeneration.GUI.Elements;
 
 class PanelWithElements
 {

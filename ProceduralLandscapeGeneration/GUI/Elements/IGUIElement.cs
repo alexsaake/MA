@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.GUI;
+namespace ProceduralLandscapeGeneration.GUI.Elements;
 
 internal interface IGUIElement
 {

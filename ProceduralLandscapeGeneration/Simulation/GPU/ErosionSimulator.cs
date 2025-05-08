@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Config;
-using ProceduralLandscapeGeneration.Config.ShaderBuffers;
 using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.Simulation.CPU.PlateTectonics;
 using ProceduralLandscapeGeneration.Simulation.GPU.ComputeShaders;
@@ -12,8 +11,8 @@ namespace ProceduralLandscapeGeneration.Simulation.GPU;
 
 internal class ErosionSimulator : IErosionSimulator
 {
-    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
+    private readonly IErosionConfiguration myErosionConfiguration;
     private readonly ILifetimeScope myLifetimeScope;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
     private readonly IGridErosion myGridErosion;
@@ -25,14 +24,13 @@ internal class ErosionSimulator : IErosionSimulator
     public event EventHandler? ErosionIterationFinished;
 
     private ComputeShaderProgram? myThermalErosionSimulationComputeShaderProgram;
-    private uint myThermalErosionConfigurationShaderBufferId;
 
     private bool myIsDisposed;
 
-    public ErosionSimulator(IConfiguration configuration,IMapGenerationConfiguration mapGenerationConfiguration, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory, IGridErosion gridErosion, IParticleErosion particleErosion, IShaderBuffers shaderBuffers, IPlateTectonicsHeightMapGenerator plateTectonicsHeightMapGenerator)
+    public ErosionSimulator(IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory, IGridErosion gridErosion, IParticleErosion particleErosion, IShaderBuffers shaderBuffers, IPlateTectonicsHeightMapGenerator plateTectonicsHeightMapGenerator)
     {
-        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
+        myErosionConfiguration = erosionConfiguration;
         myLifetimeScope = lifetimeScope;
         myComputeShaderProgramFactory = computeShaderProgramFactory;
         myGridErosion = gridErosion;
@@ -43,8 +41,6 @@ internal class ErosionSimulator : IErosionSimulator
 
     public unsafe void Initialize()
     {
-        myConfiguration.ThermalErosionConfigurationChanged += OnThermalErosionConfigurationChanged;
-
         myHeightMapGenerator = myLifetimeScope.ResolveKeyed<IHeightMapGenerator>(myMapGenerationConfiguration.HeightMapGeneration);
         switch (myMapGenerationConfiguration.MapGeneration)
         {
@@ -59,9 +55,6 @@ internal class ErosionSimulator : IErosionSimulator
                 break;
         }
 
-        ThermalErosionConfigurationShaderBuffer thermalErosionConfiguration = CreateThermalErosionConfiguration();
-        myThermalErosionConfigurationShaderBufferId = Rlgl.LoadShaderBuffer((uint)sizeof(ThermalErosionConfigurationShaderBuffer), &thermalErosionConfiguration, Rlgl.DYNAMIC_COPY);
-
         myThermalErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Shaders/ThermalErosionSimulationComputeShader.glsl");
 
         myGridErosion.Initialize();
@@ -70,19 +63,10 @@ internal class ErosionSimulator : IErosionSimulator
         myIsDisposed = false;
     }
 
-    private unsafe void OnThermalErosionConfigurationChanged(object? sender, EventArgs e)
+    public void Reset()
     {
-        ThermalErosionConfigurationShaderBuffer thermalErosionConfiguration = CreateThermalErosionConfiguration();
-        Rlgl.UpdateShaderBuffer(myThermalErosionConfigurationShaderBufferId, &thermalErosionConfiguration, (uint)sizeof(ThermalErosionConfigurationShaderBuffer), 0);
-    }
-
-    private ThermalErosionConfigurationShaderBuffer CreateThermalErosionConfiguration()
-    {
-        return new ThermalErosionConfigurationShaderBuffer()
-        {
-            TangensThresholdAngle = MathF.Tan(myConfiguration.TalusAngle * (MathF.PI / 180)),
-            HeightChange = myConfiguration.ThermalErosionHeightChange
-        };
+        myParticleErosion.ResetShaderBuffers();
+        myGridErosion.ResetShaderBuffers();
     }
 
     public void SimulateHydraulicErosion()
@@ -104,7 +88,7 @@ internal class ErosionSimulator : IErosionSimulator
         Rlgl.EnableShader(myThermalErosionSimulationComputeShaderProgram!.Id);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
-        Rlgl.BindShaderBuffer(myThermalErosionConfigurationShaderBufferId, 3);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ThermalErosionConfiguration], 3);
         Rlgl.ComputeShaderDispatch(mapSize / 64, 1, 1);
         Rlgl.DisableShader();
 
@@ -130,7 +114,7 @@ internal class ErosionSimulator : IErosionSimulator
 
         Console.WriteLine($"INFO: Simulating hydraulic erosion grid.");
 
-        if (myConfiguration.IsRainAdded)
+        if (myErosionConfiguration.IsRainAdded)
         {
             myGridErosion.AddRain();
         }
@@ -159,16 +143,12 @@ internal class ErosionSimulator : IErosionSimulator
             return;
         }
 
-        myConfiguration.ThermalErosionConfigurationChanged -= OnThermalErosionConfigurationChanged;
-
-        Rlgl.UnloadShaderBuffer(myThermalErosionConfigurationShaderBufferId);
-
         myThermalErosionSimulationComputeShaderProgram?.Dispose();
 
         myPlateTectonicsHeightMapGenerator.Dispose();
         myGridErosion.Dispose();
         myParticleErosion.Dispose();
-        myHeightMapGenerator!.Dispose();
+        myHeightMapGenerator?.Dispose();
 
         myIsDisposed = true;
     }

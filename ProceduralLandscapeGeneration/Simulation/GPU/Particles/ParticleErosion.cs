@@ -12,6 +12,7 @@ internal class ParticleErosion : IParticleErosion
 {
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
+    private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IParticleHydraulicErosionConfiguration myParticleHydraulicErosionConfiguration;
     private readonly IParticleWindErosionConfiguration myParticleWindErosionConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
@@ -25,10 +26,11 @@ internal class ParticleErosion : IParticleErosion
     private uint myHeightMapIndicesShaderBufferSize;
     private bool myIsDisposed;
 
-    public ParticleErosion(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers, IRandom random)
+    public ParticleErosion(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers, IRandom random)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
+        myErosionConfiguration = erosionConfiguration;
         myParticleHydraulicErosionConfiguration = particleHydraulicErosionConfiguration;
         myParticleWindErosionConfiguration = particleWindErosionConfiguration;
         myComputeShaderProgramFactory = computeShaderProgramFactory;
@@ -58,13 +60,18 @@ internal class ParticleErosion : IParticleErosion
 
     private void OnParticlesChangedChanged(object? sender, EventArgs e)
     {
+        ResetShaderBuffers();
+    }
+
+    public void ResetShaderBuffers()
+    {
         RemoveParticlesHydraulicErosionShaderBuffer();
         AddParticlesHydraulicErosionShaderBuffer();
     }
 
     public void SimulateHydraulicErosion()
     {
-        if (myConfiguration.IsRainAdded)
+        if (myErosionConfiguration.IsRainAdded)
         {
             CreateParticles();
         }
@@ -89,7 +96,7 @@ internal class ParticleErosion : IParticleErosion
             Rlgl.ReadShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticlesHydraulicErosion], particlesHydraulicErosionPointer, particleCount * (uint)sizeof(ParticleHydraulicErosionShaderBuffer), 0);
         }
 
-        for(int particle = 0; particle < particleCount; particle++)
+        for (int particle = 0; particle < particleCount; particle++)
         {
             if (particlesHydraulicErosion[particle].Age > myParticleHydraulicErosionConfiguration.MaxAge
                 || particlesHydraulicErosion[particle].Volume == 0)

@@ -1,7 +1,7 @@
 ﻿using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.GUI;
+namespace ProceduralLandscapeGeneration.GUI.Elements;
 
 class ToggleSliderWithLabel : IGUIElement
 {
@@ -23,6 +23,10 @@ class ToggleSliderWithLabel : IGUIElement
         int value = myValue;
         Raygui.GuiLabel(new Rectangle(position, ConfigurationGUI.LabelSize), myName);
         Raygui.GuiToggleSlider(new Rectangle(position + new Vector2(ConfigurationGUI.LabelSize.X, 0), ConfigurationGUI.ElementSize), mySliderOptions, &value);
+        if (value == myValue)
+        {
+            return;
+        }
         myValue = value;
         myValueDelegate(value);
     }

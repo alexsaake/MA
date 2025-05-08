@@ -56,9 +56,9 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     private void CreatePlates()
     {
-        for (int i = 0; i < myConfiguration.PlateCount; i++)
+        for (int i = 0; i < myMapGenerationConfiguration.PlateCount; i++)
         {
-            myPlates.Add(new Plate(new Vector2(myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength), myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength)),myMapGenerationConfiguration, myShaderBuffers));
+            myPlates.Add(new Plate(new Vector2(myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength), myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength)), myMapGenerationConfiguration, myShaderBuffers));
         }
     }
 
@@ -238,7 +238,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
         float[] heightMap = new float[heightMapSize];
         for (int segment = 0; segment < mySegments!.Length; segment++)
         {
-            if(mySegments![segment] is null)
+            if (mySegments![segment] is null)
             {
                 heightMap[segment] = 0;
                 continue;

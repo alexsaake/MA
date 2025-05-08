@@ -1,7 +1,7 @@
 ﻿using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.GUI;
+namespace ProceduralLandscapeGeneration.GUI.Elements;
 
 class ValueBoxIntWithLabel : IGUIElement
 {
@@ -30,6 +30,10 @@ class ValueBoxIntWithLabel : IGUIElement
         {
             myEditMode = !myEditMode;
             myValueDelegate(intValue);
+        }
+        if (intValue == myValue)
+        {
+            return;
         }
         myValue = intValue;
     }

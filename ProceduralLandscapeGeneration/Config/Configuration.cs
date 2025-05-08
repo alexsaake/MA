@@ -6,56 +6,12 @@ namespace ProceduralLandscapeGeneration.Config;
 internal class Configuration : IConfiguration
 {
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
+    private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IGridErosionConfiguration myGridErosionConfiguration;
     private readonly IParticleHydraulicErosionConfiguration myParticleHydraulicErosionConfiguration;
     private readonly IParticleWindErosionConfiguration myParticleWindErosionConfiguration;
 
     private bool myIsDisposed;
-
-    private int myPlateCount;
-    public int PlateCount
-    {
-        get => myPlateCount;
-        set
-        {
-            if (myPlateCount == value)
-            {
-                return;
-            }
-            myPlateCount = value;
-            ResetRequired?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    private int myTalusAngle;
-    public int TalusAngle
-    {
-        get => myTalusAngle;
-        set
-        {
-            if (myTalusAngle == value)
-            {
-                return;
-            }
-            myTalusAngle = value;
-            ThermalErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    private float myHeightChange;
-    public float ThermalErosionHeightChange
-    {
-        get => myHeightChange;
-        set
-        {
-            if (myHeightChange == value)
-            {
-                return;
-            }
-            myHeightChange = value;
-            ThermalErosionConfigurationChanged?.Invoke(this, EventArgs.Empty);
-        }
-    }
 
     public int ScreenWidth { get; set; }
     public int ScreenHeight { get; set; }
@@ -70,17 +26,13 @@ internal class Configuration : IConfiguration
     public event EventHandler? ResetRequired;
     public event EventHandler? ThermalErosionConfigurationChanged;
 
-    public Configuration(IMapGenerationConfiguration mapGenerationConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
+    public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
+        myErosionConfiguration = erosionConfiguration;
         myGridErosionConfiguration = gridErosionConfiguration;
         myParticleHydraulicErosionConfiguration = particleHydraulicErosionConfiguration;
         myParticleWindErosionConfiguration = particleWindErosionConfiguration;
-
-        PlateCount = 10;
-
-        TalusAngle = 33;
-        ThermalErosionHeightChange = 0.001f;
 
         ScreenWidth = 1920;
         ScreenHeight = 1080;
@@ -98,6 +50,7 @@ internal class Configuration : IConfiguration
         myMapGenerationConfiguration.ResetRequired += OnResetRequired;
 
         myMapGenerationConfiguration.Initialize();
+        myErosionConfiguration.Initialize();
         myGridErosionConfiguration.Initialize();
         myParticleHydraulicErosionConfiguration.Initialize();
         myParticleWindErosionConfiguration.Initialize();
@@ -118,6 +71,7 @@ internal class Configuration : IConfiguration
         }
 
         myMapGenerationConfiguration.Dispose();
+        myErosionConfiguration.Dispose();
         myGridErosionConfiguration.Dispose();
         myParticleHydraulicErosionConfiguration.Dispose();
         myParticleWindErosionConfiguration.Dispose();

@@ -24,6 +24,7 @@ internal class DependencyInjectionContainer
         containerBuilder.RegisterType<Application>().As<IApplication>();
         containerBuilder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
         containerBuilder.RegisterType<MapGenerationConfiguration>().As<IMapGenerationConfiguration>().SingleInstance();
+        containerBuilder.RegisterType<ErosionConfiguration>().As<IErosionConfiguration>().SingleInstance();
         containerBuilder.RegisterType<GridErosionConfiguration>().As<IGridErosionConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ParticleHydraulicErosionConfiguration>().As<IParticleHydraulicErosionConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ParticleWindErosionConfiguration>().As<IParticleWindErosionConfiguration>().SingleInstance();

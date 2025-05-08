@@ -9,5 +9,6 @@ enum ShaderBufferTypes
     GridErosionConfiguration,
     MapGenerationConfiguration,
     ParticleHydraulicErosionConfiguration,
-    ParticleWindErosionConfiguration
+    ParticleWindErosionConfiguration,
+    ThermalErosionConfiguration
 }

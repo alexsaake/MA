@@ -8,8 +8,8 @@ namespace ProceduralLandscapeGeneration.Rendering;
 
 internal class MeshShaderRenderer : IRenderer
 {
-    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
+    private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IShaderBuffers myShaderBuffers;
 
     private Shader myTerrainHeightMapMeshShader;
@@ -22,10 +22,10 @@ internal class MeshShaderRenderer : IRenderer
     private uint myMeshletCount;
     private bool myIsDisposed;
 
-    public MeshShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IShaderBuffers shaderBuffers)
+    public MeshShaderRenderer(IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IShaderBuffers shaderBuffers)
     {
-        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
+        myErosionConfiguration = erosionConfiguration;
         myShaderBuffers = shaderBuffers;
     }
 
@@ -74,7 +74,7 @@ internal class MeshShaderRenderer : IRenderer
     public void Draw()
     {
         Raylib.BeginMode3D(myCamera);
-        if (myConfiguration.IsSedimentDisplayed)
+        if (myErosionConfiguration.IsSedimentDisplayed)
         {
             Raylib.BeginShaderMode(mySedimentMeshShader);
             Rlgl.EnableShader(mySedimentMeshShader.Id);
@@ -92,7 +92,7 @@ internal class MeshShaderRenderer : IRenderer
         Raylib.DrawMeshTasks(0, myMeshletCount);
         Rlgl.DisableShader();
         Raylib.EndShaderMode();
-        if (myConfiguration.IsWaterDisplayed)
+        if (myErosionConfiguration.IsWaterDisplayed)
         {
             Raylib.BeginShaderMode(myWaterHeightMapMeshShader);
             Rlgl.EnableShader(myWaterHeightMapMeshShader.Id);

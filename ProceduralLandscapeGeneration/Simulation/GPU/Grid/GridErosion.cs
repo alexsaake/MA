@@ -36,7 +36,7 @@ internal class GridErosion : IGridErosion
         myRandom = random;
     }
 
-    public unsafe void Initialize()
+    public void Initialize()
     {
         myFlow = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/1FlowComputeShader.glsl");
         myVelocityMap = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/2VelocityMapComputeShader.glsl");
@@ -46,6 +46,13 @@ internal class GridErosion : IGridErosion
         myHydraulicErosionSimulationGridPassSixComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/HydraulicErosionSimulationGridPassSixComputeShader.glsl");
         myHydraulicErosionSimulationGridPassSevenComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("Simulation/GPU/Grid/Shaders/HydraulicErosionSimulationGridPassSevenComputeShader.glsl");
 
+        AddGridPointsShaderBuffer();
+
+        myIsDisposed = false;
+    }
+
+    private unsafe void AddGridPointsShaderBuffer()
+    {
         uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
         GridPointShaderBuffer[] gridPoints = new GridPointShaderBuffer[mapSize];
         for (int i = 0; i < gridPoints.Length; i++)
@@ -58,8 +65,12 @@ internal class GridErosion : IGridErosion
             Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, mapSize * (uint)sizeof(GridPointShaderBuffer), 0);
         }
         Rlgl.MemoryBarrier();
+    }
 
-        myIsDisposed = false;
+    public void ResetShaderBuffers()
+    {
+        RemoveGridPointsShaderBuffer();
+        AddGridPointsShaderBuffer();
     }
 
     public void Flow()
@@ -222,9 +233,13 @@ internal class GridErosion : IGridErosion
         myHydraulicErosionSimulationGridPassSixComputeShaderProgram?.Dispose();
         myHydraulicErosionSimulationGridPassSevenComputeShaderProgram?.Dispose();
 
-        Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints]);
-        myShaderBuffers.Remove(ShaderBufferTypes.GridPoints);
+        RemoveGridPointsShaderBuffer();
 
         myIsDisposed = true;
+    }
+    private void RemoveGridPointsShaderBuffer()
+    {
+        Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints]);
+        myShaderBuffers.Remove(ShaderBufferTypes.GridPoints);
     }
 }

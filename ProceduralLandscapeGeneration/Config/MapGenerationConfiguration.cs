@@ -130,6 +130,23 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
+    public bool IsPlateTectonicsRunning { get; set; }
+
+    private int myPlateCount;
+    public int PlateCount
+    {
+        get => myPlateCount;
+        set
+        {
+            if (myPlateCount == value)
+            {
+                return;
+            }
+            myPlateCount = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     private uint myHeightMapSideLength;
     public uint HeightMapSideLength
     {
@@ -220,6 +237,9 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         NoiseOctaves = 8;
         NoisePersistence = 0.5f;
         NoiseLacunarity = 2.0f;
+
+        IsPlateTectonicsRunning = false;
+        PlateCount = 10;
 
         HeightMapSideLength = 256;
         myHeightMultiplier = 32;

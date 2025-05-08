@@ -12,6 +12,7 @@ internal class VertexShaderRenderer : IRenderer
 {
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
+    private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IGridErosionConfiguration myGridErosionConfiguration;
     private readonly IErosionSimulator myErosionSimulator;
     private readonly IVertexMeshCreator myVertexMeshCreator;
@@ -36,10 +37,11 @@ internal class VertexShaderRenderer : IRenderer
     private bool myIsUpdateAvailable;
     private bool myIsDisposed;
 
-    public VertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IGridErosionConfiguration gridErosionConfiguration, IErosionSimulator erosionSimulator, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBuffers)
+    public VertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IErosionSimulator erosionSimulator, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
+        myErosionConfiguration = erosionConfiguration;
         myGridErosionConfiguration = gridErosionConfiguration;
         myErosionSimulator = erosionSimulator;
         myVertexMeshCreator = vertexMeshCreator;
@@ -193,11 +195,11 @@ internal class VertexShaderRenderer : IRenderer
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints], 3);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticlesHydraulicErosion], 4);
         DrawTerrainHeightMap(myTerrainHeightMapShader);
-        if (myConfiguration.IsWaterDisplayed)
+        if (myErosionConfiguration.IsWaterDisplayed)
         {
             Raylib.DrawModel(myWaterHeightMap, Vector3.Zero, 1.0f, Color.White);
         }
-        if (myConfiguration.IsSedimentDisplayed)
+        if (myErosionConfiguration.IsSedimentDisplayed)
         {
             Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
         }

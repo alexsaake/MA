@@ -3,6 +3,7 @@
 internal interface IGridErosion : IDisposable
 {
     void Initialize();
+    void ResetShaderBuffers();
     void Flow();
     void VelocityMap();
     void SuspendDeposite();

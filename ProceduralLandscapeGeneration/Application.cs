@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Config;
+using ProceduralLandscapeGeneration.Config.Types;
 using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.Rendering;
 using ProceduralLandscapeGeneration.Simulation;
@@ -11,17 +12,20 @@ internal class Application : IApplication
 {
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
+    private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IConfigurationGUI myConfigurationGUI;
     private readonly IErosionSimulator myErosionSimulator;
     private readonly ILifetimeScope myLifetimeScope;
     private IRenderer? myRenderer;
 
     private bool myIsResetRequired;
+    private bool myIsErosionResetRequired;
 
-    public Application(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
+    public Application(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
+        myErosionConfiguration = erosionConfiguration;
         myConfigurationGUI = configurationGUI;
         myErosionSimulator = erosionSimulator;
         myLifetimeScope = lifetimeScope;
@@ -39,6 +43,8 @@ internal class Application : IApplication
 
         myConfiguration.ResetRequired += OnResetRequired;
         myMapGenerationConfiguration.ResetRequired += OnResetRequired;
+        myConfigurationGUI.MapResetRequired += OnResetRequired;
+        myConfigurationGUI.ErosionResetRequired += OnErosionResetRequired;
 
         InitializeModules();
 
@@ -54,26 +60,33 @@ internal class Application : IApplication
                 InitializeModules();
                 myIsResetRequired = false;
             }
+            if (myIsErosionResetRequired)
+            {
+                myErosionSimulator.Reset();
+                myIsErosionResetRequired = false;
+            }
 
-            if (Raylib.IsKeyDown(KeyboardKey.One))
-            {
-                myErosionSimulator.SimulateHydraulicErosion();
-            }
-            else if (Raylib.IsKeyDown(KeyboardKey.Two))
-            {
-                myErosionSimulator.SimulateThermalErosion();
-            }
-            else if (Raylib.IsKeyDown(KeyboardKey.Three))
-            {
-                myErosionSimulator.SimulateWindErosion();
-            }
-            else if (Raylib.IsKeyDown(KeyboardKey.Four))
-            {
-                myErosionSimulator.SimulateHydraulicErosionGrid();
-            }
-            else if (Raylib.IsKeyDown(KeyboardKey.Five))
+            if (myMapGenerationConfiguration.IsPlateTectonicsRunning)
             {
                 myErosionSimulator.SimulatePlateTectonics();
+            }
+            else if (myErosionConfiguration.IsRunning)
+            {
+                switch (myErosionConfiguration.Mode)
+                {
+                    case ErosionModeTypes.HydraulicParticle:
+                        myErosionSimulator.SimulateHydraulicErosion();
+                        break;
+                    case ErosionModeTypes.HydraulicGrid:
+                        myErosionSimulator.SimulateHydraulicErosionGrid();
+                        break;
+                    case ErosionModeTypes.Thermal:
+                        myErosionSimulator.SimulateThermalErosion();
+                        break;
+                    case ErosionModeTypes.Wind:
+                        myErosionSimulator.SimulateWindErosion();
+                        break;
+                }
             }
 
             myRenderer!.Update();
@@ -87,10 +100,22 @@ internal class Application : IApplication
 
         myConfiguration.ResetRequired -= OnResetRequired;
         myMapGenerationConfiguration.ResetRequired -= OnResetRequired;
+        myConfigurationGUI.MapResetRequired -= OnResetRequired;
+        myConfigurationGUI.ErosionResetRequired -= OnErosionResetRequired;
 
         DisposeModules();
 
         Raylib.CloseWindow();
+    }
+
+    private void OnResetRequired(object? sender, EventArgs e)
+    {
+        myIsResetRequired = true;
+    }
+
+    private void OnErosionResetRequired(object? sender, EventArgs e)
+    {
+        myIsErosionResetRequired = true;
     }
 
     private void InitializeModules()
@@ -98,11 +123,6 @@ internal class Application : IApplication
         myConfiguration.Initialize();
         myErosionSimulator.Initialize();
         myRenderer!.Initialize();
-    }
-
-    private void OnResetRequired(object? sender, EventArgs e)
-    {
-        myIsResetRequired = true;
     }
 
     private void DisposeModules()

@@ -3,4 +3,7 @@
 internal interface IConfigurationGUI
 {
     void Draw();
+
+    event EventHandler? MapResetRequired;
+    event EventHandler? ErosionResetRequired;
 }
