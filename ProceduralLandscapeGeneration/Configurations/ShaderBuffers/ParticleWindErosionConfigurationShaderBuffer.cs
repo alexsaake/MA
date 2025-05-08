@@ -9,8 +9,11 @@ internal struct ParticleWindErosionConfigurationShaderBuffer
     public float MaxDiff;
     public float Settling;
     public float MaxAge;
-    public float padding1;
-    public float padding2;
-    public float padding3;
+    private float padding1;
     public Vector2 PersistentSpeed;
+    public bool AreParticlesAdded;
+    private bool padding2;
+    private bool padding3;
+    private bool padding4;
+    public bool AreParticlesDisplayed;
 }

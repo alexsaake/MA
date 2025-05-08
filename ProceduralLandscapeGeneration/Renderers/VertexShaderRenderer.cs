@@ -203,7 +203,10 @@ internal class VertexShaderRenderer : IRenderer
         {
             Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
         }
-        Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
+        if (myMapGenerationConfiguration.IsSeaLevelDisplayed)
+        {
+            Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
+        }
         Raylib.EndMode3D();
     }
 

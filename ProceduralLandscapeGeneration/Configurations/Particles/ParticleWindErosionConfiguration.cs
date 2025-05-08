@@ -117,9 +117,39 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
         }
     }
 
+    private bool myAreParticlesAdded;
+    public bool AreParticlesAdded
+    {
+        get => myAreParticlesAdded;
+        set
+        {
+            if (myAreParticlesAdded == value)
+            {
+                return;
+            }
+            myAreParticlesAdded = value;
+            UpdateShaderBuffer();
+        }
+    }
+
+    private bool myAreParticlesDisplayed;
+    public bool AreParticlesDisplayed
+    {
+        get => myAreParticlesDisplayed;
+        set
+        {
+            if (myAreParticlesDisplayed == value)
+            {
+                return;
+            }
+            myAreParticlesDisplayed = value;
+            UpdateShaderBuffer();
+        }
+    }
+
     public event EventHandler<EventArgs>? ParticlesChanged;
 
-    public ParticleWindErosionConfiguration(IShaderBuffers shaderBuffers)
+    public ParticleWindErosionConfiguration(IShaderBuffers shaderBuffers, IErosionConfiguration erosionConfiguration)
     {
         myShaderBuffers = shaderBuffers;
 
@@ -130,6 +160,8 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
         myMaxDiff = 0.005f;
         mySettling = 0.25f;
         myPersistentSpeed = new Vector2(0.0f, 0.125f);
+        myAreParticlesAdded = erosionConfiguration.IsWaterAdded;
+        myAreParticlesDisplayed = true;
     }
 
     public void Initialize()
@@ -152,7 +184,9 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
             Gravity = Gravity,
             MaxDiff = MaxDiff,
             Settling = Settling,
-            PersistentSpeed = PersistentSpeed
+            PersistentSpeed = PersistentSpeed,
+            AreParticlesAdded = AreParticlesAdded,
+            AreParticlesDisplayed = AreParticlesDisplayed
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleWindErosionConfiguration], &particleWindErosionConfigurationShaderBuffer, (uint)sizeof(ParticleWindErosionConfigurationShaderBuffer), 0);
     }

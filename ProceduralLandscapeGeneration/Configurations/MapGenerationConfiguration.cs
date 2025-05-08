@@ -177,6 +177,8 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
+    public bool IsSeaLevelDisplayed {  get; set; }
+
     private float mySeaLevel;
     public float SeaLevel
     {
@@ -243,6 +245,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
 
         HeightMapSideLength = 256;
         myHeightMultiplier = 32;
+        IsSeaLevelDisplayed = false;
         mySeaLevel = 0.2f;
         myCameraMode = CameraMode.Custom;
         myIsColorEnabled = false;

@@ -35,7 +35,8 @@ struct ParticleHydraulicErosionConfiguration
     float Gravity;
     float MaxDiff;
     float Settling;
-    bool IsWaterAdded;
+    bool AreParticlesAdded;
+    bool AreParticlesDisplayed;
 };
 
 layout(std430, binding = 4) readonly restrict buffer particleHydraulicErosionConfigurationShaderBuffer
@@ -283,15 +284,15 @@ bool Interact()
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    myHeightMapSideLength = uint(sqrt(heightMap.length()));
     if(id >= particlesHydraulicErosion.length())
     {
         return;
     }
+    myHeightMapSideLength = uint(sqrt(heightMap.length()));
 
     myParticleHydraulicErosion = particlesHydraulicErosion[id];
 
-    if(myParticleHydraulicErosion.Volume == 0 && particleHydraulicErosionConfiguration.IsWaterAdded)
+    if(myParticleHydraulicErosion.Volume == 0 && particleHydraulicErosionConfiguration.AreParticlesAdded)
     {
         uint index = heightMapIndices[id];
         uint x = index % myHeightMapSideLength;
@@ -302,10 +303,27 @@ void main()
         myParticleHydraulicErosion.Position = vec2(x, y);
         myParticleHydraulicErosion.Speed = vec2(0.0, 0.0);
     }
-
-    if(Move())
+    
+    if(particleHydraulicErosionConfiguration.AreParticlesDisplayed)
     {
-        Interact();
+        if(Move())
+        {
+            Interact();
+        }
+    }
+    else
+    {
+        while(true)
+        {
+            if(!Move())
+            {
+                break;
+            }
+            if(!Interact())
+            {
+                break;
+            }
+        }
     }
     
     particlesHydraulicErosion[id] = myParticleHydraulicErosion;

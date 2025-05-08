@@ -103,13 +103,16 @@ internal class MeshShaderRenderer : IRenderer
             Rlgl.DisableShader();
             Raylib.EndShaderMode();
         }
-        Raylib.BeginShaderMode(mySeaLevelQuadMeshShader);
-        Rlgl.EnableShader(mySeaLevelQuadMeshShader.Id);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
-        Raylib.DrawMeshTasks(0, 1);
-        Rlgl.DisableShader();
-        Raylib.EndShaderMode();
+        if (myMapGenerationConfiguration.IsSeaLevelDisplayed)
+        {
+            Raylib.BeginShaderMode(mySeaLevelQuadMeshShader);
+            Rlgl.EnableShader(mySeaLevelQuadMeshShader.Id);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
+            Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
+            Raylib.DrawMeshTasks(0, 1);
+            Rlgl.DisableShader();
+            Raylib.EndShaderMode();
+        }
         Raylib.EndMode3D();
     }
 

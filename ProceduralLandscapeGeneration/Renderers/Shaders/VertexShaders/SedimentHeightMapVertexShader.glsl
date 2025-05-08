@@ -56,6 +56,19 @@ layout(std430, binding = 4) buffer particleHydraulicErosionShaderBuffer
     ParticleHydraulicErosion[] particlesHydraulicErosion;
 };
 
+struct ParticleWindErosion
+{
+    int Age;
+    float Sediment;
+    vec3 Position;
+    vec3 Speed;
+};
+
+layout(std430, binding = 5) buffer particleWindErosionShaderBuffer
+{
+    ParticleWindErosion[] particlesWindErosion;
+};
+
 in vec3 vertexPosition;
 
 uniform mat4 mvp;
@@ -81,7 +94,15 @@ void main()
             continue;
         }
     }
-
+    for(int particle = 0; particle < particlesWindErosion.length(); particle++)
+    {        
+        if(ivec2(particlesWindErosion[particle].Position) == ivec2(x, y))
+        {
+            suspendedSediment = particlesWindErosion[particle].Sediment;
+            continue;
+        }
+    }
+    
     fragColor = sedimentColor;
     float zOffset = 0.00004;
     gl_Position =  mvp * vec4(vertexPosition.xy, (heightMap[index] - zOffset + suspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);

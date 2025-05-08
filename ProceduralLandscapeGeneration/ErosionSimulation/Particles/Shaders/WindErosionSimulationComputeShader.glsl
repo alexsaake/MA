@@ -31,15 +31,27 @@ struct ParticleWindErosionConfiguration
     float MaxDiff;
     float Settling;
     uint MaxAge;
-    uint padding1;
-    uint padding2;
-    uint padding3;
     vec2 PersistentSpeed;
+    bool AreParticlesAdded;
+    bool AreParticlesDisplayed;
 };
 
 layout(std430, binding = 4) readonly restrict buffer particleWindErosionConfigurationShaderBuffer
 {
     ParticleWindErosionConfiguration particleWindErosionConfiguration;
+};
+
+struct ParticleWindErosion
+{
+    int Age;
+    float Sediment;
+    vec3 Position;
+    vec3 Speed;
+};
+
+layout(std430, binding = 5) buffer particleWindErosionShaderBuffer
+{
+    ParticleWindErosion[] particlesWindErosion;
 };
 
 uint myHeightMapSideLength;
@@ -60,11 +72,8 @@ bool isOutOfBounds(ivec2 position)
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/wind.hpp
+ParticleWindErosion myParticleWindErosion;
 const float BoundaryLayer = 2.0;
-vec3 myPosition;
-vec3 mySpeed;
-int myAge;
-float mySediment;
 
 vec3 getScaledNormal(uint x, uint y)
 {
@@ -208,16 +217,20 @@ float random( vec3  v ) { return floatConstruct(hash(floatBitsToUint(v))); }
 
 bool Move()
 {
-    const ivec2 position = ivec2(myPosition.x, myPosition.y);
+    const ivec2 position = ivec2(myParticleWindErosion.Position.x, myParticleWindErosion.Position.y);
 
     if(isOutOfBounds(position))
     {
+        myParticleWindErosion.Sediment = 0.0;
+        myParticleWindErosion.Age = 0;
         return false;
     }
 
-    if(myAge > particleWindErosionConfiguration.MaxAge)
+    if(myParticleWindErosion.Age > particleWindErosionConfiguration.MaxAge)
     {
-        heightMap[getIndexV(position)] += mySediment;
+        heightMap[getIndexV(position)] += myParticleWindErosion.Sediment;
+        myParticleWindErosion.Sediment = 0.0;
+        myParticleWindErosion.Age = 0;
         Cascade(position);
         return false;
     }
@@ -225,26 +238,26 @@ bool Move()
     // Compute Movement
 
     const float height = heightMap[getIndexV(position)];
-    if (myAge == 0 || myPosition.z < height)
+    if (myParticleWindErosion.Age == 0 || myParticleWindErosion.Position.z < height)
     {
-        myPosition.z = height;
+        myParticleWindErosion.Position.z = height;
     }
     vec3 persistentSpeed = vec3(particleWindErosionConfiguration.PersistentSpeed, 0.0);
     const vec3 normal = getScaledNormal(position.x, position.y);
-    const float hfac = exp(-(myPosition.z - height) / BoundaryLayer);
+    const float hfac = exp(-(myParticleWindErosion.Position.z - height) / BoundaryLayer);
     const float shadow = 1.0 - max(0.0, dot(normalize(persistentSpeed), normal));
-    const float collision = max(0.0, -dot(normalize(mySpeed), normal));
-    const vec3 rspeed = cross(normal, cross((1.0 - collision) * mySpeed, normal));
+    const float collision = max(0.0, -dot(normalize(myParticleWindErosion.Speed), normal));
+    const vec3 rspeed = cross(normal, cross((1.0 - collision) * myParticleWindErosion.Speed, normal));
 
     // Apply Base Prevailign Wind-Speed w. Shadowing
 
-    mySpeed += 0.05 * ((0.1 + 0.9 * shadow) * persistentSpeed - mySpeed);
+    myParticleWindErosion.Speed += 0.05 * ((0.1 + 0.9 * shadow) * persistentSpeed - myParticleWindErosion.Speed);
 
     // Apply Gravity
 
-    if (myPosition.z > height)
+    if (myParticleWindErosion.Position.z > height)
     {
-        mySpeed.z -= particleWindErosionConfiguration.Gravity * mySediment;
+        myParticleWindErosion.Speed.z -= particleWindErosionConfiguration.Gravity * myParticleWindErosion.Sediment;
     }
 
     // Compute Collision Factor
@@ -253,19 +266,19 @@ bool Move()
 
     // Speed is accelerated by terrain features
 
-    mySpeed += 0.9 * (shadow * mix(persistentSpeed, rspeed, shadow * hfac) - mySpeed);
+    myParticleWindErosion.Speed += 0.9 * (shadow * mix(persistentSpeed, rspeed, shadow * hfac) - myParticleWindErosion.Speed);
 
     // Turbulence
 
-    mySpeed += 0.1 * hfac * collision * ((random(mySpeed) * 1001) - 500.0) / 500.0;
+    myParticleWindErosion.Speed += 0.1 * hfac * collision * ((random(myParticleWindErosion.Speed) * 1001) - 500.0) / 500.0;
 
     // Speed is damped by drag
 
-    mySpeed *= (1.0 - 0.3 * mySediment);
+    myParticleWindErosion.Speed *= (1.0 - 0.3 * myParticleWindErosion.Sediment);
 
     // Move
 
-    myPosition += mySpeed;
+    myParticleWindErosion.Position += myParticleWindErosion.Speed;
 
     return true;
 }
@@ -274,7 +287,7 @@ bool Interact()
 {
     // Termination Checks
 
-    const ivec2 currentPosition = ivec2(myPosition.x, myPosition.y);
+    const ivec2 currentPosition = ivec2(myParticleWindErosion.Position.x, myParticleWindErosion.Position.y);
 
     if(isOutOfBounds(currentPosition))
     {
@@ -285,24 +298,24 @@ bool Interact()
     
     const float height = heightMap[getIndexV(currentPosition)];
     const vec3 normal = getScaledNormal(currentPosition.x, currentPosition.y);
-    const float hfac = exp(-(myPosition.z - height) / BoundaryLayer);
-    const float collision = max(0.0, -dot(normalize(mySpeed), normal));
-    const float force = max(0.0, -dot(normalize(mySpeed), normal) * length(mySpeed));
+    const float hfac = exp(-(myParticleWindErosion.Position.z - height) / BoundaryLayer);
+    const float collision = max(0.0, -dot(normalize(myParticleWindErosion.Speed), normal));
+    const float force = max(0.0, -dot(normalize(myParticleWindErosion.Speed), normal) * length(myParticleWindErosion.Speed));
 
-    float lift = (1.0 - collision) * length(mySpeed);
+    float lift = (1.0 - collision) * length(myParticleWindErosion.Speed);
 
     float capacity = 1 * (force * hfac + 0.02 * lift * hfac);
 
     // Mass Transfer to Equilibrium
 
-    float diff = capacity - mySediment;
+    float diff = capacity - myParticleWindErosion.Sediment;
 
-    mySediment += particleWindErosionConfiguration.Suspension * diff;
+    myParticleWindErosion.Sediment += particleWindErosionConfiguration.Suspension * diff;
     heightMap[getIndexV(currentPosition)] -= particleWindErosionConfiguration.Suspension * diff;
 
     Cascade(currentPosition);
 
-    myAge++;
+    myParticleWindErosion.Age++;
 
     return true;
 }
@@ -310,25 +323,46 @@ bool Interact()
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
+    if(id >= particlesWindErosion.length())
+    {
+        return;
+    }
     myHeightMapSideLength = uint(sqrt(heightMap.length()));
 
-    uint index = heightMapIndices[id];
-    uint x = index % myHeightMapSideLength;
-    uint y = index / myHeightMapSideLength;
-    myPosition = vec3(x, y, 0);
-    mySpeed = vec3(0.0, 0.0, 0.0);
-    myAge = 0;
-    mySediment = 0.0;
-
-    while(true)
+    myParticleWindErosion = particlesWindErosion[id];
+    
+    if(myParticleWindErosion.Age == 0 && particleWindErosionConfiguration.AreParticlesAdded)
     {
-        if(!Move())
+        uint index = heightMapIndices[id];
+        uint x = index % myHeightMapSideLength;
+        uint y = index / myHeightMapSideLength;
+        myParticleWindErosion.Age = 0;
+        myParticleWindErosion.Sediment = 0.0;
+        myParticleWindErosion.Position = vec3(x, y, 0.0);
+        myParticleWindErosion.Speed = vec3(0.0, 0.0, 0.0);
+    }
+
+    if(particleWindErosionConfiguration.AreParticlesDisplayed)
+    {
+        if(Move())
         {
-            break;
-        }
-        if(!Interact())
-        {
-            break;
+            Interact();
         }
     }
+    else
+    {
+        while(true)
+        {
+            if(!Move())
+            {
+                break;
+            }
+            if(!Interact())
+            {
+                break;
+            }
+        }
+    }
+
+    particlesWindErosion[id] = myParticleWindErosion;
 }

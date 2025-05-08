@@ -22,8 +22,9 @@ internal class Application : IApplication
 
     private bool myIsResetRequired;
     private bool myIsErosionResetRequired;
+    private bool myShowUI = true;
 
-    public Application(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IConfigurationGUI configurationGUI, IHeightMap heightMap, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
+    public Application(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IConfigurationGUI configurationGUI, IHeightMap heightMap, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
@@ -91,12 +92,20 @@ internal class Application : IApplication
                 }
             }
 
+            if (Raylib.IsKeyPressed(KeyboardKey.Space))
+            {
+                myShowUI = !myShowUI;
+            }
+
             myRenderer!.Update();
 
             Raylib.BeginDrawing();
                 Raylib.ClearBackground(Color.SkyBlue);
                 myRenderer.Draw();
-                myConfigurationGUI.Draw();
+                if (myShowUI)
+                {
+                    myConfigurationGUI.Draw();
+                }
             Raylib.EndDrawing();
         }
 

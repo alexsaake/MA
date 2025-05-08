@@ -12,6 +12,8 @@ internal interface IParticleWindErosionConfiguration : IDisposable
     float MaxDiff { get; set; }
     float Settling { get; set; }
     Vector2 PersistentSpeed { get; set; }
+    bool AreParticlesAdded { get; set; }
+    bool AreParticlesDisplayed { get; set; }
 
     event EventHandler<EventArgs>? ParticlesChanged;
 

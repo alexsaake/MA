@@ -6,6 +6,7 @@ enum ShaderBufferTypes
     HeatMap,
     GridPoints,
     ParticlesHydraulicErosion,
+    ParticlesWindErosion,
     GridErosionConfiguration,
     MapGenerationConfiguration,
     ParticleHydraulicErosionConfiguration,

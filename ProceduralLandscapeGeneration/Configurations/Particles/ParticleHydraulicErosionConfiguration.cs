@@ -8,7 +8,6 @@ namespace ProceduralLandscapeGeneration.Configurations.Particles;
 internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosionConfiguration
 {
     private readonly IShaderBuffers myShaderBuffers;
-    private readonly IErosionConfiguration myErosionConfiguration;
 
     private bool myIsDisposed;
 
@@ -162,12 +161,41 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
         }
     }
 
+    private bool myAreParticlesAdded;
+    public bool AreParticlesAdded
+    {
+        get => myAreParticlesAdded;
+        set
+        {
+            if (myAreParticlesAdded == value)
+            {
+                return;
+            }
+            myAreParticlesAdded = value;
+            UpdateShaderBuffer();
+        }
+    }
+
+    private bool myAreParticlesDisplayed;
+    public bool AreParticlesDisplayed
+    {
+        get => myAreParticlesDisplayed;
+        set
+        {
+            if (myAreParticlesDisplayed == value)
+            {
+                return;
+            }
+            myAreParticlesDisplayed = value;
+            UpdateShaderBuffer();
+        }
+    }
+
     public event EventHandler<EventArgs>? ParticlesChanged;
 
     public ParticleHydraulicErosionConfiguration(IShaderBuffers shaderBuffers, IErosionConfiguration erosionConfiguration)
     {
         myShaderBuffers = shaderBuffers;
-        myErosionConfiguration = erosionConfiguration;
 
         myParticles = 10000;
         myWaterIncrease = 0.1f;
@@ -179,6 +207,8 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
         myGravity = 9.81f;
         myMaxDiff = 0.8f;
         mySettling = 1.0f;
+        myAreParticlesAdded = erosionConfiguration.IsWaterAdded;
+        myAreParticlesDisplayed = true;
     }
 
     public void Initialize()
@@ -205,7 +235,8 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
             Gravity = Gravity,
             MaxDiff = MaxDiff,
             Settling = Settling,
-            IsWaterAdded = myErosionConfiguration.IsWaterAdded
+            AreParticlesAdded = AreParticlesAdded,
+            AreParticlesDisplayed = AreParticlesDisplayed
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleHydraulicErosionConfiguration], &particleHydraulicErosionConfigurationShaderBuffer, (uint)sizeof(ParticleHydraulicErosionConfigurationShaderBuffer), 0);
     }

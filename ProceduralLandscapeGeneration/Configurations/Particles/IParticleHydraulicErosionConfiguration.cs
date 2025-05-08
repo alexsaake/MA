@@ -13,6 +13,8 @@ internal interface IParticleHydraulicErosionConfiguration : IDisposable
     float Gravity { get; set; }
     float MaxDiff { get; set; }
     float Settling { get; set; }
+    bool AreParticlesAdded { get; set; }
+    bool AreParticlesDisplayed { get; set; }
 
     event EventHandler<EventArgs>? ParticlesChanged;
 
