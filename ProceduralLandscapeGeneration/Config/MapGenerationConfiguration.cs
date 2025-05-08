@@ -245,7 +245,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         myHeightMultiplier = 32;
         mySeaLevel = 0.2f;
         myCameraMode = CameraMode.Custom;
-        myIsColorEnabled = true;
+        myIsColorEnabled = false;
     }
 
     public void Initialize()
