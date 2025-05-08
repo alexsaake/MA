@@ -1,11 +1,12 @@
 ﻿using Autofac;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
-using ProceduralLandscapeGeneration.Config;
-using ProceduralLandscapeGeneration.Config.Grid;
-using ProceduralLandscapeGeneration.Config.Types;
-using ProceduralLandscapeGeneration.Simulation.GPU;
-using ProceduralLandscapeGeneration.Simulation.GPU.Grid;
+using ProceduralLandscapeGeneration.Common.GPU;
+using ProceduralLandscapeGeneration.Configurations;
+using ProceduralLandscapeGeneration.Configurations.Grid;
+using ProceduralLandscapeGeneration.Configurations.Types;
+using ProceduralLandscapeGeneration.DependencyInjection;
+using ProceduralLandscapeGeneration.ErosionSimulation.Grid;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Int.Test.Simulation.GPU.Grid;
@@ -19,7 +20,7 @@ public class GridErosionTests
     [SetUp]
     public void SetUp()
     {
-        myContainer = DependencyInjectionContainer.Create();
+        myContainer = Container.Create();
         Raylib.InitWindow(1, 1, nameof(GridErosionTests));
     }
 

@@ -1,7 +1,7 @@
-﻿using ProceduralLandscapeGeneration.Config;
-using ProceduralLandscapeGeneration.Config.Grid;
-using ProceduralLandscapeGeneration.Config.Particles;
-using ProceduralLandscapeGeneration.Config.Types;
+﻿using ProceduralLandscapeGeneration.Configurations;
+using ProceduralLandscapeGeneration.Configurations.Grid;
+using ProceduralLandscapeGeneration.Configurations.Particles;
+using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.GUI.Elements;
 using Raylib_cs;
 using System.Numerics;

@@ -1,9 +1,10 @@
 ﻿using Autofac;
-using ProceduralLandscapeGeneration.Config;
-using ProceduralLandscapeGeneration.Config.Types;
+using ProceduralLandscapeGeneration.Configurations;
+using ProceduralLandscapeGeneration.Configurations.Types;
+using ProceduralLandscapeGeneration.ErosionSimulation;
 using ProceduralLandscapeGeneration.GUI;
-using ProceduralLandscapeGeneration.Rendering;
-using ProceduralLandscapeGeneration.Simulation;
+using ProceduralLandscapeGeneration.HeightMapGeneration;
+using ProceduralLandscapeGeneration.Renderers;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration;
@@ -14,6 +15,7 @@ internal class Application : IApplication
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IConfigurationGUI myConfigurationGUI;
+    private readonly IHeightMap myHeightMap;
     private readonly IErosionSimulator myErosionSimulator;
     private readonly ILifetimeScope myLifetimeScope;
     private IRenderer? myRenderer;
@@ -21,12 +23,13 @@ internal class Application : IApplication
     private bool myIsResetRequired;
     private bool myIsErosionResetRequired;
 
-    public Application(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
+    public Application(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IConfigurationGUI configurationGUI, IHeightMap heightMap, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
         myConfigurationGUI = configurationGUI;
+        myHeightMap = heightMap;
         myErosionSimulator = erosionSimulator;
         myLifetimeScope = lifetimeScope;
         ResolveModules();
@@ -68,7 +71,7 @@ internal class Application : IApplication
 
             if (myMapGenerationConfiguration.IsPlateTectonicsRunning)
             {
-                myErosionSimulator.SimulatePlateTectonics();
+                myHeightMap.SimulatePlateTectonics();
             }
             else if (myErosionConfiguration.IsRunning)
             {
@@ -121,6 +124,7 @@ internal class Application : IApplication
     private void InitializeModules()
     {
         myConfiguration.Initialize();
+        myHeightMap.Initialize();
         myErosionSimulator.Initialize();
         myRenderer!.Initialize();
     }
@@ -129,6 +133,7 @@ internal class Application : IApplication
     {
         myRenderer!.Dispose();
         myErosionSimulator.Dispose();
-        myMapGenerationConfiguration.Dispose();
+        myHeightMap.Dispose();
+        myConfiguration.Dispose();
     }
 }

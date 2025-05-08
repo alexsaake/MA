@@ -1,5 +1,4 @@
-﻿using ProceduralLandscapeGeneration.Simulation;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Common;
 

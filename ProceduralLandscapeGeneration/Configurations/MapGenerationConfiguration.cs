@@ -1,0 +1,290 @@
+﻿using ProceduralLandscapeGeneration.Common.GPU;
+using ProceduralLandscapeGeneration.Configurations.ShaderBuffers;
+using ProceduralLandscapeGeneration.Configurations.Types;
+using Raylib_cs;
+
+namespace ProceduralLandscapeGeneration.Configurations;
+
+internal class MapGenerationConfiguration : IMapGenerationConfiguration
+{
+    private IShaderBuffers myShaderBuffers;
+
+    private bool myIsDisposed;
+
+    private MapGenerationTypes myMapGeneration;
+    public MapGenerationTypes MapGeneration
+    {
+        get => myMapGeneration;
+        set
+        {
+            if (myMapGeneration == value)
+            {
+                return;
+            }
+            myMapGeneration = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private ProcessorTypes myMeshCreation;
+    public ProcessorTypes MeshCreation
+    {
+        get => myMeshCreation;
+        set
+        {
+            if (myMeshCreation == value)
+            {
+                return;
+            }
+            myMeshCreation = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private ProcessorTypes myHeightMapGeneration;
+    public ProcessorTypes HeightMapGeneration
+    {
+        get => myHeightMapGeneration;
+        set
+        {
+            if (myHeightMapGeneration == value)
+            {
+                return;
+            }
+            myHeightMapGeneration = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+    private int mySeed;
+    public int Seed
+    {
+        get => mySeed;
+        set
+        {
+            if (mySeed == value)
+            {
+                return;
+            }
+            mySeed = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myNoiseScale;
+    public float NoiseScale
+    {
+        get => myNoiseScale;
+        set
+        {
+            if (myNoiseScale == value)
+            {
+                return;
+            }
+            myNoiseScale = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private uint myNoiseOctaves;
+    public uint NoiseOctaves
+    {
+        get => myNoiseOctaves;
+        set
+        {
+            if (myNoiseOctaves == value)
+            {
+                return;
+            }
+            myNoiseOctaves = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myNoisePersistance;
+    public float NoisePersistence
+    {
+        get => myNoisePersistance;
+        set
+        {
+            if (myNoisePersistance == value)
+            {
+                return;
+            }
+            myNoisePersistance = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myNoiseLacunarity;
+    public float NoiseLacunarity
+    {
+        get => myNoiseLacunarity;
+        set
+        {
+            if (myNoiseLacunarity == value)
+            {
+                return;
+            }
+            myNoiseLacunarity = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public bool IsPlateTectonicsRunning { get; set; }
+
+    private int myPlateCount;
+    public int PlateCount
+    {
+        get => myPlateCount;
+        set
+        {
+            if (myPlateCount == value)
+            {
+                return;
+            }
+            myPlateCount = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private uint myHeightMapSideLength;
+    public uint HeightMapSideLength
+    {
+        get => myHeightMapSideLength;
+        set
+        {
+            if (myHeightMapSideLength == value)
+            {
+                return;
+            }
+            myHeightMapSideLength = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private uint myHeightMultiplier;
+    public uint HeightMultiplier
+    {
+        get => myHeightMultiplier;
+        set
+        {
+            if (myHeightMultiplier == value)
+            {
+                return;
+            }
+            myHeightMultiplier = value;
+            UpdateShaderBuffer();
+        }
+    }
+
+    private float mySeaLevel;
+    public float SeaLevel
+    {
+        get => mySeaLevel;
+        set
+        {
+            if (mySeaLevel == value)
+            {
+                return;
+            }
+            mySeaLevel = value;
+            UpdateShaderBuffer();
+        }
+    }
+
+    private bool myIsColorEnabled;
+    public bool IsColorEnabled
+    {
+        get => myIsColorEnabled;
+        set
+        {
+            if (myIsColorEnabled == value)
+            {
+                return;
+            }
+            myIsColorEnabled = value;
+            UpdateShaderBuffer();
+        }
+    }
+
+    private CameraMode myCameraMode;
+    public CameraMode CameraMode
+    {
+        get => myCameraMode;
+        set
+        {
+            if (myCameraMode == value)
+            {
+                return;
+            }
+            myCameraMode = value;
+            UpdateShaderBuffer();
+        }
+    }
+
+    public event EventHandler? ResetRequired;
+
+    public MapGenerationConfiguration(IShaderBuffers shaderBuffers)
+    {
+        myShaderBuffers = shaderBuffers;
+
+        myMapGeneration = MapGenerationTypes.Noise;
+        myMeshCreation = ProcessorTypes.CPU;
+        myHeightMapGeneration = ProcessorTypes.CPU;
+
+        Seed = 1337;
+        NoiseScale = 2.0f;
+        NoiseOctaves = 8;
+        NoisePersistence = 0.5f;
+        NoiseLacunarity = 2.0f;
+
+        IsPlateTectonicsRunning = false;
+        PlateCount = 10;
+
+        HeightMapSideLength = 256;
+        myHeightMultiplier = 32;
+        mySeaLevel = 0.2f;
+        myCameraMode = CameraMode.Custom;
+        myIsColorEnabled = false;
+    }
+
+    public void Initialize()
+    {
+        UpdateShaderBuffer();
+
+        myIsDisposed = false;
+    }
+
+    private unsafe void UpdateShaderBuffer()
+    {
+        if (!myShaderBuffers.ContainsKey(ShaderBufferTypes.MapGenerationConfiguration))
+        {
+            myShaderBuffers.Add(ShaderBufferTypes.MapGenerationConfiguration, (uint)sizeof(MapGenerationConfigurationShaderBuffer));
+        }
+        MapGenerationConfigurationShaderBuffer mapGenerationConfigurationShaderBuffer = new MapGenerationConfigurationShaderBuffer()
+        {
+            HeightMultiplier = HeightMultiplier,
+            SeaLevel = SeaLevel,
+            IsColorEnabled = IsColorEnabled
+        };
+        Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], &mapGenerationConfigurationShaderBuffer, (uint)sizeof(MapGenerationConfigurationShaderBuffer), 0);
+    }
+
+    public uint GetIndex(uint x, uint y)
+    {
+        return y * HeightMapSideLength + x;
+    }
+
+    public void Dispose()
+    {
+        if (myIsDisposed)
+        {
+            return;
+        }
+
+        Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration]);
+        myShaderBuffers.Remove(ShaderBufferTypes.MapGenerationConfiguration);
+
+        myIsDisposed = true;
+    }
+}
