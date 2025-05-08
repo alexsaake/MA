@@ -2,6 +2,7 @@
 
 internal struct ParticleHydraulicErosionConfigurationShaderBuffer
 {
+    public float WaterIncrease;
     public uint MaxAge;
     public float EvaporationRate;
     public float DepositionRate;
@@ -10,4 +11,5 @@ internal struct ParticleHydraulicErosionConfigurationShaderBuffer
     public float Gravity;
     public float MaxDiff;
     public float Settling;
+    public bool IsWaterAdded;
 }

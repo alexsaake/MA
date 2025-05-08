@@ -8,6 +8,7 @@ namespace ProceduralLandscapeGeneration.Configurations.Particles;
 internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosionConfiguration
 {
     private readonly IShaderBuffers myShaderBuffers;
+    private readonly IErosionConfiguration myErosionConfiguration;
 
     private bool myIsDisposed;
 
@@ -26,7 +27,20 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
         }
     }
 
-    public float WaterIncrease { get; set; }
+    private float myWaterIncrease;
+    public float WaterIncrease
+    {
+        get => myWaterIncrease;
+        set
+        {
+            if (myWaterIncrease == value)
+            {
+                return;
+            }
+            myWaterIncrease = value;
+            UpdateShaderBuffer();
+        }
+    }
 
     private uint myMaxAge;
     public uint MaxAge
@@ -150,16 +164,17 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
 
     public event EventHandler<EventArgs>? ParticlesChanged;
 
-    public ParticleHydraulicErosionConfiguration(IShaderBuffers shaderBuffers)
+    public ParticleHydraulicErosionConfiguration(IShaderBuffers shaderBuffers, IErosionConfiguration erosionConfiguration)
     {
         myShaderBuffers = shaderBuffers;
+        myErosionConfiguration = erosionConfiguration;
 
         myParticles = 10000;
-        WaterIncrease = 0.1f;
+        myWaterIncrease = 0.1f;
         myMaxAge = 64;
-        myEvaporationRate = 0.001f;
+        myEvaporationRate = 0.01f;
         myDepositionRate = 0.05f;
-        myMinimumVolume = 0.001f;
+        myMinimumVolume = 0.01f;
         myMaximalErosionDepth = 0.05f;
         myGravity = 9.81f;
         myMaxDiff = 0.8f;
@@ -181,6 +196,7 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
         }
         ParticleHydraulicErosionConfigurationShaderBuffer particleHydraulicErosionConfigurationShaderBuffer = new ParticleHydraulicErosionConfigurationShaderBuffer()
         {
+            WaterIncrease = WaterIncrease,
             MaxAge = MaxAge,
             EvaporationRate = EvaporationRate,
             DepositionRate = DepositionRate,
@@ -188,7 +204,8 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
             MaximalErosionDepth = MaximalErosionDepth,
             Gravity = Gravity,
             MaxDiff = MaxDiff,
-            Settling = Settling
+            Settling = Settling,
+            IsWaterAdded = myErosionConfiguration.IsWaterAdded
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleHydraulicErosionConfiguration], &particleHydraulicErosionConfigurationShaderBuffer, (uint)sizeof(ParticleHydraulicErosionConfigurationShaderBuffer), 0);
     }

@@ -3,8 +3,8 @@
 internal interface IParticleHydraulicErosionConfiguration : IDisposable
 {
     uint Particles { get; set; }
-    float WaterIncrease { get; set; }
 
+    float WaterIncrease { get; set; }
     uint MaxAge { get; set; }
     float EvaporationRate { get; set; }
     float DepositionRate { get; set; }
@@ -14,7 +14,7 @@ internal interface IParticleHydraulicErosionConfiguration : IDisposable
     float MaxDiff { get; set; }
     float Settling { get; set; }
 
-    event EventHandler<EventArgs> ParticlesChanged;
+    event EventHandler<EventArgs>? ParticlesChanged;
 
     void Initialize();
 }

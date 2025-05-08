@@ -13,7 +13,7 @@ internal class ErosionConfiguration : IErosionConfiguration
 
     public ErosionModeTypes Mode { get; set; }
     public bool IsRunning { get; set; }
-    public bool IsRainAdded { get; set; }
+    public bool IsWaterAdded { get; set; }
     public bool IsWaterDisplayed { get; set; }
     public bool IsSedimentDisplayed { get; set; }
 
@@ -52,7 +52,7 @@ internal class ErosionConfiguration : IErosionConfiguration
 
         Mode = ErosionModeTypes.HydraulicParticle;
         IsRunning = false;
-        IsRainAdded = true;
+        IsWaterAdded = true;
         IsWaterDisplayed = true;
         IsSedimentDisplayed = false;
 

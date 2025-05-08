@@ -7,6 +7,4 @@ internal interface IConfiguration : IDisposable
     int ShadowMapResolution { get; set; }
 
     void Initialize();
-
-    event EventHandler? ResetRequired;
 }

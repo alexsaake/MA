@@ -7,6 +7,11 @@ layout(std430, binding = 1) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
+layout(std430, binding = 2) readonly restrict buffer heightMapIndicesShaderBuffer
+{
+    uint[] heightMapIndices;
+};
+
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
@@ -14,13 +19,14 @@ struct MapGenerationConfiguration
     bool IsColorEnabled;
 };
 
-layout(std430, binding = 2) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+layout(std430, binding = 3) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
     MapGenerationConfiguration mapGenerationConfiguration;
 };
 
 struct ParticleHydraulicErosionConfiguration
 {
+    float WaterIncrease;
     uint MaxAge;
     float EvaporationRate;
     float DepositionRate;
@@ -29,9 +35,10 @@ struct ParticleHydraulicErosionConfiguration
     float Gravity;
     float MaxDiff;
     float Settling;
+    bool IsWaterAdded;
 };
 
-layout(std430, binding = 3) readonly restrict buffer particleHydraulicErosionConfigurationShaderBuffer
+layout(std430, binding = 4) readonly restrict buffer particleHydraulicErosionConfigurationShaderBuffer
 {
     ParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration;
 };
@@ -45,7 +52,7 @@ struct ParticleHydraulicErosion
     vec2 Speed;
 };
 
-layout(std430, binding = 4) buffer particleHydraulicErosionShaderBuffer
+layout(std430, binding = 5) buffer particleHydraulicErosionShaderBuffer
 {
     ParticleHydraulicErosion[] particlesHydraulicErosion;
 };
@@ -283,6 +290,18 @@ void main()
     }
 
     myParticleHydraulicErosion = particlesHydraulicErosion[id];
+
+    if(myParticleHydraulicErosion.Volume == 0 && particleHydraulicErosionConfiguration.IsWaterAdded)
+    {
+        uint index = heightMapIndices[id];
+        uint x = index % myHeightMapSideLength;
+        uint y = index / myHeightMapSideLength;
+        myParticleHydraulicErosion.Age = 0;
+        myParticleHydraulicErosion.Volume = particleHydraulicErosionConfiguration.WaterIncrease;
+        myParticleHydraulicErosion.Sediment = 0.0;
+        myParticleHydraulicErosion.Position = vec2(x, y);
+        myParticleHydraulicErosion.Speed = vec2(0.0, 0.0);
+    }
 
     if(Move())
     {

@@ -25,6 +25,7 @@ internal class ParticleErosion : IParticleErosion
 
     private uint myHeightMapIndicesShaderBufferId;
     private uint myHeightMapIndicesShaderBufferSize;
+    private uint myIteration;
     private bool myIsDisposed;
 
     public ParticleErosion(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers, IRandom random)
@@ -50,6 +51,9 @@ internal class ParticleErosion : IParticleErosion
         myHeightMapIndicesShaderBufferId = Rlgl.LoadShaderBuffer(myHeightMapIndicesShaderBufferSize, null, Rlgl.DYNAMIC_COPY);
 
         AddParticlesHydraulicErosionShaderBuffer();
+        CreateRandomIndices();
+
+        myIteration = 0;
 
         myIsDisposed = false;
     }
@@ -72,50 +76,29 @@ internal class ParticleErosion : IParticleErosion
 
     public void SimulateHydraulicErosion()
     {
-        if (myErosionConfiguration.IsRainAdded)
-        {
-            CreateParticles();
-        }
+        CreateRandomIndices();
 
         Rlgl.EnableShader(myHydraulicErosionParticleSimulationComputeShaderProgram!.Id);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleHydraulicErosionConfiguration], 3);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticlesHydraulicErosion], 4);
+        Rlgl.BindShaderBuffer(myHeightMapIndicesShaderBufferId, 2);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 3);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleHydraulicErosionConfiguration], 4);
+        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticlesHydraulicErosion], 5);
         Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myParticleHydraulicErosionConfiguration.Particles / 64f), 1, 1);
         Rlgl.DisableShader();
     }
 
-    private unsafe void CreateParticles()
+    private unsafe void CreateRandomIndices()
     {
-        uint particleCount = myParticleHydraulicErosionConfiguration.Particles;
-
-        ParticleHydraulicErosionShaderBuffer[] particlesHydraulicErosion = new ParticleHydraulicErosionShaderBuffer[particleCount];
-        Rlgl.MemoryBarrier();
-        fixed (void* particlesHydraulicErosionPointer = particlesHydraulicErosion)
+        uint[] randomParticleIndices = new uint[myParticleHydraulicErosionConfiguration.Particles];
+        uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
+        for (uint particle = 0; particle < myParticleHydraulicErosionConfiguration.Particles; particle++)
         {
-            Rlgl.ReadShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticlesHydraulicErosion], particlesHydraulicErosionPointer, particleCount * (uint)sizeof(ParticleHydraulicErosionShaderBuffer), 0);
+            randomParticleIndices[particle] = (uint)myRandom.Next((int)mapSize);
         }
-
-        for (int particle = 0; particle < particleCount; particle++)
+        fixed (uint* randomHeightMapIndicesPointer = randomParticleIndices)
         {
-            if (particlesHydraulicErosion[particle].Age > myParticleHydraulicErosionConfiguration.MaxAge
-                || particlesHydraulicErosion[particle].Volume == 0)
-            {
-                particlesHydraulicErosion[particle] = new ParticleHydraulicErosionShaderBuffer()
-                {
-                    Age = 0,
-                    Volume = myParticleHydraulicErosionConfiguration.WaterIncrease,
-                    Sediment = 0,
-                    Position = new Vector2(myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength), myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength)),
-                    Speed = Vector2.Zero
-                };
-            }
-        }
-
-        fixed (void* particlesHydraulicErosionPointer = particlesHydraulicErosion)
-        {
-            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticlesHydraulicErosion], particlesHydraulicErosionPointer, particleCount * (uint)sizeof(ParticleHydraulicErosionShaderBuffer), 0);
+            Rlgl.UpdateShaderBuffer(myHeightMapIndicesShaderBufferId, randomHeightMapIndicesPointer, myHeightMapIndicesShaderBufferSize, 0);
         }
         Rlgl.MemoryBarrier();
     }
@@ -127,42 +110,48 @@ internal class ParticleErosion : IParticleErosion
             Console.WriteLine($"WARN: Simulation not possible. Wind speed is zero.");
             return;
         }
-        CreateRandomIndicesAlongBorder();
+        if (myIteration == myParticleWindErosionConfiguration.MaxAge)
+        {
+            CreateRandomIndicesAlongBorder();
+            myIteration = 0;
+        }
 
         Rlgl.EnableShader(myWindErosionParticleSimulationComputeShaderProgram!.Id);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
         Rlgl.BindShaderBuffer(myHeightMapIndicesShaderBufferId, 2);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 3);
         Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleWindErosionConfiguration], 4);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myParticleHydraulicErosionConfiguration.Particles / 64f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myParticleWindErosionConfiguration.Particles / 64f), 1, 1);
         Rlgl.DisableShader();
+
+        myIteration++;
     }
 
     private unsafe void CreateRandomIndicesAlongBorder()
     {
-        uint[] randomHeightMapIndices = new uint[myParticleHydraulicErosionConfiguration.Particles];
-        for (uint i = 0; i < myParticleHydraulicErosionConfiguration.Particles; i++)
+        uint[] randomParticleIndices = new uint[myParticleWindErosionConfiguration.Particles];
+        for (uint particle = 0; particle < myParticleWindErosionConfiguration.Particles; particle++)
         {
             if (myParticleWindErosionConfiguration.PersistentSpeed.X == 0)
             {
                 if (myParticleWindErosionConfiguration.PersistentSpeed.Y > 0)
                 {
-                    randomHeightMapIndices[i] = GetRandomBottomIndex();
+                    randomParticleIndices[particle] = GetRandomBottomIndex();
                 }
                 if (myParticleWindErosionConfiguration.PersistentSpeed.Y < 0)
                 {
-                    randomHeightMapIndices[i] = GetRandomTopIndex();
+                    randomParticleIndices[particle] = GetRandomTopIndex();
                 }
             }
             else if (myParticleWindErosionConfiguration.PersistentSpeed.Y == 0)
             {
                 if (myParticleWindErosionConfiguration.PersistentSpeed.X > 0)
                 {
-                    randomHeightMapIndices[i] = GetRandomLeftIndex();
+                    randomParticleIndices[particle] = GetRandomLeftIndex();
                 }
                 if (myParticleWindErosionConfiguration.PersistentSpeed.X < 0)
                 {
-                    randomHeightMapIndices[i] = GetRandomRightIndex();
+                    randomParticleIndices[particle] = GetRandomRightIndex();
                 }
             }
             else
@@ -171,30 +160,31 @@ internal class ParticleErosion : IParticleErosion
                 {
                     if (myParticleWindErosionConfiguration.PersistentSpeed.X > 0)
                     {
-                        randomHeightMapIndices[i] = GetRandomLeftIndex();
+                        randomParticleIndices[particle] = GetRandomLeftIndex();
                     }
                     if (myParticleWindErosionConfiguration.PersistentSpeed.X < 0)
                     {
-                        randomHeightMapIndices[i] = GetRandomRightIndex();
+                        randomParticleIndices[particle] = GetRandomRightIndex();
                     }
                 }
                 else
                 {
                     if (myParticleWindErosionConfiguration.PersistentSpeed.Y > 0)
                     {
-                        randomHeightMapIndices[i] = GetRandomBottomIndex();
+                        randomParticleIndices[particle] = GetRandomBottomIndex();
                     }
                     if (myParticleWindErosionConfiguration.PersistentSpeed.Y < 0)
                     {
-                        randomHeightMapIndices[i] = GetRandomTopIndex();
+                        randomParticleIndices[particle] = GetRandomTopIndex();
                     }
                 }
             }
         }
-        fixed (uint* randomHeightMapIndicesPointer = randomHeightMapIndices)
+        fixed (uint* randomHeightMapIndicesPointer = randomParticleIndices)
         {
             Rlgl.UpdateShaderBuffer(myHeightMapIndicesShaderBufferId, randomHeightMapIndicesPointer, myHeightMapIndicesShaderBufferSize, 0);
         }
+        Rlgl.MemoryBarrier();
     }
 
     private uint GetRandomBottomIndex()

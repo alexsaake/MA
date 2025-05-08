@@ -12,6 +12,21 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
 
     private bool myIsDisposed;
 
+    private uint myParticles;
+    public uint Particles
+    {
+        get => myParticles;
+        set
+        {
+            if (myParticles == value)
+            {
+                return;
+            }
+            myParticles = value;
+            ParticlesChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     private uint myMaxAge;
     public uint MaxAge
     {
@@ -102,10 +117,13 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
         }
     }
 
+    public event EventHandler<EventArgs>? ParticlesChanged;
+
     public ParticleWindErosionConfiguration(IShaderBuffers shaderBuffers)
     {
         myShaderBuffers = shaderBuffers;
 
+        myParticles = 1000;
         myMaxAge = 1024;
         mySuspension = 0.05f;
         myGravity = 0.025f;

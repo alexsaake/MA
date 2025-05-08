@@ -94,7 +94,7 @@ internal class ErosionSimulator : IErosionSimulator
 
         Console.WriteLine($"INFO: Simulating hydraulic erosion grid.");
 
-        if (myErosionConfiguration.IsRainAdded)
+        if (myErosionConfiguration.IsWaterAdded)
         {
             myGridErosion.AddRain();
         }

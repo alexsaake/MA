@@ -6,7 +6,7 @@ internal interface IErosionConfiguration : IDisposable
 {
     ErosionModeTypes Mode { get; set; }
     bool IsRunning { get; set; }
-    bool IsRainAdded { get; set; }
+    bool IsWaterAdded { get; set; }
     bool IsWaterDisplayed { get; set; }
     bool IsSedimentDisplayed { get; set; }
 

@@ -16,15 +16,7 @@ internal class Configuration : IConfiguration
     public int ScreenWidth { get; set; }
     public int ScreenHeight { get; set; }
     public int ParallelExecutions { get; set; }
-    public int SimulationCallbackEachIterations { get; set; }
     public int ShadowMapResolution { get; set; }
-
-    public bool IsRainAdded { get; set; }
-    public bool IsWaterDisplayed { get; set; }
-    public bool IsSedimentDisplayed { get; set; }
-
-    public event EventHandler? ResetRequired;
-    public event EventHandler? ThermalErosionConfigurationChanged;
 
     public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
     {
@@ -37,18 +29,11 @@ internal class Configuration : IConfiguration
         ScreenWidth = 1920;
         ScreenHeight = 1080;
         ParallelExecutions = 10;
-        SimulationCallbackEachIterations = 1000;
         ShadowMapResolution = 1028;
-
-        IsRainAdded = true;
-        IsWaterDisplayed = true;
-        IsSedimentDisplayed = false;
     }
 
     public void Initialize()
     {
-        myMapGenerationConfiguration.ResetRequired += OnResetRequired;
-
         myMapGenerationConfiguration.Initialize();
         myErosionConfiguration.Initialize();
         myGridErosionConfiguration.Initialize();
@@ -56,11 +41,6 @@ internal class Configuration : IConfiguration
         myParticleWindErosionConfiguration.Initialize();
 
         myIsDisposed = false;
-    }
-
-    private void OnResetRequired(object? sender, EventArgs e)
-    {
-        ResetRequired?.Invoke(this, e);
     }
 
     public void Dispose()

@@ -44,7 +44,6 @@ internal class Application : IApplication
     {
         Raylib.InitWindow(myConfiguration.ScreenWidth, myConfiguration.ScreenHeight, "Procedural Landscape Generation");
 
-        myConfiguration.ResetRequired += OnResetRequired;
         myMapGenerationConfiguration.ResetRequired += OnResetRequired;
         myConfigurationGUI.MapResetRequired += OnResetRequired;
         myConfigurationGUI.ErosionResetRequired += OnErosionResetRequired;
@@ -101,7 +100,6 @@ internal class Application : IApplication
             Raylib.EndDrawing();
         }
 
-        myConfiguration.ResetRequired -= OnResetRequired;
         myMapGenerationConfiguration.ResetRequired -= OnResetRequired;
         myConfigurationGUI.MapResetRequired -= OnResetRequired;
         myConfigurationGUI.ErosionResetRequired -= OnErosionResetRequired;
