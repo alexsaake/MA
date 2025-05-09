@@ -154,14 +154,14 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
 
         myRainDrops = 1000;
 
-        myWaterIncrease = 0.0001f;
-        myEvaporationRate = 0.0001f;
-        mySuspensionRate = 0.05f;
+        myWaterIncrease = 0.001f;
+        myEvaporationRate = 0.01f;
+        mySuspensionRate = 0.1f;
         myDepositionRate = 0.05f;
-        myMaximalErosionDepth = 0.05f;
+        myMaximalErosionDepth = 0.005f;
         myGravity = 9.81f;
         myTimeDelta = 1;
-        myDampening = 0.5f;
+        myDampening = 0.25f;
     }
 
     public void Initialize()

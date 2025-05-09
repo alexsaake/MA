@@ -132,7 +132,7 @@ void main()
     float alpha = acos(dotProd);
     float tiltAngle = sin(alpha);
 	
-    float sedimentCapacity = gridPoint.WaterHeight * gridErosionConfiguration.SuspensionRate - gridPoint.SuspendedSediment;
+    float sedimentCapacity = gridPoint.WaterHeight - gridPoint.SuspendedSediment;
 	float erosionDepthLimit = (gridErosionConfiguration.MaximalErosionDepth - min(gridErosionConfiguration.MaximalErosionDepth, gridPoint.WaterHeight)) / gridErosionConfiguration.MaximalErosionDepth;
 	float sedimentTransportCapacity = sedimentCapacity * tiltAngle * length(gridPoint.Velocity) * erosionDepthLimit;
 
