@@ -40,16 +40,12 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
         ComputeShaderProgram heightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/GPU/Shaders/HeightMapGeneratorComputeShader.glsl");
         Rlgl.EnableShader(heightMapComputeShaderProgram.Id);
-        Rlgl.BindShaderBuffer(heightMapParametersBufferId, 1);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 2);
         Rlgl.ComputeShaderDispatch(heightMapSize, 1, 1);
         Rlgl.DisableShader();
         heightMapComputeShaderProgram.Dispose();
 
         ComputeShaderProgram normalizeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/GPU/Shaders/NormalizeComputeShader.glsl");
         Rlgl.EnableShader(normalizeComputeShaderProgram.Id);
-        Rlgl.BindShaderBuffer(heightMapParametersBufferId, 1);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 2);
         Rlgl.ComputeShaderDispatch(heightMapSize, 1, 1);
         Rlgl.DisableShader();
         normalizeComputeShaderProgram.Dispose();
@@ -78,16 +74,12 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
         ComputeShaderProgram heightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/GPU/Shaders/HeightMapGeneratorComputeShader.glsl");
         Rlgl.EnableShader(heightMapComputeShaderProgram.Id);
-        Rlgl.BindShaderBuffer(heatMapParametersBufferId, 1);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeatMap], 2);
         Rlgl.ComputeShaderDispatch(heatMapSize, 1, 1);
         Rlgl.DisableShader();
         heightMapComputeShaderProgram.Dispose();
 
         ComputeShaderProgram normalizeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/GPU/Shaders/NormalizeComputeShader.glsl");
         Rlgl.EnableShader(normalizeComputeShaderProgram.Id);
-        Rlgl.BindShaderBuffer(heatMapParametersBufferId, 1);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeatMap], 2);
         Rlgl.ComputeShaderDispatch(heatMapSize, 1, 1);
         Rlgl.DisableShader();
         normalizeComputeShaderProgram.Dispose();
@@ -138,16 +130,9 @@ internal class HeightMapGenerator : IHeightMapGenerator
             return;
         }
 
-        if (myShaderBuffers.ContainsKey(ShaderBufferTypes.HeightMap))
-        {
-            Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap]);
-            myShaderBuffers.Remove(ShaderBufferTypes.HeightMap);
-        }
-        if (myShaderBuffers.ContainsKey(ShaderBufferTypes.HeatMap))
-        {
-            Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeatMap]);
-            myShaderBuffers.Remove(ShaderBufferTypes.HeatMap);
-        }
+        myShaderBuffers.Remove(ShaderBufferTypes.HeightMap);
+
+        myShaderBuffers.Remove(ShaderBufferTypes.HeatMap);
 
         myIsDisposed = true;
     }

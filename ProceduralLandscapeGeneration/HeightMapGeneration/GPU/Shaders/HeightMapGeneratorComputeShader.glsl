@@ -87,6 +87,11 @@ float perlinNoise(vec2 position, uint seed) {
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
+layout(std430, binding = 0) buffer heightMapShaderBuffer
+{
+    float[] heightMap;
+};
+
 struct HeightMapParameters
 {
     uint seed;
@@ -98,14 +103,9 @@ struct HeightMapParameters
     int max;
 };
 
-layout(std430, binding = 1) buffer heightMapParametersShaderBuffer
+layout(std430, binding = 12) buffer heightMapParametersShaderBuffer
 {
     HeightMapParameters parameters;
-};
-
-layout(std430, binding = 2) buffer heightMapShaderBuffer
-{
-    float[] heightMap;
 };
 
 void main()

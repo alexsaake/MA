@@ -190,10 +190,6 @@ internal class VertexShaderRenderer : IRenderer
     public void Draw()
     {
         Raylib.BeginMode3D(myCamera);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], 1);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], 2);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints], 3);
-        Rlgl.BindShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticlesHydraulicErosion], 4);
         DrawTerrainHeightMap(myTerrainHeightMapShader);
         if (myErosionConfiguration.IsWaterDisplayed)
         {
@@ -203,7 +199,7 @@ internal class VertexShaderRenderer : IRenderer
         {
             Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
         }
-        if (myMapGenerationConfiguration.IsSeaLevelDisplayed)
+        if (myErosionConfiguration.IsSeaLevelDisplayed)
         {
             Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
         }

@@ -147,16 +147,9 @@ internal class HeightMapGenerator : IHeightMapGenerator
             return;
         }
 
-        if (myShaderBuffers.ContainsKey(ShaderBufferTypes.HeightMap))
-        {
-            Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap]);
-            myShaderBuffers.Remove(ShaderBufferTypes.HeightMap);
-        }
-        if (myShaderBuffers.ContainsKey(ShaderBufferTypes.HeatMap))
-        {
-            Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeatMap]);
-            myShaderBuffers.Remove(ShaderBufferTypes.HeatMap);
-        }
+        myShaderBuffers.Remove(ShaderBufferTypes.HeightMap);
+
+        myShaderBuffers.Remove(ShaderBufferTypes.HeatMap);
 
         myIsDisposed = true;
     }

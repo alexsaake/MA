@@ -47,6 +47,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
                                                                                             }, (int)erosionConfiguration.Mode));
         myErosionPanel.Add(new Button("Reset", () => ErosionResetRequired?.Invoke(this, EventArgs.Empty)));
         myErosionPanel.Add(new ToggleSliderWithLabel("Running", "Off;On", (value) => erosionConfiguration.IsRunning = value == 1, erosionConfiguration.IsRunning ? 1 : 0));
+        myErosionPanel.Add(new ValueBoxIntWithLabel("Iterations per Step", (value) => erosionConfiguration.IterationsPerStep = (uint)value, (int)erosionConfiguration.IterationsPerStep, 1, 1000));
         myErosionPanel.Add(new ToggleSliderWithLabel("Rain Added", "Off;On", (value) =>
         {
             erosionConfiguration.IsWaterAdded = value == 1;
@@ -55,12 +56,15 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         }, erosionConfiguration.IsWaterAdded ? 1 : 0));
         myErosionPanel.Add(new ToggleSliderWithLabel("Water Displayed", "Off;On", (value) => erosionConfiguration.IsWaterDisplayed = value == 1, erosionConfiguration.IsWaterDisplayed ? 1 : 0));
         myErosionPanel.Add(new ToggleSliderWithLabel("Sediment Displayed", "Off;On", (value) => erosionConfiguration.IsSedimentDisplayed = value == 1, erosionConfiguration.IsSedimentDisplayed ? 1 : 0));
+        myErosionPanel.Add(new ToggleSliderWithLabel("Sea Level Displayed", "Off;On", (value) => erosionConfiguration.IsSeaLevelDisplayed = value == 1, erosionConfiguration.IsSeaLevelDisplayed ? 1 : 0));
+        myErosionPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => erosionConfiguration.SeaLevel = value, erosionConfiguration.SeaLevel));
 
         myThermalErosionPanel = new PanelWithElements("Thermal Erosion");
         myThermalErosionPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => erosionConfiguration.TalusAngle = value, erosionConfiguration.TalusAngle, 0, 89));
         myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Height Change", (value) => erosionConfiguration.ThermalErosionHeightChange = value, erosionConfiguration.ThermalErosionHeightChange));
 
         myGridErosionPanel = new PanelWithElements("Grid Hydraulic Erosion");
+        myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridErosionConfiguration.RainDrops = (uint)value, (int)gridErosionConfiguration.RainDrops, 1, 100000));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Water Increase", (value) => gridErosionConfiguration.WaterIncrease = value, gridErosionConfiguration.WaterIncrease));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => gridErosionConfiguration.TimeDelta = value, gridErosionConfiguration.TimeDelta));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Cell Size X", (value) => gridErosionConfiguration.CellSizeX = value, gridErosionConfiguration.CellSizeX));
@@ -85,18 +89,16 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => particleHydraulicErosionConfiguration.Gravity = value, particleHydraulicErosionConfiguration.Gravity));
         myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Maximum Difference", (value) => particleHydraulicErosionConfiguration.MaxDiff = value, particleHydraulicErosionConfiguration.MaxDiff));
         myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Settling", (value) => particleHydraulicErosionConfiguration.Settling = value, particleHydraulicErosionConfiguration.Settling));
-        myParticleHydraulicErosionPanel.Add(new ToggleSliderWithLabel("Particles Displayed", "Off;On", (value) => particleHydraulicErosionConfiguration.AreParticlesDisplayed = value == 1, particleHydraulicErosionConfiguration.AreParticlesDisplayed ? 1 : 0));
 
         myParticleWindErosionPanel = new PanelWithElements("Particle Wind Erosion");
         myParticleWindErosionPanel.Add(new ValueBoxIntWithLabel("Particles", (value) => particleWindErosionConfiguration.Particles = (uint)value, (int)particleWindErosionConfiguration.Particles, 1, 1000000));
+        myParticleWindErosionPanel.Add(new ValueBoxIntWithLabel("Maximum Age", (value) => particleWindErosionConfiguration.MaxAge = (uint)value, (int)particleWindErosionConfiguration.MaxAge, 1, 1024));
         myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Persistent Speed X", (value) => particleWindErosionConfiguration.PersistentSpeed = new Vector2(value, particleWindErosionConfiguration.PersistentSpeed.Y), particleWindErosionConfiguration.PersistentSpeed.X));
         myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Persistent Speed Y", (value) => particleWindErosionConfiguration.PersistentSpeed = new Vector2(particleWindErosionConfiguration.PersistentSpeed.X, value), particleWindErosionConfiguration.PersistentSpeed.Y));
-        myParticleWindErosionPanel.Add(new ValueBoxIntWithLabel("Maximum Age", (value) => particleWindErosionConfiguration.MaxAge = (uint)value, (int)particleWindErosionConfiguration.MaxAge, 1, 1024));
-        myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => particleWindErosionConfiguration.Suspension = value, particleWindErosionConfiguration.Suspension));
+        myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Suspension Rate", (value) => particleWindErosionConfiguration.SuspensionRate = value, particleWindErosionConfiguration.SuspensionRate));
         myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => particleWindErosionConfiguration.Gravity = value, particleWindErosionConfiguration.Gravity));
         myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Maximum Difference", (value) => particleWindErosionConfiguration.MaxDiff = value, particleWindErosionConfiguration.MaxDiff));
         myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Settling", (value) => particleWindErosionConfiguration.Settling = value, particleWindErosionConfiguration.Settling));
-        myParticleWindErosionPanel.Add(new ToggleSliderWithLabel("Particles Displayed", "Off;On", (value) => particleWindErosionConfiguration.AreParticlesDisplayed = value == 1, particleWindErosionConfiguration.AreParticlesDisplayed ? 1 : 0));
 
 
         myRightPanelPosition = new Vector2(configuration.ScreenWidth - PanelSize.X, 0); ;
@@ -107,8 +109,6 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Mesh Creation", "CPU;GPU", (value) => mapGenerationConfiguration.MeshCreation = (ProcessorTypes)value, (int)mapGenerationConfiguration.MeshCreation));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Side Length", (value) => mapGenerationConfiguration.HeightMapSideLength = (uint)value, (int)mapGenerationConfiguration.HeightMapSideLength, 32, 8192));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => mapGenerationConfiguration.HeightMultiplier = (uint)value, (int)mapGenerationConfiguration.HeightMultiplier, 1, 512));
-        myMapGenerationPanel.Add(new ToggleSliderWithLabel("Sea Level Displayed", "Off;On", (value) => mapGenerationConfiguration.IsSeaLevelDisplayed = value == 1, mapGenerationConfiguration.IsSeaLevelDisplayed ? 1 : 0));
-        myMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => mapGenerationConfiguration.SeaLevel = value, mapGenerationConfiguration.SeaLevel));
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Camera Mode", "Still;Orbital", (value) => mapGenerationConfiguration.CameraMode = value == 0 ? CameraMode.Custom : CameraMode.Orbital, (int)mapGenerationConfiguration.CameraMode));
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Color Enabled", "Off;On", (value) => mapGenerationConfiguration.IsColorEnabled = value == 1, mapGenerationConfiguration.IsColorEnabled ? 1 : 0));
 

@@ -3,13 +3,22 @@
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    float SeaLevel;
     bool IsColorEnabled;
 };
 
-layout(std430, binding = 2) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
     MapGenerationConfiguration mapGenerationConfiguration;
+};
+
+struct ErosionConfiguration
+{
+    float SeaLevel;
+};
+
+layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
+{
+    ErosionConfiguration erosionConfiguration;
 };
 
 in vec3 vertexPosition;
@@ -22,5 +31,5 @@ out vec4 fragColor;
 void main()
 {
     fragColor = vertexColor;
-    gl_Position = mvp * vec4(vertexPosition.xy, mapGenerationConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier, 1.0);
+    gl_Position = mvp * vec4(vertexPosition.xy, erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier, 1.0);
 }

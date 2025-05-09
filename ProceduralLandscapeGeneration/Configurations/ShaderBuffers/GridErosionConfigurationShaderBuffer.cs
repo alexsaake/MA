@@ -2,6 +2,7 @@
 
 public struct GridErosionConfigurationShaderBuffer
 {
+    public float WaterIncrease;
     public float TimeDelta;
     public float CellSizeX;
     public float CellSizeY;

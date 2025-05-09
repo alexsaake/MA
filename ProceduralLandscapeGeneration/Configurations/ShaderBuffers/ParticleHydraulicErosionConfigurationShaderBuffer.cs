@@ -12,8 +12,4 @@ internal struct ParticleHydraulicErosionConfigurationShaderBuffer
     public float MaxDiff;
     public float Settling;
     public bool AreParticlesAdded;
-    private bool padding1;
-    private bool padding2;
-    private bool padding3;
-    public bool AreParticlesDisplayed;
 }

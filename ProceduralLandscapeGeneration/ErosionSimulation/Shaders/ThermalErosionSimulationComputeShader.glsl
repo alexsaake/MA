@@ -2,7 +2,7 @@
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-layout(std430, binding = 1) buffer heightMapShaderBuffer
+layout(std430, binding = 0) buffer heightMapShaderBuffer
 {
     float[] heightMap;
 };
@@ -10,11 +10,10 @@ layout(std430, binding = 1) buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    float SeaLevel;
     bool IsColorEnabled;
 };
 
-layout(std430, binding = 2) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
     MapGenerationConfiguration mapGenerationConfiguration;
 };
@@ -25,7 +24,7 @@ struct ThermalErosionConfiguration
     float HeightChange;
 };
 
-layout(std430, binding = 3) readonly restrict buffer thermalErosionConfigurationShaderBuffer
+layout(std430, binding = 10) readonly restrict buffer thermalErosionConfigurationShaderBuffer
 {
     ThermalErosionConfiguration thermalErosionConfiguration;
 };

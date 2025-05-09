@@ -20,8 +20,6 @@ internal interface IMapGenerationConfiguration : IDisposable
 
     uint HeightMapSideLength { get; set; }
     uint HeightMultiplier { get; set; }
-    bool IsSeaLevelDisplayed { get; set; }
-    float SeaLevel { get; set; }
     CameraMode CameraMode { get; set; }
     bool IsColorEnabled { get; set; }
 

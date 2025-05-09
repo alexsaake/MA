@@ -1,6 +1,6 @@
 #version 430
 
-layout(std430, binding = 1) buffer heightMapShaderBuffer
+layout(std430, binding = 0) buffer heightMapShaderBuffer
 {
     float[] heightMap;
 };
@@ -8,13 +8,22 @@ layout(std430, binding = 1) buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    float SeaLevel;
     bool IsColorEnabled;
 };
 
-layout(std430, binding = 2) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
     MapGenerationConfiguration mapGenerationConfiguration;
+};
+
+struct ErosionConfiguration
+{
+    float SeaLevel;
+};
+
+layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
+{
+    ErosionConfiguration erosionConfiguration;
 };
 
 uint myHeightMapSideLength;
@@ -77,7 +86,7 @@ void main()
 
     float height = heightMap[index];
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
-    float seaLevelHeight = mapGenerationConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
+    float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     fragPosition = vec3(matModel * vec4(vertexPosition.xy, terrainHeight, 1.0));
     vec3 normal = getScaledNormal(x, y);
     fragNormal = transpose(inverse(mat3(matModel))) * normal;

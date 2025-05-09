@@ -582,8 +582,6 @@ public class GridErosionTests
     {
         IConfiguration configuration = myContainer!.Resolve<IConfiguration>();
         configuration.Initialize();
-        IMapGenerationConfiguration mapGenerationConfiguration = myContainer!.Resolve<IMapGenerationConfiguration>();
-        mapGenerationConfiguration.SeaLevel = 0;
     }
 
     private void SetUpFlatHeightMap()

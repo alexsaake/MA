@@ -7,9 +7,10 @@ namespace ProceduralLandscapeGeneration.Common.GPU;
 
 class ShaderBuffers : IDictionary<ShaderBufferTypes, uint>, IShaderBuffers
 {
-    private readonly Dictionary<ShaderBufferTypes, uint> myShaderBufferIds = new Dictionary<ShaderBufferTypes, uint>();
+    private readonly Dictionary<ShaderBufferTypes, uint> myIds = new Dictionary<ShaderBufferTypes, uint>();
+    private readonly Dictionary<ShaderBufferTypes, uint> myIndices = new Dictionary<ShaderBufferTypes, uint>();
 
-    public uint this[ShaderBufferTypes key] { get => myShaderBufferIds[key]; set => throw new NotImplementedException(); }
+    public uint this[ShaderBufferTypes key] { get => myIds[key]; set => throw new NotImplementedException(); }
 
     public ICollection<ShaderBufferTypes> Keys => throw new NotImplementedException();
 
@@ -19,10 +20,28 @@ class ShaderBuffers : IDictionary<ShaderBufferTypes, uint>, IShaderBuffers
 
     public bool IsReadOnly => throw new NotImplementedException();
 
+    public ShaderBuffers()
+    {
+        myIndices.Add(ShaderBufferTypes.HeightMap, 0);
+        myIndices.Add(ShaderBufferTypes.HeatMap, 1);
+        myIndices.Add(ShaderBufferTypes.ParticlesHydraulicErosion, 2);
+        myIndices.Add(ShaderBufferTypes.ParticlesWindErosion, 3);
+        myIndices.Add(ShaderBufferTypes.GridPoints, 4);
+        myIndices.Add(ShaderBufferTypes.MapGenerationConfiguration, 5);
+        myIndices.Add(ShaderBufferTypes.ErosionConfiguration, 6);
+        myIndices.Add(ShaderBufferTypes.ParticleHydraulicErosionConfiguration, 7);
+        myIndices.Add(ShaderBufferTypes.ParticleWindErosionConfiguration, 8);
+        myIndices.Add(ShaderBufferTypes.GridErosionConfiguration, 9);
+        myIndices.Add(ShaderBufferTypes.ThermalErosionConfiguration, 10);
+        myIndices.Add(ShaderBufferTypes.HeightMapIndices, 11);
+        myIndices.Add(ShaderBufferTypes.HeightMapParameters, 12);
+    }
+
     public unsafe void Add(ShaderBufferTypes key, uint size)
     {
         uint shaderBufferId = Rlgl.LoadShaderBuffer(size, null, Rlgl.DYNAMIC_COPY);
-        myShaderBufferIds.Add(key, shaderBufferId);
+        myIds.Add(key, shaderBufferId);
+        Rlgl.BindShaderBuffer(shaderBufferId, myIndices[key]);
     }
 
     public void Add(KeyValuePair<ShaderBufferTypes, uint> item)
@@ -42,7 +61,7 @@ class ShaderBuffers : IDictionary<ShaderBufferTypes, uint>, IShaderBuffers
 
     public bool ContainsKey(ShaderBufferTypes key)
     {
-        return myShaderBufferIds.ContainsKey(key);
+        return myIds.ContainsKey(key);
     }
 
     public void CopyTo(KeyValuePair<ShaderBufferTypes, uint>[] array, int arrayIndex)
@@ -57,7 +76,11 @@ class ShaderBuffers : IDictionary<ShaderBufferTypes, uint>, IShaderBuffers
 
     public bool Remove(ShaderBufferTypes key)
     {
-        return myShaderBufferIds.Remove(key);
+        if (myIds.TryGetValue(key, out uint value))
+        {
+            Rlgl.UnloadShaderBuffer(value);
+        }
+        return myIds.Remove(key);
     }
 
     public bool Remove(KeyValuePair<ShaderBufferTypes, uint> item)

@@ -1,20 +1,35 @@
 #version 430
 
-layout(std430, binding = 1) readonly restrict buffer heightMapShaderBuffer
+layout(std430, binding = 0) readonly restrict buffer heightMapShaderBuffer
 {
     float[] heightMap;
 };
 
-struct MapGenerationConfiguration
+struct ParticleHydraulicErosion
 {
-    float HeightMultiplier;
-    float SeaLevel;
-    bool IsColorEnabled;
+    int Age;
+    float Volume;
+    float Sediment;
+    vec2 Position;
+    vec2 Speed;
 };
 
-layout(std430, binding = 2) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+layout(std430, binding = 2) buffer particleHydraulicErosionShaderBuffer
 {
-    MapGenerationConfiguration mapGenerationConfiguration;
+    ParticleHydraulicErosion[] particlesHydraulicErosion;
+};
+
+struct ParticleWindErosion
+{
+    int Age;
+    float Sediment;
+    vec3 Position;
+    vec3 Speed;
+};
+
+layout(std430, binding = 3) buffer particleWindErosionShaderBuffer
+{
+    ParticleWindErosion[] particlesWindErosion;
 };
 
 struct GridPoint
@@ -37,36 +52,20 @@ struct GridPoint
     vec2 Velocity;
 };
 
-layout(std430, binding = 3) buffer gridPointsShaderBuffer
+layout(std430, binding = 4) buffer gridPointsShaderBuffer
 {
     GridPoint[] gridPoints;
 };
 
-struct ParticleHydraulicErosion
+struct MapGenerationConfiguration
 {
-    int Age;
-    float Volume;
-    float Sediment;
-    vec2 Position;
-    vec2 Speed;
+    float HeightMultiplier;
+    bool IsColorEnabled;
 };
 
-layout(std430, binding = 4) buffer particleHydraulicErosionShaderBuffer
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
-    ParticleHydraulicErosion[] particlesHydraulicErosion;
-};
-
-struct ParticleWindErosion
-{
-    int Age;
-    float Sediment;
-    vec3 Position;
-    vec3 Speed;
-};
-
-layout(std430, binding = 5) buffer particleWindErosionShaderBuffer
-{
-    ParticleWindErosion[] particlesWindErosion;
+    MapGenerationConfiguration mapGenerationConfiguration;
 };
 
 in vec3 vertexPosition;

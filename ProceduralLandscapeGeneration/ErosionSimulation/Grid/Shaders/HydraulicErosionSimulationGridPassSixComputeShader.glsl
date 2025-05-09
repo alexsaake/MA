@@ -2,7 +2,7 @@
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-layout(std430, binding = 1) buffer heightMapShaderBuffer
+layout(std430, binding = 0) buffer heightMapShaderBuffer
 {
     float[] heightMap;
 };
@@ -23,11 +23,11 @@ struct GridPoint
     float ThermalRight;
     float ThermalTop;
     float ThermalBottom;
-	
+    
     vec2 Velocity;
 };
 
-layout(std430, binding = 2) buffer gridPointsShaderBuffer
+layout(std430, binding = 4) buffer gridPointsShaderBuffer
 {
     GridPoint[] gridPoints;
 };

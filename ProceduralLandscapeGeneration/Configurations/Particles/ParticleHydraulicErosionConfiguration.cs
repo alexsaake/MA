@@ -176,21 +176,6 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
         }
     }
 
-    private bool myAreParticlesDisplayed;
-    public bool AreParticlesDisplayed
-    {
-        get => myAreParticlesDisplayed;
-        set
-        {
-            if (myAreParticlesDisplayed == value)
-            {
-                return;
-            }
-            myAreParticlesDisplayed = value;
-            UpdateShaderBuffer();
-        }
-    }
-
     public event EventHandler<EventArgs>? ParticlesChanged;
 
     public ParticleHydraulicErosionConfiguration(IShaderBuffers shaderBuffers, IErosionConfiguration erosionConfiguration)
@@ -208,7 +193,6 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
         myMaxDiff = 0.8f;
         mySettling = 1.0f;
         myAreParticlesAdded = erosionConfiguration.IsWaterAdded;
-        myAreParticlesDisplayed = true;
     }
 
     public void Initialize()
@@ -235,8 +219,7 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
             Gravity = Gravity,
             MaxDiff = MaxDiff,
             Settling = Settling,
-            AreParticlesAdded = AreParticlesAdded,
-            AreParticlesDisplayed = AreParticlesDisplayed
+            AreParticlesAdded = AreParticlesAdded
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleHydraulicErosionConfiguration], &particleHydraulicErosionConfigurationShaderBuffer, (uint)sizeof(ParticleHydraulicErosionConfigurationShaderBuffer), 0);
     }
@@ -248,7 +231,6 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
             return;
         }
 
-        Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleHydraulicErosionConfiguration]);
         myShaderBuffers.Remove(ShaderBufferTypes.ParticleHydraulicErosionConfiguration);
 
         myIsDisposed = true;

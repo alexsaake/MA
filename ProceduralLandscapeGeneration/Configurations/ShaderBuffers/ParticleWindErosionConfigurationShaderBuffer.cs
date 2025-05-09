@@ -4,7 +4,7 @@ namespace ProceduralLandscapeGeneration.Configurations.ShaderBuffers;
 
 internal struct ParticleWindErosionConfigurationShaderBuffer
 {
-    public float Suspension;
+    public float SuspensionRate;
     public float Gravity;
     public float MaxDiff;
     public float Settling;
@@ -12,8 +12,4 @@ internal struct ParticleWindErosionConfigurationShaderBuffer
     private float padding1;
     public Vector2 PersistentSpeed;
     public bool AreParticlesAdded;
-    private bool padding2;
-    private bool padding3;
-    private bool padding4;
-    public bool AreParticlesDisplayed;
 }

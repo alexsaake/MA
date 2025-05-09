@@ -177,23 +177,6 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
-    public bool IsSeaLevelDisplayed {  get; set; }
-
-    private float mySeaLevel;
-    public float SeaLevel
-    {
-        get => mySeaLevel;
-        set
-        {
-            if (mySeaLevel == value)
-            {
-                return;
-            }
-            mySeaLevel = value;
-            UpdateShaderBuffer();
-        }
-    }
-
     private bool myIsColorEnabled;
     public bool IsColorEnabled
     {
@@ -245,8 +228,6 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
 
         HeightMapSideLength = 256;
         myHeightMultiplier = 32;
-        IsSeaLevelDisplayed = false;
-        mySeaLevel = 0.2f;
         myCameraMode = CameraMode.Custom;
         myIsColorEnabled = false;
     }
@@ -267,7 +248,6 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         MapGenerationConfigurationShaderBuffer mapGenerationConfigurationShaderBuffer = new MapGenerationConfigurationShaderBuffer()
         {
             HeightMultiplier = HeightMultiplier,
-            SeaLevel = SeaLevel,
             IsColorEnabled = IsColorEnabled
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], &mapGenerationConfigurationShaderBuffer, (uint)sizeof(MapGenerationConfigurationShaderBuffer), 0);
@@ -285,7 +265,6 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
             return;
         }
 
-        Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration]);
         myShaderBuffers.Remove(ShaderBufferTypes.MapGenerationConfiguration);
 
         myIsDisposed = true;

@@ -42,17 +42,17 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
         }
     }
 
-    private float mySuspension;
-    public float Suspension
+    private float mySuspensionRate;
+    public float SuspensionRate
     {
-        get => mySuspension;
+        get => mySuspensionRate;
         set
         {
-            if (mySuspension == value)
+            if (mySuspensionRate == value)
             {
                 return;
             }
-            mySuspension = value;
+            mySuspensionRate = value;
             UpdateShaderBuffer();
         }
     }
@@ -132,21 +132,6 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
         }
     }
 
-    private bool myAreParticlesDisplayed;
-    public bool AreParticlesDisplayed
-    {
-        get => myAreParticlesDisplayed;
-        set
-        {
-            if (myAreParticlesDisplayed == value)
-            {
-                return;
-            }
-            myAreParticlesDisplayed = value;
-            UpdateShaderBuffer();
-        }
-    }
-
     public event EventHandler<EventArgs>? ParticlesChanged;
 
     public ParticleWindErosionConfiguration(IShaderBuffers shaderBuffers, IErosionConfiguration erosionConfiguration)
@@ -155,13 +140,12 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
 
         myParticles = 1000;
         myMaxAge = 1024;
-        mySuspension = 0.05f;
+        mySuspensionRate = 0.05f;
         myGravity = 0.025f;
         myMaxDiff = 0.005f;
         mySettling = 0.25f;
         myPersistentSpeed = new Vector2(0.0f, 0.125f);
         myAreParticlesAdded = erosionConfiguration.IsWaterAdded;
-        myAreParticlesDisplayed = true;
     }
 
     public void Initialize()
@@ -180,13 +164,12 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
         ParticleWindErosionConfigurationShaderBuffer particleWindErosionConfigurationShaderBuffer = new ParticleWindErosionConfigurationShaderBuffer()
         {
             MaxAge = MaxAge,
-            Suspension = Suspension,
+            SuspensionRate = SuspensionRate,
             Gravity = Gravity,
             MaxDiff = MaxDiff,
             Settling = Settling,
             PersistentSpeed = PersistentSpeed,
-            AreParticlesAdded = AreParticlesAdded,
-            AreParticlesDisplayed = AreParticlesDisplayed
+            AreParticlesAdded = AreParticlesAdded
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleWindErosionConfiguration], &particleWindErosionConfigurationShaderBuffer, (uint)sizeof(ParticleWindErosionConfigurationShaderBuffer), 0);
     }
@@ -198,7 +181,6 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
             return;
         }
 
-        Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleWindErosionConfiguration]);
         myShaderBuffers.Remove(ShaderBufferTypes.ParticleWindErosionConfiguration);
 
         myIsDisposed = true;

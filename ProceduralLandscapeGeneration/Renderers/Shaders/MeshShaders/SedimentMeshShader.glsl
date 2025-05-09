@@ -19,7 +19,7 @@ out PerVertexData
 	vec4 normal;
 } v_out[];
 
-layout(std430, binding = 1) readonly restrict buffer heightMapShaderBuffer
+layout(std430, binding = 0) readonly restrict buffer heightMapShaderBuffer
 {
     float[] heightMap;
 };
@@ -44,7 +44,7 @@ struct GridPoint
     vec2 Velocity;
 };
 
-layout(std430, binding = 2) buffer gridPointsShaderBuffer
+layout(std430, binding = 4) buffer gridPointsShaderBuffer
 {
     GridPoint[] gridPoints;
 };
@@ -52,11 +52,10 @@ layout(std430, binding = 2) buffer gridPointsShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    float SeaLevel;
     bool IsColorEnabled;
 };
 
-layout(std430, binding = 3) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
     MapGenerationConfiguration mapGenerationConfiguration;
 };

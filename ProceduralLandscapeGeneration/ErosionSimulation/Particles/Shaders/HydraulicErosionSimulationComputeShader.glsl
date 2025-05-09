@@ -2,26 +2,44 @@
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-layout(std430, binding = 1) buffer heightMapShaderBuffer
+layout(std430, binding = 0) buffer heightMapShaderBuffer
 {
     float[] heightMap;
 };
 
-layout(std430, binding = 2) readonly restrict buffer heightMapIndicesShaderBuffer
+struct ParticleHydraulicErosion
 {
-    uint[] heightMapIndices;
+    int Age;
+    float Volume;
+    float Sediment;
+    vec2 Position;
+    vec2 Speed;
+};
+
+layout(std430, binding = 2) buffer particleHydraulicErosionShaderBuffer
+{
+    ParticleHydraulicErosion[] particlesHydraulicErosion;
 };
 
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    float SeaLevel;
     bool IsColorEnabled;
 };
 
-layout(std430, binding = 3) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
     MapGenerationConfiguration mapGenerationConfiguration;
+};
+
+struct ErosionConfiguration
+{
+    float SeaLevel;
+};
+
+layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
+{
+    ErosionConfiguration erosionConfiguration;
 };
 
 struct ParticleHydraulicErosionConfiguration
@@ -36,26 +54,16 @@ struct ParticleHydraulicErosionConfiguration
     float MaxDiff;
     float Settling;
     bool AreParticlesAdded;
-    bool AreParticlesDisplayed;
 };
 
-layout(std430, binding = 4) readonly restrict buffer particleHydraulicErosionConfigurationShaderBuffer
+layout(std430, binding = 7) readonly restrict buffer particleHydraulicErosionConfigurationShaderBuffer
 {
     ParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration;
 };
 
-struct ParticleHydraulicErosion
+layout(std430, binding = 11) readonly restrict buffer heightMapIndicesShaderBuffer
 {
-    int Age;
-    float Volume;
-    float Sediment;
-    vec2 Position;
-    vec2 Speed;
-};
-
-layout(std430, binding = 5) buffer particleHydraulicErosionShaderBuffer
-{
-    ParticleHydraulicErosion[] particlesHydraulicErosion;
+    uint[] heightMapIndices;
 };
 
 uint myHeightMapSideLength;
@@ -203,7 +211,7 @@ bool Move()
 
     if(myParticleHydraulicErosion.Age > particleHydraulicErosionConfiguration.MaxAge
     || myParticleHydraulicErosion.Volume < particleHydraulicErosionConfiguration.MinimumVolume
-    || heightMap[getIndexV(position)] <= mapGenerationConfiguration.SeaLevel - particleHydraulicErosionConfiguration.MaximalErosionDepth)
+    || heightMap[getIndexV(position)] <= erosionConfiguration.SeaLevel - particleHydraulicErosionConfiguration.MaximalErosionDepth)
     {
         heightMap[getIndexV(position)] += myParticleHydraulicErosion.Sediment;
         myParticleHydraulicErosion.Sediment = 0;
@@ -304,27 +312,12 @@ void main()
         myParticleHydraulicErosion.Speed = vec2(0.0, 0.0);
     }
     
-    if(particleHydraulicErosionConfiguration.AreParticlesDisplayed)
+    if(Move())
     {
-        if(Move())
-        {
-            Interact();
-        }
-    }
-    else
-    {
-        while(true)
-        {
-            if(!Move())
-            {
-                break;
-            }
-            if(!Interact())
-            {
-                break;
-            }
-        }
+        Interact();
     }
     
     particlesHydraulicErosion[id] = myParticleHydraulicErosion;
+
+    memoryBarrier();
 }

@@ -13,9 +13,27 @@ internal class ErosionConfiguration : IErosionConfiguration
 
     public ErosionModeTypes Mode { get; set; }
     public bool IsRunning { get; set; }
+    public uint IterationsPerStep { get; set; }
     public bool IsWaterAdded { get; set; }
     public bool IsWaterDisplayed { get; set; }
     public bool IsSedimentDisplayed { get; set; }
+
+    public bool IsSeaLevelDisplayed { get; set; }
+
+    private float mySeaLevel;
+    public float SeaLevel
+    {
+        get => mySeaLevel;
+        set
+        {
+            if (mySeaLevel == value)
+            {
+                return;
+            }
+            mySeaLevel = value;
+            UpdateShaderBuffer();
+        }
+    }
 
     private int myTalusAngle;
     public int TalusAngle
@@ -52,9 +70,13 @@ internal class ErosionConfiguration : IErosionConfiguration
 
         Mode = ErosionModeTypes.HydraulicParticle;
         IsRunning = false;
+        IterationsPerStep = 1;
         IsWaterAdded = true;
         IsWaterDisplayed = true;
         IsSedimentDisplayed = false;
+
+        IsSeaLevelDisplayed = false;
+        mySeaLevel = 0.2f;
 
         myTalusAngle = 33;
         myThermalErosionHeightChange = 0.001f;
@@ -69,6 +91,16 @@ internal class ErosionConfiguration : IErosionConfiguration
 
     private unsafe void UpdateShaderBuffer()
     {
+        if (!myShaderBuffers.ContainsKey(ShaderBufferTypes.ErosionConfiguration))
+        {
+            myShaderBuffers.Add(ShaderBufferTypes.ErosionConfiguration, (uint)sizeof(ErosionConfigurationShaderBuffer));
+        }
+        ErosionConfigurationShaderBuffer erosionConfigurationShaderBuffer = new ErosionConfigurationShaderBuffer()
+        {
+            SeaLevel = SeaLevel
+        };
+        Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ErosionConfiguration], &erosionConfigurationShaderBuffer, (uint)sizeof(ErosionConfigurationShaderBuffer), 0);
+
         if (!myShaderBuffers.ContainsKey(ShaderBufferTypes.ThermalErosionConfiguration))
         {
             myShaderBuffers.Add(ShaderBufferTypes.ThermalErosionConfiguration, (uint)sizeof(ThermalErosionConfigurationShaderBuffer));
@@ -88,8 +120,9 @@ internal class ErosionConfiguration : IErosionConfiguration
             return;
         }
 
-        Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.ThermalErosionConfiguration]);
         myShaderBuffers.Remove(ShaderBufferTypes.ThermalErosionConfiguration);
+
+        myShaderBuffers.Remove(ShaderBufferTypes.ErosionConfiguration);
 
         myIsDisposed = true;
     }

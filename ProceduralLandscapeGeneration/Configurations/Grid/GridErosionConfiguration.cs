@@ -11,7 +11,35 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
 
     private bool myIsDisposed;
 
-    public float WaterIncrease { get; set; }
+    private uint myRainDrops;
+    public uint RainDrops
+    {
+        get => myRainDrops;
+        set
+        {
+            if (myRainDrops == value)
+            {
+                return;
+            }
+            myRainDrops = value;
+            RainDropsChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float myWaterIncrease;
+    public float WaterIncrease
+    {
+        get => myWaterIncrease;
+        set
+        {
+            if (myWaterIncrease == value)
+            {
+                return;
+            }
+            myWaterIncrease = value;
+            UpdateShaderBuffer();
+        }
+    }
 
     private float myTimeDelta;
     public float TimeDelta
@@ -176,12 +204,16 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         }
     }
 
+    public event EventHandler<EventArgs>? RainDropsChanged;
+
     public GridErosionConfiguration(IShaderBuffers shaderBuffers)
     {
         myShaderBuffers = shaderBuffers;
 
-        WaterIncrease = 0.00025f;
-        myEvaporationRate = 0.001f;
+        myRainDrops = 1000;
+
+        myWaterIncrease = 0.0001f;
+        myEvaporationRate = 0.01f;
         mySedimentCapacity = 0.01f;
         mySuspensionRate = 0.01f;
         myDepositionRate = 0.025f;
@@ -209,6 +241,7 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         }
         GridErosionConfigurationShaderBuffer gridErosionConfigurationShaderBuffer = new GridErosionConfigurationShaderBuffer()
         {
+            WaterIncrease = WaterIncrease,
             TimeDelta = TimeDelta,
             CellSizeX = CellSizeX,
             CellSizeY = CellSizeY,
@@ -231,7 +264,6 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
             return;
         }
 
-        Rlgl.UnloadShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridErosionConfiguration]);
         myShaderBuffers.Remove(ShaderBufferTypes.GridErosionConfiguration);
 
         myIsDisposed = true;

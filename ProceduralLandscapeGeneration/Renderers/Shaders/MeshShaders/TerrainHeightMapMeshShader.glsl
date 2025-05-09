@@ -19,7 +19,7 @@ out PerVertexData
 	vec4 normal;
 } v_out[];
 
-layout(std430, binding = 1) readonly restrict buffer heightMapShaderBuffer
+layout(std430, binding = 0) readonly restrict buffer heightMapShaderBuffer
 {
     float[] heightMap;
 };
@@ -27,11 +27,10 @@ layout(std430, binding = 1) readonly restrict buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    float SeaLevel;
     bool IsColorEnabled;
 };
 
-layout(std430, binding = 2) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
     MapGenerationConfiguration mapGenerationConfiguration;
 };
@@ -82,7 +81,7 @@ void addVertex(uint vertex, uint x, uint y)
     uint index = getIndex(x, y);
     float height = heightMap[index];
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
-    float seaLevelHeight = mapGenerationConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
+    float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     vec3 normal = getScaledNormal(x, y);
     vec4 position = mvp * vec4(x, y, terrainHeight, 1.0);
 

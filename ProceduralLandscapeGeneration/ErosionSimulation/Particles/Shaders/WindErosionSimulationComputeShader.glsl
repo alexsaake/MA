@@ -2,43 +2,9 @@
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-layout(std430, binding = 1) buffer heightMapShaderBuffer
+layout(std430, binding = 0) buffer heightMapShaderBuffer
 {
     float[] heightMap;
-};
-
-layout(std430, binding = 2) readonly restrict buffer heightMapIndicesShaderBuffer
-{
-    uint[] heightMapIndices;
-};
-
-struct MapGenerationConfiguration
-{
-    float HeightMultiplier;
-    float SeaLevel;
-    bool IsColorEnabled;
-};
-
-layout(std430, binding = 3) readonly restrict buffer mapGenerationConfigurationShaderBuffer
-{
-    MapGenerationConfiguration mapGenerationConfiguration;
-};
-
-struct ParticleWindErosionConfiguration
-{
-    float Suspension;
-    float Gravity;
-    float MaxDiff;
-    float Settling;
-    uint MaxAge;
-    vec2 PersistentSpeed;
-    bool AreParticlesAdded;
-    bool AreParticlesDisplayed;
-};
-
-layout(std430, binding = 4) readonly restrict buffer particleWindErosionConfigurationShaderBuffer
-{
-    ParticleWindErosionConfiguration particleWindErosionConfiguration;
 };
 
 struct ParticleWindErosion
@@ -49,9 +15,41 @@ struct ParticleWindErosion
     vec3 Speed;
 };
 
-layout(std430, binding = 5) buffer particleWindErosionShaderBuffer
+layout(std430, binding = 3) buffer particleWindErosionShaderBuffer
 {
     ParticleWindErosion[] particlesWindErosion;
+};
+
+struct MapGenerationConfiguration
+{
+    float HeightMultiplier;
+    bool IsColorEnabled;
+};
+
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+{
+    MapGenerationConfiguration mapGenerationConfiguration;
+};
+
+struct ParticleWindErosionConfiguration
+{
+    float SuspensionRate;
+    float Gravity;
+    float MaxDiff;
+    float Settling;
+    uint MaxAge;
+    vec2 PersistentSpeed;
+    bool AreParticlesAdded;
+};
+
+layout(std430, binding = 8) readonly restrict buffer particleWindErosionConfigurationShaderBuffer
+{
+    ParticleWindErosionConfiguration particleWindErosionConfiguration;
+};
+
+layout(std430, binding = 11) readonly restrict buffer heightMapIndicesShaderBuffer
+{
+    uint[] heightMapIndices;
 };
 
 uint myHeightMapSideLength;
@@ -310,8 +308,8 @@ bool Interact()
 
     float diff = capacity - myParticleWindErosion.Sediment;
 
-    myParticleWindErosion.Sediment += particleWindErosionConfiguration.Suspension * diff;
-    heightMap[getIndexV(currentPosition)] -= particleWindErosionConfiguration.Suspension * diff;
+    myParticleWindErosion.Sediment += particleWindErosionConfiguration.SuspensionRate * diff;
+    heightMap[getIndexV(currentPosition)] -= particleWindErosionConfiguration.SuspensionRate * diff;
 
     Cascade(currentPosition);
 
@@ -342,27 +340,12 @@ void main()
         myParticleWindErosion.Speed = vec3(0.0, 0.0, 0.0);
     }
 
-    if(particleWindErosionConfiguration.AreParticlesDisplayed)
+    if(Move())
     {
-        if(Move())
-        {
-            Interact();
-        }
-    }
-    else
-    {
-        while(true)
-        {
-            if(!Move())
-            {
-                break;
-            }
-            if(!Interact())
-            {
-                break;
-            }
-        }
+        Interact();
     }
 
     particlesWindErosion[id] = myParticleWindErosion;
+
+    memoryBarrier();
 }

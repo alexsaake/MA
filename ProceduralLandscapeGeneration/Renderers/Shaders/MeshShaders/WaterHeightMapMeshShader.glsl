@@ -19,7 +19,7 @@ out PerVertexData
 	vec4 normal;
 } v_out[];
 
-layout(std430, binding = 1) readonly restrict buffer heightMapShaderBuffer
+layout(std430, binding = 0) readonly restrict buffer heightMapShaderBuffer
 {
     float[] heightMap;
 };
@@ -52,7 +52,6 @@ layout(std430, binding = 2) buffer gridPointsShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    float SeaLevel;
     bool IsColorEnabled;
 };
 
