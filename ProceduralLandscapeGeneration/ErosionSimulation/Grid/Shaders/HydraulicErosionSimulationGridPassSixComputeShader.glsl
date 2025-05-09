@@ -44,8 +44,6 @@ uint getIndex(uint x, uint y)
 
 void main()
 {
-    float cellSizeX = 1.0;
-    float cellSizeY = 1.0;
 	float thermalErosionRate = 0.15;
 	float talusAngleTangentCoeff = 0.8;
 	float talusAngleTangentBias = 0.1;
@@ -69,12 +67,12 @@ void main()
 	float heightDifferenceB = heightMap[id] - heightMap[getIndex(x, y - 1)];
 	float maxHeightDifference = max(max(heightDifferenceL, heightDifferenceR), max(heightDifferenceB, heightDifferenceT));
 
-	float volumeToBeMoved = cellSizeX * cellSizeY * maxHeightDifference * 0.5 * thermalErosionRate * gridPoint.Hardness;
+	float volumeToBeMoved = maxHeightDifference * 0.5 * thermalErosionRate * gridPoint.Hardness;
 	
-	float tanAngleL = heightDifferenceL / cellSizeX;
-	float tanAngleR = heightDifferenceR / cellSizeX;
-	float tanAngleT = heightDifferenceT / cellSizeY;
-	float tanAngleB = heightDifferenceB / cellSizeY;
+	float tanAngleL = heightDifferenceL;
+	float tanAngleR = heightDifferenceR;
+	float tanAngleT = heightDifferenceT;
+	float tanAngleB = heightDifferenceB;
 	
 	float treshold = gridPoint.Hardness * talusAngleTangentCoeff + talusAngleTangentBias;
 	

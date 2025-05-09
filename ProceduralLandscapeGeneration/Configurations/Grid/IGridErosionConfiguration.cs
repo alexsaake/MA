@@ -5,8 +5,6 @@ internal interface IGridErosionConfiguration : IDisposable
     uint RainDrops { get; set; }
     float WaterIncrease { get; set; }
     float TimeDelta { get; set; }
-    float CellSizeX { get; set; }
-    float CellSizeY { get; set; }
     float Gravity { get; set; }
     float Friction { get; set; }
     float MaximalErosionDepth { get; set; }

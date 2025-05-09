@@ -47,8 +47,6 @@ struct GridErosionConfiguration
 {
     float WaterIncrease;
     float TimeDelta;
-    float CellSizeX;
-    float CellSizeY;
     float Gravity;
     float Friction;
     float MaximalErosionDepth;
@@ -97,26 +95,69 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
-	vec3 dhdx = vec3(gridErosionConfiguration.CellSizeX, 0.0, (heightMap[getIndex(x + 1, y)] - heightMap[getIndex(x - 1, y)]) * mapGenerationConfiguration.HeightMultiplier);
-	vec3 dhdy = vec3(0.0, gridErosionConfiguration.CellSizeY, (heightMap[getIndex(x, y + 1)] - heightMap[getIndex(x, y - 1)]) * mapGenerationConfiguration.HeightMultiplier);
-	vec3 normal = cross(dhdx, dhdy);
+    float height = heightMap[id];
+    float heightLeft;
+    float heightRight;
+    float heightBottom;
+    float heightTop;
+    if(x > 0)
+    {
+        heightLeft = heightMap[getIndex(x - 1, y)];
+    }
+    else
+    {
+        heightLeft = height;
+    }
+    if(x < myHeightMapSideLength - 1)
+    {
+        heightRight = heightMap[getIndex(x + 1, y)];
+    }
+    else
+    {
+        heightRight = height;
+    }
+    if(y > 0)
+    {
+        heightBottom = heightMap[getIndex(x, y - 1)];
+    }
+    else
+    {
+        heightBottom = height;
+    }
+    if(y < myHeightMapSideLength - 1)
+    {
+        heightTop = heightMap[getIndex(x, y + 1)];
+    }
+    else
+    {
+        heightTop = height;
+    }
 
-	float sinTiltAngle = abs(normal.z) / length(normal);
+	vec3 dhdx = vec3(1.0, 0.0, (heightRight - heightLeft) / 2.0 * mapGenerationConfiguration.HeightMultiplier);
+	vec3 dhdy = vec3(0.0, 1.0, (heightTop - heightBottom) / 2.0 * mapGenerationConfiguration.HeightMultiplier);
+	vec3 normal = normalize(cross(dhdx, dhdy));
+    
+    float dotProd = dot(normal, vec3(0.0, 0.0, 1.0));
+    float alpha = acos(dotProd);
+    float tiltAngle = sin(alpha);
 	
-	float lmax = clamp(1.0 - max(0.0, gridErosionConfiguration.MaximalErosionDepth - gridPoint.WaterHeight) / gridErosionConfiguration.MaximalErosionDepth, 0.0, 1.0);
-	float sedimentTransportCapacity = gridErosionConfiguration.SedimentCapacity * length(gridPoint.Velocity) * sinTiltAngle * lmax;
+    float maximumSediment = gridErosionConfiguration.SedimentCapacity;
+	float erosionDepthLimit = clamp(1.0 - max(0.0, -gridErosionConfiguration.MaximalErosionDepth - gridPoint.WaterHeight) / -gridErosionConfiguration.MaximalErosionDepth, 0.0, 1.0);
+	float sedimentTransportCapacity = clamp(gridErosionConfiguration.SedimentCapacity * tiltAngle * length(gridPoint.Velocity) * erosionDepthLimit, 0.0, maximumSediment);
 
-	if (gridPoint.SuspendedSediment < sedimentTransportCapacity)
+	if (sedimentTransportCapacity > gridPoint.SuspendedSediment)
 	{
-		float mod = gridErosionConfiguration.TimeDelta * gridErosionConfiguration.SuspensionRate * gridPoint.Hardness * (sedimentTransportCapacity - gridPoint.SuspendedSediment);
-		heightMap[id] -= mod;
-		gridPoint.SuspendedSediment += mod;
+		float soilSuspended = gridErosionConfiguration.TimeDelta * gridErosionConfiguration.SuspensionRate * (sedimentTransportCapacity - gridPoint.SuspendedSediment);
+		heightMap[id] = max(0.0, heightMap[id] - soilSuspended);
+        float suspend = clamp(gridPoint.SuspendedSediment + soilSuspended, 0.0, maximumSediment);
+		gridPoint.SuspendedSediment += suspend;
 	}
-	else if (gridPoint.SuspendedSediment > sedimentTransportCapacity)
+	else if (sedimentTransportCapacity < gridPoint.SuspendedSediment)
 	{
-		float mod = gridErosionConfiguration.TimeDelta * gridErosionConfiguration.DepositionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
-		heightMap[id] += mod;
-		gridPoint.SuspendedSediment -= mod;
+		float soilDeposited = gridErosionConfiguration.TimeDelta * gridErosionConfiguration.DepositionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
+		heightMap[id] = min(1.0, heightMap[id] + soilDeposited);
+        float deposit = max(0.0, gridPoint.SuspendedSediment - soilDeposited);
+		gridPoint.SuspendedSediment -= deposit;
 	}
 	 
 	// Hardness update

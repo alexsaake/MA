@@ -31,8 +31,6 @@ struct GridErosionConfiguration
 {
     float WaterIncrease;
     float TimeDelta;
-    float CellSizeX;
-    float CellSizeY;
     float Gravity;
     float Friction;
     float MaximalErosionDepth;

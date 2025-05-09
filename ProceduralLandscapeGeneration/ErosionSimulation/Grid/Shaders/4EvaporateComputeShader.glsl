@@ -36,8 +36,6 @@ struct GridErosionConfiguration
 {
     float WaterIncrease;
     float TimeDelta;
-    float CellSizeX;
-    float CellSizeY;
     float Gravity;
     float Friction;
     float MaximalErosionDepth;
@@ -55,7 +53,12 @@ layout(std430, binding = 9) buffer gridErosionConfigurationShaderBuffer
 
 uint myHeightMapSideLength;
 
-uint getIndex(vec2 position)
+uint getIndex(uint x, uint y)
+{
+    return uint((y * myHeightMapSideLength) + x);
+}
+
+uint getIndexVector(vec2 position)
 {
     return uint((position.y * myHeightMapSideLength) + position.x);
 }
@@ -63,22 +66,58 @@ uint getIndex(vec2 position)
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
 //https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
 
-float SampleBilinear(vec2 uv)
+float SampleBilinearSediment(vec2 position)
 {
-	vec2 uva = floor(uv);
-	vec2 uvb = ceil(uv);
+	vec2 ceilPosition = ceil(position);
+    if(ceilPosition.x >= myHeightMapSideLength)
+    {
+        ceilPosition.x = myHeightMapSideLength - 1;
+    }
+    if(ceilPosition.x < 0)
+    {
+        ceilPosition.x = 0;
+    }
+    if(ceilPosition.y >= myHeightMapSideLength)
+    {
+        ceilPosition.y = myHeightMapSideLength - 1;
+    }
+    if(ceilPosition.y < 0)
+    {
+        ceilPosition.y = 0;
+    }
+	vec2 floorPosition = floor(position);
+    if(floorPosition.x >= myHeightMapSideLength)
+    {
+        floorPosition.x = myHeightMapSideLength - 1;
+    }
+    if(floorPosition.x < 0)
+    {
+        floorPosition.x = 0;
+    }
+    if(floorPosition.y >= myHeightMapSideLength)
+    {
+        floorPosition.y = myHeightMapSideLength - 1;
+    }
+    if(floorPosition.y < 0)
+    {
+        floorPosition.y = 0;
+    }
+    
+    uint topLeftIndex = uint(ceilPosition.y * myHeightMapSideLength + floorPosition.x);
+    uint topRightIndex = uint(ceilPosition.y * myHeightMapSideLength + ceilPosition.x);
+    uint bottomLeftIndex = uint(floorPosition.y * myHeightMapSideLength + floorPosition.x);
+    uint bottomRightIndex = uint(floorPosition.y * myHeightMapSideLength + ceilPosition.x);
+    
+    float dx = position.x - floorPosition.x;
+    float dy = position.y - floorPosition.y;
+    
+    float interpolateXBottom = gridPoints[bottomLeftIndex].SuspendedSediment * (1 - dx) + gridPoints[bottomRightIndex].SuspendedSediment * dx;
+    float interpolateXTop = gridPoints[topLeftIndex].SuspendedSediment * (1 - dx) + gridPoints[topRightIndex].SuspendedSediment * dx;
+    
+    // calculate interpolated sediment
+    float interpolatedSediment = interpolateXBottom * (1 - dy) + interpolateXTop * dy;
 
-	uvec2 id00 = uvec2(uva);  // 0 0
-	uvec2 id10 = uvec2(uvb.x, uva.y); // 1 0
-	uvec2 id01 = uvec2(uva.x, uvb.y); // 0 1	
-	uvec2 id11 = uvec2(uvb); // 1 1
-
-	vec2 d = uv - uva;
-
-    return gridPoints[getIndex(id00)].SuspendedSediment * (1 - d.x) * (1 - d.y) +
-		gridPoints[getIndex(id10)].SuspendedSediment * d.x * (1 - d.y) +
-		gridPoints[getIndex(id01)].SuspendedSediment * (1 - d.x) * d.y +
-		gridPoints[getIndex(id11)].SuspendedSediment * d.x * d.y;
+    return interpolatedSediment;
 }
 
 void main()
@@ -96,8 +135,18 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
+    ivec2 previousPosition = ivec2(x - gridPoint.Velocity.x * gridErosionConfiguration.TimeDelta, y - gridPoint.Velocity.y * gridErosionConfiguration.TimeDelta);
+    if(previousPosition.x < 0 || previousPosition.x >= myHeightMapSideLength
+        || previousPosition.y < 0 || previousPosition.y >= myHeightMapSideLength)
+        {
+            gridPoint.TempSediment = SampleBilinearSediment(previousPosition);    
+        }
+    else
+    {
+        gridPoint.TempSediment = gridPoints[getIndexVector(previousPosition)].SuspendedSediment;
+    }
+
 	gridPoint.WaterHeight = max(0.0, gridPoint.WaterHeight * (1.0 - gridErosionConfiguration.EvaporationRate * gridErosionConfiguration.TimeDelta));
-	gridPoint.TempSediment = SampleBilinear(vec2(x, y) - gridPoint.Velocity * gridErosionConfiguration.TimeDelta);
 
     gridPoints[id] = gridPoint;
     

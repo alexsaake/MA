@@ -67,8 +67,6 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridErosionConfiguration.RainDrops = (uint)value, (int)gridErosionConfiguration.RainDrops, 1, 100000));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Water Increase", (value) => gridErosionConfiguration.WaterIncrease = value, gridErosionConfiguration.WaterIncrease));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => gridErosionConfiguration.TimeDelta = value, gridErosionConfiguration.TimeDelta));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Cell Size X", (value) => gridErosionConfiguration.CellSizeX = value, gridErosionConfiguration.CellSizeX));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Cell Size Y", (value) => gridErosionConfiguration.CellSizeY = value, gridErosionConfiguration.CellSizeY));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => gridErosionConfiguration.Gravity = value, gridErosionConfiguration.Gravity));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Friction", (value) => gridErosionConfiguration.Friction = value, gridErosionConfiguration.Friction));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Maximal Erosion Depth", (value) => gridErosionConfiguration.MaximalErosionDepth = value, gridErosionConfiguration.MaximalErosionDepth));

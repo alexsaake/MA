@@ -47,8 +47,6 @@ struct GridErosionConfiguration
 {
     float WaterIncrease;
     float TimeDelta;
-    float CellSizeX;
-    float CellSizeY;
     float Gravity;
     float Friction;
     float MaximalErosionDepth;
@@ -96,11 +94,11 @@ void main()
 
 	float volumeDelta = gridErosionConfiguration.TimeDelta * (flowIn - flowOut) / mapGenerationConfiguration.HeightMultiplier;
 
-	gridPoint.WaterHeight = max(0, gridPoint.WaterHeight + volumeDelta / (gridErosionConfiguration.CellSizeX * gridErosionConfiguration.CellSizeY));
+	gridPoint.WaterHeight = max(0.0, gridPoint.WaterHeight + volumeDelta);
 
-    if(gridPoint.WaterHeight > 0)
+    if(gridPoint.WaterHeight > 0.0)
     {
-        gridPoint.Velocity = vec2(0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight) / gridErosionConfiguration.CellSizeY, 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop) / gridErosionConfiguration.CellSizeX);
+        gridPoint.Velocity = vec2(0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight), 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop));
     }
     else
     {

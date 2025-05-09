@@ -47,8 +47,6 @@ struct GridErosionConfiguration
 {
     float WaterIncrease;
     float TimeDelta;
-    float CellSizeX;
-    float CellSizeY;
     float Gravity;
     float Friction;
     float MaximalErosionDepth;
@@ -97,7 +95,7 @@ void main()
     if(x > 0)
     {
         float totalHeightLeft = heightMap[getIndex(x - 1, y)] + gridPoints[getIndex(x - 1, y)].WaterHeight;
-        gridPoint.FlowLeft = max(0.0, gridPoint.FlowLeft * frictionFactor + (totalHeight - totalHeightLeft) * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeX);
+        gridPoint.FlowLeft = max(0.0, gridPoint.FlowLeft * frictionFactor + (totalHeight - totalHeightLeft) * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta);
     }
     else
     {
@@ -107,7 +105,7 @@ void main()
     if(x < myHeightMapSideLength - 1)
     {
         float totalHeightRight = heightMap[getIndex(x + 1, y)] + gridPoints[getIndex(x + 1, y)].WaterHeight;
-        gridPoint.FlowRight = max(0.0, gridPoint.FlowRight * frictionFactor + (totalHeight - totalHeightRight) * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeX);
+        gridPoint.FlowRight = max(0.0, gridPoint.FlowRight * frictionFactor + (totalHeight - totalHeightRight) * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta);
     }
     else
     {
@@ -117,7 +115,7 @@ void main()
     if(y > 0)
     {
         float totalHeightBottom = heightMap[getIndex(x, y - 1)] + gridPoints[getIndex(x, y - 1)].WaterHeight;
-        gridPoint.FlowBottom = max(0.0, gridPoint.FlowBottom * frictionFactor + (totalHeight - totalHeightBottom) * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeY);
+        gridPoint.FlowBottom = max(0.0, gridPoint.FlowBottom * frictionFactor + (totalHeight - totalHeightBottom) * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta);
     }
     else
     {
@@ -127,7 +125,7 @@ void main()
     if(y < myHeightMapSideLength - 1)
     {
         float totalHeightTop = heightMap[getIndex(x, y + 1)] + gridPoints[getIndex(x, y + 1)].WaterHeight;
-        gridPoint.FlowTop = max(0.0, gridPoint.FlowTop * frictionFactor + (totalHeight - totalHeightTop) * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta / gridErosionConfiguration.CellSizeY);
+        gridPoint.FlowTop = max(0.0, gridPoint.FlowTop * frictionFactor + (totalHeight - totalHeightTop) * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta);
     }
     else
     {
@@ -137,7 +135,7 @@ void main()
     float totalOutflow = gridPoint.FlowLeft + gridPoint.FlowRight + gridPoint.FlowBottom + gridPoint.FlowTop;
     if (totalOutflow > gridPoint.WaterHeight * mapGenerationConfiguration.HeightMultiplier)
     {
-        float scale = min(1.0, gridPoint.WaterHeight * mapGenerationConfiguration.HeightMultiplier * gridErosionConfiguration.CellSizeX * gridErosionConfiguration.CellSizeY / (totalOutflow * gridErosionConfiguration.TimeDelta));
+        float scale = min(1.0, gridPoint.WaterHeight * mapGenerationConfiguration.HeightMultiplier / (totalOutflow * gridErosionConfiguration.TimeDelta));
         
         gridPoint.FlowLeft *= scale;
         gridPoint.FlowRight *= scale;

@@ -56,34 +56,6 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         }
     }
 
-    private float myCellSizeX;
-    public float CellSizeX
-    {
-        get => myCellSizeX;
-        set
-        {
-            if (myCellSizeX == value)
-            {
-                return;
-            }
-            myCellSizeX = value;
-            UpdateShaderBuffer();
-        }
-    }
-    private float myCellSizeY;
-    public float CellSizeY
-    {
-        get => myCellSizeY;
-        set
-        {
-            if (myCellSizeY == value)
-            {
-                return;
-            }
-            myCellSizeY = value;
-            UpdateShaderBuffer();
-        }
-    }
     private float myGravity;
     public float Gravity
     {
@@ -213,15 +185,13 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         myRainDrops = 1000;
 
         myWaterIncrease = 0.0001f;
-        myEvaporationRate = 0.01f;
+        myEvaporationRate = 0.001f;
         mySedimentCapacity = 0.01f;
-        mySuspensionRate = 0.01f;
-        myDepositionRate = 0.025f;
-        myMaximalErosionDepth = 0.05f;
+        mySuspensionRate = 0.25f;
+        myDepositionRate = 0.125f;
+        myMaximalErosionDepth = 0.005f;
         myGravity = 9.81f;
         myTimeDelta = 1;
-        myCellSizeX = 1;
-        myCellSizeY = 1;
         myFriction = 1.0f;
         mySedimentSofteningRate = 0;
     }
@@ -243,8 +213,6 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         {
             WaterIncrease = WaterIncrease,
             TimeDelta = TimeDelta,
-            CellSizeX = CellSizeX,
-            CellSizeY = CellSizeY,
             Gravity = Gravity,
             Friction = Friction,
             MaximalErosionDepth = MaximalErosionDepth,
