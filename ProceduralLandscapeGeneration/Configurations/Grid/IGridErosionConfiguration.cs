@@ -6,12 +6,10 @@ internal interface IGridErosionConfiguration : IDisposable
     float WaterIncrease { get; set; }
     float TimeDelta { get; set; }
     float Gravity { get; set; }
-    float Friction { get; set; }
+    float Dampening { get; set; }
     float MaximalErosionDepth { get; set; }
-    float SedimentCapacity { get; set; }
     float SuspensionRate { get; set; }
     float DepositionRate { get; set; }
-    float SedimentSofteningRate { get; set; }
     float EvaporationRate { get; set; }
 
     event EventHandler<EventArgs>? RainDropsChanged;

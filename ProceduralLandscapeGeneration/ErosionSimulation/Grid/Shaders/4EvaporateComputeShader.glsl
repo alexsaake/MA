@@ -12,18 +12,10 @@ struct GridPoint
     float WaterHeight;
     float SuspendedSediment;
     float TempSediment;
-    float Hardness;
-
     float FlowLeft;
     float FlowRight;
     float FlowTop;
-    float FlowBottom;
-
-    float ThermalLeft;
-    float ThermalRight;
-    float ThermalTop;
-    float ThermalBottom;
-    
+    float FlowBottom;    
     vec2 Velocity;
 };
 
@@ -37,12 +29,10 @@ struct GridErosionConfiguration
     float WaterIncrease;
     float TimeDelta;
     float Gravity;
-    float Friction;
+    float Dampening;
     float MaximalErosionDepth;
-    float SedimentCapacity;
     float SuspensionRate;
     float DepositionRate;
-    float SedimentSofteningRate;
     float EvaporationRate;
 };
 

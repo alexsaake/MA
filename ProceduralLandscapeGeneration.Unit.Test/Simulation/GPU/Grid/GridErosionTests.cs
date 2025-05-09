@@ -59,10 +59,10 @@ public class GridErosionTests
         SetUpFlatHeightMap();
         IGridErosion testee = myContainer!.Resolve<IGridErosion>();
         testee.Initialize();
-        testee.AddWater(0, 0);
-        testee.AddWater(1, 0);
-        testee.AddWater(0, 1);
-        testee.AddWater(1, 1);
+        AddWater(0, 0);
+        AddWater(1, 0);
+        AddWater(0, 1);
+        AddWater(1, 1);
 
         testee.Flow();
 
@@ -84,7 +84,7 @@ public class GridErosionTests
         SetUpFlatChannelHeightMap();
         IGridErosion testee = myContainer!.Resolve<IGridErosion>();
         testee.Initialize();
-        testee.AddWater(0, 0);
+        AddWater(0, 0);
 
         testee.Flow();
 
@@ -103,7 +103,7 @@ public class GridErosionTests
         SetUpFlatHeightMap();
         IGridErosion testee = myContainer!.Resolve<IGridErosion>();
         testee.Initialize();
-        testee.AddWater(1, 1);
+        AddWater(1, 1);
 
         testee.Flow();
 
@@ -125,7 +125,7 @@ public class GridErosionTests
         SetUpSlopedChannelHeightMap();
         IGridErosion testee = myContainer!.Resolve<IGridErosion>();
         testee.Initialize();
-        testee.AddWater(1, 0);
+        AddWater(1, 0);
 
         testee.Flow();
 
@@ -165,7 +165,7 @@ public class GridErosionTests
         SetUpFlatHeightMap();
         IGridErosion testee = myContainer!.Resolve<IGridErosion>();
         testee.Initialize();
-        testee.AddWater(1, 1);
+        AddWater(1, 1);
         testee.Flow();
 
         testee.VelocityMap();
@@ -197,7 +197,7 @@ public class GridErosionTests
         SetUpSlopedChannelHeightMap();
         IGridErosion testee = myContainer!.Resolve<IGridErosion>();
         testee.Initialize();
-        testee.AddWater(1, 0);
+        AddWater(1, 0);
         testee.Flow();
 
         testee.VelocityMap();
@@ -249,7 +249,7 @@ public class GridErosionTests
         SetUpFlatHeightMap();
         IGridErosion testee = myContainer!.Resolve<IGridErosion>();
         testee.Initialize();
-        testee.AddWater(1, 1);
+        AddWater(1, 1);
         testee.Flow();
         testee.VelocityMap();
 
@@ -295,7 +295,7 @@ public class GridErosionTests
         SetUpSlopedChannelHeightMap();
         IGridErosion testee = myContainer!.Resolve<IGridErosion>();
         testee.Initialize();
-        testee.AddWater(1, 0);
+        AddWater(1, 0);
         testee.Flow();
         testee.VelocityMap();
 
@@ -330,11 +330,11 @@ public class GridErosionTests
         SetUpFlatHeightMap();
         GridErosion testee = (GridErosion)myContainer!.Resolve<IGridErosion>();
         testee.Initialize();
-        testee.AddWater(1, 1);
+        AddWater(1, 1);
         testee.Flow();
         testee.VelocityMap();
         testee.SuspendDeposite();
-        testee.RemoveWater();
+        RemoveWater();
         testee.Flow();
         testee.VelocityMap();
 
@@ -380,11 +380,11 @@ public class GridErosionTests
         SetUpSlopedChannelHeightMap();
         GridErosion testee = (GridErosion)myContainer!.Resolve<IGridErosion>();
         testee.Initialize();
-        testee.AddWater(1, 0);
+        AddWater(1, 0);
         testee.Flow();
         testee.VelocityMap();
         testee.SuspendDeposite();
-        testee.RemoveWater();
+        RemoveWater();
         testee.Flow();
         testee.VelocityMap();
 
@@ -444,7 +444,7 @@ public class GridErosionTests
         SetUpFlatHeightMap();
         IGridErosion testee = myContainer!.Resolve<IGridErosion>();
         testee.Initialize();
-        testee.AddWater(1, 1);
+        AddWater(1, 1);
         testee.Flow();
         testee.VelocityMap();
         testee.SuspendDeposite();
@@ -512,7 +512,7 @@ public class GridErosionTests
         SetUpFlatHeightMap();
         IGridErosion testee = myContainer!.Resolve<IGridErosion>();
         testee.Initialize();
-        testee.AddWater(0, 0);
+        AddWater(0, 0);
         testee.Flow();
         testee.VelocityMap();
         testee.SuspendDeposite();
@@ -543,7 +543,7 @@ public class GridErosionTests
         SetUpFlatHeightMap();
         IGridErosion testee = myContainer!.Resolve<IGridErosion>();
         testee.Initialize();
-        testee.AddWater(1, 1);
+        AddWater(1, 1);
         testee.Flow();
         testee.VelocityMap();
         testee.SuspendDeposite();
@@ -682,5 +682,56 @@ public class GridErosionTests
     {
         IMapGenerationConfiguration mapGenerationConfiguration = myContainer!.Resolve<IMapGenerationConfiguration>();
         return mapGenerationConfiguration.GetIndex(x, y);
+    }
+
+    private unsafe void AddWater(uint x, uint y)
+    {
+        IMapGenerationConfiguration mapGenerationConfiguration = myContainer!.Resolve<IMapGenerationConfiguration>();
+        IGridErosionConfiguration gridErosionConfiguration = myContainer!.Resolve<IGridErosionConfiguration>();
+        IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
+        uint mapSize = mapGenerationConfiguration.HeightMapSideLength * mapGenerationConfiguration.HeightMapSideLength;
+        uint bufferSize = mapSize * (uint)sizeof(GridPointShaderBuffer);
+
+        GridPointShaderBuffer[] gridPoints = new GridPointShaderBuffer[mapSize];
+        Rlgl.MemoryBarrier();
+        fixed (void* gridPointsPointer = gridPoints)
+        {
+            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
+        }
+
+        uint index = mapGenerationConfiguration.GetIndex(x, y);
+        gridPoints[index].WaterHeight += gridErosionConfiguration.WaterIncrease;
+
+        fixed (void* gridPointsPointer = gridPoints)
+        {
+            Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
+        }
+        Rlgl.MemoryBarrier();
+    }
+
+    private unsafe void RemoveWater()
+    {
+        IMapGenerationConfiguration mapGenerationConfiguration = myContainer!.Resolve<IMapGenerationConfiguration>();
+        IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
+        uint mapSize = mapGenerationConfiguration.HeightMapSideLength * mapGenerationConfiguration.HeightMapSideLength;
+        uint bufferSize = mapSize * (uint)sizeof(GridPointShaderBuffer);
+
+        GridPointShaderBuffer[] gridPoints = new GridPointShaderBuffer[mapSize];
+        Rlgl.MemoryBarrier();
+        fixed (void* gridPointsPointer = gridPoints)
+        {
+            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
+        }
+
+        for (int i = 0; i < gridPoints.Length; i++)
+        {
+            gridPoints[i].WaterHeight = 0;
+        }
+
+        fixed (void* gridPointsPointer = gridPoints)
+        {
+            Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
+        }
+        Rlgl.MemoryBarrier();
     }
 }

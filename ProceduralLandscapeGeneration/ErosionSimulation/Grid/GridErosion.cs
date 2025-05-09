@@ -23,8 +23,6 @@ internal class GridErosion : IGridErosion
     private ComputeShaderProgram? mySuspendDepositeHydraulicErosionGridSimulationComputeShaderProgram;
     private ComputeShaderProgram? myEvaporateHydraulicErosionGridSimulationComputeShaderProgram;
     private ComputeShaderProgram? myMoveSedimentHydraulicErosionGridSimulationComputeShaderProgram;
-    private ComputeShaderProgram? myHydraulicErosionSimulationGridPassSixComputeShaderProgram;
-    private ComputeShaderProgram? myHydraulicErosionSimulationGridPassSevenComputeShaderProgram;
 
     private bool myHasRainDropsChangedChanged;
     private bool myIsDisposed;
@@ -51,8 +49,6 @@ internal class GridErosion : IGridErosion
         mySuspendDepositeHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/3SuspendDepositeComputeShader.glsl");
         myEvaporateHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/4EvaporateComputeShader.glsl");
         myMoveSedimentHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/5MoveSedimentComputeShader.glsl");
-        myHydraulicErosionSimulationGridPassSixComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/HydraulicErosionSimulationGridPassSixComputeShader.glsl");
-        myHydraulicErosionSimulationGridPassSevenComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/HydraulicErosionSimulationGridPassSevenComputeShader.glsl");
 
         AddGridPointsShaderBuffer();
         AddHeightMapIndicesShaderBuffer();
@@ -68,16 +64,7 @@ internal class GridErosion : IGridErosion
     private unsafe void AddGridPointsShaderBuffer()
     {
         uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        GridPointShaderBuffer[] gridPoints = new GridPointShaderBuffer[mapSize];
-        for (int i = 0; i < gridPoints.Length; i++)
-        {
-            gridPoints[i].Hardness = 1.0f;
-        }
         myShaderBuffers.Add(ShaderBufferTypes.GridPoints, (uint)(mapSize * sizeof(GridPointShaderBuffer)));
-        fixed (void* gridPointsPointer = gridPoints)
-        {
-            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, mapSize * (uint)sizeof(GridPointShaderBuffer), 0);
-        }
         Rlgl.MemoryBarrier();
     }
 
@@ -159,19 +146,6 @@ internal class GridErosion : IGridErosion
         Rlgl.MemoryBarrier();
     }
 
-    public void Erode()
-    {
-        //Rlgl.EnableShader(myHydraulicErosionSimulationGridPassSixComputeShaderProgram!.Id);
-        //Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
-        //Rlgl.DisableShader();
-        //Rlgl.MemoryBarrier();
-
-        //Rlgl.EnableShader(myHydraulicErosionSimulationGridPassSevenComputeShaderProgram!.Id);
-        //Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
-        //Rlgl.DisableShader();
-        //Rlgl.MemoryBarrier();
-    }
-
     private unsafe void CreateRandomIndices()
     {
         int[] randomRainDropIndices = new int[myGridErosionConfiguration.RainDrops];
@@ -183,52 +157,6 @@ internal class GridErosion : IGridErosion
         fixed (int* randomRainDropIndicesPointer = randomRainDropIndices)
         {
             Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMapIndices], randomRainDropIndicesPointer, myGridErosionConfiguration.RainDrops * sizeof(int), 0);
-        }
-        Rlgl.MemoryBarrier();
-    }
-
-    public unsafe void AddWater(uint x, uint y)
-    {
-        uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        uint bufferSize = mapSize * (uint)sizeof(GridPointShaderBuffer);
-
-        GridPointShaderBuffer[] gridPoints = new GridPointShaderBuffer[mapSize];
-        Rlgl.MemoryBarrier();
-        fixed (void* gridPointsPointer = gridPoints)
-        {
-            Rlgl.ReadShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
-        }
-
-        uint index = myMapGenerationConfiguration.GetIndex(x, y);
-        gridPoints[index].WaterHeight += myGridErosionConfiguration.WaterIncrease;
-
-        fixed (void* gridPointsPointer = gridPoints)
-        {
-            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
-        }
-        Rlgl.MemoryBarrier();
-    }
-
-    public unsafe void RemoveWater()
-    {
-        uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        uint bufferSize = mapSize * (uint)sizeof(GridPointShaderBuffer);
-
-        GridPointShaderBuffer[] gridPoints = new GridPointShaderBuffer[mapSize];
-        Rlgl.MemoryBarrier();
-        fixed (void* gridPointsPointer = gridPoints)
-        {
-            Rlgl.ReadShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
-        }
-
-        for (int i = 0; i < gridPoints.Length; i++)
-        {
-            gridPoints[i].WaterHeight = 0;
-        }
-
-        fixed (void* gridPointsPointer = gridPoints)
-        {
-            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
         }
         Rlgl.MemoryBarrier();
     }
@@ -248,8 +176,6 @@ internal class GridErosion : IGridErosion
         mySuspendDepositeHydraulicErosionGridSimulationComputeShaderProgram?.Dispose();
         myEvaporateHydraulicErosionGridSimulationComputeShaderProgram?.Dispose();
         myMoveSedimentHydraulicErosionGridSimulationComputeShaderProgram?.Dispose();
-        myHydraulicErosionSimulationGridPassSixComputeShaderProgram?.Dispose();
-        myHydraulicErosionSimulationGridPassSevenComputeShaderProgram?.Dispose();
 
         RemoveHeightMapIndicesShaderBuffer();
         RemoveGridPointsShaderBuffer();

@@ -12,18 +12,10 @@ struct GridPoint
     float WaterHeight;
     float SuspendedSediment;
     float TempSediment;
-    float Hardness;
-
     float FlowLeft;
     float FlowRight;
     float FlowTop;
-    float FlowBottom;
-
-    float ThermalLeft;
-    float ThermalRight;
-    float ThermalTop;
-    float ThermalBottom;
-    
+    float FlowBottom;    
     vec2 Velocity;
 };
 
@@ -48,12 +40,10 @@ struct GridErosionConfiguration
     float WaterIncrease;
     float TimeDelta;
     float Gravity;
-    float Friction;
+    float Dampening;
     float MaximalErosionDepth;
-    float SedimentCapacity;
     float SuspensionRate;
     float DepositionRate;
-    float SedimentSofteningRate;
     float EvaporationRate;
 };
 
@@ -78,7 +68,8 @@ uint getIndexVector(vec2 position)
 //https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
 //https://github.com/keepitwiel/hydraulic-erosion-simulator/blob/main/src/algorithm.py
 //https://github.com/karhu/terrain-erosion/blob/master/Simulation/FluidSimulation.cpp
-
+//depth limit
+//https://github.com/patiltanma/15618-FinalProject/blob/master/Renderer/Renderer/erosion_kernel.cu
 void main()
 {
 	
@@ -141,28 +132,22 @@ void main()
     float alpha = acos(dotProd);
     float tiltAngle = sin(alpha);
 	
-    float maximumSediment = gridErosionConfiguration.SedimentCapacity;
-	float erosionDepthLimit = clamp(1.0 - max(0.0, -gridErosionConfiguration.MaximalErosionDepth - gridPoint.WaterHeight) / -gridErosionConfiguration.MaximalErosionDepth, 0.0, 1.0);
-	float sedimentTransportCapacity = clamp(gridErosionConfiguration.SedimentCapacity * tiltAngle * length(gridPoint.Velocity) * erosionDepthLimit, 0.0, maximumSediment);
+    float sedimentCapacity = gridPoint.WaterHeight * gridErosionConfiguration.SuspensionRate - gridPoint.SuspendedSediment;
+	float erosionDepthLimit = (gridErosionConfiguration.MaximalErosionDepth - min(gridErosionConfiguration.MaximalErosionDepth, gridPoint.WaterHeight)) / gridErosionConfiguration.MaximalErosionDepth;
+	float sedimentTransportCapacity = sedimentCapacity * tiltAngle * length(gridPoint.Velocity) * erosionDepthLimit;
 
 	if (sedimentTransportCapacity > gridPoint.SuspendedSediment)
 	{
 		float soilSuspended = gridErosionConfiguration.TimeDelta * gridErosionConfiguration.SuspensionRate * (sedimentTransportCapacity - gridPoint.SuspendedSediment);
-		heightMap[id] = max(0.0, heightMap[id] - soilSuspended);
-        float suspend = clamp(gridPoint.SuspendedSediment + soilSuspended, 0.0, maximumSediment);
-		gridPoint.SuspendedSediment += suspend;
+		heightMap[id] -= soilSuspended;
+		gridPoint.SuspendedSediment += soilSuspended;
 	}
 	else if (sedimentTransportCapacity < gridPoint.SuspendedSediment)
 	{
 		float soilDeposited = gridErosionConfiguration.TimeDelta * gridErosionConfiguration.DepositionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
-		heightMap[id] = min(1.0, heightMap[id] + soilDeposited);
-        float deposit = max(0.0, gridPoint.SuspendedSediment - soilDeposited);
-		gridPoint.SuspendedSediment -= deposit;
+		heightMap[id] += soilDeposited;
+		gridPoint.SuspendedSediment -= soilDeposited;
 	}
-	 
-	// Hardness update
-	gridPoint.Hardness -= gridErosionConfiguration.TimeDelta * gridErosionConfiguration.SedimentSofteningRate * gridErosionConfiguration.SuspensionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
-	gridPoint.Hardness = clamp(gridPoint.Hardness, 0.1, 1.0);
 	
     gridPoints[id] = gridPoint;
     

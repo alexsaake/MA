@@ -71,17 +71,17 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         }
     }
 
-    private float myFriction;
-    public float Friction
+    private float myDampening;
+    public float Dampening
     {
-        get => myFriction;
+        get => myDampening;
         set
         {
-            if (myFriction == value)
+            if (myDampening == value)
             {
                 return;
             }
-            myFriction = value;
+            myDampening = value;
             UpdateShaderBuffer();
         }
     }
@@ -97,21 +97,6 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
                 return;
             }
             myMaximalErosionDepth = value;
-            UpdateShaderBuffer();
-        }
-    }
-
-    private float mySedimentCapacity;
-    public float SedimentCapacity
-    {
-        get => mySedimentCapacity;
-        set
-        {
-            if (mySedimentCapacity == value)
-            {
-                return;
-            }
-            mySedimentCapacity = value;
             UpdateShaderBuffer();
         }
     }
@@ -146,21 +131,6 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         }
     }
 
-    private float mySedimentSofteningRate;
-    public float SedimentSofteningRate
-    {
-        get => mySedimentSofteningRate;
-        set
-        {
-            if (mySedimentSofteningRate == value)
-            {
-                return;
-            }
-            mySedimentSofteningRate = value;
-            UpdateShaderBuffer();
-        }
-    }
-
     private float myEvaporationRate;
     public float EvaporationRate
     {
@@ -185,15 +155,13 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         myRainDrops = 1000;
 
         myWaterIncrease = 0.0001f;
-        myEvaporationRate = 0.001f;
-        mySedimentCapacity = 0.01f;
-        mySuspensionRate = 0.25f;
-        myDepositionRate = 0.125f;
-        myMaximalErosionDepth = 0.005f;
+        myEvaporationRate = 0.0001f;
+        mySuspensionRate = 0.05f;
+        myDepositionRate = 0.05f;
+        myMaximalErosionDepth = 0.05f;
         myGravity = 9.81f;
         myTimeDelta = 1;
-        myFriction = 1.0f;
-        mySedimentSofteningRate = 0;
+        myDampening = 0.5f;
     }
 
     public void Initialize()
@@ -214,12 +182,10 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
             WaterIncrease = WaterIncrease,
             TimeDelta = TimeDelta,
             Gravity = Gravity,
-            Friction = Friction,
+            Dampening = Dampening,
             MaximalErosionDepth = MaximalErosionDepth,
-            SedimentCapacity = SedimentCapacity,
             SuspensionRate = SuspensionRate,
             DepositionRate = DepositionRate,
-            SedimentSofteningRate = SedimentSofteningRate,
             EvaporationRate = EvaporationRate
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridErosionConfiguration], &gridErosionConfigurationShaderBuffer, (uint)sizeof(GridErosionConfigurationShaderBuffer), 0);

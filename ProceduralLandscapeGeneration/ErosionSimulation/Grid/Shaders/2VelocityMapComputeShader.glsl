@@ -12,18 +12,10 @@ struct GridPoint
     float WaterHeight;
     float SuspendedSediment;
     float TempSediment;
-    float Hardness;
-
     float FlowLeft;
     float FlowRight;
     float FlowTop;
-    float FlowBottom;
-
-    float ThermalLeft;
-    float ThermalRight;
-    float ThermalTop;
-    float ThermalBottom;
-    
+    float FlowBottom;    
     vec2 Velocity;
 };
 
@@ -48,12 +40,10 @@ struct GridErosionConfiguration
     float WaterIncrease;
     float TimeDelta;
     float Gravity;
-    float Friction;
+    float Dampening;
     float MaximalErosionDepth;
-    float SedimentCapacity;
     float SuspensionRate;
     float DepositionRate;
-    float SedimentSofteningRate;
     float EvaporationRate;
 };
 
@@ -92,13 +82,14 @@ void main()
     float flowIn = gridPoints[getIndex(x - 1, y)].FlowRight + gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoints[getIndex(x, y - 1)].FlowTop + gridPoints[getIndex(x, y + 1)].FlowBottom;
     float flowOut = gridPoint.FlowRight + gridPoint.FlowLeft + gridPoint.FlowTop + gridPoint.FlowBottom;
 
-	float volumeDelta = gridErosionConfiguration.TimeDelta * (flowIn - flowOut) / mapGenerationConfiguration.HeightMultiplier;
+	float volumeDelta = gridErosionConfiguration.TimeDelta * (flowIn - flowOut);
 
 	gridPoint.WaterHeight = max(0.0, gridPoint.WaterHeight + volumeDelta);
 
     if(gridPoint.WaterHeight > 0.0)
     {
-        gridPoint.Velocity = vec2(0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight), 0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop));
+        gridPoint.Velocity = vec2(0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight) * mapGenerationConfiguration.HeightMultiplier,
+                                  0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop) * mapGenerationConfiguration.HeightMultiplier);
     }
     else
     {

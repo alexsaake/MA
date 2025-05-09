@@ -12,18 +12,10 @@ struct GridPoint
     float WaterHeight;
     float SuspendedSediment;
     float TempSediment;
-    float Hardness;
-
     float FlowLeft;
     float FlowRight;
     float FlowTop;
     float FlowBottom;
-
-    float ThermalLeft;
-    float ThermalRight;
-    float ThermalTop;
-    float ThermalBottom;
-    
     vec2 Velocity;
 };
 

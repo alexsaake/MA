@@ -10,6 +10,4 @@ internal interface IGridErosion : IDisposable
     void SuspendDeposite();
     void Evaporate();
     void MoveSediment();
-    void Erode();
-    void AddWater(uint x, uint y);
 }
