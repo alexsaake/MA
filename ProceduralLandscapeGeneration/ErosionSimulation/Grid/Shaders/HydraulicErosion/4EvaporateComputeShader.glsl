@@ -50,6 +50,22 @@ uint getIndex(uint x, uint y)
 
 uint getIndexVector(vec2 position)
 {
+    if(position.x < 0)
+    {
+        position.x = floor(position.x);
+    }
+    else if(position.x > 0)
+    {
+        position.x = ceil(position.x);
+    }
+    if(position.y < 0)
+    {
+        position.y = floor(position.y);
+    }
+    else if(position.y > 0)
+    {
+        position.y = ceil(position.y);
+    }
     return uint((position.y * myHeightMapSideLength) + position.x);
 }
 
@@ -125,7 +141,7 @@ void main()
     
     GridPoint gridPoint = gridPoints[id];
 
-    ivec2 previousPosition = ivec2(x - gridPoint.Velocity.x * gridErosionConfiguration.TimeDelta, y - gridPoint.Velocity.y * gridErosionConfiguration.TimeDelta);
+    vec2 previousPosition = vec2(x, y) - gridPoint.Velocity * gridErosionConfiguration.TimeDelta;
     if(previousPosition.x < 0 || previousPosition.x >= myHeightMapSideLength
         || previousPosition.y < 0 || previousPosition.y >= myHeightMapSideLength)
         {

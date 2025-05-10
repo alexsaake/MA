@@ -57,5 +57,5 @@ void main()
 
 	float volumeDelta = thermalIn - thermalOut;
 
-	heightMap[id] += min(1.0, timeDelta * thermalErosionTimeScale) * volumeDelta;
+	heightMap[id] += timeDelta * volumeDelta;
 }

@@ -43,12 +43,12 @@ internal class GridErosion : IGridErosion
     {
         myGridErosionConfiguration.RainDropsChanged += OnRainDropsChanged;
 
-        myRainHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/0RainComputeShader.glsl");
-        myFlowHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/1FlowComputeShader.glsl");
-        myVelocityMapHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/2VelocityMapComputeShader.glsl");
-        mySuspendDepositeHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/3SuspendDepositeComputeShader.glsl");
-        myEvaporateHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/4EvaporateComputeShader.glsl");
-        myMoveSedimentHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/5MoveSedimentComputeShader.glsl");
+        myRainHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/HydraulicErosion/0RainComputeShader.glsl");
+        myFlowHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/HydraulicErosion/1FlowComputeShader.glsl");
+        myVelocityMapHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/HydraulicErosion/2VelocityMapComputeShader.glsl");
+        mySuspendDepositeHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/HydraulicErosion/3SuspendDepositeComputeShader.glsl");
+        myEvaporateHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/HydraulicErosion/4EvaporateComputeShader.glsl");
+        myMoveSedimentHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Grid/Shaders/HydraulicErosion/5MoveSedimentComputeShader.glsl");
 
         AddGridPointsShaderBuffer();
         AddHeightMapIndicesShaderBuffer();

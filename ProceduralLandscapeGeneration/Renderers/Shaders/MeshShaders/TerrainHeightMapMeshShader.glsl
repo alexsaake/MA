@@ -35,6 +35,16 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
     MapGenerationConfiguration mapGenerationConfiguration;
 };
 
+struct ErosionConfiguration
+{
+    float SeaLevel;
+};
+
+layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
+{
+    ErosionConfiguration erosionConfiguration;
+};
+
 uniform mat4 mvp;
 
 uint myMapSize;

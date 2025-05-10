@@ -36,7 +36,7 @@ struct GridPoint
     vec2 Velocity;
 };
 
-layout(std430, binding = 2) buffer gridPointsShaderBuffer
+layout(std430, binding = 4) buffer gridPointsShaderBuffer
 {
     GridPoint[] gridPoints;
 };
@@ -47,7 +47,7 @@ struct MapGenerationConfiguration
     bool IsColorEnabled;
 };
 
-layout(std430, binding = 3) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
     MapGenerationConfiguration mapGenerationConfiguration;
 };
