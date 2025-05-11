@@ -1,8 +1,8 @@
 ﻿using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.ErosionSimulation.Grid;
+namespace ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
 
-public struct GridPointShaderBuffer
+public struct HydraulicErosionGridPointShaderBuffer
 {
     public float WaterHeight;
     public float SuspendedSediment;

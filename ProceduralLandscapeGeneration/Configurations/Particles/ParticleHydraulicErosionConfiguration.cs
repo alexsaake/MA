@@ -131,36 +131,6 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
         }
     }
 
-    private float myMaxDiff;
-    public float MaxDiff
-    {
-        get => myMaxDiff;
-        set
-        {
-            if (myMaxDiff == value)
-            {
-                return;
-            }
-            myMaxDiff = value;
-            UpdateShaderBuffer();
-        }
-    }
-
-    private float mySettling;
-    public float Settling
-    {
-        get => mySettling;
-        set
-        {
-            if (mySettling == value)
-            {
-                return;
-            }
-            mySettling = value;
-            UpdateShaderBuffer();
-        }
-    }
-
     private bool myAreParticlesAdded;
     public bool AreParticlesAdded
     {
@@ -190,8 +160,6 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
         myMinimumVolume = 0.01f;
         myMaximalErosionDepth = 0.05f;
         myGravity = 9.81f;
-        myMaxDiff = 0.8f;
-        mySettling = 1.0f;
         myAreParticlesAdded = erosionConfiguration.IsWaterAdded;
     }
 
@@ -217,8 +185,6 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
             MinimumVolume = MinimumVolume,
             MaximalErosionDepth = MaximalErosionDepth,
             Gravity = Gravity,
-            MaxDiff = MaxDiff,
-            Settling = Settling,
             AreParticlesAdded = AreParticlesAdded
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ParticleHydraulicErosionConfiguration], &particleHydraulicErosionConfigurationShaderBuffer, (uint)sizeof(ParticleHydraulicErosionConfigurationShaderBuffer), 0);

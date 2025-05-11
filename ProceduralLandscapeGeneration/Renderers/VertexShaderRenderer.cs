@@ -1,7 +1,6 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.Grid;
-using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.ErosionSimulation;
 using Raylib_cs;
 using System.Numerics;
@@ -37,7 +36,7 @@ internal class VertexShaderRenderer : IRenderer
     private bool myIsUpdateAvailable;
     private bool myIsDisposed;
 
-    public VertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IErosionSimulator erosionSimulator, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBuffers)
+    public VertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IErosionSimulator erosionSimulator, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
@@ -50,7 +49,7 @@ internal class VertexShaderRenderer : IRenderer
 
     public void Initialize()
     {
-        myErosionSimulator.ErosionIterationFinished += OnErosionIterationFinished;
+        myErosionSimulator.IterationFinished += OnErosionIterationFinished;
 
         LoadShaders();
 
@@ -219,7 +218,7 @@ internal class VertexShaderRenderer : IRenderer
             return;
         }
 
-        myErosionSimulator.ErosionIterationFinished -= OnErosionIterationFinished;
+        myErosionSimulator.IterationFinished -= OnErosionIterationFinished;
 
         Raylib.UnloadRenderTexture(myShadowMap);
         Raylib.UnloadModel(myTerrainHeightMap);

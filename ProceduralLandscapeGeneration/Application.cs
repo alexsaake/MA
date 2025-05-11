@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Configurations;
-using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.ErosionSimulation;
 using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.HeightMapGeneration;
@@ -65,7 +64,7 @@ internal class Application : IApplication
             }
             if (myIsErosionResetRequired)
             {
-                myErosionSimulator.Reset();
+                myErosionSimulator.ResetShaderBuffers();
                 myIsErosionResetRequired = false;
             }
 
@@ -75,21 +74,7 @@ internal class Application : IApplication
             }
             else if (myErosionConfiguration.IsRunning)
             {
-                switch (myErosionConfiguration.Mode)
-                {
-                    case ErosionModeTypes.HydraulicParticle:
-                        myErosionSimulator.SimulateHydraulicErosion();
-                        break;
-                    case ErosionModeTypes.HydraulicGrid:
-                        myErosionSimulator.SimulateHydraulicErosionGrid();
-                        break;
-                    case ErosionModeTypes.Thermal:
-                        myErosionSimulator.SimulateThermalErosion();
-                        break;
-                    case ErosionModeTypes.Wind:
-                        myErosionSimulator.SimulateWindErosion();
-                        break;
-                }
+                myErosionSimulator.Simulate();
             }
 
             if (Raylib.IsKeyPressed(KeyboardKey.Space))
@@ -100,12 +85,12 @@ internal class Application : IApplication
             myRenderer!.Update();
 
             Raylib.BeginDrawing();
-                Raylib.ClearBackground(Color.SkyBlue);
-                myRenderer.Draw();
-                if (myShowUI)
-                {
-                    myConfigurationGUI.Draw();
-                }
+            Raylib.ClearBackground(Color.SkyBlue);
+            myRenderer.Draw();
+            if (myShowUI)
+            {
+                myConfigurationGUI.Draw();
+            }
             Raylib.EndDrawing();
         }
 

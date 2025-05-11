@@ -1,124 +1,100 @@
-﻿using ProceduralLandscapeGeneration.Common.GPU.ComputeShaders;
-using ProceduralLandscapeGeneration.Configurations;
-using ProceduralLandscapeGeneration.ErosionSimulation.Grid;
-using ProceduralLandscapeGeneration.ErosionSimulation.Particles;
-using Raylib_cs;
+﻿using ProceduralLandscapeGeneration.Configurations;
+using ProceduralLandscapeGeneration.Configurations.Types;
+using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
+using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Particles;
+using ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion;
+using ProceduralLandscapeGeneration.ErosionSimulation.WindErosion;
 
 namespace ProceduralLandscapeGeneration.ErosionSimulation;
 
 internal class ErosionSimulator : IErosionSimulator
 {
-    private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
-    private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
-    private readonly IGridErosion myGridErosion;
-    private readonly IParticleErosion myParticleErosion;
-
-    private ComputeShaderProgram? myThermalErosionSimulationComputeShaderProgram;
+    private readonly IParticleHydraulicErosion myParticleHydraulicErosion;
+    private readonly IGridHydraulicErosion myGridHydraulicErosion;
+    private readonly IThermalErosion myThermalErosion;
+    private readonly IParticleWindErosion myParticleWindErosion;
 
     private bool myIsDisposed;
 
-    public event EventHandler? ErosionIterationFinished;
+    public event EventHandler? IterationFinished;
 
-    public ErosionSimulator(IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IGridErosion gridErosion, IParticleErosion particleErosion)
+    public ErosionSimulator(IErosionConfiguration erosionConfiguration, IParticleHydraulicErosion particleHydraulicErosion, IGridHydraulicErosion gridHydraulicErosion, IThermalErosion thermalErosion, IParticleWindErosion particleWindErosion)
     {
-        myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
-        myComputeShaderProgramFactory = computeShaderProgramFactory;
-        myGridErosion = gridErosion;
-        myParticleErosion = particleErosion;
+        myParticleHydraulicErosion = particleHydraulicErosion;
+        myGridHydraulicErosion = gridHydraulicErosion;
+        myThermalErosion = thermalErosion;
+        myParticleWindErosion = particleWindErosion;
     }
 
     public unsafe void Initialize()
     {
-        myThermalErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Shaders/ThermalErosionSimulationComputeShader.glsl");
-
-        myGridErosion.Initialize();
-        myParticleErosion.Initialize();
+        myParticleHydraulicErosion.Initialize();
+        myGridHydraulicErosion.Initialize();
+        myThermalErosion.Initialize();
+        myParticleWindErosion.Initialize();
 
         myIsDisposed = false;
     }
 
-    public void Reset()
+    public void Simulate()
     {
         switch (myErosionConfiguration.Mode)
         {
-            case Configurations.Types.ErosionModeTypes.HydraulicParticle:
-            case Configurations.Types.ErosionModeTypes.Wind:
-                myGridErosion.ResetShaderBuffers();
-                myParticleErosion.ResetShaderBuffers();
+            case ErosionModeTypes.ParticleHydraulic:
+                myParticleHydraulicErosion.Simulate();
                 break;
-            case Configurations.Types.ErosionModeTypes.HydraulicGrid:
-                myParticleErosion.ResetShaderBuffers();
-                myGridErosion.ResetShaderBuffers();
+            case ErosionModeTypes.GridHydraulic:
+                for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
+                {
+                    if (myErosionConfiguration.IsWaterAdded)
+                    {
+                        myGridHydraulicErosion.AddRain();
+                    }
+                    myGridHydraulicErosion.Flow();
+                    myGridHydraulicErosion.VelocityMap();
+                    myGridHydraulicErosion.SuspendDeposite();
+                    myGridHydraulicErosion.Evaporate();
+                    myGridHydraulicErosion.MoveSediment();
+                }
+                break;
+            case ErosionModeTypes.Thermal:
+                myThermalErosion.Simulate();
+                break;
+            case ErosionModeTypes.ParticleWind:
+                myParticleWindErosion.Simulate();
+                break;
+        }
+
+        IterationFinished?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ResetShaderBuffers()
+    {
+        switch (myErosionConfiguration.Mode)
+        {
+            case ErosionModeTypes.ParticleHydraulic:
+                myGridHydraulicErosion.ResetShaderBuffers();
+                myParticleWindErosion.ResetShaderBuffers();
+                myParticleHydraulicErosion.ResetShaderBuffers();
+                break;
+            case ErosionModeTypes.ParticleWind:
+                myGridHydraulicErosion.ResetShaderBuffers();
+                myParticleHydraulicErosion.ResetShaderBuffers();
+                myParticleWindErosion.ResetShaderBuffers();
+                break;
+            case ErosionModeTypes.GridHydraulic:
+                myParticleHydraulicErosion.ResetShaderBuffers();
+                myParticleWindErosion.ResetShaderBuffers();
+                myGridHydraulicErosion.ResetShaderBuffers();
                 break;
             default:
-                myParticleErosion.ResetShaderBuffers();
-                myGridErosion.ResetShaderBuffers();
+                myParticleHydraulicErosion.ResetShaderBuffers();
+                myParticleWindErosion.ResetShaderBuffers();
+                myGridHydraulicErosion.ResetShaderBuffers();
                 break;
         }
-    }
-
-    public void SimulateHydraulicErosion()
-    {
-        Console.WriteLine($"INFO: Simulating hydraulic erosion particle.");
-
-        myParticleErosion.SimulateHydraulicErosion();
-
-        ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-        Console.WriteLine($"INFO: End of simulation.");
-    }
-
-    public void SimulateThermalErosion()
-    {
-        Console.WriteLine($"INFO: Simulating thermal erosion on each cell of the height map.");
-
-        uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-
-        Rlgl.EnableShader(myThermalErosionSimulationComputeShaderProgram!.Id);
-        for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
-        {
-            Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(mapSize / 64f), 1, 1);
-        }
-        Rlgl.DisableShader();
-
-        ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-        Console.WriteLine($"INFO: End of simulation after {myErosionConfiguration.IterationsPerStep} iterations.");
-    }
-
-    public void SimulateWindErosion()
-    {
-        Console.WriteLine($"INFO: Simulating wind erosion particle.");
-
-        myParticleErosion.SimulateWindErosion();
-
-        ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-        Console.WriteLine($"INFO: End of simulation.");
-    }
-
-    public void SimulateHydraulicErosionGrid()
-    {
-        //https://trossvik.com/procedural/
-        //https://lilyraeburn.com/Thesis.html
-
-
-        Console.WriteLine($"INFO: Simulating hydraulic erosion grid.");
-
-        for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
-        {
-            if (myErosionConfiguration.IsWaterAdded)
-            {
-                myGridErosion.AddRain();
-            }
-            myGridErosion.Flow();
-            myGridErosion.VelocityMap();
-            myGridErosion.SuspendDeposite();
-            myGridErosion.Evaporate();
-            myGridErosion.MoveSediment();
-        }
-
-        ErosionIterationFinished?.Invoke(this, EventArgs.Empty);
-        Console.WriteLine($"INFO: End of simulation.");
     }
 
     public void Dispose()
@@ -128,10 +104,10 @@ internal class ErosionSimulator : IErosionSimulator
             return;
         }
 
-        myThermalErosionSimulationComputeShaderProgram?.Dispose();
-
-        myGridErosion.Dispose();
-        myParticleErosion.Dispose();
+        myParticleHydraulicErosion.Dispose();
+        myGridHydraulicErosion.Dispose();
+        myThermalErosion.Dispose();
+        myParticleWindErosion.Dispose();
 
         myIsDisposed = true;
     }

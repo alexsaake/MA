@@ -6,32 +6,28 @@ using ProceduralLandscapeGeneration.Configurations.Particles;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.ErosionSimulation.Particles;
+namespace ProceduralLandscapeGeneration.ErosionSimulation.WindErosion;
 
-internal class ParticleErosion : IParticleErosion
+internal class ParticleWindErosion : IParticleWindErosion
 {
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
-    private readonly IParticleHydraulicErosionConfiguration myParticleHydraulicErosionConfiguration;
     private readonly IParticleWindErosionConfiguration myParticleWindErosionConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
     private readonly IShaderBuffers myShaderBuffers;
     private readonly IRandom myRandom;
 
-    private ComputeShaderProgram? myHydraulicErosionParticleSimulationComputeShaderProgram;
     private ComputeShaderProgram? myWindErosionParticleSimulationComputeShaderProgram;
 
-    private bool myHasHydraulicErosionParticlesChangedChanged;
-    private bool myHasWindErosionParticlesChangedChanged;
+    private bool myHasParticlesChanged;
     private bool myIsDisposed;
 
-    public ParticleErosion(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers, IRandom random)
+    public ParticleWindErosion(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers, IRandom random)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
-        myParticleHydraulicErosionConfiguration = particleHydraulicErosionConfiguration;
         myParticleWindErosionConfiguration = particleWindErosionConfiguration;
         myComputeShaderProgramFactory = computeShaderProgramFactory;
         myShaderBuffers = shaderBuffers;
@@ -40,45 +36,29 @@ internal class ParticleErosion : IParticleErosion
 
     public unsafe void Initialize()
     {
-        myParticleHydraulicErosionConfiguration.ParticlesChanged += OnHydraulicErosionParticlesChangedChanged;
-        myParticleWindErosionConfiguration.ParticlesChanged += OnWindErosionParticlesChangedChanged;
+        myParticleWindErosionConfiguration.ParticlesChanged += OnParticlesChanged;
 
-        myHydraulicErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Particles/Shaders/HydraulicErosionSimulationComputeShader.glsl");
-        myWindErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/Particles/Shaders/WindErosionSimulationComputeShader.glsl");
+        myWindErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/WindErosion/Shaders/ParticleWindErosionSimulationComputeShader.glsl");
 
-        AddHeightMapIndicesShaderBuffer();
-        AddParticlesHydraulicErosionShaderBuffer();
+        switch (myErosionConfiguration.Mode)
+        {
+            case ErosionModeTypes.ParticleWind:
+                AddHeightMapIndicesShaderBuffer();
+                break;
+        }
         AddParticlesWindErosionShaderBuffer();
 
         myIsDisposed = false;
     }
 
-    private void OnHydraulicErosionParticlesChangedChanged(object? sender, EventArgs e)
+    private void OnParticlesChanged(object? sender, EventArgs e)
     {
-        myHasHydraulicErosionParticlesChangedChanged = true;
-    }
-
-    private void OnWindErosionParticlesChangedChanged(object? sender, EventArgs e)
-    {
-        myHasWindErosionParticlesChangedChanged = true;
+        myHasParticlesChanged = true;
     }
 
     private unsafe void AddHeightMapIndicesShaderBuffer()
     {
-        switch (myErosionConfiguration.Mode)
-        {
-            case ErosionModeTypes.HydraulicParticle:
-                myShaderBuffers.Add(ShaderBufferTypes.HeightMapIndices, myParticleHydraulicErosionConfiguration.Particles * sizeof(uint));
-                break;
-            case ErosionModeTypes.Wind:
-                myShaderBuffers.Add(ShaderBufferTypes.HeightMapIndices, myParticleWindErosionConfiguration.Particles * sizeof(uint));
-                break;
-        }
-    }
-
-    private unsafe void AddParticlesHydraulicErosionShaderBuffer()
-    {
-        myShaderBuffers.Add(ShaderBufferTypes.ParticlesHydraulicErosion, (uint)(myParticleHydraulicErosionConfiguration.Particles * sizeof(ParticleHydraulicErosionShaderBuffer)));
+        myShaderBuffers.Add(ShaderBufferTypes.HeightMapIndices, myParticleWindErosionConfiguration.Particles * sizeof(uint));
     }
 
     private unsafe void AddParticlesWindErosionShaderBuffer()
@@ -86,58 +66,18 @@ internal class ParticleErosion : IParticleErosion
         myShaderBuffers.Add(ShaderBufferTypes.ParticlesWindErosion, (uint)(myParticleWindErosionConfiguration.Particles * sizeof(ParticleWindErosionShaderBuffer)));
     }
 
-    public void SimulateHydraulicErosion()
-    {
-        if (myHasHydraulicErosionParticlesChangedChanged)
-        {
-            ResetHeightMapIndicesShaderBuffers();
-            ResetHydraulicErosionShaderBuffers();
-            myHasHydraulicErosionParticlesChangedChanged = false;
-        }
-        CreateRandomIndices();
-
-        Rlgl.EnableShader(myHydraulicErosionParticleSimulationComputeShaderProgram!.Id);
-        for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
-        {
-            Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myParticleHydraulicErosionConfiguration.Particles / 64.0f), 1, 1);
-            Rlgl.MemoryBarrier();
-        }
-        Rlgl.DisableShader();
-    }
-
-    private void ResetHydraulicErosionShaderBuffers()
-    {
-        RemoveParticlesHydraulicErosionShaderBuffer();
-        AddParticlesHydraulicErosionShaderBuffer();
-    }
-
-    private unsafe void CreateRandomIndices()
-    {
-        uint[] randomParticleIndices = new uint[myParticleHydraulicErosionConfiguration.Particles];
-        uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        for (uint particle = 0; particle < myParticleHydraulicErosionConfiguration.Particles; particle++)
-        {
-            randomParticleIndices[particle] = (uint)myRandom.Next((int)mapSize);
-        }
-        fixed (uint* randomHeightMapIndicesPointer = randomParticleIndices)
-        {
-            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMapIndices], randomHeightMapIndicesPointer, myParticleHydraulicErosionConfiguration.Particles * sizeof(uint), 0);
-        }
-        Rlgl.MemoryBarrier();
-    }
-
-    public unsafe void SimulateWindErosion()
+    public unsafe void Simulate()
     {
         if (myParticleWindErosionConfiguration.PersistentSpeed.Length() == 0)
         {
             Console.WriteLine($"WARN: Simulation not possible. Wind speed is zero.");
             return;
         }
-        if (myHasWindErosionParticlesChangedChanged)
+        if (myHasParticlesChanged)
         {
             ResetHeightMapIndicesShaderBuffers();
-            ResetWindErosionShaderBuffers();
-            myHasWindErosionParticlesChangedChanged = false;
+            ResetParticlesWindErosionShaderBuffers();
+            myHasParticlesChanged = false;
         }
 
         CreateRandomIndicesAlongBorder();
@@ -145,13 +85,13 @@ internal class ParticleErosion : IParticleErosion
         Rlgl.EnableShader(myWindErosionParticleSimulationComputeShaderProgram!.Id);
         for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
         {
-            Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myParticleHydraulicErosionConfiguration.Particles / 64.0f), 1, 1);
+            Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myParticleWindErosionConfiguration.Particles / 64.0f), 1, 1);
             Rlgl.MemoryBarrier();
         }
         Rlgl.DisableShader();
     }
 
-    private void ResetWindErosionShaderBuffers()
+    private void ResetParticlesWindErosionShaderBuffers()
     {
         RemoveParticlesWindErosionShaderBuffer();
         AddParticlesWindErosionShaderBuffer();
@@ -240,8 +180,7 @@ internal class ParticleErosion : IParticleErosion
     public void ResetShaderBuffers()
     {
         ResetHeightMapIndicesShaderBuffers();
-        ResetHydraulicErosionShaderBuffers();
-        ResetWindErosionShaderBuffers();
+        ResetParticlesWindErosionShaderBuffers();
     }
 
     private void ResetHeightMapIndicesShaderBuffers()
@@ -257,14 +196,11 @@ internal class ParticleErosion : IParticleErosion
             return;
         }
 
-        myParticleHydraulicErosionConfiguration.ParticlesChanged -= OnHydraulicErosionParticlesChangedChanged;
-        myParticleWindErosionConfiguration.ParticlesChanged -= OnWindErosionParticlesChangedChanged;
+        myParticleWindErosionConfiguration.ParticlesChanged -= OnParticlesChanged;
 
         RemoveHeightMapIndicesShaderBuffer();
-        RemoveParticlesHydraulicErosionShaderBuffer();
         RemoveParticlesWindErosionShaderBuffer();
 
-        myHydraulicErosionParticleSimulationComputeShaderProgram?.Dispose();
         myWindErosionParticleSimulationComputeShaderProgram?.Dispose();
 
         myIsDisposed = true;
@@ -273,11 +209,6 @@ internal class ParticleErosion : IParticleErosion
     private void RemoveHeightMapIndicesShaderBuffer()
     {
         myShaderBuffers.Remove(ShaderBufferTypes.HeightMapIndices);
-    }
-
-    private void RemoveParticlesHydraulicErosionShaderBuffer()
-    {
-        myShaderBuffers.Remove(ShaderBufferTypes.ParticlesHydraulicErosion);
     }
 
     private void RemoveParticlesWindErosionShaderBuffer()

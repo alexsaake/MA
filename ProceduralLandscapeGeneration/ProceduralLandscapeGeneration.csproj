@@ -21,43 +21,52 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <None Update="ErosionSimulation\Grid\Shaders\HydraulicErosion\0RainComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\0RainComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\Grid\Shaders\HydraulicErosion\1FlowComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\1FlowComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\Grid\Shaders\HydraulicErosion\2VelocityMapComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\2VelocityMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\Grid\Shaders\HydraulicErosion\3SuspendDepositeComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\3SuspendDepositeComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\Grid\Shaders\HydraulicErosion\4EvaporateComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\4EvaporateComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\Grid\Shaders\HydraulicErosion\5MoveSedimentComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\5MoveSedimentComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\Grid\Shaders\HydraulicErosionSimulationGridPassSevenComputeShader.glsl">
+	  <None Update="ErosionSimulation\ThermalErosion\Shaders\HydraulicErosionSimulationGridPassSevenComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\Grid\Shaders\HydraulicErosionSimulationGridPassSixComputeShader.glsl">
+	  <None Update="ErosionSimulation\ThermalErosion\Shaders\HydraulicErosionSimulationGridPassSixComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\Particles\Shaders\HydraulicErosionSimulationComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Particles\Shaders\ParticleHydraulicErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\Particles\Shaders\WindErosionSimulationComputeShader.glsl">
+	  <None Update="ErosionSimulation\WindErosion\Shaders\ParticleWindErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\Shaders\ThermalErosionSimulationComputeShader.glsl">
+	  <None Update="ErosionSimulation\ThermalErosion\Shaders\Cascade.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="ErosionSimulation\ThermalErosion\Shaders\ThermalErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Raylib-CsLo.pdb">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="raylib.dll">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Renderers\Shaders\MeshShaders\Particle\SedimentParticleMeshShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Renderers\Shaders\MeshShaders\Particle\WaterParticleMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Renderers\Shaders\VertexShaders\SedimentHeightMapVertexShader.glsl">

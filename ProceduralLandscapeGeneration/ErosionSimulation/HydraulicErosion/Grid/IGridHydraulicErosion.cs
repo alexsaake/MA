@@ -1,6 +1,6 @@
-﻿namespace ProceduralLandscapeGeneration.ErosionSimulation.Grid;
+﻿namespace ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
 
-internal interface IGridErosion : IDisposable
+internal interface IGridHydraulicErosion : IDisposable
 {
     void Initialize();
     void ResetShaderBuffers();

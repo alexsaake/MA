@@ -68,7 +68,7 @@ internal class ErosionConfiguration : IErosionConfiguration
     {
         myShaderBuffers = shaderBuffers;
 
-        Mode = ErosionModeTypes.HydraulicParticle;
+        Mode = ErosionModeTypes.ParticleHydraulic;
         IsRunning = false;
         IterationsPerStep = 1;
         IsWaterAdded = true;

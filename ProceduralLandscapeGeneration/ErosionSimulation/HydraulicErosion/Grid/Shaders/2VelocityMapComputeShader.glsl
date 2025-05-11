@@ -88,8 +88,8 @@ void main()
 
     if(gridPoint.WaterHeight > 0.0)
     {
-        gridPoint.Velocity = vec2(0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight) * mapGenerationConfiguration.HeightMultiplier,
-                                  0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop) * mapGenerationConfiguration.HeightMultiplier);
+        gridPoint.Velocity = vec2(clamp(0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight) * mapGenerationConfiguration.HeightMultiplier, -1.0, 1.0),
+                                  clamp(0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop) * mapGenerationConfiguration.HeightMultiplier, -1.0, 1.0));
     }
     else
     {

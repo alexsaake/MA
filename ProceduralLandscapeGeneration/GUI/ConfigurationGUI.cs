@@ -83,8 +83,6 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Minimum Volume", (value) => particleHydraulicErosionConfiguration.MinimumVolume = value, particleHydraulicErosionConfiguration.MinimumVolume));
         myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Maximal Erosion Depth", (value) => particleHydraulicErosionConfiguration.MaximalErosionDepth = value, particleHydraulicErosionConfiguration.MaximalErosionDepth));
         myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => particleHydraulicErosionConfiguration.Gravity = value, particleHydraulicErosionConfiguration.Gravity));
-        myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Maximum Difference", (value) => particleHydraulicErosionConfiguration.MaxDiff = value, particleHydraulicErosionConfiguration.MaxDiff));
-        myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Settling", (value) => particleHydraulicErosionConfiguration.Settling = value, particleHydraulicErosionConfiguration.Settling));
 
         myParticleWindErosionPanel = new PanelWithElements("Particle Wind Erosion");
         myParticleWindErosionPanel.Add(new ValueBoxIntWithLabel("Particles", (value) => particleWindErosionConfiguration.Particles = (uint)value, (int)particleWindErosionConfiguration.Particles, 1, 1000000));
@@ -93,8 +91,6 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Persistent Speed Y", (value) => particleWindErosionConfiguration.PersistentSpeed = new Vector2(particleWindErosionConfiguration.PersistentSpeed.X, value), particleWindErosionConfiguration.PersistentSpeed.Y));
         myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Suspension Rate", (value) => particleWindErosionConfiguration.SuspensionRate = value, particleWindErosionConfiguration.SuspensionRate));
         myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => particleWindErosionConfiguration.Gravity = value, particleWindErosionConfiguration.Gravity));
-        myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Maximum Difference", (value) => particleWindErosionConfiguration.MaxDiff = value, particleWindErosionConfiguration.MaxDiff));
-        myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Settling", (value) => particleWindErosionConfiguration.Settling = value, particleWindErosionConfiguration.Settling));
 
 
         myRightPanelPosition = new Vector2(configuration.ScreenWidth - PanelSize.X, 0); ;
@@ -140,16 +136,16 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myErosionPanel.Draw(Vector2.Zero);
         switch (myErosionConfiguration.Mode)
         {
-            case ErosionModeTypes.HydraulicParticle:
+            case ErosionModeTypes.ParticleHydraulic:
                 myParticleHydraulicErosionPanel.Draw(myErosionPanel.BottomLeft);
                 break;
-            case ErosionModeTypes.HydraulicGrid:
+            case ErosionModeTypes.GridHydraulic:
                 myGridErosionPanel.Draw(myErosionPanel.BottomLeft);
                 break;
             case ErosionModeTypes.Thermal:
                 myThermalErosionPanel.Draw(myErosionPanel.BottomLeft);
                 break;
-            case ErosionModeTypes.Wind:
+            case ErosionModeTypes.ParticleWind:
                 myParticleWindErosionPanel.Draw(myErosionPanel.BottomLeft);
                 break;
         }

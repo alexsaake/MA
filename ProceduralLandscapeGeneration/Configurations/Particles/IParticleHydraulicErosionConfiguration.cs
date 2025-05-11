@@ -11,8 +11,6 @@ internal interface IParticleHydraulicErosionConfiguration : IDisposable
     float MinimumVolume { get; set; }
     float MaximalErosionDepth { get; set; }
     float Gravity { get; set; }
-    float MaxDiff { get; set; }
-    float Settling { get; set; }
     bool AreParticlesAdded { get; set; }
 
     event EventHandler<EventArgs>? ParticlesChanged;

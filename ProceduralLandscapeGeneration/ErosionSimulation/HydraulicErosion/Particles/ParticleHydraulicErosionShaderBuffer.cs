@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.ErosionSimulation.Particles;
+namespace ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Particles;
 
 internal struct ParticleHydraulicErosionShaderBuffer
 {

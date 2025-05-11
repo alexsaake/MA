@@ -72,36 +72,6 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
         }
     }
 
-    private float myMaxDiff;
-    public float MaxDiff
-    {
-        get => myMaxDiff;
-        set
-        {
-            if (myMaxDiff == value)
-            {
-                return;
-            }
-            myMaxDiff = value;
-            UpdateShaderBuffer();
-        }
-    }
-
-    private float mySettling;
-    public float Settling
-    {
-        get => mySettling;
-        set
-        {
-            if (mySettling == value)
-            {
-                return;
-            }
-            mySettling = value;
-            UpdateShaderBuffer();
-        }
-    }
-
     private Vector2 myPersistentSpeed;
     public Vector2 PersistentSpeed
     {
@@ -142,8 +112,6 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
         myMaxAge = 1024;
         mySuspensionRate = 0.05f;
         myGravity = 0.025f;
-        myMaxDiff = 0.005f;
-        mySettling = 0.25f;
         myPersistentSpeed = new Vector2(0.0f, 0.125f);
         myAreParticlesAdded = erosionConfiguration.IsWaterAdded;
     }
@@ -166,8 +134,6 @@ internal class ParticleWindErosionConfiguration : IParticleWindErosionConfigurat
             MaxAge = MaxAge,
             SuspensionRate = SuspensionRate,
             Gravity = Gravity,
-            MaxDiff = MaxDiff,
-            Settling = Settling,
             PersistentSpeed = PersistentSpeed,
             AreParticlesAdded = AreParticlesAdded
         };

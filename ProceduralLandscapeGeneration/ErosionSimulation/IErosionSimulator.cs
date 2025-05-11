@@ -2,12 +2,9 @@
 
 internal interface IErosionSimulator : IDisposable
 {
-    event EventHandler? ErosionIterationFinished;
+    event EventHandler? IterationFinished;
 
     void Initialize();
-    void Reset();
-    void SimulateHydraulicErosion();
-    void SimulateHydraulicErosionGrid();
-    void SimulateThermalErosion();
-    void SimulateWindErosion();
+    void ResetShaderBuffers();
+    void Simulate();
 }

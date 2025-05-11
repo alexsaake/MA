@@ -9,7 +9,5 @@ internal struct ParticleHydraulicErosionConfigurationShaderBuffer
     public float MinimumVolume;
     public float MaximalErosionDepth;
     public float Gravity;
-    public float MaxDiff;
-    public float Settling;
     public bool AreParticlesAdded;
 }

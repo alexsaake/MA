@@ -134,7 +134,7 @@ void main()
 	
     float sedimentCapacity = gridPoint.WaterHeight - gridPoint.SuspendedSediment;
 	float erosionDepthLimit = (gridErosionConfiguration.MaximalErosionDepth - min(gridErosionConfiguration.MaximalErosionDepth, gridPoint.WaterHeight)) / gridErosionConfiguration.MaximalErosionDepth;
-	float sedimentTransportCapacity = sedimentCapacity * tiltAngle * length(gridPoint.Velocity) * erosionDepthLimit;
+	float sedimentTransportCapacity = sedimentCapacity * max(0.1, tiltAngle) * length(gridPoint.Velocity) * erosionDepthLimit;
 
 	if (sedimentTransportCapacity > gridPoint.SuspendedSediment)
 	{

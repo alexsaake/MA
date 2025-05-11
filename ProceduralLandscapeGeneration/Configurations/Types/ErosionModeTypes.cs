@@ -2,8 +2,8 @@
 
 internal enum ErosionModeTypes
 {
-    HydraulicParticle,
-    HydraulicGrid,
+    ParticleHydraulic,
+    GridHydraulic,
     Thermal,
-    Wind
+    ParticleWind
 }
