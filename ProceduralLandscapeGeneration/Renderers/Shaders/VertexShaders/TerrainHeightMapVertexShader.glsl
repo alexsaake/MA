@@ -62,12 +62,10 @@ in vec3 vertexPosition;
 
 uniform mat4 mvp;
 uniform mat4 matModel;
-uniform mat4 lightSpaceMatrix;
 
 out vec3 fragPosition;
 out vec3 fragNormal;
 out vec4 fragColor;
-out vec4 fragPosLightSpace;
 
 vec3 oceanCliff = vec3(0.2, 0.2, 0.1);
 vec3 beachColor = vec3(1.0, 0.9, 0.6);
@@ -143,6 +141,5 @@ void main()
         }
     }
     fragColor = vec4(terrainColor, 1.0);
-    fragPosLightSpace = lightSpaceMatrix * vec4(fragPosition, 1.0);
     gl_Position = mvp * vec4(vertexPosition.xy, terrainHeight, 1.0);
 }

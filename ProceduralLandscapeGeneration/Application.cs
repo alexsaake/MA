@@ -84,9 +84,8 @@ internal class Application : IApplication
                 myShowUI = !myShowUI;
             }
 
-            myRenderer!.Update();
-
             Raylib.BeginDrawing();
+                myRenderer!.Update();
                 Raylib.ClearBackground(Color.SkyBlue);
                 myRenderer!.Draw();
                 if (myShowUI)

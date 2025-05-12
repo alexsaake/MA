@@ -141,12 +141,6 @@
 	  <None Update="Renderers\Shaders\VertexShaders\TerrainHeightMapVertexShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\VertexShaders\ShadowMapFragmentShader.glsl">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Renderers\Shaders\VertexShaders\ShadowMapVertexShader.glsl">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
   </ItemGroup>
 
 </Project>

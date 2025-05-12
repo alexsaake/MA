@@ -215,7 +215,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
     {
         myShaderBuffers = shaderBuffers;
 
-        myMapGeneration = MapGenerationTypes.Noise;
+        myMapGeneration = MapGenerationTypes.Cube;
         myMeshCreation = ProcessorTypes.CPU;
         myHeightMapGeneration = ProcessorTypes.CPU;
 
