@@ -6,4 +6,5 @@ internal interface IConfigurationGUI
 
     event EventHandler? MapResetRequired;
     event EventHandler? ErosionResetRequired;
+    event EventHandler? ErosionModeChanged;
 }

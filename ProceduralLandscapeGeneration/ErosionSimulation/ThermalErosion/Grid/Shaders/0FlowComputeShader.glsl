@@ -7,21 +7,17 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-struct GridPoint
+struct GridThermalErosionCell
 {
-    float WaterHeight;
-    float SuspendedSediment;
-    float TempSediment;
     float FlowLeft;
     float FlowRight;
     float FlowTop;
-    float FlowBottom;    
-    vec2 Velocity;
+    float FlowBottom;
 };
 
-layout(std430, binding = 4) buffer gridPointsShaderBuffer
+layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
 {
-    GridPoint[] gridPoints;
+    GridThermalErosionCell[] gridThermalErosionCells;
 };
 
 uint myHeightMapSideLength;
@@ -36,9 +32,9 @@ uint getIndex(uint x, uint y)
 
 void main()
 {
+	float dampening = 0.25;
 	float thermalErosionRate = 0.15;
-	float talusAngleTangentCoeff = 0.8;
-	float talusAngleTangentBias = 0.1;
+	float talusAngleTangentCoeff = 0.15;
 	
     uint id = gl_GlobalInvocationID.x;
     uint heightMapLength = heightMap.length();
@@ -46,12 +42,12 @@ void main()
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(gridPoints.length()));
+    myHeightMapSideLength = uint(sqrt(gridThermalErosionCells.length()));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;
     
-    GridPoint gridPoint = gridPoints[id];
+    GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[id];
 
 	float heightDifferenceL = heightMap[id] - heightMap[getIndex(x - 1, y)];
 	float heightDifferenceR = heightMap[id] - heightMap[getIndex(x + 1, y)];
@@ -59,37 +55,37 @@ void main()
 	float heightDifferenceB = heightMap[id] - heightMap[getIndex(x, y - 1)];
 	float maxHeightDifference = max(max(heightDifferenceL, heightDifferenceR), max(heightDifferenceB, heightDifferenceT));
 
-	float volumeToBeMoved = maxHeightDifference * 0.5 * thermalErosionRate * gridPoint.Hardness;
+	float volumeToBeMoved = maxHeightDifference * 0.5 * thermalErosionRate;
 	
 	float tanAngleL = heightDifferenceL;
 	float tanAngleR = heightDifferenceR;
 	float tanAngleT = heightDifferenceT;
 	float tanAngleB = heightDifferenceB;
 	
-	float treshold = gridPoint.Hardness * talusAngleTangentCoeff + talusAngleTangentBias;
+	float treshold = talusAngleTangentCoeff;
 	
-	float thermalLeft = 0;
+	float flowLeft = 0;
 	if (tanAngleL > treshold)
 	{
-		thermalLeft = heightDifferenceL;
+		flowLeft = heightDifferenceL;
 	}
 
-	float thermalRight = 0;
+	float flowRight = 0;
 	if (tanAngleR > treshold)
 	{
-		thermalRight = heightDifferenceR;
+		flowRight = heightDifferenceR;
 	}
 
-	float thermalTop = 0;
+	float flowTop = 0;
 	if (tanAngleT > treshold)
 	{
-		thermalTop = heightDifferenceT;
+		flowTop = heightDifferenceT;
 	}
 
-	float thermalBottom = 0;
+	float flowBottom = 0;
 	if (tanAngleB > treshold)
 	{
-		thermalBottom = heightDifferenceB;
+		flowBottom = heightDifferenceB;
 	}
 
 	// Output flux
@@ -99,40 +95,42 @@ void main()
 	{
 		if(x > 0)
 		{
-			gridPoint.ThermalLeft = volumeToBeMoved * thermalLeft / sumProportions;
+			gridThermalErosionCell.FlowLeft = volumeToBeMoved * flowLeft / sumProportions;
 		}
 		else
 		{
-			gridPoint.ThermalLeft = 0;
+			gridThermalErosionCell.FlowLeft = 0;
 		}
 		
 		if(x < myHeightMapSideLength - 1)
 		{
-			gridPoint.ThermalRight = volumeToBeMoved * thermalRight / sumProportions;
+			gridThermalErosionCell.FlowRight = volumeToBeMoved * flowRight / sumProportions;
 		}
 		else
 		{
-			gridPoint.ThermalRight = 0;
+			gridThermalErosionCell.FlowRight = 0;
 		}
 
 		if(y > 0)
 		{
-			gridPoint.ThermalBottom = volumeToBeMoved * thermalBottom / sumProportions;
+			gridThermalErosionCell.FlowBottom = volumeToBeMoved * flowBottom / sumProportions;
 		}
 		else
 		{
-			gridPoint.ThermalBottom = 0;
+			gridThermalErosionCell.FlowBottom = 0;
 		}
 		
 		if(y < myHeightMapSideLength - 1)
 		{
-			gridPoint.ThermalTop = volumeToBeMoved * thermalTop / sumProportions;
+			gridThermalErosionCell.FlowTop = volumeToBeMoved * flowTop / sumProportions;
 		}
 		else
 		{
-			gridPoint.ThermalTop = 0;
+			gridThermalErosionCell.FlowTop = 0;
 		}
-
-		gridPoints[id] = gridPoint;
+		
+		gridThermalErosionCells[id] = gridThermalErosionCell;
+		
+		memoryBarrier();
 	}
 }

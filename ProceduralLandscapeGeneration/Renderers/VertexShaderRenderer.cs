@@ -2,6 +2,7 @@
 using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.Grid;
 using ProceduralLandscapeGeneration.ErosionSimulation;
+using ProceduralLandscapeGeneration.GUI;
 using Raylib_cs;
 using System.Numerics;
 
@@ -15,6 +16,7 @@ internal class VertexShaderRenderer : IRenderer
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IGridErosionConfiguration myGridErosionConfiguration;
+    private readonly IConfigurationGUI myConfigurationGUI;
     private readonly IErosionSimulator myErosionSimulator;
     private readonly IVertexMeshCreator myVertexMeshCreator;
     private readonly IShaderBuffers myShaderBuffers;
@@ -37,12 +39,13 @@ internal class VertexShaderRenderer : IRenderer
     private bool myIsUpdateAvailable;
     private bool myIsDisposed;
 
-    public VertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IErosionSimulator erosionSimulator, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBuffers)
+    public VertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
         myGridErosionConfiguration = gridErosionConfiguration;
+        myConfigurationGUI = configurationGUI;
         myErosionSimulator = erosionSimulator;
         myVertexMeshCreator = vertexMeshCreator;
         myShaderBuffers = shaderBuffers;
@@ -52,6 +55,7 @@ internal class VertexShaderRenderer : IRenderer
     {
         myErosionSimulator.IterationFinished += OnErosionIterationFinished;
         myMapGenerationConfiguration.HeightMultiplierChanged += OnHeightMultiplierChanged;
+        myConfigurationGUI.ErosionModeChanged += OnErosionModeChanged;
 
         LoadShaders();
 
@@ -75,6 +79,11 @@ internal class VertexShaderRenderer : IRenderer
     }
 
     private void OnHeightMultiplierChanged(object? sender, EventArgs e)
+    {
+        myIsUpdateAvailable = true;
+    }
+
+    private void OnErosionModeChanged(object? sender, EventArgs e)
     {
         myIsUpdateAvailable = true;
     }
@@ -123,7 +132,6 @@ internal class VertexShaderRenderer : IRenderer
             target.Depth.Mipmaps = 1;
 
             Rlgl.FramebufferAttach(target.Id, target.Depth.Id, FramebufferAttachType.Depth, FramebufferAttachTextureType.Texture2D, 0);
-
             if (Rlgl.FramebufferComplete(target.Id))
             {
                 Console.WriteLine($"INFO: FBO: {target.Id} Framebuffer object created successfully");
@@ -160,6 +168,7 @@ internal class VertexShaderRenderer : IRenderer
         if (myIsUpdateAvailable)
         {
             UpdateShadowMap();
+            myIsUpdateAvailable = false;
         }
     }
 
@@ -178,7 +187,7 @@ internal class VertexShaderRenderer : IRenderer
         Matrix4x4 lightSpaceMatrix = Matrix4x4.Multiply(lightProjection, lightView);
         Raylib.SetShaderValueMatrix(myTerrainHeightMapShader, myLightSpaceMatrixLocation, lightSpaceMatrix);
 
-        int slot = 10;
+        int slot = 1;
         Rlgl.ActiveTextureSlot(slot);
         Rlgl.EnableTexture(myShadowMap.Depth.Id);
         Rlgl.SetUniform(myShadowMapLocation, &slot, (int)ShaderUniformDataType.Int, 1);
@@ -204,7 +213,7 @@ internal class VertexShaderRenderer : IRenderer
             Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
         }
         if (myErosionConfiguration.IsSeaLevelDisplayed)
-    {
+        {
             Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
         }
         Raylib.EndMode3D();
@@ -224,13 +233,16 @@ internal class VertexShaderRenderer : IRenderer
 
         myErosionSimulator.IterationFinished -= OnErosionIterationFinished;
         myMapGenerationConfiguration.HeightMultiplierChanged -= OnHeightMultiplierChanged;
+        myConfigurationGUI.ErosionModeChanged -= OnErosionModeChanged;
 
         Raylib.UnloadRenderTexture(myShadowMap);
         Raylib.UnloadModel(myTerrainHeightMap);
         Raylib.UnloadModel(myWaterHeightMap);
+        Raylib.UnloadModel(mySedimentHeightMap);
         Raylib.UnloadModel(mySeaLevelQuad);
         Raylib.UnloadShader(myTerrainHeightMapShader);
         Raylib.UnloadShader(myWaterHeightMapShader);
+        Raylib.UnloadShader(mySedimentHeightMapShader);
         Raylib.UnloadShader(mySeaLevelQuadShader);
 
         myIsDisposed = true;

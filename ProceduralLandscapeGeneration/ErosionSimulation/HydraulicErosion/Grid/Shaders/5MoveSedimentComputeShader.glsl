@@ -7,7 +7,7 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-struct GridPoint
+struct GridHydraulicErosionCell
 {
     float WaterHeight;
     float SuspendedSediment;
@@ -15,13 +15,13 @@ struct GridPoint
     float FlowLeft;
     float FlowRight;
     float FlowTop;
-    float FlowBottom;    
+    float FlowBottom;
     vec2 Velocity;
 };
 
-layout(std430, binding = 4) buffer gridPointsShaderBuffer
+layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 {
-    GridPoint[] gridPoints;
+    GridHydraulicErosionCell[] gridHydraulicErosionCells;
 };
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
@@ -31,11 +31,11 @@ void main()
 {
     uint id = gl_GlobalInvocationID.x;
 
-    GridPoint gridPoint = gridPoints[id];
+    GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[id];
 
-    gridPoint.SuspendedSediment = gridPoint.TempSediment;
+    gridHydraulicErosionCell.SuspendedSediment = gridHydraulicErosionCell.TempSediment;
 
-    gridPoints[id] = gridPoint;
+    gridHydraulicErosionCells[id] = gridHydraulicErosionCell;
     
     memoryBarrier();
 }

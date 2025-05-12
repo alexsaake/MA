@@ -33,6 +33,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
 
     public event EventHandler? MapResetRequired;
     public event EventHandler? ErosionResetRequired;
+    public event EventHandler? ErosionModeChanged;
 
     public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
     {
@@ -42,8 +43,8 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myErosionPanel = new PanelWithElements("Erosion Simulation");
         myErosionPanel.Add(new ComboBox("Hydraulic Particle;Hydraulic Grid;Thermal;Wind", (value) =>
                                                                                             {
-                                                                                                ErosionResetRequired?.Invoke(this, EventArgs.Empty);
                                                                                                 erosionConfiguration.Mode = (ErosionModeTypes)value;
+                                                                                                ErosionModeChanged?.Invoke(this, EventArgs.Empty);
                                                                                             }, (int)erosionConfiguration.Mode));
         myErosionPanel.Add(new Button("Reset", () => ErosionResetRequired?.Invoke(this, EventArgs.Empty)));
         myErosionPanel.Add(new ToggleSliderWithLabel("Running", "Off;On", (value) => erosionConfiguration.IsRunning = value == 1, erosionConfiguration.IsRunning ? 1 : 0));

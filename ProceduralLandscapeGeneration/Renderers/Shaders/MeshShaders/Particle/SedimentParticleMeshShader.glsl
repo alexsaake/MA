@@ -24,7 +24,7 @@ layout(std430, binding = 0) readonly restrict buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-struct GridPoint
+struct GridHydraulicErosionCell
 {
     float WaterHeight;
     float SuspendedSediment;
@@ -36,9 +36,9 @@ struct GridPoint
     vec2 Velocity;
 };
 
-layout(std430, binding = 4) buffer gridPointsShaderBuffer
+layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 {
-    GridPoint[] gridPoints;
+    GridHydraulicErosionCell[] gridHydraulicErosionCells;
 };
 
 struct MapGenerationConfiguration
@@ -67,7 +67,7 @@ void addVertex(uint vertex, uint x, uint y)
 {
     uint index = getIndex(x, y);
     float zOffset = 0.00004;
-    vec4 position = mvp * vec4(x, y, (heightMap[index] - zOffset + gridPoints[index].SuspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
+    vec4 position = mvp * vec4(x, y, (heightMap[index] - zOffset + gridHydraulicErosionCells[index].SuspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
     v_out[vertex].position = position;

@@ -7,7 +7,7 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-struct GridPoint
+struct GridHydraulicErosionCell
 {
     float WaterHeight;
     float SuspendedSediment;
@@ -15,13 +15,13 @@ struct GridPoint
     float FlowLeft;
     float FlowRight;
     float FlowTop;
-    float FlowBottom;    
+    float FlowBottom;
     vec2 Velocity;
 };
 
-layout(std430, binding = 4) buffer gridPointsShaderBuffer
+layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 {
-    GridPoint[] gridPoints;
+    GridHydraulicErosionCell[] gridHydraulicErosionCells;
 };
 
 struct MapGenerationConfiguration
@@ -79,12 +79,12 @@ void main()
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(gridPoints.length()));
+    myHeightMapSideLength = uint(sqrt(gridHydraulicErosionCells.length()));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;
     
-    GridPoint gridPoint = gridPoints[id];
+    GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[id];
 
     float height = heightMap[id];
     float heightLeft;
@@ -132,24 +132,24 @@ void main()
     float alpha = acos(dotProd);
     float tiltAngle = sin(alpha);
 	
-    float sedimentCapacity = gridPoint.WaterHeight - gridPoint.SuspendedSediment;
-	float erosionDepthLimit = (gridErosionConfiguration.MaximalErosionDepth - min(gridErosionConfiguration.MaximalErosionDepth, gridPoint.WaterHeight)) / gridErosionConfiguration.MaximalErosionDepth;
-	float sedimentTransportCapacity = sedimentCapacity * max(0.1, tiltAngle) * length(gridPoint.Velocity) * erosionDepthLimit;
+    float sedimentCapacity = gridHydraulicErosionCell.WaterHeight - gridHydraulicErosionCell.SuspendedSediment;
+	float erosionDepthLimit = (gridErosionConfiguration.MaximalErosionDepth - min(gridErosionConfiguration.MaximalErosionDepth, gridHydraulicErosionCell.WaterHeight)) / gridErosionConfiguration.MaximalErosionDepth;
+	float sedimentTransportCapacity = sedimentCapacity * max(0.1, tiltAngle) * length(gridHydraulicErosionCell.Velocity) * erosionDepthLimit;
 
-	if (sedimentTransportCapacity > gridPoint.SuspendedSediment)
+	if (sedimentTransportCapacity > gridHydraulicErosionCell.SuspendedSediment)
 	{
-		float soilSuspended = gridErosionConfiguration.TimeDelta * gridErosionConfiguration.SuspensionRate * (sedimentTransportCapacity - gridPoint.SuspendedSediment);
+		float soilSuspended = gridErosionConfiguration.TimeDelta * gridErosionConfiguration.SuspensionRate * (sedimentTransportCapacity - gridHydraulicErosionCell.SuspendedSediment);
 		heightMap[id] -= soilSuspended;
-		gridPoint.SuspendedSediment += soilSuspended;
+		gridHydraulicErosionCell.SuspendedSediment += soilSuspended;
 	}
-	else if (sedimentTransportCapacity < gridPoint.SuspendedSediment)
+	else if (sedimentTransportCapacity < gridHydraulicErosionCell.SuspendedSediment)
 	{
-		float soilDeposited = gridErosionConfiguration.TimeDelta * gridErosionConfiguration.DepositionRate * (gridPoint.SuspendedSediment - sedimentTransportCapacity);
+		float soilDeposited = gridErosionConfiguration.TimeDelta * gridErosionConfiguration.DepositionRate * (gridHydraulicErosionCell.SuspendedSediment - sedimentTransportCapacity);
 		heightMap[id] += soilDeposited;
-		gridPoint.SuspendedSediment -= soilDeposited;
+		gridHydraulicErosionCell.SuspendedSediment -= soilDeposited;
 	}
 	
-    gridPoints[id] = gridPoint;
+    gridHydraulicErosionCells[id] = gridHydraulicErosionCell;
     
     memoryBarrier();
 }

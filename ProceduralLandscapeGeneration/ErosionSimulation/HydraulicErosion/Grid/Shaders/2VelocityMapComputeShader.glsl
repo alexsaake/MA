@@ -7,7 +7,7 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-struct GridPoint
+struct GridHydraulicErosionCell
 {
     float WaterHeight;
     float SuspendedSediment;
@@ -15,13 +15,13 @@ struct GridPoint
     float FlowLeft;
     float FlowRight;
     float FlowTop;
-    float FlowBottom;    
+    float FlowBottom;
     vec2 Velocity;
 };
 
-layout(std430, binding = 4) buffer gridPointsShaderBuffer
+layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 {
-    GridPoint[] gridPoints;
+    GridHydraulicErosionCell[] gridHydraulicErosionCells;
 };
 
 struct MapGenerationConfiguration
@@ -72,31 +72,31 @@ void main()
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(gridPoints.length()));
+    myHeightMapSideLength = uint(sqrt(gridHydraulicErosionCells.length()));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;
     
-    GridPoint gridPoint = gridPoints[id];
+    GridHydraulicErosionCell gridHydraulicErosionCell  = gridHydraulicErosionCells[id];
 
-    float flowIn = gridPoints[getIndex(x - 1, y)].FlowRight + gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoints[getIndex(x, y - 1)].FlowTop + gridPoints[getIndex(x, y + 1)].FlowBottom;
-    float flowOut = gridPoint.FlowRight + gridPoint.FlowLeft + gridPoint.FlowTop + gridPoint.FlowBottom;
+    float flowIn = gridHydraulicErosionCells[getIndex(x - 1, y)].FlowRight + gridHydraulicErosionCells[getIndex(x + 1, y)].FlowLeft + gridHydraulicErosionCells[getIndex(x, y - 1)].FlowTop + gridHydraulicErosionCells[getIndex(x, y + 1)].FlowBottom;
+    float flowOut = gridHydraulicErosionCell.FlowRight + gridHydraulicErosionCell.FlowLeft + gridHydraulicErosionCell.FlowTop + gridHydraulicErosionCell.FlowBottom;
 
 	float volumeDelta = gridErosionConfiguration.TimeDelta * (flowIn - flowOut);
 
-	gridPoint.WaterHeight = max(0.0, gridPoint.WaterHeight + volumeDelta);
+	gridHydraulicErosionCell.WaterHeight = max(0.0, gridHydraulicErosionCell.WaterHeight + volumeDelta);
 
-    if(gridPoint.WaterHeight > 0.0)
+    if(gridHydraulicErosionCell.WaterHeight > 0.0)
     {
-        gridPoint.Velocity = vec2(clamp(0.5 * (gridPoints[getIndex(x - 1, y)].FlowRight - gridPoint.FlowLeft - gridPoints[getIndex(x + 1, y)].FlowLeft + gridPoint.FlowRight) * mapGenerationConfiguration.HeightMultiplier, -1.0, 1.0),
-                                  clamp(0.5 * (gridPoints[getIndex(x, y - 1)].FlowTop - gridPoint.FlowBottom - gridPoints[getIndex(x, y + 1)].FlowBottom + gridPoint.FlowTop) * mapGenerationConfiguration.HeightMultiplier, -1.0, 1.0));
+        gridHydraulicErosionCell.Velocity = vec2(clamp(0.5 * (gridHydraulicErosionCells[getIndex(x - 1, y)].FlowRight - gridHydraulicErosionCell.FlowLeft - gridHydraulicErosionCells[getIndex(x + 1, y)].FlowLeft + gridHydraulicErosionCell.FlowRight) * mapGenerationConfiguration.HeightMultiplier, -1.0, 1.0),
+                                  clamp(0.5 * (gridHydraulicErosionCells[getIndex(x, y - 1)].FlowTop - gridHydraulicErosionCell.FlowBottom - gridHydraulicErosionCells[getIndex(x, y + 1)].FlowBottom + gridHydraulicErosionCell.FlowTop) * mapGenerationConfiguration.HeightMultiplier, -1.0, 1.0));
     }
     else
     {
-        gridPoint.Velocity = vec2(0);
+        gridHydraulicErosionCell.Velocity = vec2(0);
     }
     
-    gridPoints[id] = gridPoint;
+    gridHydraulicErosionCells[id] = gridHydraulicErosionCell;
 
     memoryBarrier();
 }

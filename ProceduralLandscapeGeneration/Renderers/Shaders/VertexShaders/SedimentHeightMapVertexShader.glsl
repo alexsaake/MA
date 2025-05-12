@@ -32,7 +32,7 @@ layout(std430, binding = 3) buffer particleWindErosionShaderBuffer
     ParticleWindErosion[] particlesWindErosion;
 };
 
-struct GridPoint
+struct GridHydraulicErosionCell
 {
     float WaterHeight;
     float SuspendedSediment;
@@ -44,9 +44,9 @@ struct GridPoint
     vec2 Velocity;
 };
 
-layout(std430, binding = 4) buffer gridPointsShaderBuffer
+layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 {
-    GridPoint[] gridPoints;
+    GridHydraulicErosionCell[] gridHydraulicErosionCells;
 };
 
 struct MapGenerationConfiguration
@@ -76,7 +76,7 @@ void main()
     uint x = index % sideLength;
     uint y = index / sideLength;
 
-    float suspendedSediment = gridPoints[index].SuspendedSediment;
+    float suspendedSediment = gridHydraulicErosionCells[index].SuspendedSediment;
     for(int particle = 0; particle < particlesHydraulicErosion.length(); particle++)
     {        
         if(ivec2(particlesHydraulicErosion[particle].Position) == ivec2(x, y))

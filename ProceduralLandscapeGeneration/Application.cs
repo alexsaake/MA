@@ -49,6 +49,7 @@ internal class Application : IApplication
         myMapGenerationConfiguration.ResetRequired += OnResetRequired;
         myConfigurationGUI.MapResetRequired += OnResetRequired;
         myConfigurationGUI.ErosionResetRequired += OnErosionResetRequired;
+        myConfigurationGUI.ErosionModeChanged += OnErosionModeChanged;
 
         InitializeModules();
 
@@ -98,6 +99,7 @@ internal class Application : IApplication
         myMapGenerationConfiguration.ResetRequired -= OnResetRequired;
         myConfigurationGUI.MapResetRequired -= OnResetRequired;
         myConfigurationGUI.ErosionResetRequired -= OnErosionResetRequired;
+        myConfigurationGUI.ErosionModeChanged -= OnErosionModeChanged;
 
         DisposeModules();
 
@@ -110,6 +112,11 @@ internal class Application : IApplication
     }
 
     private void OnErosionResetRequired(object? sender, EventArgs e)
+    {
+        myIsErosionResetRequired = true;
+    }
+
+    private void OnErosionModeChanged(object? sender, EventArgs e)
     {
         myIsErosionResetRequired = true;
     }

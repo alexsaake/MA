@@ -41,8 +41,8 @@ public class GridErosionTests
 
         testee.Flow();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
-        foreach (HydraulicErosionGridPointShaderBuffer gridPoint in gridPoints)
+        GridHydraulicErosionCellShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        foreach (GridHydraulicErosionCellShaderBuffer gridPoint in gridPoints)
         {
             Assert.That(gridPoint.FlowLeft, Is.Zero);
             Assert.That(gridPoint.FlowRight, Is.Zero);
@@ -66,8 +66,8 @@ public class GridErosionTests
 
         testee.Flow();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
-        foreach (HydraulicErosionGridPointShaderBuffer gridPoint in gridPoints)
+        GridHydraulicErosionCellShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        foreach (GridHydraulicErosionCellShaderBuffer gridPoint in gridPoints)
         {
             Assert.That(gridPoint.FlowLeft, Is.Zero);
             Assert.That(gridPoint.FlowRight, Is.Zero);
@@ -88,10 +88,10 @@ public class GridErosionTests
 
         testee.Flow();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
         IGridErosionConfiguration gridErosionConfiguration = myContainer!.Resolve<IGridErosionConfiguration>();
         float expectedFlow = gridErosionConfiguration.WaterIncrease * (1 - gridErosionConfiguration.Dampening);
-        HydraulicErosionGridPointShaderBuffer leftBottomGridPoint = gridPoints[GetIndex(0, 0)];
+        GridHydraulicErosionCellShaderBuffer leftBottomGridPoint = gridHydraulicErosionCells[GetIndex(0, 0)];
         Assert.That(leftBottomGridPoint.FlowRight, Is.EqualTo(expectedFlow).Within(0.00001f));
     }
 
@@ -107,10 +107,10 @@ public class GridErosionTests
 
         testee.Flow();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
         IGridErosionConfiguration gridErosionConfiguration = myContainer!.Resolve<IGridErosionConfiguration>();
         float expectedFlow = gridErosionConfiguration.WaterIncrease / (4 * gridErosionConfiguration.TimeDelta) * (1 - gridErosionConfiguration.Dampening);
-        HydraulicErosionGridPointShaderBuffer centerGridPoint = gridPoints[GetIndex(1, 1)];
+        GridHydraulicErosionCellShaderBuffer centerGridPoint = gridHydraulicErosionCells[GetIndex(1, 1)];
         Assert.That(centerGridPoint.FlowLeft, Is.EqualTo(expectedFlow).Within(0.00001f));
         Assert.That(centerGridPoint.FlowRight, Is.EqualTo(expectedFlow).Within(0.00001f));
         Assert.That(centerGridPoint.FlowTop, Is.EqualTo(expectedFlow).Within(0.00001f));
@@ -129,8 +129,8 @@ public class GridErosionTests
 
         testee.Flow();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
-        HydraulicErosionGridPointShaderBuffer centerGridPoint = gridPoints[GetIndex(1, 0)];
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer centerGridPoint = gridHydraulicErosionCells[GetIndex(1, 0)];
         Assert.That(centerGridPoint.FlowLeft, Is.GreaterThan(centerGridPoint.FlowRight));
     }
 
@@ -146,8 +146,8 @@ public class GridErosionTests
 
         testee.VelocityMap();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
-        foreach (HydraulicErosionGridPointShaderBuffer gridPoint in gridPoints)
+        GridHydraulicErosionCellShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        foreach (GridHydraulicErosionCellShaderBuffer gridPoint in gridPoints)
         {
             Assert.That(gridPoint.Velocity.X, Is.Zero);
             Assert.That(gridPoint.Velocity.Y, Is.Zero);
@@ -171,20 +171,20 @@ public class GridErosionTests
         float expectedFlow = gridErosionConfiguration.WaterIncrease / (4 * gridErosionConfiguration.TimeDelta) * (1 - gridErosionConfiguration.Dampening);
         IMapGenerationConfiguration mapGenerationConfiguration = myContainer!.Resolve<IMapGenerationConfiguration>();
         float expectedVelocity = expectedFlow * mapGenerationConfiguration.HeightMultiplier / 2;
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
-        HydraulicErosionGridPointShaderBuffer centerGridPoint = gridPoints[GetIndex(1, 1)];
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer centerGridPoint = gridHydraulicErosionCells[GetIndex(1, 1)];
         Assert.That(centerGridPoint.Velocity.X, Is.EqualTo(0));
         Assert.That(centerGridPoint.Velocity.Y, Is.EqualTo(0));
-        HydraulicErosionGridPointShaderBuffer leftGridPoint = gridPoints[GetIndex(0, 1)];
+        GridHydraulicErosionCellShaderBuffer leftGridPoint = gridHydraulicErosionCells[GetIndex(0, 1)];
         Assert.That(leftGridPoint.Velocity.X, Is.EqualTo(-expectedVelocity).Within(0.00001f));
         Assert.That(leftGridPoint.Velocity.Y, Is.EqualTo(0));
-        HydraulicErosionGridPointShaderBuffer rightGridPoint = gridPoints[GetIndex(2, 1)];
+        GridHydraulicErosionCellShaderBuffer rightGridPoint = gridHydraulicErosionCells[GetIndex(2, 1)];
         Assert.That(rightGridPoint.Velocity.X, Is.EqualTo(expectedVelocity).Within(0.00001f));
         Assert.That(rightGridPoint.Velocity.Y, Is.EqualTo(0));
-        HydraulicErosionGridPointShaderBuffer topGridPoint = gridPoints[GetIndex(1, 2)];
+        GridHydraulicErosionCellShaderBuffer topGridPoint = gridHydraulicErosionCells[GetIndex(1, 2)];
         Assert.That(topGridPoint.Velocity.X, Is.EqualTo(0));
         Assert.That(topGridPoint.Velocity.Y, Is.EqualTo(expectedVelocity).Within(0.00001f));
-        HydraulicErosionGridPointShaderBuffer bottomGridPoint = gridPoints[GetIndex(1, 0)];
+        GridHydraulicErosionCellShaderBuffer bottomGridPoint = gridHydraulicErosionCells[GetIndex(1, 0)];
         Assert.That(bottomGridPoint.Velocity.X, Is.EqualTo(0));
         Assert.That(bottomGridPoint.Velocity.Y, Is.EqualTo(-expectedVelocity).Within(0.00001f));
     }
@@ -202,9 +202,9 @@ public class GridErosionTests
 
         testee.VelocityMap();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
-        HydraulicErosionGridPointShaderBuffer leftGridPoint = gridPoints[GetIndex(0, 0)];
-        HydraulicErosionGridPointShaderBuffer rightGridPoint = gridPoints[GetIndex(2, 0)];
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer leftGridPoint = gridHydraulicErosionCells[GetIndex(0, 0)];
+        GridHydraulicErosionCellShaderBuffer rightGridPoint = gridHydraulicErosionCells[GetIndex(2, 0)];
         Assert.That(-leftGridPoint.Velocity.X, Is.GreaterThan(rightGridPoint.Velocity.X));
     }
 
@@ -231,9 +231,9 @@ public class GridErosionTests
         testee.VelocityMap();
 
         float expectedVelocity = 1.0f;
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
-        HydraulicErosionGridPointShaderBuffer leftGridPoint = gridPoints[GetIndex(0, 0)];
-        HydraulicErosionGridPointShaderBuffer rightGridPoint = gridPoints[GetIndex(1, 0)];
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer leftGridPoint = gridHydraulicErosionCells[GetIndex(0, 0)];
+        GridHydraulicErosionCellShaderBuffer rightGridPoint = gridHydraulicErosionCells[GetIndex(1, 0)];
         Assert.That(-leftGridPoint.Velocity.X, Is.LessThanOrEqualTo(expectedVelocity));
     }
 
@@ -250,8 +250,8 @@ public class GridErosionTests
 
         testee.SuspendDeposite();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
-        foreach (HydraulicErosionGridPointShaderBuffer gridPoint in gridPoints)
+        GridHydraulicErosionCellShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        foreach (GridHydraulicErosionCellShaderBuffer gridPoint in gridPoints)
         {
             Assert.That(gridPoint.SuspendedSediment, Is.Zero);
         }
@@ -277,22 +277,22 @@ public class GridErosionTests
 
         testee.SuspendDeposite();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
         uint centerIndex = GetIndex(1, 1);
-        HydraulicErosionGridPointShaderBuffer centerGridPoint = gridPoints[centerIndex];
+        GridHydraulicErosionCellShaderBuffer centerGridPoint = gridHydraulicErosionCells[centerIndex];
         Assert.That(centerGridPoint.SuspendedSediment, Is.EqualTo(0));
         uint leftIndex = GetIndex(0, 1);
-        HydraulicErosionGridPointShaderBuffer leftGridPoint = gridPoints[leftIndex];
+        GridHydraulicErosionCellShaderBuffer leftGridPoint = gridHydraulicErosionCells[leftIndex];
         float expectedSuspendedSediment = leftGridPoint.SuspendedSediment;
         Assert.That(leftGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment));
         uint rightIndex = GetIndex(2, 1);
-        HydraulicErosionGridPointShaderBuffer rightGridPoint = gridPoints[rightIndex];
+        GridHydraulicErosionCellShaderBuffer rightGridPoint = gridHydraulicErosionCells[rightIndex];
         Assert.That(rightGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment));
         uint topIndex = GetIndex(1, 2);
-        HydraulicErosionGridPointShaderBuffer topGridPoint = gridPoints[topIndex];
+        GridHydraulicErosionCellShaderBuffer topGridPoint = gridHydraulicErosionCells[topIndex];
         Assert.That(topGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment));
         uint bottomIndex = GetIndex(1, 0);
-        HydraulicErosionGridPointShaderBuffer bottomGridPoint = gridPoints[bottomIndex];
+        GridHydraulicErosionCellShaderBuffer bottomGridPoint = gridHydraulicErosionCells[bottomIndex];
         Assert.That(bottomGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment));
 
         float[] heightMapValuesAfterSimulation = ReadHeightMapShaderBuffer();
@@ -324,15 +324,15 @@ public class GridErosionTests
 
         testee.SuspendDeposite();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
         uint centerIndex = GetIndex(1, 0);
-        HydraulicErosionGridPointShaderBuffer centerGridPoint = gridPoints[centerIndex];
+        GridHydraulicErosionCellShaderBuffer centerGridPoint = gridHydraulicErosionCells[centerIndex];
         float expectedSuspendedSedimentCenter = centerGridPoint.SuspendedSediment;
         uint leftIndex = GetIndex(0, 0);
-        HydraulicErosionGridPointShaderBuffer leftGridPoint = gridPoints[leftIndex];
+        GridHydraulicErosionCellShaderBuffer leftGridPoint = gridHydraulicErosionCells[leftIndex];
         float expectedSuspendedSedimentLeft = leftGridPoint.SuspendedSediment;
         uint rightIndex = GetIndex(2, 0);
-        HydraulicErosionGridPointShaderBuffer rightGridPoint = gridPoints[rightIndex];
+        GridHydraulicErosionCellShaderBuffer rightGridPoint = gridHydraulicErosionCells[rightIndex];
         float expectedSuspendedSedimentRight = rightGridPoint.SuspendedSediment;
         Assert.That(leftGridPoint.SuspendedSediment, Is.GreaterThan(rightGridPoint.SuspendedSediment));
 
@@ -366,22 +366,22 @@ public class GridErosionTests
 
         testee.SuspendDeposite();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
         float expectedSuspendedSediment = 0.0125f;
         uint centerIndex = GetIndex(1, 1);
-        HydraulicErosionGridPointShaderBuffer centerGridPoint = gridPoints[centerIndex];
+        GridHydraulicErosionCellShaderBuffer centerGridPoint = gridHydraulicErosionCells[centerIndex];
         Assert.That(centerGridPoint.SuspendedSediment, Is.EqualTo(0));
         uint leftIndex = GetIndex(0, 1);
-        HydraulicErosionGridPointShaderBuffer leftGridPoint = gridPoints[leftIndex];
+        GridHydraulicErosionCellShaderBuffer leftGridPoint = gridHydraulicErosionCells[leftIndex];
         Assert.That(leftGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
         uint rightIndex = GetIndex(2, 1);
-        HydraulicErosionGridPointShaderBuffer rightGridPoint = gridPoints[rightIndex];
+        GridHydraulicErosionCellShaderBuffer rightGridPoint = gridHydraulicErosionCells[rightIndex];
         Assert.That(rightGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
         uint topIndex = GetIndex(1, 2);
-        HydraulicErosionGridPointShaderBuffer topGridPoint = gridPoints[topIndex];
+        GridHydraulicErosionCellShaderBuffer topGridPoint = gridHydraulicErosionCells[topIndex];
         Assert.That(topGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
         uint bottomIndex = GetIndex(1, 0);
-        HydraulicErosionGridPointShaderBuffer bottomGridPoint = gridPoints[bottomIndex];
+        GridHydraulicErosionCellShaderBuffer bottomGridPoint = gridHydraulicErosionCells[bottomIndex];
         Assert.That(bottomGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
 
         float[] heightMapValuesAfterSimulation = ReadHeightMapShaderBuffer();
@@ -416,16 +416,16 @@ public class GridErosionTests
 
         testee.SuspendDeposite();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
         float expectedSuspendedSediment = 0.0175f;
         uint centerIndex = GetIndex(1, 0);
-        HydraulicErosionGridPointShaderBuffer centerGridPoint = gridPoints[centerIndex];
+        GridHydraulicErosionCellShaderBuffer centerGridPoint = gridHydraulicErosionCells[centerIndex];
         Assert.That(centerGridPoint.SuspendedSediment, Is.EqualTo(0));
         uint leftIndex = GetIndex(0, 0);
-        HydraulicErosionGridPointShaderBuffer leftGridPoint = gridPoints[leftIndex];
+        GridHydraulicErosionCellShaderBuffer leftGridPoint = gridHydraulicErosionCells[leftIndex];
         Assert.That(leftGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
         uint rightIndex = GetIndex(2, 0);
-        HydraulicErosionGridPointShaderBuffer rightGridPoint = gridPoints[rightIndex];
+        GridHydraulicErosionCellShaderBuffer rightGridPoint = gridHydraulicErosionCells[rightIndex];
         Assert.That(rightGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment - 0.01125f).Within(0.001f));
 
         float[] heightMapValuesAfterSimulation = ReadHeightMapShaderBuffer();
@@ -452,8 +452,8 @@ public class GridErosionTests
 
         testee.Evaporate();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
-        foreach (HydraulicErosionGridPointShaderBuffer gridPoint in gridPoints)
+        GridHydraulicErosionCellShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        foreach (GridHydraulicErosionCellShaderBuffer gridPoint in gridPoints)
         {
             Assert.That(gridPoint.WaterHeight, Is.Zero);
             Assert.That(gridPoint.WaterHeight, Is.Zero);
@@ -475,33 +475,33 @@ public class GridErosionTests
         testee.VelocityMap();
         testee.SuspendDeposite();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
         IGridErosionConfiguration gridErosionConfiguration = myContainer!.Resolve<IGridErosionConfiguration>();
         float expectedWaterHeight = gridErosionConfiguration.WaterIncrease / 4;
-        HydraulicErosionGridPointShaderBuffer centerGridPoint = gridPoints[GetIndex(1, 1)];
+        GridHydraulicErosionCellShaderBuffer centerGridPoint = gridHydraulicErosionCells[GetIndex(1, 1)];
         Assert.That(centerGridPoint.WaterHeight, Is.EqualTo(0));
-        HydraulicErosionGridPointShaderBuffer leftGridPoint = gridPoints[GetIndex(0, 1)];
+        GridHydraulicErosionCellShaderBuffer leftGridPoint = gridHydraulicErosionCells[GetIndex(0, 1)];
         Assert.That(leftGridPoint.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(0.001f));
-        HydraulicErosionGridPointShaderBuffer rightGridPoint = gridPoints[GetIndex(2, 1)];
+        GridHydraulicErosionCellShaderBuffer rightGridPoint = gridHydraulicErosionCells[GetIndex(2, 1)];
         Assert.That(rightGridPoint.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(0.001f));
-        HydraulicErosionGridPointShaderBuffer topGridPoint = gridPoints[GetIndex(1, 2)];
+        GridHydraulicErosionCellShaderBuffer topGridPoint = gridHydraulicErosionCells[GetIndex(1, 2)];
         Assert.That(topGridPoint.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(0.001f));
-        HydraulicErosionGridPointShaderBuffer bottomGridPoint = gridPoints[GetIndex(1, 0)];
+        GridHydraulicErosionCellShaderBuffer bottomGridPoint = gridHydraulicErosionCells[GetIndex(1, 0)];
         Assert.That(bottomGridPoint.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(0.001f));
 
         testee.Evaporate();
 
-        gridPoints = ReadGridPointShaderBuffer();
+        gridHydraulicErosionCells = ReadGridPointShaderBuffer();
         expectedWaterHeight = 0.85f;
-        centerGridPoint = gridPoints[GetIndex(1, 1)];
+        centerGridPoint = gridHydraulicErosionCells[GetIndex(1, 1)];
         Assert.That(centerGridPoint.WaterHeight, Is.EqualTo(0));
-        leftGridPoint = gridPoints[GetIndex(0, 1)];
+        leftGridPoint = gridHydraulicErosionCells[GetIndex(0, 1)];
         Assert.That(leftGridPoint.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(0.001f));
-        rightGridPoint = gridPoints[GetIndex(2, 1)];
+        rightGridPoint = gridHydraulicErosionCells[GetIndex(2, 1)];
         Assert.That(rightGridPoint.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(0.001f));
-        topGridPoint = gridPoints[GetIndex(1, 2)];
+        topGridPoint = gridHydraulicErosionCells[GetIndex(1, 2)];
         Assert.That(topGridPoint.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(0.001f));
-        bottomGridPoint = gridPoints[GetIndex(1, 0)];
+        bottomGridPoint = gridHydraulicErosionCells[GetIndex(1, 0)];
         Assert.That(bottomGridPoint.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(0.001f));
     }
 
@@ -520,8 +520,8 @@ public class GridErosionTests
 
         testee.MoveSediment();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
-        foreach (HydraulicErosionGridPointShaderBuffer gridPoint in gridPoints)
+        GridHydraulicErosionCellShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        foreach (GridHydraulicErosionCellShaderBuffer gridPoint in gridPoints)
         {
             Assert.That(gridPoint.SuspendedSediment, Is.Zero);
             Assert.That(gridPoint.SuspendedSediment, Is.Zero);
@@ -544,20 +544,20 @@ public class GridErosionTests
         testee.SuspendDeposite();
         testee.Evaporate();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
         float expectedSuspendedSediment = 0.02f;
-        HydraulicErosionGridPointShaderBuffer leftBottomGridPoint = gridPoints[GetIndex(0, 0)];
+        GridHydraulicErosionCellShaderBuffer leftBottomGridPoint = gridHydraulicErosionCells[GetIndex(0, 0)];
         Assert.That(leftBottomGridPoint.SuspendedSediment, Is.EqualTo(0));
-        HydraulicErosionGridPointShaderBuffer rightBottomGridPoint = gridPoints[GetIndex(1, 0)];
+        GridHydraulicErosionCellShaderBuffer rightBottomGridPoint = gridHydraulicErosionCells[GetIndex(1, 0)];
         Assert.That(rightBottomGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
 
         testee.MoveSediment();
 
-        gridPoints = ReadGridPointShaderBuffer();
+        gridHydraulicErosionCells = ReadGridPointShaderBuffer();
         expectedSuspendedSediment = expectedSuspendedSediment / 2;
-        leftBottomGridPoint = gridPoints[GetIndex(0, 0)];
+        leftBottomGridPoint = gridHydraulicErosionCells[GetIndex(0, 0)];
         Assert.That(leftBottomGridPoint.SuspendedSediment, Is.EqualTo(0));
-        rightBottomGridPoint = gridPoints[GetIndex(1, 0)];
+        rightBottomGridPoint = gridHydraulicErosionCells[GetIndex(1, 0)];
         Assert.That(rightBottomGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
     }
 
@@ -575,32 +575,32 @@ public class GridErosionTests
         testee.SuspendDeposite();
         testee.Evaporate();
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = ReadGridPointShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
         float expectedSuspendedSediment = 0.025f;
-        HydraulicErosionGridPointShaderBuffer centerGridPoint = gridPoints[GetIndex(1, 1)];
+        GridHydraulicErosionCellShaderBuffer centerGridPoint = gridHydraulicErosionCells[GetIndex(1, 1)];
         Assert.That(centerGridPoint.SuspendedSediment, Is.EqualTo(0));
-        HydraulicErosionGridPointShaderBuffer leftGridPoint = gridPoints[GetIndex(0, 1)];
+        GridHydraulicErosionCellShaderBuffer leftGridPoint = gridHydraulicErosionCells[GetIndex(0, 1)];
         Assert.That(leftGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
-        HydraulicErosionGridPointShaderBuffer rightGridPoint = gridPoints[GetIndex(2, 1)];
+        GridHydraulicErosionCellShaderBuffer rightGridPoint = gridHydraulicErosionCells[GetIndex(2, 1)];
         Assert.That(rightGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
-        HydraulicErosionGridPointShaderBuffer topGridPoint = gridPoints[GetIndex(1, 2)];
+        GridHydraulicErosionCellShaderBuffer topGridPoint = gridHydraulicErosionCells[GetIndex(1, 2)];
         Assert.That(topGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
-        HydraulicErosionGridPointShaderBuffer bottomGridPoint = gridPoints[GetIndex(1, 0)];
+        GridHydraulicErosionCellShaderBuffer bottomGridPoint = gridHydraulicErosionCells[GetIndex(1, 0)];
         Assert.That(bottomGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
 
         testee.MoveSediment();
 
-        gridPoints = ReadGridPointShaderBuffer();
+        gridHydraulicErosionCells = ReadGridPointShaderBuffer();
         expectedSuspendedSediment = expectedSuspendedSediment / 2;
-        centerGridPoint = gridPoints[GetIndex(1, 1)];
+        centerGridPoint = gridHydraulicErosionCells[GetIndex(1, 1)];
         Assert.That(centerGridPoint.SuspendedSediment, Is.EqualTo(0));
-        leftGridPoint = gridPoints[GetIndex(0, 1)];
+        leftGridPoint = gridHydraulicErosionCells[GetIndex(0, 1)];
         Assert.That(leftGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
-        rightGridPoint = gridPoints[GetIndex(2, 1)];
+        rightGridPoint = gridHydraulicErosionCells[GetIndex(2, 1)];
         Assert.That(rightGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
-        topGridPoint = gridPoints[GetIndex(1, 2)];
+        topGridPoint = gridHydraulicErosionCells[GetIndex(1, 2)];
         Assert.That(topGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
-        bottomGridPoint = gridPoints[GetIndex(1, 0)];
+        bottomGridPoint = gridHydraulicErosionCells[GetIndex(1, 0)];
         Assert.That(bottomGridPoint.SuspendedSediment, Is.EqualTo(expectedSuspendedSediment).Within(0.001f));
     }
 
@@ -675,17 +675,17 @@ public class GridErosionTests
         mapGenerationConfiguration.HeightMapSideLength = heightMapSideLength;
     }
 
-    private unsafe HydraulicErosionGridPointShaderBuffer[] ReadGridPointShaderBuffer()
+    private unsafe GridHydraulicErosionCellShaderBuffer[] ReadGridPointShaderBuffer()
     {
         IMapGenerationConfiguration mapGenerationConfiguration = myContainer!.Resolve<IMapGenerationConfiguration>();
         IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
         uint mapSize = mapGenerationConfiguration.HeightMapSideLength * mapGenerationConfiguration.HeightMapSideLength;
         uint heightMapSize = mapSize * sizeof(float);
-        uint gridPointSize = (uint)(mapSize * sizeof(HydraulicErosionGridPointShaderBuffer));
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = new HydraulicErosionGridPointShaderBuffer[mapSize];
+        uint gridPointSize = (uint)(mapSize * sizeof(GridHydraulicErosionCellShaderBuffer));
+        GridHydraulicErosionCellShaderBuffer[] gridPoints = new GridHydraulicErosionCellShaderBuffer[mapSize];
         fixed (void* gridPointsPointer = gridPoints)
         {
-            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, gridPointSize, 0);
+            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridHydraulicErosionCell], gridPointsPointer, gridPointSize, 0);
         }
         return gridPoints;
     }
@@ -716,21 +716,21 @@ public class GridErosionTests
         IGridErosionConfiguration gridErosionConfiguration = myContainer!.Resolve<IGridErosionConfiguration>();
         IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
         uint mapSize = mapGenerationConfiguration.HeightMapSideLength * mapGenerationConfiguration.HeightMapSideLength;
-        uint bufferSize = mapSize * (uint)sizeof(HydraulicErosionGridPointShaderBuffer);
+        uint bufferSize = mapSize * (uint)sizeof(GridHydraulicErosionCellShaderBuffer);
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = new HydraulicErosionGridPointShaderBuffer[mapSize];
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = new GridHydraulicErosionCellShaderBuffer[mapSize];
         Rlgl.MemoryBarrier();
-        fixed (void* gridPointsPointer = gridPoints)
+        fixed (void* gridPointsPointer = gridHydraulicErosionCells)
         {
-            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
+            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridHydraulicErosionCell], gridPointsPointer, bufferSize, 0);
         }
 
         uint index = mapGenerationConfiguration.GetIndex(x, y);
-        gridPoints[index].WaterHeight += gridErosionConfiguration.WaterIncrease;
+        gridHydraulicErosionCells[index].WaterHeight += gridErosionConfiguration.WaterIncrease;
 
-        fixed (void* gridPointsPointer = gridPoints)
+        fixed (void* gridPointsPointer = gridHydraulicErosionCells)
         {
-            Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
+            Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.GridHydraulicErosionCell], gridPointsPointer, bufferSize, 0);
         }
         Rlgl.MemoryBarrier();
     }
@@ -740,23 +740,23 @@ public class GridErosionTests
         IMapGenerationConfiguration mapGenerationConfiguration = myContainer!.Resolve<IMapGenerationConfiguration>();
         IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
         uint mapSize = mapGenerationConfiguration.HeightMapSideLength * mapGenerationConfiguration.HeightMapSideLength;
-        uint bufferSize = mapSize * (uint)sizeof(HydraulicErosionGridPointShaderBuffer);
+        uint bufferSize = mapSize * (uint)sizeof(GridHydraulicErosionCellShaderBuffer);
 
-        HydraulicErosionGridPointShaderBuffer[] gridPoints = new HydraulicErosionGridPointShaderBuffer[mapSize];
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = new GridHydraulicErosionCellShaderBuffer[mapSize];
         Rlgl.MemoryBarrier();
-        fixed (void* gridPointsPointer = gridPoints)
+        fixed (void* gridPointsPointer = gridHydraulicErosionCells)
         {
-            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
+            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridHydraulicErosionCell], gridPointsPointer, bufferSize, 0);
         }
 
-        for (int i = 0; i < gridPoints.Length; i++)
+        for (int i = 0; i < gridHydraulicErosionCells.Length; i++)
         {
-            gridPoints[i].WaterHeight = 0;
+            gridHydraulicErosionCells[i].WaterHeight = 0;
         }
 
-        fixed (void* gridPointsPointer = gridPoints)
+        fixed (void* gridPointsPointer = gridHydraulicErosionCells)
         {
-            Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.GridPoints], gridPointsPointer, bufferSize, 0);
+            Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.GridHydraulicErosionCell], gridPointsPointer, bufferSize, 0);
         }
         Rlgl.MemoryBarrier();
     }

@@ -2,7 +2,7 @@
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-struct GridPoint
+struct GridHydraulicErosionCell
 {
     float WaterHeight;
     float SuspendedSediment;
@@ -14,9 +14,9 @@ struct GridPoint
     vec2 Velocity;
 };
 
-layout(std430, binding = 4) buffer gridPointsShaderBuffer
+layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 {
-    GridPoint[] gridPoints;
+    GridHydraulicErosionCell[] gridHydraulicErosionCells;
 };
 
 struct GridErosionConfiguration
@@ -61,11 +61,11 @@ void main()
     }
     heightMapIndices[id] = -1;
 
-    GridPoint gridPoint = gridPoints[index];
+    GridHydraulicErosionCell gridHydraulicErosionCell  = gridHydraulicErosionCells[index];
 
-    gridPoint.WaterHeight += gridErosionConfiguration.WaterIncrease;
+    gridHydraulicErosionCell.WaterHeight += gridErosionConfiguration.WaterIncrease;
 
-    gridPoints[index] = gridPoint;
+    gridHydraulicErosionCells[index] = gridHydraulicErosionCell;
     
     memoryBarrier();
 }

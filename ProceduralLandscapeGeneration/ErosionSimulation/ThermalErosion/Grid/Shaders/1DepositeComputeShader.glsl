@@ -7,21 +7,17 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-struct GridPoint
+struct GridThermalErosionCell
 {
-    float WaterHeight;
-    float SuspendedSediment;
-    float TempSediment;
     float FlowLeft;
     float FlowRight;
     float FlowTop;
     float FlowBottom;
-    vec2 Velocity;
 };
 
-layout(std430, binding = 4) buffer gridPointsShaderBuffer
+layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
 {
-    GridPoint[] gridPoints;
+    GridThermalErosionCell[] gridThermalErosionCells;
 };
 
 uint myHeightMapSideLength;
@@ -45,17 +41,19 @@ void main()
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(gridPoints.length()));
+    myHeightMapSideLength = uint(sqrt(gridThermalErosionCells.length()));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;
     
-    GridPoint gridPoint = gridPoints[id];
+    GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[id];
 
-    float thermalIn = gridPoints[getIndex(x - 1, y)].ThermalRight + gridPoints[getIndex(x + 1, y)].ThermalLeft + gridPoints[getIndex(x, y - 1)].ThermalTop + gridPoints[getIndex(x, y + 1)].ThermalBottom;
-    float thermalOut = gridPoint.ThermalRight + gridPoint.ThermalLeft + gridPoint.ThermalTop + gridPoint.ThermalBottom;
+    float flowIn = gridThermalErosionCells[getIndex(x - 1, y)].FlowRight + gridThermalErosionCells[getIndex(x + 1, y)].FlowLeft + gridThermalErosionCells[getIndex(x, y - 1)].FlowTop + gridThermalErosionCells[getIndex(x, y + 1)].FlowBottom;
+    float flowOut = gridThermalErosionCell.FlowRight + gridThermalErosionCell.FlowLeft + gridThermalErosionCell.FlowTop + gridThermalErosionCell.FlowBottom;
 
-	float volumeDelta = thermalIn - thermalOut;
+	float volumeDelta = flowIn - flowOut;
 
-	heightMap[id] += timeDelta * volumeDelta;
+	heightMap[id] = clamp(heightMap[id] + volumeDelta * timeDelta, 0.0, 1.0);
+    
+    memoryBarrier();
 }

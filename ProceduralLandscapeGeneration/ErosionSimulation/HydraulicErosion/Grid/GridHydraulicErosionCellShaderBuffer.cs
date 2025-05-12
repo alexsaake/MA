@@ -2,7 +2,7 @@
 
 namespace ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
 
-public struct HydraulicErosionGridPointShaderBuffer
+public struct GridHydraulicErosionCellShaderBuffer
 {
     public float WaterHeight;
     public float SuspendedSediment;

@@ -52,7 +52,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
         myEvaporateHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/4EvaporateComputeShader.glsl");
         myMoveSedimentHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/5MoveSedimentComputeShader.glsl");
 
-        AddGridPointsShaderBuffer();
+        AddGridHydraulicErosionCellShaderBuffer();
         AddHeightMapIndicesShaderBuffer();
 
         myIsDisposed = false;
@@ -63,11 +63,10 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
         myHasRainDropsChangedChanged = true;
     }
 
-    private unsafe void AddGridPointsShaderBuffer()
+    private unsafe void AddGridHydraulicErosionCellShaderBuffer()
     {
         uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        myShaderBuffers.Add(ShaderBufferTypes.GridPoints, (uint)(mapSize * sizeof(HydraulicErosionGridPointShaderBuffer)));
-        Rlgl.MemoryBarrier();
+        myShaderBuffers.Add(ShaderBufferTypes.GridHydraulicErosionCell, (uint)(mapSize * sizeof(GridHydraulicErosionCellShaderBuffer)));
     }
 
     private unsafe void AddHeightMapIndicesShaderBuffer()
@@ -82,8 +81,8 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
 
     public void ResetShaderBuffers()
     {
-        RemoveGridPointsShaderBuffer();
-        AddGridPointsShaderBuffer();
+        RemoveGridHydraulicErosionCellShaderBuffer();
+        AddGridHydraulicErosionCellShaderBuffer();
         ResetHeightMapIndicesShaderBuffers();
     }
 
@@ -180,7 +179,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
         myMoveSedimentHydraulicErosionGridSimulationComputeShaderProgram?.Dispose();
 
         RemoveHeightMapIndicesShaderBuffer();
-        RemoveGridPointsShaderBuffer();
+        RemoveGridHydraulicErosionCellShaderBuffer();
 
         myIsDisposed = true;
     }
@@ -189,8 +188,8 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
         myShaderBuffers.Remove(ShaderBufferTypes.HeightMapIndices);
     }
 
-    private void RemoveGridPointsShaderBuffer()
+    private void RemoveGridHydraulicErosionCellShaderBuffer()
     {
-        myShaderBuffers.Remove(ShaderBufferTypes.GridPoints);
+        myShaderBuffers.Remove(ShaderBufferTypes.GridHydraulicErosionCell);
     }
 }
