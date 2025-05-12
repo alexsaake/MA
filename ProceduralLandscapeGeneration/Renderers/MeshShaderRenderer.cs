@@ -7,6 +7,8 @@ namespace ProceduralLandscapeGeneration.Renderers;
 
 internal class MeshShaderRenderer : IRenderer
 {
+    private const string ShaderDirectory = "Renderers/Shaders/MeshShaders/";
+
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
 
@@ -30,15 +32,15 @@ internal class MeshShaderRenderer : IRenderer
 
     public unsafe void Initialize()
     {
-        myTerrainHeightMapMeshShader = Raylib.LoadMeshShader("Renderers/Shaders/MeshShaders/TerrainHeightMapMeshShader.glsl", "Renderers/Shaders/MeshShaders/TerrainHeightMapMeshFragmentShader.glsl");
-        myWaterHeightMapMeshShader = Raylib.LoadMeshShader("Renderers/Shaders/MeshShaders/Grid/WaterHeightMapMeshShader.glsl", "Renderers/Shaders/MeshShaders/TerrainHeightMapMeshFragmentShader.glsl");
-        myWaterParticleMeshShader = Raylib.LoadMeshShader("Renderers/Shaders/MeshShaders/Particle/WaterParticleMeshShader.glsl", "Renderers/Shaders/MeshShaders/TerrainHeightMapMeshFragmentShader.glsl");
-        mySedimentHeightMapMeshShader = Raylib.LoadMeshShader("Renderers/Shaders/MeshShaders/Grid/SedimentHeightMapMeshShader.glsl", "Renderers/Shaders/MeshShaders/TerrainHeightMapMeshFragmentShader.glsl");
-        mySedimentParticleMeshShader = Raylib.LoadMeshShader("Renderers/Shaders/MeshShaders/Particle/SedimentParticleMeshShader.glsl", "Renderers/Shaders/MeshShaders/TerrainHeightMapMeshFragmentShader.glsl");
-        mySeaLevelQuadMeshShader = Raylib.LoadMeshShader("Renderers/Shaders/MeshShaders/SeaLevelQuadMeshShader.glsl", "Renderers/Shaders/MeshShaders/SeaLevelQuadMeshFragmentShader.glsl");
+        myTerrainHeightMapMeshShader = Raylib.LoadMeshShader($"{ShaderDirectory}TerrainHeightMapMeshShader.glsl", $"{ShaderDirectory}TerrainHeightMapMeshFragmentShader.glsl");
+        myWaterHeightMapMeshShader = Raylib.LoadMeshShader($"{ShaderDirectory}Grid/WaterHeightMapMeshShader.glsl", $"{ShaderDirectory}TerrainHeightMapMeshFragmentShader.glsl");
+        myWaterParticleMeshShader = Raylib.LoadMeshShader($"{ShaderDirectory}Particle/WaterParticleMeshShader.glsl", $"{ShaderDirectory}TerrainHeightMapMeshFragmentShader.glsl");
+        mySedimentHeightMapMeshShader = Raylib.LoadMeshShader($"{ShaderDirectory}Grid/SedimentHeightMapMeshShader.glsl", $"{ShaderDirectory}TerrainHeightMapMeshFragmentShader.glsl");
+        mySedimentParticleMeshShader = Raylib.LoadMeshShader($"{ShaderDirectory}Particle/SedimentParticleMeshShader.glsl", $"{ShaderDirectory}TerrainHeightMapMeshFragmentShader.glsl");
+        mySeaLevelQuadMeshShader = Raylib.LoadMeshShader($"{ShaderDirectory}SeaLevelQuadMeshShader.glsl", $"{ShaderDirectory}SeaLevelQuadMeshFragmentShader.glsl");
 
         Vector3 heightMapCenter = new Vector3(myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 2, 0);
-        Vector3 lightDirection = new Vector3(0, myMapGenerationConfiguration.HeightMapSideLength, -myMapGenerationConfiguration.HeightMapSideLength / 2);
+        Vector3 lightDirection = new Vector3(-myMapGenerationConfiguration.HeightMapSideLength, -myMapGenerationConfiguration.HeightMapSideLength, -myMapGenerationConfiguration.HeightMapSideLength / 2);
         int lightDirectionLocation = Raylib.GetShaderLocation(myTerrainHeightMapMeshShader, "lightDirection");
 
         Raylib.SetShaderValue(myTerrainHeightMapMeshShader, lightDirectionLocation, &lightDirection, ShaderUniformDataType.Vec3);
@@ -75,49 +77,49 @@ internal class MeshShaderRenderer : IRenderer
     public void Draw()
     {
         Raylib.BeginMode3D(myCamera);
-        if (myErosionConfiguration.IsSedimentDisplayed)
-        {
-            switch (myErosionConfiguration.Mode)
+            if (myErosionConfiguration.IsSedimentDisplayed)
             {
-                case ErosionModeTypes.ParticleHydraulic:
-                case ErosionModeTypes.ParticleWind:
-                    Rlgl.EnableShader(mySedimentParticleMeshShader.Id);
-                    Raylib.DrawMeshTasks(0, myMeshletCount);
-                    Rlgl.DisableShader();
-                    break;
-                case ErosionModeTypes.GridHydraulic:
-                    Rlgl.EnableShader(mySedimentHeightMapMeshShader.Id);
-                    Raylib.DrawMeshTasks(0, myMeshletCount);
-                    Rlgl.DisableShader();
-                    break;
+                switch (myErosionConfiguration.Mode)
+                {
+                    case ErosionModeTypes.ParticleHydraulic:
+                    case ErosionModeTypes.ParticleWind:
+                        Rlgl.EnableShader(mySedimentParticleMeshShader.Id);
+                            Raylib.DrawMeshTasks(0, myMeshletCount);
+                        Rlgl.DisableShader();
+                        break;
+                    case ErosionModeTypes.GridHydraulic:
+                        Rlgl.EnableShader(mySedimentHeightMapMeshShader.Id);
+                            Raylib.DrawMeshTasks(0, myMeshletCount);
+                        Rlgl.DisableShader();
+                        break;
+                }
             }
-        }
-        Rlgl.EnableShader(myTerrainHeightMapMeshShader.Id);
-        Raylib.DrawMeshTasks(0, myMeshletCount);
-        Rlgl.DisableShader();
-        if (myErosionConfiguration.IsWaterDisplayed)
-        {
-            switch (myErosionConfiguration.Mode)
-            {
-                case ErosionModeTypes.ParticleHydraulic:
-                case ErosionModeTypes.ParticleWind:
-                    Rlgl.EnableShader(myWaterParticleMeshShader.Id);
-                    Raylib.DrawMeshTasks(0, myMeshletCount);
-                    Rlgl.DisableShader();
-                    break;
-                case ErosionModeTypes.GridHydraulic:
-                    Rlgl.EnableShader(myWaterHeightMapMeshShader.Id);
-                    Raylib.DrawMeshTasks(0, myMeshletCount);
-                    Rlgl.DisableShader();
-                    break;
-            }
-        }
-        if (myErosionConfiguration.IsSeaLevelDisplayed)
-        {
-            Rlgl.EnableShader(mySeaLevelQuadMeshShader.Id);
-            Raylib.DrawMeshTasks(0, 1);
+            Rlgl.EnableShader(myTerrainHeightMapMeshShader.Id);
+                Raylib.DrawMeshTasks(0, myMeshletCount);
             Rlgl.DisableShader();
-        }
+            if (myErosionConfiguration.IsWaterDisplayed)
+            {
+                switch (myErosionConfiguration.Mode)
+                {
+                    case ErosionModeTypes.ParticleHydraulic:
+                    case ErosionModeTypes.ParticleWind:
+                        Rlgl.EnableShader(myWaterParticleMeshShader.Id);
+                            Raylib.DrawMeshTasks(0, myMeshletCount);
+                        Rlgl.DisableShader();
+                        break;
+                    case ErosionModeTypes.GridHydraulic:
+                        Rlgl.EnableShader(myWaterHeightMapMeshShader.Id);
+                            Raylib.DrawMeshTasks(0, myMeshletCount);
+                        Rlgl.DisableShader();
+                        break;
+                }
+            }
+            if (myErosionConfiguration.IsSeaLevelDisplayed)
+            {
+                Rlgl.EnableShader(mySeaLevelQuadMeshShader.Id);
+                    Raylib.DrawMeshTasks(0, 1);
+                Rlgl.DisableShader();
+            }
         Raylib.EndMode3D();
     }
 

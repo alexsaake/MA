@@ -44,7 +44,7 @@ void main()
 {
     vec3 lightColor = vec3(1.0);
 
-    vec3 ambient = 0.01 * lightColor;
+    vec3 ambient = 0.2 * lightColor;
 
     vec3 normal = normalize(fragNormal);
     vec3 lightDirectionNormal = normalize(-lightDirection);
@@ -53,8 +53,8 @@ void main()
 
     vec3 viewDirection = normalize(viewPosition - fragPosition);
     vec3 reflectDir = reflect(-lightDirectionNormal, normal);
-    float spec = pow(max(dot(viewDirection, reflectDir), 0.0), 64);
-    vec3 specular = spec * lightColor;
+    float spec = pow(max(dot(viewDirection, reflectDir), 0.0), 2);
+    vec3 specular = spec * lightColor * 0.2;
 
     float shadow = ShadowCalculation();
 

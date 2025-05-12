@@ -10,6 +10,8 @@ namespace ProceduralLandscapeGeneration;
 
 internal class Application : IApplication
 {
+    private const string WindowTitle = "Procedural Landscape Generation";
+
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
@@ -42,7 +44,7 @@ internal class Application : IApplication
 
     public void Run()
     {
-        Raylib.InitWindow(myConfiguration.ScreenWidth, myConfiguration.ScreenHeight, "Procedural Landscape Generation");
+        Raylib.InitWindow(myConfiguration.ScreenWidth, myConfiguration.ScreenHeight, WindowTitle);
 
         myMapGenerationConfiguration.ResetRequired += OnResetRequired;
         myConfigurationGUI.MapResetRequired += OnResetRequired;
@@ -85,12 +87,12 @@ internal class Application : IApplication
             myRenderer!.Update();
 
             Raylib.BeginDrawing();
-            Raylib.ClearBackground(Color.SkyBlue);
-            myRenderer.Draw();
-            if (myShowUI)
-            {
-                myConfigurationGUI.Draw();
-            }
+                Raylib.ClearBackground(Color.SkyBlue);
+                myRenderer!.Draw();
+                if (myShowUI)
+                {
+                    myConfigurationGUI.Draw();
+                }
             Raylib.EndDrawing();
         }
 

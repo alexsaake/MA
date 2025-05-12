@@ -9,6 +9,8 @@ namespace ProceduralLandscapeGeneration.Renderers;
 
 internal class VertexShaderRenderer : IRenderer
 {
+    private const string ShaderDirectory = "Renderers/Shaders/VertexShaders/";
+
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
@@ -50,11 +52,12 @@ internal class VertexShaderRenderer : IRenderer
     public void Initialize()
     {
         myErosionSimulator.IterationFinished += OnErosionIterationFinished;
+        myMapGenerationConfiguration.HeightMultiplierChanged += OnHeightMultiplierChanged;
 
         LoadShaders();
 
         Vector3 heightMapCenter = new Vector3(myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 2, 0);
-        Vector3 lightDirection = new Vector3(0, myMapGenerationConfiguration.HeightMapSideLength, -myMapGenerationConfiguration.HeightMapSideLength / 2);
+        Vector3 lightDirection = new Vector3(-myMapGenerationConfiguration.HeightMapSideLength, -myMapGenerationConfiguration.HeightMapSideLength, 0);
 
         SetHeightMapShaderValues(heightMapCenter, lightDirection);
         SetShadowMapShaderValues(heightMapCenter, lightDirection);
@@ -71,13 +74,18 @@ internal class VertexShaderRenderer : IRenderer
         myIsUpdateAvailable = true;
     }
 
+    private void OnHeightMultiplierChanged(object? sender, EventArgs e)
+    {
+        myIsUpdateAvailable = true;
+    }
+
     private void LoadShaders()
     {
-        myTerrainHeightMapShader = Raylib.LoadShader("Renderers/Shaders/VertexShaders/TerrainHeightMapVertexShader.glsl", "Renderers/Shaders/VertexShaders/TerrainHeightMapFragmentShader.glsl");
-        myShadowMapShader = Raylib.LoadShader("Renderers/Shaders/VertexShaders/ShadowMapVertexShader.glsl", "Renderers/Shaders/VertexShaders/ShadowMapFragmentShader.glsl");
-        myWaterHeightMapShader = Raylib.LoadShader("Renderers/Shaders/VertexShaders/WaterHeightMapVertexShader.glsl", "Renderers/Shaders/VertexShaders/SeaLevelQuadFragmentShader.glsl");
-        mySedimentHeightMapShader = Raylib.LoadShader("Renderers/Shaders/VertexShaders/SedimentHeightMapVertexShader.glsl", "Renderers/Shaders/VertexShaders/SeaLevelQuadFragmentShader.glsl");
-        mySeaLevelQuadShader = Raylib.LoadShader("Renderers/Shaders/VertexShaders/SeaLevelQuadVertexShader.glsl", "Renderers/Shaders/VertexShaders/SeaLevelQuadFragmentShader.glsl");
+        myTerrainHeightMapShader = Raylib.LoadShader($"{ShaderDirectory}TerrainHeightMapVertexShader.glsl", $"{ShaderDirectory}TerrainHeightMapFragmentShader.glsl");
+        myShadowMapShader = Raylib.LoadShader($"{ShaderDirectory}ShadowMapVertexShader.glsl", $"{ShaderDirectory}ShadowMapFragmentShader.glsl");
+        myWaterHeightMapShader = Raylib.LoadShader($"{ShaderDirectory}WaterHeightMapVertexShader.glsl", $"{ShaderDirectory}SeaLevelQuadFragmentShader.glsl");
+        mySedimentHeightMapShader = Raylib.LoadShader($"{ShaderDirectory}SedimentHeightMapVertexShader.glsl", $"{ShaderDirectory}SeaLevelQuadFragmentShader.glsl");
+        mySeaLevelQuadShader = Raylib.LoadShader($"{ShaderDirectory}SeaLevelQuadVertexShader.glsl", $"{ShaderDirectory}SeaLevelQuadFragmentShader.glsl");
     }
 
     private unsafe void SetHeightMapShaderValues(Vector3 heightMapCenter, Vector3 lightDirection)
@@ -161,22 +169,23 @@ internal class VertexShaderRenderer : IRenderer
     private unsafe void UpdateShadowMap()
     {
         Raylib.BeginTextureMode(myShadowMap);
-        Raylib.ClearBackground(Color.White);
-        Raylib.BeginMode3D(myLightCamera);
-        Matrix4x4 lightProjection = Rlgl.GetMatrixProjection();
-        Matrix4x4 lightView = Rlgl.GetMatrixModelview();
-        DrawTerrainHeightMap(myShadowMapShader);
-        Raylib.EndMode3D();
+            Raylib.ClearBackground(Color.White);
+            Raylib.BeginMode3D(myLightCamera);
+                Matrix4x4 lightProjection = Rlgl.GetMatrixProjection();
+                Matrix4x4 lightView = Rlgl.GetMatrixModelview();
+                DrawTerrainHeightMap(myShadowMapShader);
+            Raylib.EndMode3D();
         Raylib.EndTextureMode();
         Matrix4x4 lightSpaceMatrix = Matrix4x4.Multiply(lightProjection, lightView);
         Raylib.SetShaderValueMatrix(myTerrainHeightMapShader, myLightSpaceMatrixLocation, lightSpaceMatrix);
 
         Rlgl.EnableShader(myShadowMapShader.Id);
-        int slot = 10;
-        Rlgl.ActiveTextureSlot(slot);
-        Rlgl.EnableTexture(myShadowMap.Depth.Id);
-        Raylib.SetShaderValueTexture(myTerrainHeightMapShader, myShadowMapLocation, myShadowMap.Depth);
-        Rlgl.SetUniform(myShadowMapLocation, &slot, (int)ShaderUniformDataType.Int, 1);
+            int slot = 10;
+            Rlgl.ActiveTextureSlot(slot);
+            Rlgl.EnableTexture(myShadowMap.Depth.Id);
+            Raylib.SetShaderValueTexture(myTerrainHeightMapShader, myShadowMapLocation, myShadowMap.Depth);
+            Rlgl.SetUniform(myShadowMapLocation, &slot, (int)ShaderUniformDataType.Int, 1);
+        Rlgl.DisableShader();
     }
 
     private unsafe void UpdateCamera()
@@ -199,7 +208,7 @@ internal class VertexShaderRenderer : IRenderer
             Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
         }
         if (myErosionConfiguration.IsSeaLevelDisplayed)
-        {
+    {
             Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
         }
         Raylib.EndMode3D();
@@ -219,6 +228,7 @@ internal class VertexShaderRenderer : IRenderer
         }
 
         myErosionSimulator.IterationFinished -= OnErosionIterationFinished;
+        myMapGenerationConfiguration.HeightMultiplierChanged -= OnHeightMultiplierChanged;
 
         Raylib.UnloadRenderTexture(myShadowMap);
         Raylib.UnloadModel(myTerrainHeightMap);

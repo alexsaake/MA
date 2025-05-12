@@ -174,6 +174,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
             }
             myHeightMultiplier = value;
             UpdateShaderBuffer();
+            HeightMultiplierChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -208,6 +209,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
     }
 
     public event EventHandler? ResetRequired;
+    public event EventHandler? HeightMultiplierChanged;
 
     public MapGenerationConfiguration(IShaderBuffers shaderBuffers)
     {

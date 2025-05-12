@@ -24,6 +24,7 @@ internal interface IMapGenerationConfiguration : IDisposable
     bool IsColorEnabled { get; set; }
 
     event EventHandler? ResetRequired;
+    event EventHandler? HeightMultiplierChanged;
 
     void Initialize();
     uint GetIndex(uint x, uint y);
