@@ -1,6 +1,6 @@
 ﻿namespace ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion;
 
-internal interface IThermalErosion : IDisposable
+internal interface IVertexNormalThermalErosion : IDisposable
 {
     void Initialize();
     void Simulate();

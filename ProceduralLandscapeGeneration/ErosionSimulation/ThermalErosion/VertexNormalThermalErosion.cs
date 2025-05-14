@@ -4,7 +4,7 @@ using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion;
 
-internal class ThermalErosion : IThermalErosion
+internal class VertexNormalThermalErosion : IVertexNormalThermalErosion
 {
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
@@ -14,7 +14,7 @@ internal class ThermalErosion : IThermalErosion
 
     private bool myIsDisposed;
 
-    public ThermalErosion(IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory)
+    public VertexNormalThermalErosion(IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
@@ -23,7 +23,7 @@ internal class ThermalErosion : IThermalErosion
 
     public unsafe void Initialize()
     {
-        myThermalErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/ThermalErosion/Shaders/ThermalErosionSimulationComputeShader.glsl");
+        myThermalErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/ThermalErosion/Shaders/VertexNormalThermalErosionSimulationComputeShader.glsl");
 
         myIsDisposed = false;
     }
@@ -32,12 +32,13 @@ internal class ThermalErosion : IThermalErosion
     {
         uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
 
-        Rlgl.EnableShader(myThermalErosionSimulationComputeShaderProgram!.Id);
         for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
         {
+            Rlgl.EnableShader(myThermalErosionSimulationComputeShaderProgram!.Id);
             Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(mapSize / 64f), 1, 1);
+            Rlgl.DisableShader();
+            Rlgl.MemoryBarrier();
         }
-        Rlgl.DisableShader();
     }
 
     public void Dispose()

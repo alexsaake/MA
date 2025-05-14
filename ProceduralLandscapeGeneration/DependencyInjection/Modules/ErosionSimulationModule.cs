@@ -17,7 +17,7 @@ internal class ErosionSimulationModule : Module
         containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>().SingleInstance();
         containerBuilder.RegisterType<ParticleHydraulicErosion>().As<IParticleHydraulicErosion>();
         containerBuilder.RegisterType<GridHydraulicErosion>().As<IGridHydraulicErosion>();
-        containerBuilder.RegisterType<ThermalErosion>().As<IThermalErosion>();
+        containerBuilder.RegisterType<VertexNormalThermalErosion>().As<IVertexNormalThermalErosion>();
         containerBuilder.RegisterType<GridThermalErosion>().As<IGridThermalErosion>();
         containerBuilder.RegisterType<ParticleWindErosion>().As<IParticleWindErosion>();
     }

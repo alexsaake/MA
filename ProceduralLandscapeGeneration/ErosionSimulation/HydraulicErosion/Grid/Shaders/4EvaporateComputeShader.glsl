@@ -27,13 +27,23 @@ layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 struct GridErosionConfiguration
 {
     float WaterIncrease;
-    float TimeDelta;
     float Gravity;
     float Dampening;
     float MaximalErosionDepth;
     float SuspensionRate;
     float DepositionRate;
     float EvaporationRate;
+};
+
+struct ErosionConfiguration
+{
+    float SeaLevel;
+    float TimeDelta;
+};
+
+layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
+{
+    ErosionConfiguration erosionConfiguration;
 };
 
 layout(std430, binding = 9) buffer gridErosionConfigurationShaderBuffer
@@ -141,7 +151,7 @@ void main()
     
     GridHydraulicErosionCell gridHydraulicErosionCell  = gridHydraulicErosionCells[id];
 
-    vec2 previousPosition = vec2(x, y) - gridHydraulicErosionCell.Velocity * gridErosionConfiguration.TimeDelta;
+    vec2 previousPosition = vec2(x, y) - gridHydraulicErosionCell.Velocity * erosionConfiguration.TimeDelta;
     if(previousPosition.x < 0 || previousPosition.x >= myHeightMapSideLength
         || previousPosition.y < 0 || previousPosition.y >= myHeightMapSideLength)
         {
@@ -152,7 +162,7 @@ void main()
         gridHydraulicErosionCell.TempSediment = gridHydraulicErosionCells[getIndexVector(previousPosition)].SuspendedSediment;
     }
 
-	gridHydraulicErosionCell.WaterHeight = max(0.0, gridHydraulicErosionCell.WaterHeight * (1.0 - gridErosionConfiguration.EvaporationRate * gridErosionConfiguration.TimeDelta));
+	gridHydraulicErosionCell.WaterHeight = max(0.0, gridHydraulicErosionCell.WaterHeight * (1.0 - gridErosionConfiguration.EvaporationRate * erosionConfiguration.TimeDelta));
 
     gridHydraulicErosionCells[id] = gridHydraulicErosionCell;
     

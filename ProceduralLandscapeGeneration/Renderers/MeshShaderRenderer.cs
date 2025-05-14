@@ -1,5 +1,5 @@
 ﻿using ProceduralLandscapeGeneration.Configurations;
-using ProceduralLandscapeGeneration.Configurations.Types;
+using ProceduralLandscapeGeneration.Configurations.Types.ErosionMode;
 using Raylib_cs;
 using System.Numerics;
 
@@ -79,19 +79,21 @@ internal class MeshShaderRenderer : IRenderer
         Raylib.BeginMode3D(myCamera);
             if (myErosionConfiguration.IsSedimentDisplayed)
             {
-                switch (myErosionConfiguration.Mode)
+                if (myErosionConfiguration.IsWaterDisplayed)
                 {
-                    case ErosionModeTypes.ParticleHydraulic:
-                    case ErosionModeTypes.ParticleWind:
+                    if (myErosionConfiguration.HydraulicErosionMode == HydraulicErosionModeTypes.ParticleHydraulic
+                    || myErosionConfiguration.WindErosionMode == WindErosionModeTypes.ParticleWind)
+                    {
                         Rlgl.EnableShader(mySedimentParticleMeshShader.Id);
                             Raylib.DrawMeshTasks(0, myMeshletCount);
                         Rlgl.DisableShader();
-                        break;
-                    case ErosionModeTypes.GridHydraulic:
+                    }
+                    else if (myErosionConfiguration.HydraulicErosionMode == HydraulicErosionModeTypes.GridHydraulic)
+                    {
                         Rlgl.EnableShader(mySedimentHeightMapMeshShader.Id);
                             Raylib.DrawMeshTasks(0, myMeshletCount);
                         Rlgl.DisableShader();
-                        break;
+                    }
                 }
             }
             Rlgl.EnableShader(myTerrainHeightMapMeshShader.Id);
@@ -99,19 +101,20 @@ internal class MeshShaderRenderer : IRenderer
             Rlgl.DisableShader();
             if (myErosionConfiguration.IsWaterDisplayed)
             {
-                switch (myErosionConfiguration.Mode)
+                if (myErosionConfiguration.HydraulicErosionMode == HydraulicErosionModeTypes.ParticleHydraulic
+                || myErosionConfiguration.WindErosionMode == WindErosionModeTypes.ParticleWind)
                 {
-                    case ErosionModeTypes.ParticleHydraulic:
-                    case ErosionModeTypes.ParticleWind:
-                        Rlgl.EnableShader(myWaterParticleMeshShader.Id);
-                            Raylib.DrawMeshTasks(0, myMeshletCount);
-                        Rlgl.DisableShader();
-                        break;
-                    case ErosionModeTypes.GridHydraulic:
-                        Rlgl.EnableShader(myWaterHeightMapMeshShader.Id);
-                            Raylib.DrawMeshTasks(0, myMeshletCount);
-                        Rlgl.DisableShader();
-                        break;
+
+                    Rlgl.EnableShader(myWaterParticleMeshShader.Id);
+                        Raylib.DrawMeshTasks(0, myMeshletCount);
+                    Rlgl.DisableShader();
+                }
+                else if (myErosionConfiguration.HydraulicErosionMode == HydraulicErosionModeTypes.GridHydraulic)
+                {
+
+                    Rlgl.EnableShader(myWaterHeightMapMeshShader.Id);
+                        Raylib.DrawMeshTasks(0, myMeshletCount);
+                    Rlgl.DisableShader();
                 }
             }
             if (myErosionConfiguration.IsSeaLevelDisplayed)

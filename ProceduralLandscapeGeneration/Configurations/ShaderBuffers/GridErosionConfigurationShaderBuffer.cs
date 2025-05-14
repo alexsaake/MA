@@ -3,7 +3,6 @@
 public struct GridErosionConfigurationShaderBuffer
 {
     public float WaterIncrease;
-    public float TimeDelta;
     public float Gravity;
     public float Dampening;
     public float MaximalErosionDepth;

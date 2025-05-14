@@ -38,13 +38,23 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 struct GridErosionConfiguration
 {
     float WaterIncrease;
-    float TimeDelta;
     float Gravity;
     float Dampening;
     float MaximalErosionDepth;
     float SuspensionRate;
     float DepositionRate;
     float EvaporationRate;
+};
+
+struct ErosionConfiguration
+{
+    float SeaLevel;
+    float TimeDelta;
+};
+
+layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
+{
+    ErosionConfiguration erosionConfiguration;
 };
 
 layout(std430, binding = 9) buffer gridErosionConfigurationShaderBuffer
@@ -138,13 +148,13 @@ void main()
 
 	if (sedimentTransportCapacity > gridHydraulicErosionCell.SuspendedSediment)
 	{
-		float soilSuspended = gridErosionConfiguration.TimeDelta * gridErosionConfiguration.SuspensionRate * (sedimentTransportCapacity - gridHydraulicErosionCell.SuspendedSediment);
+		float soilSuspended = erosionConfiguration.TimeDelta * gridErosionConfiguration.SuspensionRate * (sedimentTransportCapacity - gridHydraulicErosionCell.SuspendedSediment);
 		heightMap[id] -= soilSuspended;
 		gridHydraulicErosionCell.SuspendedSediment += soilSuspended;
 	}
 	else if (sedimentTransportCapacity < gridHydraulicErosionCell.SuspendedSediment)
 	{
-		float soilDeposited = gridErosionConfiguration.TimeDelta * gridErosionConfiguration.DepositionRate * (gridHydraulicErosionCell.SuspendedSediment - sedimentTransportCapacity);
+		float soilDeposited = erosionConfiguration.TimeDelta * gridErosionConfiguration.DepositionRate * (gridHydraulicErosionCell.SuspendedSediment - sedimentTransportCapacity);
 		heightMap[id] += soilDeposited;
 		gridHydraulicErosionCell.SuspendedSediment -= soilDeposited;
 	}

@@ -7,6 +7,40 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
+struct MapGenerationConfiguration
+{
+    float HeightMultiplier;
+    bool IsColorEnabled;
+};
+
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+{
+    MapGenerationConfiguration mapGenerationConfiguration;
+};
+
+struct ErosionConfiguration
+{
+    float SeaLevel;
+    float TimeDelta;
+};
+
+layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
+{
+    ErosionConfiguration erosionConfiguration;
+};
+
+struct ThermalErosionConfiguration
+{
+    float TangensTalusAngle;
+    float ErosionRate;
+    float Dampening;
+};
+
+layout(std430, binding = 10) readonly restrict buffer thermalErosionConfigurationShaderBuffer
+{
+    ThermalErosionConfiguration thermalErosionConfiguration;
+};
+
 struct GridThermalErosionCell
 {
     float FlowLeft;
@@ -28,17 +62,11 @@ uint getIndex(uint x, uint y)
 }
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
-//https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
 
 void main()
-{
-	float dampening = 0.25;
-	float thermalErosionRate = 0.15;
-	float talusAngleTangentCoeff = 0.15;
-	
+{	
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length();
-    if(id > heightMapLength)
+    if(id > heightMap.length())
     {
         return;
     }
@@ -49,53 +77,51 @@ void main()
     
     GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[id];
 
-	float heightDifferenceL = heightMap[id] - heightMap[getIndex(x - 1, y)];
-	float heightDifferenceR = heightMap[id] - heightMap[getIndex(x + 1, y)];
-	float heightDifferenceT = heightMap[id] - heightMap[getIndex(x, y + 1)];
-	float heightDifferenceB = heightMap[id] - heightMap[getIndex(x, y - 1)];
-	float maxHeightDifference = max(max(heightDifferenceL, heightDifferenceR), max(heightDifferenceB, heightDifferenceT));
+	float heightDifferenceLeft = max(heightMap[id] - heightMap[getIndex(x - 1, y)], 0.0);
+	float heightDifferenceRight = max(heightMap[id] - heightMap[getIndex(x + 1, y)], 0.0);
+	float heightDifferenceTop = max(heightMap[id] - heightMap[getIndex(x, y + 1)], 0.0);
+	float heightDifferenceBottom = max(heightMap[id] - heightMap[getIndex(x, y - 1)], 0.0);
+	float maxHeightDifference = max(max(heightDifferenceLeft, heightDifferenceRight), max(heightDifferenceBottom, heightDifferenceTop));
 
-	float volumeToBeMoved = maxHeightDifference * 0.5 * thermalErosionRate;
+	float volumeToBeMoved = maxHeightDifference * thermalErosionConfiguration.ErosionRate * (1.0 - thermalErosionConfiguration.Dampening);
 	
-	float tanAngleL = heightDifferenceL;
-	float tanAngleR = heightDifferenceR;
-	float tanAngleT = heightDifferenceT;
-	float tanAngleB = heightDifferenceB;
-	
-	float treshold = talusAngleTangentCoeff;
+	float tangensAngleLeft = heightDifferenceLeft * mapGenerationConfiguration.HeightMultiplier / 1.0;
+	float tangensAngleRight = heightDifferenceRight * mapGenerationConfiguration.HeightMultiplier / 1.0;
+	float tangensAngleTop = heightDifferenceTop * mapGenerationConfiguration.HeightMultiplier / 1.0;
+	float tangensAngleBottom = heightDifferenceBottom * mapGenerationConfiguration.HeightMultiplier / 1.0;
 	
 	float flowLeft = 0;
-	if (tanAngleL > treshold)
+	if (tangensAngleLeft > thermalErosionConfiguration.TangensTalusAngle)
 	{
-		flowLeft = heightDifferenceL;
+		flowLeft = heightDifferenceLeft;
 	}
 
 	float flowRight = 0;
-	if (tanAngleR > treshold)
+	if (tangensAngleRight > thermalErosionConfiguration.TangensTalusAngle)
 	{
-		flowRight = heightDifferenceR;
+		flowRight = heightDifferenceRight;
 	}
 
 	float flowTop = 0;
-	if (tanAngleT > treshold)
+	if (tangensAngleTop > thermalErosionConfiguration.TangensTalusAngle)
 	{
-		flowTop = heightDifferenceT;
+		flowTop = heightDifferenceTop;
 	}
 
 	float flowBottom = 0;
-	if (tanAngleB > treshold)
+	if (tangensAngleBottom > thermalErosionConfiguration.TangensTalusAngle)
 	{
-		flowBottom = heightDifferenceB;
+		flowBottom = heightDifferenceBottom;
 	}
 
 	// Output flux
-	float sumProportions = heightDifferenceL + heightDifferenceR + heightDifferenceB + heightDifferenceT;
+	float totalHeightDifference = heightDifferenceLeft + heightDifferenceRight + heightDifferenceBottom + heightDifferenceTop;
 
-	if (sumProportions > 0)
+	if (totalHeightDifference > 0)
 	{
 		if(x > 0)
 		{
-			gridThermalErosionCell.FlowLeft = volumeToBeMoved * flowLeft / sumProportions;
+			gridThermalErosionCell.FlowLeft = max(volumeToBeMoved * flowLeft / totalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
@@ -104,7 +130,7 @@ void main()
 		
 		if(x < myHeightMapSideLength - 1)
 		{
-			gridThermalErosionCell.FlowRight = volumeToBeMoved * flowRight / sumProportions;
+			gridThermalErosionCell.FlowRight = max(volumeToBeMoved * flowRight / totalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
@@ -113,7 +139,7 @@ void main()
 
 		if(y > 0)
 		{
-			gridThermalErosionCell.FlowBottom = volumeToBeMoved * flowBottom / sumProportions;
+			gridThermalErosionCell.FlowBottom = max(volumeToBeMoved * flowBottom / totalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
@@ -122,15 +148,15 @@ void main()
 		
 		if(y < myHeightMapSideLength - 1)
 		{
-			gridThermalErosionCell.FlowTop = volumeToBeMoved * flowTop / sumProportions;
+			gridThermalErosionCell.FlowTop = max(volumeToBeMoved * flowTop / totalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
 			gridThermalErosionCell.FlowTop = 0;
 		}
-		
-		gridThermalErosionCells[id] = gridThermalErosionCell;
-		
-		memoryBarrier();
 	}
+
+	gridThermalErosionCells[id] = gridThermalErosionCell;
+	
+	memoryBarrier();
 }

@@ -38,13 +38,23 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 struct GridErosionConfiguration
 {
     float WaterIncrease;
-    float TimeDelta;
     float Gravity;
     float Dampening;
     float MaximalErosionDepth;
     float SuspensionRate;
     float DepositionRate;
     float EvaporationRate;
+};
+
+struct ErosionConfiguration
+{
+    float SeaLevel;
+    float TimeDelta;
+};
+
+layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
+{
+    ErosionConfiguration erosionConfiguration;
 };
 
 layout(std430, binding = 9) buffer gridErosionConfigurationShaderBuffer
@@ -82,9 +92,9 @@ void main()
     float flowIn = gridHydraulicErosionCells[getIndex(x - 1, y)].FlowRight + gridHydraulicErosionCells[getIndex(x + 1, y)].FlowLeft + gridHydraulicErosionCells[getIndex(x, y - 1)].FlowTop + gridHydraulicErosionCells[getIndex(x, y + 1)].FlowBottom;
     float flowOut = gridHydraulicErosionCell.FlowRight + gridHydraulicErosionCell.FlowLeft + gridHydraulicErosionCell.FlowTop + gridHydraulicErosionCell.FlowBottom;
 
-	float volumeDelta = gridErosionConfiguration.TimeDelta * (flowIn - flowOut);
+	float volumeDelta = (flowIn - flowOut) * erosionConfiguration.TimeDelta;
 
-	gridHydraulicErosionCell.WaterHeight = max(0.0, gridHydraulicErosionCell.WaterHeight + volumeDelta);
+	gridHydraulicErosionCell.WaterHeight = max(gridHydraulicErosionCell.WaterHeight + volumeDelta, 0.0);
 
     if(gridHydraulicErosionCell.WaterHeight > 0.0)
     {

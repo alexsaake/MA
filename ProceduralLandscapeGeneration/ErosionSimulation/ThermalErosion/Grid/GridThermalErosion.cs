@@ -18,7 +18,9 @@ internal class GridThermalErosion : IGridThermalErosion
 
     private bool myIsDisposed;
 
-    public GridThermalErosion(IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
+    private uint myMapSize => myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
+
+    public GridThermalErosion(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
@@ -50,20 +52,27 @@ internal class GridThermalErosion : IGridThermalErosion
 
     public void Simulate()
     {
-        uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-
         for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
         {
-            Rlgl.EnableShader(myFlowComputeShaderProgram!.Id);
-            Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(mapSize / 64f), 1, 1);
-            Rlgl.DisableShader();
-            Rlgl.MemoryBarrier();
-
-            Rlgl.EnableShader(myDepositeComputeShaderProgram!.Id);
-            Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(mapSize / 64f), 1, 1);
-            Rlgl.DisableShader();
-            Rlgl.MemoryBarrier();
+            Flow();
+            Deposite();
         }
+    }
+
+    internal unsafe void Flow()
+    {
+        Rlgl.EnableShader(myFlowComputeShaderProgram!.Id);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapSize / 64.0f), 1, 1);
+        Rlgl.DisableShader();
+        Rlgl.MemoryBarrier();
+    }
+
+    internal unsafe void Deposite()
+    {
+        Rlgl.EnableShader(myDepositeComputeShaderProgram!.Id);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapSize / 64.0f), 1, 1);
+        Rlgl.DisableShader();
+        Rlgl.MemoryBarrier();
     }
 
     public void Dispose()

@@ -35,6 +35,7 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 struct ErosionConfiguration
 {
     float SeaLevel;
+    float TimeDelta;
 };
 
 layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
@@ -59,9 +60,9 @@ layout(std430, binding = 7) readonly restrict buffer particleHydraulicErosionCon
     ParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration;
 };
 
-layout(std430, binding = 11) readonly restrict buffer heightMapIndicesShaderBuffer
+layout(std430, binding = 11) readonly restrict buffer hydraulicErosionHeightMapIndicesShaderBuffer
 {
-    uint[] heightMapIndices;
+    uint[] hydraulicErosionHeightMapIndices;
 };
 
 uint myHeightMapSideLength;
@@ -211,7 +212,7 @@ void main()
 
     if(myParticleHydraulicErosion.Volume == 0 && particleHydraulicErosionConfiguration.AreParticlesAdded)
     {
-        uint index = heightMapIndices[id];
+        uint index = hydraulicErosionHeightMapIndices[id];
         uint x = index % myHeightMapSideLength;
         uint y = index / myHeightMapSideLength;
         myParticleHydraulicErosion.Age = 0;

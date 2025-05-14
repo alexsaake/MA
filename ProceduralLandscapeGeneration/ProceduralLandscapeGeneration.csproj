@@ -54,7 +54,7 @@
 	  <None Update="ErosionSimulation\ThermalErosion\Shaders\Cascade.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\ThermalErosion\Shaders\ThermalErosionSimulationComputeShader.glsl">
+	  <None Update="ErosionSimulation\ThermalErosion\Shaders\VertexNormalThermalErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Raylib-CsLo.pdb">

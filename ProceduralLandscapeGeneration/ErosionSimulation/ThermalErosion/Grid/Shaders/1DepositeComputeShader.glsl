@@ -7,6 +7,17 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
+struct ErosionConfiguration
+{
+    float SeaLevel;
+    float TimeDelta;
+};
+
+layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
+{
+    ErosionConfiguration erosionConfiguration;
+};
+
 struct GridThermalErosionCell
 {
     float FlowLeft;
@@ -28,16 +39,11 @@ uint getIndex(uint x, uint y)
 }
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
-//https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
 
 void main()
 {    
-    float timeDelta = 1.0;
-    float thermalErosionTimeScale = 1.0;
-    
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length();
-    if(id > heightMapLength)
+    if(id > heightMap.length())
     {
         return;
     }
@@ -51,9 +57,9 @@ void main()
     float flowIn = gridThermalErosionCells[getIndex(x - 1, y)].FlowRight + gridThermalErosionCells[getIndex(x + 1, y)].FlowLeft + gridThermalErosionCells[getIndex(x, y - 1)].FlowTop + gridThermalErosionCells[getIndex(x, y + 1)].FlowBottom;
     float flowOut = gridThermalErosionCell.FlowRight + gridThermalErosionCell.FlowLeft + gridThermalErosionCell.FlowTop + gridThermalErosionCell.FlowBottom;
 
-	float volumeDelta = flowIn - flowOut;
+	float volumeDelta = (flowIn - flowOut) * erosionConfiguration.TimeDelta;
 
-	heightMap[id] = clamp(heightMap[id] + volumeDelta * timeDelta, 0.0, 1.0);
+	heightMap[id] = max(heightMap[id] + volumeDelta, 0.0);
     
     memoryBarrier();
 }

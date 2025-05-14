@@ -41,21 +41,6 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         }
     }
 
-    private float myTimeDelta;
-    public float TimeDelta
-    {
-        get => myTimeDelta;
-        set
-        {
-            if (myTimeDelta == value)
-            {
-                return;
-            }
-            myTimeDelta = value;
-            UpdateShaderBuffer();
-        }
-    }
-
     private float myGravity;
     public float Gravity
     {
@@ -160,7 +145,6 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         myDepositionRate = 0.05f;
         myMaximalErosionDepth = 0.005f;
         myGravity = 9.81f;
-        myTimeDelta = 1;
         myDampening = 0.25f;
     }
 
@@ -180,7 +164,6 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         GridErosionConfigurationShaderBuffer gridErosionConfigurationShaderBuffer = new GridErosionConfigurationShaderBuffer()
         {
             WaterIncrease = WaterIncrease,
-            TimeDelta = TimeDelta,
             Gravity = Gravity,
             Dampening = Dampening,
             MaximalErosionDepth = MaximalErosionDepth,

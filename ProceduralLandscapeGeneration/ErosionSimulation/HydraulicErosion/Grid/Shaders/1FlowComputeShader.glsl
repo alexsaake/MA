@@ -24,10 +24,20 @@ layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
     GridHydraulicErosionCell[] gridHydraulicErosionCells;
 };
 
+struct ErosionConfiguration
+{
+    float SeaLevel;
+    float TimeDelta;
+};
+
+layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
+{
+    ErosionConfiguration erosionConfiguration;
+};
+
 struct GridErosionConfiguration
 {
     float WaterIncrease;
-    float TimeDelta;
     float Gravity;
     float Dampening;
     float MaximalErosionDepth;
@@ -56,7 +66,7 @@ uint getIndex(uint x, uint y)
 //https://github.com/patiltanma/15618-FinalProject/blob/master/Renderer/Renderer/erosion_kernel.cu
 
 void main()
-{    
+{
     uint id = gl_GlobalInvocationID.x;
     uint heightMapLength = heightMap.length();
     if(id > heightMapLength)
@@ -75,7 +85,7 @@ void main()
     if(x > 0)
     {
         float totalHeightLeft = heightMap[getIndex(x - 1, y)] + gridHydraulicErosionCells[getIndex(x - 1, y)].WaterHeight;
-        gridHydraulicErosionCell.FlowLeft = max(0.0, gridHydraulicErosionCell.FlowLeft + (totalHeight - totalHeightLeft) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta);
+        gridHydraulicErosionCell.FlowLeft = max(gridHydraulicErosionCell.FlowLeft + (totalHeight - totalHeightLeft) * gridErosionConfiguration.Gravity * erosionConfiguration.TimeDelta, 0.0);
     }
     else
     {
@@ -85,7 +95,7 @@ void main()
     if(x < myHeightMapSideLength - 1)
     {
         float totalHeightRight = heightMap[getIndex(x + 1, y)] + gridHydraulicErosionCells[getIndex(x + 1, y)].WaterHeight;
-        gridHydraulicErosionCell.FlowRight = max(0.0, gridHydraulicErosionCell.FlowRight + (totalHeight - totalHeightRight) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta);
+        gridHydraulicErosionCell.FlowRight = max(gridHydraulicErosionCell.FlowRight + (totalHeight - totalHeightRight) * gridErosionConfiguration.Gravity * erosionConfiguration.TimeDelta, 0.0);
     }
     else
     {
@@ -95,7 +105,7 @@ void main()
     if(y > 0)
     {
         float totalHeightBottom = heightMap[getIndex(x, y - 1)] + gridHydraulicErosionCells[getIndex(x, y - 1)].WaterHeight;
-        gridHydraulicErosionCell.FlowBottom = max(0.0, gridHydraulicErosionCell.FlowBottom + (totalHeight - totalHeightBottom) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta);
+        gridHydraulicErosionCell.FlowBottom = max(gridHydraulicErosionCell.FlowBottom + (totalHeight - totalHeightBottom) * gridErosionConfiguration.Gravity * erosionConfiguration.TimeDelta, 0.0);
     }
     else
     {
@@ -105,7 +115,7 @@ void main()
     if(y < myHeightMapSideLength - 1)
     {
         float totalHeightTop = heightMap[getIndex(x, y + 1)] + gridHydraulicErosionCells[getIndex(x, y + 1)].WaterHeight;
-        gridHydraulicErosionCell.FlowTop = max(0.0, gridHydraulicErosionCell.FlowTop + (totalHeight - totalHeightTop) * gridErosionConfiguration.Gravity * gridErosionConfiguration.TimeDelta);
+        gridHydraulicErosionCell.FlowTop = max(gridHydraulicErosionCell.FlowTop + (totalHeight - totalHeightTop) * gridErosionConfiguration.Gravity * erosionConfiguration.TimeDelta, 0.0);
     }
     else
     {
@@ -113,7 +123,7 @@ void main()
     }
 
     float totalOutflow = gridHydraulicErosionCell.FlowLeft + gridHydraulicErosionCell.FlowRight + gridHydraulicErosionCell.FlowBottom + gridHydraulicErosionCell.FlowTop;
-    float scale = min(1.0, gridHydraulicErosionCell.WaterHeight / (totalOutflow * gridErosionConfiguration.TimeDelta) * (1.0 - gridErosionConfiguration.Dampening));
+    float scale = min(gridHydraulicErosionCell.WaterHeight / totalOutflow * (1.0 - gridErosionConfiguration.Dampening), 1.0);
         
     gridHydraulicErosionCell.FlowLeft *= scale;
     gridHydraulicErosionCell.FlowRight *= scale;

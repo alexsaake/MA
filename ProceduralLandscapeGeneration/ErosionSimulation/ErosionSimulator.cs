@@ -1,5 +1,5 @@
 ﻿using ProceduralLandscapeGeneration.Configurations;
-using ProceduralLandscapeGeneration.Configurations.Types;
+using ProceduralLandscapeGeneration.Configurations.Types.ErosionMode;
 using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
 using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Particles;
 using ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion;
@@ -13,7 +13,7 @@ internal class ErosionSimulator : IErosionSimulator
     private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IParticleHydraulicErosion myParticleHydraulicErosion;
     private readonly IGridHydraulicErosion myGridHydraulicErosion;
-    private readonly IThermalErosion myThermalErosion;
+    private readonly IVertexNormalThermalErosion myVertexNormalThermalErosion;
     private readonly IGridThermalErosion myGridThermalErosion;
     private readonly IParticleWindErosion myParticleWindErosion;
 
@@ -21,12 +21,12 @@ internal class ErosionSimulator : IErosionSimulator
 
     public event EventHandler? IterationFinished;
 
-    public ErosionSimulator(IErosionConfiguration erosionConfiguration, IParticleHydraulicErosion particleHydraulicErosion, IGridHydraulicErosion gridHydraulicErosion, IThermalErosion thermalErosion, IGridThermalErosion  gridThermalErosion, IParticleWindErosion particleWindErosion)
+    public ErosionSimulator(IErosionConfiguration erosionConfiguration, IParticleHydraulicErosion particleHydraulicErosion, IGridHydraulicErosion gridHydraulicErosion, IVertexNormalThermalErosion vertexNormalThermalErosion, IGridThermalErosion  gridThermalErosion, IParticleWindErosion particleWindErosion)
     {
         myErosionConfiguration = erosionConfiguration;
         myParticleHydraulicErosion = particleHydraulicErosion;
         myGridHydraulicErosion = gridHydraulicErosion;
-        myThermalErosion = thermalErosion;
+        myVertexNormalThermalErosion = vertexNormalThermalErosion;
         myGridThermalErosion = gridThermalErosion;
         myParticleWindErosion = particleWindErosion;
     }
@@ -35,7 +35,7 @@ internal class ErosionSimulator : IErosionSimulator
     {
         myParticleHydraulicErosion.Initialize();
         myGridHydraulicErosion.Initialize();
-        myThermalErosion.Initialize();
+        myVertexNormalThermalErosion.Initialize();
         myGridThermalErosion.Initialize();
         myParticleWindErosion.Initialize();
 
@@ -44,30 +44,28 @@ internal class ErosionSimulator : IErosionSimulator
 
     public void Simulate()
     {
-        switch (myErosionConfiguration.Mode)
+        switch (myErosionConfiguration.HydraulicErosionMode)
         {
-            case ErosionModeTypes.ParticleHydraulic:
+            case HydraulicErosionModeTypes.ParticleHydraulic:
                 myParticleHydraulicErosion.Simulate();
                 break;
-            case ErosionModeTypes.GridHydraulic:
-                for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
-                {
-                    if (myErosionConfiguration.IsWaterAdded)
-                    {
-                        myGridHydraulicErosion.AddRain();
-                    }
-                    myGridHydraulicErosion.Flow();
-                    myGridHydraulicErosion.VelocityMap();
-                    myGridHydraulicErosion.SuspendDeposite();
-                    myGridHydraulicErosion.Evaporate();
-                    myGridHydraulicErosion.MoveSediment();
-                }
+            case HydraulicErosionModeTypes.GridHydraulic:
+                myGridHydraulicErosion.Simulate();
                 break;
-            case ErosionModeTypes.Thermal:
-                myGridThermalErosion.Simulate();
-                break;
-            case ErosionModeTypes.ParticleWind:
+        }
+        switch (myErosionConfiguration.WindErosionMode)
+        {
+            case WindErosionModeTypes.ParticleWind:
                 myParticleWindErosion.Simulate();
+                break;
+        }
+        switch (myErosionConfiguration.ThermalErosionMode)
+        {
+            case ThermalErosionModeTypes.VertexNormalThermal:
+                myVertexNormalThermalErosion.Simulate();
+                break;
+            case ThermalErosionModeTypes.GridThermal:
+                myGridThermalErosion.Simulate();
                 break;
         }
 
@@ -76,39 +74,19 @@ internal class ErosionSimulator : IErosionSimulator
 
     public void ResetShaderBuffers()
     {
-        switch (myErosionConfiguration.Mode)
+        switch (myErosionConfiguration.HydraulicErosionMode)
         {
-            case ErosionModeTypes.ParticleHydraulic:
-                myGridHydraulicErosion.ResetShaderBuffers();
-                myParticleWindErosion.ResetShaderBuffers();
+            case HydraulicErosionModeTypes.GridHydraulic:
                 myParticleHydraulicErosion.ResetShaderBuffers();
-                myGridThermalErosion.ResetShaderBuffers();
-                break;
-            case ErosionModeTypes.ParticleWind:
                 myGridHydraulicErosion.ResetShaderBuffers();
-                myParticleHydraulicErosion.ResetShaderBuffers();
-                myParticleWindErosion.ResetShaderBuffers();
-                myGridThermalErosion.ResetShaderBuffers();
-                break;
-            case ErosionModeTypes.GridHydraulic:
-                myParticleHydraulicErosion.ResetShaderBuffers();
-                myParticleWindErosion.ResetShaderBuffers();
-                myGridHydraulicErosion.ResetShaderBuffers();
-                myGridThermalErosion.ResetShaderBuffers();
-                break;
-            case ErosionModeTypes.Thermal:
-                myParticleHydraulicErosion.ResetShaderBuffers();
-                myParticleWindErosion.ResetShaderBuffers();
-                myGridHydraulicErosion.ResetShaderBuffers();
-                myGridThermalErosion.ResetShaderBuffers();
                 break;
             default:
-                myParticleHydraulicErosion.ResetShaderBuffers();
-                myParticleWindErosion.ResetShaderBuffers();
                 myGridHydraulicErosion.ResetShaderBuffers();
-                myGridThermalErosion.ResetShaderBuffers();
+                myParticleHydraulicErosion.ResetShaderBuffers();
                 break;
         }
+        myParticleWindErosion.ResetShaderBuffers();
+        myGridThermalErosion.ResetShaderBuffers();
     }
 
     public void Dispose()
@@ -120,7 +98,7 @@ internal class ErosionSimulator : IErosionSimulator
 
         myParticleHydraulicErosion.Dispose();
         myGridHydraulicErosion.Dispose();
-        myThermalErosion.Dispose();
+        myVertexNormalThermalErosion.Dispose();
         myGridThermalErosion.Dispose();
         myParticleWindErosion.Dispose();
 

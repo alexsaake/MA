@@ -2,6 +2,7 @@
 
 internal struct ThermalErosionConfigurationShaderBuffer
 {
-    public float TangensThresholdAngle;
-    public float HeightChange;
+    public float TangensTalusAngle;
+    public float ErosionRate;
+    public float Dampening;
 }

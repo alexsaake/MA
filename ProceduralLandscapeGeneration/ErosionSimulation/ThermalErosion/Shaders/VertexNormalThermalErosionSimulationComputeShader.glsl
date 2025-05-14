@@ -20,8 +20,20 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 struct ThermalErosionConfiguration
 {
-    float TangensThresholdAngle;
-    float HeightChange;
+    float TangensTalusAngle;
+    float ErosionRate;
+    float Dampening;
+};
+
+struct ErosionConfiguration
+{
+    float SeaLevel;
+    float TimeDelta;
+};
+
+layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
+{
+    ErosionConfiguration erosionConfiguration;
 };
 
 layout(std430, binding = 10) readonly restrict buffer thermalErosionConfigurationShaderBuffer
@@ -81,7 +93,7 @@ void main()
     uint y = id / myHeightMapSideLength;
 
     vec2 normal = getScaledNormal(x, y).xy;
-    float tolerance = 0.025;
+    float tolerance = 0.3;
     if(normal.x > 0)
     {
         if(normal.x < tolerance)
@@ -131,12 +143,15 @@ void main()
     {
         return;
     }
-    float neighborHeight = heightMap[neighborIndex] * mapGenerationConfiguration.HeightMultiplier;
-    float zDiff = heightMap[id] * mapGenerationConfiguration.HeightMultiplier - neighborHeight;
+    float heightDifference = heightMap[id] - heightMap[neighborIndex];
+	float tangensAngle = heightDifference * mapGenerationConfiguration.HeightMultiplier / 1.0;
 
-    if (zDiff > thermalErosionConfiguration.TangensThresholdAngle)
+    if (tangensAngle > thermalErosionConfiguration.TangensTalusAngle)
     {
-        heightMap[id] -= thermalErosionConfiguration.HeightChange;
-        heightMap[neighborIndex] += thermalErosionConfiguration.HeightChange;
+        float heightChange = heightDifference * thermalErosionConfiguration.ErosionRate * erosionConfiguration.TimeDelta * (1.0 - thermalErosionConfiguration.Dampening);
+        heightMap[id] -= heightChange;
+        heightMap[neighborIndex] += heightChange;
+        
+        memoryBarrier();
     }
 }

@@ -45,9 +45,9 @@ layout(std430, binding = 8) readonly restrict buffer particleWindErosionConfigur
     ParticleWindErosionConfiguration particleWindErosionConfiguration;
 };
 
-layout(std430, binding = 11) readonly restrict buffer heightMapIndicesShaderBuffer
+layout(std430, binding = 14) readonly restrict buffer windErosionHeightMapIndicesShaderBuffer
 {
-    uint[] heightMapIndices;
+    uint[] windErosionHeightMapIndices;
 };
 
 uint myHeightMapSideLength;
@@ -240,7 +240,7 @@ void main()
     
     if(myParticleWindErosion.Age == 0 && particleWindErosionConfiguration.AreParticlesAdded)
     {
-        uint index = heightMapIndices[id];
+        uint index = windErosionHeightMapIndices[id];
         uint x = index % myHeightMapSideLength;
         uint y = index / myHeightMapSideLength;
         myParticleWindErosion.Age = 0;

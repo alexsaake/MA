@@ -2,6 +2,7 @@
 using ProceduralLandscapeGeneration.Configurations.Grid;
 using ProceduralLandscapeGeneration.Configurations.Particles;
 using ProceduralLandscapeGeneration.Configurations.Types;
+using ProceduralLandscapeGeneration.Configurations.Types.ErosionMode;
 using ProceduralLandscapeGeneration.GUI.Elements;
 using Raylib_cs;
 using System.Numerics;
@@ -25,7 +26,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
     private readonly PanelWithElements myParticleHydraulicErosionPanel;
     private readonly PanelWithElements myParticleWindErosionPanel;
 
-    Vector2 myRightPanelPosition;
+    private Vector2 myRightPanelPosition;
     private readonly PanelWithElements myMapGenerationPanel;
     private readonly PanelWithElements myNoiseMapGenerationPanel;
     private readonly PanelWithElements myHeatMapGenerationPanel;
@@ -41,11 +42,21 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myErosionConfiguration = erosionConfiguration;
 
         myErosionPanel = new PanelWithElements("Erosion Simulation");
-        myErosionPanel.Add(new ComboBox("Hydraulic Particle;Hydraulic Grid;Thermal;Wind", (value) =>
+        myErosionPanel.Add(new ComboBox("Off;Hydraulic Particle;Hydraulic Grid", (value) =>
                                                                                             {
-                                                                                                erosionConfiguration.Mode = (ErosionModeTypes)value;
+                                                                                                erosionConfiguration.HydraulicErosionMode = (HydraulicErosionModeTypes)value;
                                                                                                 ErosionModeChanged?.Invoke(this, EventArgs.Empty);
-                                                                                            }, (int)erosionConfiguration.Mode));
+                                                                                            }, (int)erosionConfiguration.HydraulicErosionMode));
+        myErosionPanel.Add(new ComboBox("Off;Wind Particle", (value) =>
+                                                                                            {
+                                                                                                erosionConfiguration.WindErosionMode = (WindErosionModeTypes)value;
+                                                                                                ErosionModeChanged?.Invoke(this, EventArgs.Empty);
+                                                                                            }, (int)erosionConfiguration.WindErosionMode));
+        myErosionPanel.Add(new ComboBox("Off;Thermal Vertex Normal;Thermal Grid", (value) =>
+                                                                                            {
+                                                                                                erosionConfiguration.ThermalErosionMode = (ThermalErosionModeTypes)value;
+                                                                                                ErosionModeChanged?.Invoke(this, EventArgs.Empty);
+                                                                                            }, (int)erosionConfiguration.ThermalErosionMode));
         myErosionPanel.Add(new Button("Reset", () => ErosionResetRequired?.Invoke(this, EventArgs.Empty)));
         myErosionPanel.Add(new ToggleSliderWithLabel("Running", "Off;On", (value) => erosionConfiguration.IsRunning = value == 1, erosionConfiguration.IsRunning ? 1 : 0));
         myErosionPanel.Add(new ValueBoxIntWithLabel("Iterations per Step", (value) => erosionConfiguration.IterationsPerStep = (uint)value, (int)erosionConfiguration.IterationsPerStep, 1, 1000));
@@ -59,15 +70,16 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myErosionPanel.Add(new ToggleSliderWithLabel("Sediment Displayed", "Off;On", (value) => erosionConfiguration.IsSedimentDisplayed = value == 1, erosionConfiguration.IsSedimentDisplayed ? 1 : 0));
         myErosionPanel.Add(new ToggleSliderWithLabel("Sea Level Displayed", "Off;On", (value) => erosionConfiguration.IsSeaLevelDisplayed = value == 1, erosionConfiguration.IsSeaLevelDisplayed ? 1 : 0));
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => erosionConfiguration.SeaLevel = value, erosionConfiguration.SeaLevel));
+        myErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => erosionConfiguration.TimeDelta = value, erosionConfiguration.TimeDelta));
 
         myThermalErosionPanel = new PanelWithElements("Thermal Erosion");
         myThermalErosionPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => erosionConfiguration.TalusAngle = value, erosionConfiguration.TalusAngle, 0, 89));
-        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Height Change", (value) => erosionConfiguration.ThermalErosionHeightChange = value, erosionConfiguration.ThermalErosionHeightChange));
+        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Erosion Rate", (value) => erosionConfiguration.ErosionRate = value, erosionConfiguration.ErosionRate));
+        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Dampening", (value) => erosionConfiguration.Dampening = value, erosionConfiguration.Dampening));
 
         myGridErosionPanel = new PanelWithElements("Grid Hydraulic Erosion");
         myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridErosionConfiguration.RainDrops = (uint)value, (int)gridErosionConfiguration.RainDrops, 1, 100000));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Water Increase", (value) => gridErosionConfiguration.WaterIncrease = value, gridErosionConfiguration.WaterIncrease));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => gridErosionConfiguration.TimeDelta = value, gridErosionConfiguration.TimeDelta));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => gridErosionConfiguration.Gravity = value, gridErosionConfiguration.Gravity));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Dampening", (value) => gridErosionConfiguration.Dampening = value, gridErosionConfiguration.Dampening));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Maximal Erosion Depth", (value) => gridErosionConfiguration.MaximalErosionDepth = value, gridErosionConfiguration.MaximalErosionDepth));
@@ -135,19 +147,31 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
     private void DrawErosionPanels()
     {
         myErosionPanel.Draw(Vector2.Zero);
-        switch (myErosionConfiguration.Mode)
+        Vector2 hydraulicOffset = myErosionPanel.BottomLeft;
+        switch (myErosionConfiguration.HydraulicErosionMode)
         {
-            case ErosionModeTypes.ParticleHydraulic:
+            case HydraulicErosionModeTypes.ParticleHydraulic:
                 myParticleHydraulicErosionPanel.Draw(myErosionPanel.BottomLeft);
+                hydraulicOffset = myParticleHydraulicErosionPanel.BottomLeft;
                 break;
-            case ErosionModeTypes.GridHydraulic:
+            case HydraulicErosionModeTypes.GridHydraulic:
                 myGridErosionPanel.Draw(myErosionPanel.BottomLeft);
+                hydraulicOffset = myGridErosionPanel.BottomLeft;
                 break;
-            case ErosionModeTypes.Thermal:
-                myThermalErosionPanel.Draw(myErosionPanel.BottomLeft);
+        }
+        Vector2 windOffset = hydraulicOffset;
+        switch (myErosionConfiguration.WindErosionMode)
+        {
+            case WindErosionModeTypes.ParticleWind:
+                myParticleWindErosionPanel.Draw(hydraulicOffset);
+                windOffset = myParticleWindErosionPanel.BottomLeft;
                 break;
-            case ErosionModeTypes.ParticleWind:
-                myParticleWindErosionPanel.Draw(myErosionPanel.BottomLeft);
+        }
+        switch (myErosionConfiguration.ThermalErosionMode)
+        {
+            case ThermalErosionModeTypes.VertexNormalThermal:
+            case ThermalErosionModeTypes.GridThermal:
+                myThermalErosionPanel.Draw(windOffset);
                 break;
         }
     }

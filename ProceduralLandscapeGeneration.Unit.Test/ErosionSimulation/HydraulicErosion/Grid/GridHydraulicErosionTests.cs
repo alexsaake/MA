@@ -9,11 +9,11 @@ using ProceduralLandscapeGeneration.DependencyInjection;
 using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Int.Test.Simulation.GPU.Grid;
+namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.HydraulicErosion.Grid;
 
 [TestFixture]
 [SingleThreaded]
-public class GridErosionTests
+public class GridHydraulicErosionTests
 {
     private IContainer? myContainer;
 
@@ -21,7 +21,7 @@ public class GridErosionTests
     public void SetUp()
     {
         myContainer = Container.Create();
-        Raylib.InitWindow(1, 1, nameof(GridErosionTests));
+        Raylib.InitWindow(1, 1, nameof(GridHydraulicErosionTests));
     }
 
     [TearDown]
@@ -36,7 +36,7 @@ public class GridErosionTests
     {
         InitializeConfiguration();
         SetUpFlatHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
 
         testee.Flow();
@@ -57,7 +57,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(2);
         SetUpFlatHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         AddWater(0, 0);
         AddWater(1, 0);
@@ -82,7 +82,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(2);
         SetUpFlatChannelHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         AddWater(0, 0);
 
@@ -101,7 +101,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(3);
         SetUpFlatHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         AddWater(1, 1);
 
@@ -109,7 +109,7 @@ public class GridErosionTests
 
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
         IGridErosionConfiguration gridErosionConfiguration = myContainer!.Resolve<IGridErosionConfiguration>();
-        float expectedFlow = gridErosionConfiguration.WaterIncrease / (4 * gridErosionConfiguration.TimeDelta) * (1 - gridErosionConfiguration.Dampening);
+        float expectedFlow = gridErosionConfiguration.WaterIncrease / 4 * (1 - gridErosionConfiguration.Dampening);
         GridHydraulicErosionCellShaderBuffer centerGridPoint = gridHydraulicErosionCells[GetIndex(1, 1)];
         Assert.That(centerGridPoint.FlowLeft, Is.EqualTo(expectedFlow).Within(0.00001f));
         Assert.That(centerGridPoint.FlowRight, Is.EqualTo(expectedFlow).Within(0.00001f));
@@ -123,7 +123,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(3);
         SetUpSlopedChannelHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         AddWater(1, 0);
 
@@ -140,7 +140,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(3);
         SetUpFlatHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         testee.Flow();
 
@@ -160,7 +160,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(3);
         SetUpFlatHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         AddWater(1, 1);
         testee.Flow();
@@ -168,7 +168,7 @@ public class GridErosionTests
         testee.VelocityMap();
 
         IGridErosionConfiguration gridErosionConfiguration = myContainer!.Resolve<IGridErosionConfiguration>();
-        float expectedFlow = gridErosionConfiguration.WaterIncrease / (4 * gridErosionConfiguration.TimeDelta) * (1 - gridErosionConfiguration.Dampening);
+        float expectedFlow = gridErosionConfiguration.WaterIncrease / 4 * (1 - gridErosionConfiguration.Dampening);
         IMapGenerationConfiguration mapGenerationConfiguration = myContainer!.Resolve<IMapGenerationConfiguration>();
         float expectedVelocity = expectedFlow * mapGenerationConfiguration.HeightMultiplier / 2;
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCells = ReadGridPointShaderBuffer();
@@ -195,7 +195,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(3);
         SetUpSlopedChannelHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         AddWater(1, 0);
         testee.Flow();
@@ -219,7 +219,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(2);
         SetUpSlopedChannelHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         IMapGenerationConfiguration mapGenerationConfiguration = myContainer!.Resolve<IMapGenerationConfiguration>();
         mapGenerationConfiguration.HeightMultiplier = heightMultiplier;
@@ -243,7 +243,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(3);
         SetUpFlatHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         testee.Flow();
         testee.VelocityMap();
@@ -269,7 +269,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(3);
         SetUpFlatHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         AddWater(1, 1);
         testee.Flow();
@@ -316,7 +316,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(heightMapLength);
         SetUpSlopedChannelHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         AddWater(1, 0);
         testee.Flow();
@@ -354,7 +354,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(3);
         SetUpFlatHeightMap();
-        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         AddWater(1, 1);
         testee.Flow();
@@ -404,7 +404,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(3);
         SetUpSlopedChannelHeightMap();
-        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         AddWater(1, 0);
         testee.Flow();
@@ -444,7 +444,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(3);
         SetUpFlatHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         testee.Flow();
         testee.VelocityMap();
@@ -468,7 +468,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(3);
         SetUpFlatHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         AddWater(1, 1);
         testee.Flow();
@@ -511,7 +511,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(3);
         SetUpFlatHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         testee.Flow();
         testee.VelocityMap();
@@ -536,7 +536,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(2);
         SetUpFlatHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         AddWater(0, 0);
         testee.Flow();
@@ -567,7 +567,7 @@ public class GridErosionTests
         InitializeConfiguration();
         SetUpMapGenerationConfiguration(3);
         SetUpFlatHeightMap();
-        IGridErosion testee = myContainer!.Resolve<IGridErosion>();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
         AddWater(1, 1);
         testee.Flow();

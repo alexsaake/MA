@@ -36,6 +36,7 @@ layout(std430, binding = 5) readonly restrict buffer MapGenerationConfigurationS
 struct ErosionConfiguration
 {
     float SeaLevel;
+    float TimeDelta;
 };
 
 layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer

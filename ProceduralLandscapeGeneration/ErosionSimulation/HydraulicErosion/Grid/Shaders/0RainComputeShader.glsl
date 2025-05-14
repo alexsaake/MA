@@ -19,10 +19,20 @@ layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
     GridHydraulicErosionCell[] gridHydraulicErosionCells;
 };
 
+struct ErosionConfiguration
+{
+    float SeaLevel;
+    float TimeDelta;
+};
+
+layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
+{
+    ErosionConfiguration erosionConfiguration;
+};
+
 struct GridErosionConfiguration
 {
     float WaterIncrease;
-    float TimeDelta;
     float Gravity;
     float Dampening;
     float MaximalErosionDepth;
@@ -36,9 +46,9 @@ layout(std430, binding = 9) buffer gridErosionConfigurationShaderBuffer
     GridErosionConfiguration gridErosionConfiguration;
 };
 
-layout(std430, binding = 11) buffer heightMapIndicesShaderBuffer
+layout(std430, binding = 11) buffer hydraulicErosionHeightMapIndicesShaderBuffer
 {
-    int[] heightMapIndices;
+    int[] hydraulicErosionHeightMapIndices;
 };
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
@@ -49,21 +59,21 @@ layout(std430, binding = 11) buffer heightMapIndicesShaderBuffer
 void main()
 {    
     uint id = gl_GlobalInvocationID.x;
-    if(id >= heightMapIndices.length())
+    if(id >= hydraulicErosionHeightMapIndices.length())
     {
         return;
     }
 
-    int index = heightMapIndices[id];
+    int index = hydraulicErosionHeightMapIndices[id];
     if(index < 0)
     {
         return;
     }
-    heightMapIndices[id] = -1;
+    hydraulicErosionHeightMapIndices[id] = -1;
 
     GridHydraulicErosionCell gridHydraulicErosionCell  = gridHydraulicErosionCells[index];
 
-    gridHydraulicErosionCell.WaterHeight += gridErosionConfiguration.WaterIncrease;
+    gridHydraulicErosionCell.WaterHeight += gridErosionConfiguration.WaterIncrease * erosionConfiguration.TimeDelta;
 
     gridHydraulicErosionCells[index] = gridHydraulicErosionCell;
     
