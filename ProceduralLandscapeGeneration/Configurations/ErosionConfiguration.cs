@@ -12,11 +12,14 @@ internal class ErosionConfiguration : IErosionConfiguration
 
     private bool myIsDisposed;
 
+    public bool IsSimulationRunning { get; set; }
+    public bool IsHydraulicErosionEnabled { get; set; }
     public HydraulicErosionModeTypes HydraulicErosionMode { get; set; }
+    public bool IsWindErosionEnabled { get; set; }
     public WindErosionModeTypes WindErosionMode { get; set; }
+    public bool IsThermalErosionEnabled { get; set; }
     public ThermalErosionModeTypes ThermalErosionMode { get; set; }
 
-    public bool IsRunning { get; set; }
     public uint IterationsPerStep { get; set; }
     public bool IsWaterAdded { get; set; }
     public bool IsWaterDisplayed { get; set; }
@@ -103,11 +106,14 @@ internal class ErosionConfiguration : IErosionConfiguration
     {
         myShaderBuffers = shaderBuffers;
 
+        IsHydraulicErosionEnabled = true;
         HydraulicErosionMode = HydraulicErosionModeTypes.ParticleHydraulic;
-        WindErosionMode = WindErosionModeTypes.None;
+        IsWindErosionEnabled = false;
+        WindErosionMode = WindErosionModeTypes.ParticleWind;
+        IsThermalErosionEnabled = true;
         ThermalErosionMode = ThermalErosionModeTypes.CascadeThermal;
 
-        IsRunning = false;
+        IsSimulationRunning = false;
         IterationsPerStep = 1;
         IsWaterAdded = true;
         IsWaterDisplayed = true;

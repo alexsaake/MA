@@ -2,7 +2,6 @@
 
 internal enum HydraulicErosionModeTypes
 {
-    None,
     ParticleHydraulic,
     GridHydraulic
 }

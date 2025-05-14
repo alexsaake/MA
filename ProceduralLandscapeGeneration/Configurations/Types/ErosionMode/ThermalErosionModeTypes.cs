@@ -2,7 +2,6 @@
 
 internal enum ThermalErosionModeTypes
 {
-    None,
     GridThermal,
     CascadeThermal,
     VertexNormalThermal

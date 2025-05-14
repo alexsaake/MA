@@ -22,7 +22,7 @@ internal class ErosionSimulator : IErosionSimulator
 
     public event EventHandler? IterationFinished;
 
-    public ErosionSimulator(IErosionConfiguration erosionConfiguration, IParticleHydraulicErosion particleHydraulicErosion, IGridHydraulicErosion gridHydraulicErosion, IGridThermalErosion  gridThermalErosion,ICascadeThermalErosion cascadeThermalErosion, IVertexNormalThermalErosion vertexNormalThermalErosion, IParticleWindErosion particleWindErosion)
+    public ErosionSimulator(IErosionConfiguration erosionConfiguration, IParticleHydraulicErosion particleHydraulicErosion, IGridHydraulicErosion gridHydraulicErosion, IGridThermalErosion gridThermalErosion, ICascadeThermalErosion cascadeThermalErosion, IVertexNormalThermalErosion vertexNormalThermalErosion, IParticleWindErosion particleWindErosion)
     {
         myErosionConfiguration = erosionConfiguration;
         myParticleHydraulicErosion = particleHydraulicErosion;
@@ -47,32 +47,41 @@ internal class ErosionSimulator : IErosionSimulator
 
     public void Simulate()
     {
-        switch (myErosionConfiguration.HydraulicErosionMode)
+        if (myErosionConfiguration.IsHydraulicErosionEnabled)
         {
-            case HydraulicErosionModeTypes.ParticleHydraulic:
-                myParticleHydraulicErosion.Simulate();
-                break;
-            case HydraulicErosionModeTypes.GridHydraulic:
-                myGridHydraulicErosion.Simulate();
-                break;
+            switch (myErosionConfiguration.HydraulicErosionMode)
+            {
+                case HydraulicErosionModeTypes.ParticleHydraulic:
+                    myParticleHydraulicErosion.Simulate();
+                    break;
+                case HydraulicErosionModeTypes.GridHydraulic:
+                    myGridHydraulicErosion.Simulate();
+                    break;
+            }
         }
-        switch (myErosionConfiguration.WindErosionMode)
+        if (myErosionConfiguration.IsWindErosionEnabled)
         {
-            case WindErosionModeTypes.ParticleWind:
-                myParticleWindErosion.Simulate();
-                break;
+            switch (myErosionConfiguration.WindErosionMode)
+            {
+                case WindErosionModeTypes.ParticleWind:
+                    myParticleWindErosion.Simulate();
+                    break;
+            }
         }
-        switch (myErosionConfiguration.ThermalErosionMode)
+        if (myErosionConfiguration.IsThermalErosionEnabled)
         {
-            case ThermalErosionModeTypes.GridThermal:
-                myGridThermalErosion.Simulate();
-                break;
-            case ThermalErosionModeTypes.CascadeThermal:
-                myCascadeThermalErosion.Simulate();
-                break;
-            case ThermalErosionModeTypes.VertexNormalThermal:
-                myVertexNormalThermalErosion.Simulate();
-                break;
+            switch (myErosionConfiguration.ThermalErosionMode)
+            {
+                case ThermalErosionModeTypes.GridThermal:
+                    myGridThermalErosion.Simulate();
+                    break;
+                case ThermalErosionModeTypes.CascadeThermal:
+                    myCascadeThermalErosion.Simulate();
+                    break;
+                case ThermalErosionModeTypes.VertexNormalThermal:
+                    myVertexNormalThermalErosion.Simulate();
+                    break;
+            }
         }
 
         IterationFinished?.Invoke(this, EventArgs.Empty);

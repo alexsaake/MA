@@ -4,10 +4,13 @@ namespace ProceduralLandscapeGeneration.Configurations;
 
 internal interface IErosionConfiguration : IDisposable
 {
+    bool IsSimulationRunning { get; set; }
+    bool IsHydraulicErosionEnabled { get; set; }
     HydraulicErosionModeTypes HydraulicErosionMode { get; set; }
+    bool IsWindErosionEnabled { get; set; }
     WindErosionModeTypes WindErosionMode { get; set; }
+    bool IsThermalErosionEnabled { get; set; }
     ThermalErosionModeTypes ThermalErosionMode { get; set; }
-    bool IsRunning { get; set; }
     uint IterationsPerStep { get; set; }
     bool IsWaterAdded { get; set; }
     bool IsWaterDisplayed { get; set; }

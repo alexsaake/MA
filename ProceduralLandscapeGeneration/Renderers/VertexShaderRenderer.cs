@@ -204,13 +204,16 @@ internal class VertexShaderRenderer : IRenderer
     {
         Raylib.BeginMode3D(myCamera);
         DrawTerrainHeightMap();
-        if (myErosionConfiguration.IsWaterDisplayed)
-        {
-            Raylib.DrawModel(myWaterHeightMap, Vector3.Zero, 1.0f, Color.White);
-        }
-        if (myErosionConfiguration.IsSedimentDisplayed)
+        if ((myErosionConfiguration.IsHydraulicErosionEnabled
+            || myErosionConfiguration.IsWindErosionEnabled)
+                && myErosionConfiguration.IsSedimentDisplayed)
         {
             Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
+        }
+        if (myErosionConfiguration.IsHydraulicErosionEnabled
+            && myErosionConfiguration.IsWaterDisplayed)
+        {
+            Raylib.DrawModel(myWaterHeightMap, Vector3.Zero, 1.0f, Color.White);
         }
         if (myErosionConfiguration.IsSeaLevelDisplayed)
         {
