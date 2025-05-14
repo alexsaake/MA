@@ -64,7 +64,7 @@ uint getIndexV(ivec2 position)
 
 bool isOutOfBounds(ivec2 position)
 {
-    return position.x < 0 || position.x > myHeightMapSideLength || position.y < 0 || position.y > myHeightMapSideLength;
+    return position.x < 0 || position.x >= myHeightMapSideLength || position.y < 0 || position.y >= myHeightMapSideLength;
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/wind.hpp
