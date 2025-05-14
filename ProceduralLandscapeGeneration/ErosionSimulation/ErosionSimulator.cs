@@ -13,21 +13,23 @@ internal class ErosionSimulator : IErosionSimulator
     private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IParticleHydraulicErosion myParticleHydraulicErosion;
     private readonly IGridHydraulicErosion myGridHydraulicErosion;
-    private readonly IVertexNormalThermalErosion myVertexNormalThermalErosion;
     private readonly IGridThermalErosion myGridThermalErosion;
+    private readonly ICascadeThermalErosion myCascadeThermalErosion;
+    private readonly IVertexNormalThermalErosion myVertexNormalThermalErosion;
     private readonly IParticleWindErosion myParticleWindErosion;
 
     private bool myIsDisposed;
 
     public event EventHandler? IterationFinished;
 
-    public ErosionSimulator(IErosionConfiguration erosionConfiguration, IParticleHydraulicErosion particleHydraulicErosion, IGridHydraulicErosion gridHydraulicErosion, IVertexNormalThermalErosion vertexNormalThermalErosion, IGridThermalErosion  gridThermalErosion, IParticleWindErosion particleWindErosion)
+    public ErosionSimulator(IErosionConfiguration erosionConfiguration, IParticleHydraulicErosion particleHydraulicErosion, IGridHydraulicErosion gridHydraulicErosion, IGridThermalErosion  gridThermalErosion,ICascadeThermalErosion cascadeThermalErosion, IVertexNormalThermalErosion vertexNormalThermalErosion, IParticleWindErosion particleWindErosion)
     {
         myErosionConfiguration = erosionConfiguration;
         myParticleHydraulicErosion = particleHydraulicErosion;
         myGridHydraulicErosion = gridHydraulicErosion;
-        myVertexNormalThermalErosion = vertexNormalThermalErosion;
         myGridThermalErosion = gridThermalErosion;
+        myCascadeThermalErosion = cascadeThermalErosion;
+        myVertexNormalThermalErosion = vertexNormalThermalErosion;
         myParticleWindErosion = particleWindErosion;
     }
 
@@ -35,8 +37,9 @@ internal class ErosionSimulator : IErosionSimulator
     {
         myParticleHydraulicErosion.Initialize();
         myGridHydraulicErosion.Initialize();
-        myVertexNormalThermalErosion.Initialize();
         myGridThermalErosion.Initialize();
+        myCascadeThermalErosion.Initialize();
+        myVertexNormalThermalErosion.Initialize();
         myParticleWindErosion.Initialize();
 
         myIsDisposed = false;
@@ -61,11 +64,14 @@ internal class ErosionSimulator : IErosionSimulator
         }
         switch (myErosionConfiguration.ThermalErosionMode)
         {
-            case ThermalErosionModeTypes.VertexNormalThermal:
-                myVertexNormalThermalErosion.Simulate();
-                break;
             case ThermalErosionModeTypes.GridThermal:
                 myGridThermalErosion.Simulate();
+                break;
+            case ThermalErosionModeTypes.CascadeThermal:
+                myCascadeThermalErosion.Simulate();
+                break;
+            case ThermalErosionModeTypes.VertexNormalThermal:
+                myVertexNormalThermalErosion.Simulate();
                 break;
         }
 
@@ -98,8 +104,9 @@ internal class ErosionSimulator : IErosionSimulator
 
         myParticleHydraulicErosion.Dispose();
         myGridHydraulicErosion.Dispose();
-        myVertexNormalThermalErosion.Dispose();
         myGridThermalErosion.Dispose();
+        myCascadeThermalErosion.Dispose();
+        myVertexNormalThermalErosion.Dispose();
         myParticleWindErosion.Dispose();
 
         myIsDisposed = true;

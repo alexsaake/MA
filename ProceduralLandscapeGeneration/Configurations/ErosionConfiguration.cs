@@ -105,7 +105,7 @@ internal class ErosionConfiguration : IErosionConfiguration
 
         HydraulicErosionMode = HydraulicErosionModeTypes.ParticleHydraulic;
         WindErosionMode = WindErosionModeTypes.None;
-        ThermalErosionMode = ThermalErosionModeTypes.GridThermal;
+        ThermalErosionMode = ThermalErosionModeTypes.CascadeThermal;
 
         IsRunning = false;
         IterationsPerStep = 1;

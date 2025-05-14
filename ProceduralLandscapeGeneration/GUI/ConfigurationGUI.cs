@@ -52,7 +52,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
                                                                                                 erosionConfiguration.WindErosionMode = (WindErosionModeTypes)value;
                                                                                                 ErosionModeChanged?.Invoke(this, EventArgs.Empty);
                                                                                             }, (int)erosionConfiguration.WindErosionMode));
-        myErosionPanel.Add(new ComboBox("Off;Thermal Vertex Normal;Thermal Grid", (value) =>
+        myErosionPanel.Add(new ComboBox("Off;Thermal Grid;Thermal Cascade;Thermal Vertex Normal", (value) =>
                                                                                             {
                                                                                                 erosionConfiguration.ThermalErosionMode = (ThermalErosionModeTypes)value;
                                                                                                 ErosionModeChanged?.Invoke(this, EventArgs.Empty);
@@ -169,8 +169,9 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         }
         switch (myErosionConfiguration.ThermalErosionMode)
         {
-            case ThermalErosionModeTypes.VertexNormalThermal:
             case ThermalErosionModeTypes.GridThermal:
+            case ThermalErosionModeTypes.CascadeThermal:
+            case ThermalErosionModeTypes.VertexNormalThermal:
                 myThermalErosionPanel.Draw(windOffset);
                 break;
         }

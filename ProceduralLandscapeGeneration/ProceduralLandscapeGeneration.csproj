@@ -51,7 +51,7 @@
 	  <None Update="ErosionSimulation\WindErosion\Shaders\ParticleWindErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\ThermalErosion\Shaders\Cascade.glsl">
+	  <None Update="ErosionSimulation\ThermalErosion\Shaders\CascadeThermalErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="ErosionSimulation\ThermalErosion\Shaders\VertexNormalThermalErosionSimulationComputeShader.glsl">

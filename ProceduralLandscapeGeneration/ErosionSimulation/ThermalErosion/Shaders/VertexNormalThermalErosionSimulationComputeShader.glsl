@@ -18,13 +18,6 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
     MapGenerationConfiguration mapGenerationConfiguration;
 };
 
-struct ThermalErosionConfiguration
-{
-    float TangensTalusAngle;
-    float ErosionRate;
-    float Dampening;
-};
-
 struct ErosionConfiguration
 {
     float SeaLevel;
@@ -34,6 +27,13 @@ struct ErosionConfiguration
 layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
 {
     ErosionConfiguration erosionConfiguration;
+};
+
+struct ThermalErosionConfiguration
+{
+    float TangensTalusAngle;
+    float ErosionRate;
+    float Dampening;
 };
 
 layout(std430, binding = 10) readonly restrict buffer thermalErosionConfigurationShaderBuffer
