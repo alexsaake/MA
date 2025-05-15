@@ -18,6 +18,7 @@ internal interface IMapGenerationConfiguration : IDisposable
     bool IsPlateTectonicsRunning { get; set; }
     int PlateCount { get; set; }
 
+    uint MapSize { get; }
     uint HeightMapSideLength { get; set; }
     uint HeightMultiplier { get; set; }
     CameraMode CameraMode { get; set; }

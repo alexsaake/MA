@@ -13,8 +13,8 @@ internal class Plate
     private const float Convection = 10.0f;
     private const float Growth = 0.05f;
 
-    private IMapGenerationConfiguration myMapGenerationConfiguration;
-    private IShaderBuffers myShaderBuffers;
+    private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
+    private readonly IShaderBuffers myShaderBuffers;
 
     public Vector2 Position { get; private set; }
 
@@ -112,9 +112,8 @@ internal class Plate
 
     private unsafe float[] ReadHeatMap()
     {
-        uint heatMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        uint heatMapBufferSize = heatMapSize * sizeof(float);
-        float[] heatMap = new float[heatMapSize];
+        uint heatMapBufferSize = myMapGenerationConfiguration.MapSize * sizeof(float);
+        float[] heatMap = new float[myMapGenerationConfiguration.MapSize];
         Rlgl.MemoryBarrier();
         fixed (float* heatMapPointer = heatMap)
         {
@@ -289,8 +288,7 @@ internal class Plate
 
     private unsafe void WriteHeatMap(float[] heatMap)
     {
-        uint heatMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        uint heatMapBufferSize = heatMapSize * sizeof(float);
+        uint heatMapBufferSize = myMapGenerationConfiguration.MapSize * sizeof(float);
         fixed (float* heatMapPointer = heatMap)
         {
             Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeatMap], heatMapPointer, heatMapBufferSize, 0);

@@ -11,6 +11,6 @@ public struct GridHydraulicErosionCellShaderBuffer
     public float FlowRight;
     public float FlowTop;
     public float FlowBottom;
-    private float padding1;
+    private readonly float padding1;
     public Vector2 Velocity;
 }

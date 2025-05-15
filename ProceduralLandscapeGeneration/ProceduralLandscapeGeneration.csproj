@@ -57,6 +57,12 @@
 	  <None Update="ErosionSimulation\ThermalErosion\Shaders\VertexNormalThermalErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\Shaders\AddSegmentsToNearestPlateComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\Shaders\RecenterPlateComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	  <None Update="Raylib-CsLo.pdb">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
@@ -117,7 +123,7 @@
 	  <None Update="Simulation\Particles\Shaders\HydraulicErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\GPU\Shaders\NormalizeComputeShader.glsl">
+	  <None Update="HeightMapGeneration\GPU\Shaders\NormalizeHeightMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Simulation\Shaders\ThermalErosionSimulationComputeShader.glsl">
@@ -126,7 +132,7 @@
 	  <None Update="Simulation\Particles\Shaders\WindErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\GPU\Shaders\HeightMapGeneratorComputeShader.glsl">
+	  <None Update="HeightMapGeneration\GPU\Shaders\GenerateHeightMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Renderers\Shaders\MeshShaders\TerrainHeightMapMeshShader.glsl">

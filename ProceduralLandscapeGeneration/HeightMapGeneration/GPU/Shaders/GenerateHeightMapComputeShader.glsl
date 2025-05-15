@@ -94,51 +94,52 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
 
 struct HeightMapParameters
 {
-    uint seed;
-    float scale;
-    uint octaves;
-    float persistence;
-    float lacunarity;
-    int min;
-    int max;
+    uint Seed;
+    float Scale;
+    uint Octaves;
+    float Persistence;
+    float Lacunarity;
+    int Min;
+    int Max;
 };
 
 layout(std430, binding = 12) buffer heightMapParametersShaderBuffer
 {
-    HeightMapParameters parameters;
+    HeightMapParameters heightMapParameters;
 };
 
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    
-    uint sideLength = uint(sqrt(heightMap.length()));
-    uint mapSize = sideLength * sideLength;
-    if (id >= mapSize) return;
-    
-    uint x = id % sideLength;
-    uint y = id / sideLength;
+    if(id >= heightMap.length())
+    {
+        return;
+    }
+    heightMapSideLength = uint(sqrt(heightMap.length()));
+
+    uint x = id % heightMapSideLength;
+    uint y = id / heightMapSideLength;
     
     float amplitude = 1;
     float frequency = 1;
     float noiseHeight = 0;
     
-    uint currentSeed = uint(parameters.seed);
-    for (int octave = 0; octave < parameters.octaves; octave++)
+    uint currentSeed = uint(heightMapParameters.Seed);
+    for (int octave = 0; octave < heightMapParameters.Octaves; octave++)
     {
         currentSeed = hash(currentSeed, 0x0U); // create a new seed for each octave
-        float sampleX = x / (parameters.scale * 100) * frequency;
-        float sampleY = y / (parameters.scale * 100) * frequency;
+        float sampleX = x / (heightMapParameters.Scale * 100) * frequency;
+        float sampleY = y / (heightMapParameters.Scale * 100) * frequency;
 
         float perlinValue = perlinNoise(vec2(sampleX, sampleY), currentSeed);
         noiseHeight += perlinValue * amplitude;
 
-        amplitude *= parameters.persistence;
-        frequency *= parameters.lacunarity;
+        amplitude *= heightMapParameters.Persistence;
+        frequency *= heightMapParameters.Lacunarity;
     }
 
     heightMap[id] = noiseHeight;
     int val = int(noiseHeight * 100000);
-    atomicMin(parameters.min, val);
-    atomicMax(parameters.max, val);
+    atomicMin(heightMapParameters.Min, val);
+    atomicMax(heightMapParameters.Max, val);
 }

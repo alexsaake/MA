@@ -66,9 +66,8 @@ internal class Segment
 
     private unsafe float[] ReadHeatMap()
     {
-        uint heatMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        uint heatMapBufferSize = heatMapSize * sizeof(float);
-        float[] heatMap = new float[heatMapSize];
+        uint heatMapBufferSize = myMapGenerationConfiguration.MapSize * sizeof(float);
+        float[] heatMap = new float[myMapGenerationConfiguration.MapSize];
         Rlgl.MemoryBarrier();
         fixed (float* heatMapPointer = heatMap)
         {

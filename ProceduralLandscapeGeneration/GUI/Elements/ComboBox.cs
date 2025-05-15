@@ -5,8 +5,8 @@ namespace ProceduralLandscapeGeneration.GUI.Elements;
 
 class ComboBox : IGUIElement
 {
-    private string myComboBoxOptions;
-    private Action<int> myValueDelegate;
+    private readonly string myComboBoxOptions;
+    private readonly Action<int> myValueDelegate;
     private int myValue;
 
     public ComboBox(string comboBoxOptions, Action<int> valueDelegate, int value)

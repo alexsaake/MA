@@ -5,8 +5,8 @@ namespace ProceduralLandscapeGeneration.GUI.Elements;
 
 class Button : IGUIElement
 {
-    private string myText;
-    private Action myOnClickDelegate;
+    private readonly string myText;
+    private readonly Action myOnClickDelegate;
 
     public Button(string text, Action onClickDelegate)
     {

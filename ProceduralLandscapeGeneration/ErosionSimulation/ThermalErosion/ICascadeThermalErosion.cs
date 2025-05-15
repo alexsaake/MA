@@ -1,8 +1,7 @@
-﻿namespace ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion
+﻿namespace ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion;
+
+internal interface ICascadeThermalErosion : IDisposable
 {
-    internal interface ICascadeThermalErosion : IDisposable
-    {
-        void Initialize();
-        void Simulate();
-    }
+    void Initialize();
+    void Simulate();
 }

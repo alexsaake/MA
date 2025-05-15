@@ -82,14 +82,13 @@ uint getIndexVector(vec2 position)
 //https://github.com/patiltanma/15618-FinalProject/blob/master/Renderer/Renderer/erosion_kernel.cu
 void main()
 {
-	
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length();
-    if(id > heightMapLength)
+    uint gridHydraulicErosionCellsLength = gridHydraulicErosionCells.length();
+    if(id > gridHydraulicErosionCellsLength)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(gridHydraulicErosionCells.length()));
+    myHeightMapSideLength = uint(sqrt(gridHydraulicErosionCellsLength));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;

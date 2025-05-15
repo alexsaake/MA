@@ -6,9 +6,9 @@ namespace ProceduralLandscapeGeneration.GUI.Elements;
 
 class ValueBoxFloatWithLabel : IGUIElement
 {
-    private string myName;
-    private Action<float> myValueDelegate;
-    private byte[] myValue;
+    private readonly string myName;
+    private readonly Action<float> myValueDelegate;
+    private readonly byte[] myValue;
 
     private bool myEditMode;
 

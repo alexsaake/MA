@@ -16,5 +16,7 @@ enum ShaderBufferTypes
     HydraulicErosionHeightMapIndices,
     HeightMapParameters,
     GridThermalErosionCell,
-    WindErosionHeightMapIndices
+    WindErosionHeightMapIndices,
+    PlateTectonicsSegments,
+    PlateTectonicsPlates
 }

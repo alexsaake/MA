@@ -30,12 +30,10 @@ internal class VertexNormalThermalErosion : IVertexNormalThermalErosion
 
     public void Simulate()
     {
-        uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-
         for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
         {
             Rlgl.EnableShader(myThermalErosionSimulationComputeShaderProgram!.Id);
-            Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(mapSize / 64f), 1, 1);
+            Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
             Rlgl.DisableShader();
             Rlgl.MemoryBarrier();
         }

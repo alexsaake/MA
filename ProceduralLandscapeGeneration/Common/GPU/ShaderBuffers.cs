@@ -37,6 +37,8 @@ class ShaderBuffers : IDictionary<ShaderBufferTypes, uint>, IShaderBuffers
         myIndices.Add(ShaderBufferTypes.HeightMapParameters, 12);
         myIndices.Add(ShaderBufferTypes.GridThermalErosionCell, 13);
         myIndices.Add(ShaderBufferTypes.WindErosionHeightMapIndices, 14);
+        myIndices.Add(ShaderBufferTypes.PlateTectonicsSegments, 15);
+        myIndices.Add(ShaderBufferTypes.PlateTectonicsPlates, 16);
     }
 
     public unsafe void Add(ShaderBufferTypes key, uint size)

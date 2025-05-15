@@ -28,8 +28,6 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     private bool myHasRainDropsChangedChanged;
     private bool myIsDisposed;
 
-    private uint myMapSize => myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-
     //https://trossvik.com/procedural/
     //https://lilyraeburn.com/Thesis.html
     public GridHydraulicErosion(IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IMapGenerationConfiguration mapGenerationConfiguration, IShaderBuffers shaderBuffers, IRandom random)
@@ -66,8 +64,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
 
     private unsafe void AddGridHydraulicErosionCellShaderBuffer()
     {
-        uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        myShaderBuffers.Add(ShaderBufferTypes.GridHydraulicErosionCell, (uint)(mapSize * sizeof(GridHydraulicErosionCellShaderBuffer)));
+        myShaderBuffers.Add(ShaderBufferTypes.GridHydraulicErosionCell, (uint)(myMapGenerationConfiguration.MapSize * sizeof(GridHydraulicErosionCellShaderBuffer)));
     }
 
     private unsafe void AddHeightMapIndicesShaderBuffer()
@@ -127,7 +124,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     internal void Flow()
     {
         Rlgl.EnableShader(myFlowHydraulicErosionGridSimulationComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -135,7 +132,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     internal void VelocityMap()
     {
         Rlgl.EnableShader(myVelocityMapHydraulicErosionGridSimulationComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -143,7 +140,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     internal void SuspendDeposite()
     {
         Rlgl.EnableShader(mySuspendDepositeHydraulicErosionGridSimulationComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -151,7 +148,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     internal void Evaporate()
     {
         Rlgl.EnableShader(myEvaporateHydraulicErosionGridSimulationComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -159,7 +156,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     internal void MoveSediment()
     {
         Rlgl.EnableShader(myMoveSedimentHydraulicErosionGridSimulationComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -167,10 +164,9 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     private unsafe void CreateRandomIndices()
     {
         int[] randomRainDropIndices = new int[myGridErosionConfiguration.RainDrops];
-        uint mapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
         for (uint rainDrop = 0; rainDrop < myGridErosionConfiguration.RainDrops; rainDrop++)
         {
-            randomRainDropIndices[rainDrop] = myRandom.Next((int)mapSize);
+            randomRainDropIndices[rainDrop] = myRandom.Next((int)myMapGenerationConfiguration.MapSize);
         }
         fixed (int* randomRainDropIndicesPointer = randomRainDropIndices)
         {

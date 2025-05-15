@@ -159,7 +159,7 @@ internal class ParticleWindErosion : IParticleWindErosion
 
     private uint GetRandomTopIndex()
     {
-        return (uint)myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength) + myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength - myMapGenerationConfiguration.HeightMapSideLength;
+        return (uint)myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength) + myMapGenerationConfiguration.MapSize - myMapGenerationConfiguration.HeightMapSideLength;
     }
 
     private uint GetRandomLeftIndex()

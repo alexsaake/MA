@@ -5,9 +5,9 @@ namespace ProceduralLandscapeGeneration.GUI.Elements;
 
 class ToggleSliderWithLabel : IGUIElement
 {
-    private string myName;
-    private string mySliderOptions;
-    private Action<int> myValueDelegate;
+    private readonly string myName;
+    private readonly string mySliderOptions;
+    private readonly Action<int> myValueDelegate;
     private int myValue;
 
     public ToggleSliderWithLabel(string name, string sliderOptions, Action<int> valueDelegate, int value)

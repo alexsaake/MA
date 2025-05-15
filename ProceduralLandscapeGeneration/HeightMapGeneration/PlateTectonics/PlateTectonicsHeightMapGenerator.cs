@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Common.GPU;
+using ProceduralLandscapeGeneration.Common.GPU.ComputeShaders;
 using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
@@ -16,21 +17,35 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private readonly IRandom myRandom;
     private readonly IShaderBuffers myShaderBuffers;
     private readonly ILifetimeScope myLifetimeScope;
+    private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
+
+    private IComputeShaderProgram? myAddSegmentsToNearestPlateComputeShaderProgram;
+    private IComputeShaderProgram? myRecenterPlateComputeShaderProgram;
 
     private Segment?[]? mySegments;
+    private bool myIsDispoed;
     private readonly List<Plate> myPlates;
 
     public event EventHandler? PlateTectonicsIterationFinished;
 
-    public PlateTectonicsHeightMapGenerator(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IRandom random, IShaderBuffers shaderBuffers, ILifetimeScope lifetimeScope)
+    public PlateTectonicsHeightMapGenerator(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IRandom random, IShaderBuffers shaderBuffers, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myRandom = random;
         myShaderBuffers = shaderBuffers;
         myLifetimeScope = lifetimeScope;
+        myComputeShaderProgramFactory = computeShaderProgramFactory;
 
         myPlates = new List<Plate>();
+    }
+
+    public void Initialize()
+    {
+        myAddSegmentsToNearestPlateComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/PlateTectonics/Shaders/AddSegmentsToNearestPlateComputeShader.glsl");
+        myRecenterPlateComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/PlateTectonics/Shaders/RecenterPlateComputeShader.glsl");
+
+        myIsDispoed = false;
     }
 
     public void GenerateHeightMap()
@@ -44,54 +59,49 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
         CreateEmptyHeightMapShaderBuffer();
     }
 
-    private void CreateSegments()
+    private unsafe void CreateSegments()
     {
-        mySegments = new Segment[myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength];
-        for (uint y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
-        {
-            for (uint x = 0; x < myMapGenerationConfiguration.HeightMapSideLength; x++)
-            {
-                mySegments[x + y * myMapGenerationConfiguration.HeightMapSideLength] = new Segment(x, y, myMapGenerationConfiguration, myShaderBuffers);
-            }
-        }
+        uint plateTectonicsSegmentsSize = (uint)(myMapGenerationConfiguration.MapSize * sizeof(PlateTectonicsSegmentShaderBuffer));
+        myShaderBuffers.Add(ShaderBufferTypes.PlateTectonicsSegments, plateTectonicsSegmentsSize);
     }
 
-    private void CreatePlates()
+    private unsafe void CreatePlates()
     {
-        for (int i = 0; i < myMapGenerationConfiguration.PlateCount; i++)
+        uint plateTectonicsPlatesSize = (uint)(myMapGenerationConfiguration.PlateCount * sizeof(PlateTectonicsPlateShaderBuffer));
+        myShaderBuffers.Add(ShaderBufferTypes.PlateTectonicsPlates, plateTectonicsPlatesSize);
+        PlateTectonicsPlateShaderBuffer[] plateTectonicsPlates = new PlateTectonicsPlateShaderBuffer[myMapGenerationConfiguration.PlateCount];
+        for (int plate = 0; plate < myMapGenerationConfiguration.PlateCount; plate++)
         {
-            myPlates.Add(new Plate(new Vector2(myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength), myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength)), myMapGenerationConfiguration, myShaderBuffers));
+            plateTectonicsPlates[plate].Position = new Vector2(myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength), myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength));
         }
+        fixed (void* plateTectonicsPlatesPointer = plateTectonicsPlates)
+        {
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.PlateTectonicsPlates], plateTectonicsPlatesPointer, plateTectonicsPlatesSize, 0);
+        }
+        Rlgl.MemoryBarrier();
     }
 
-    private void AddSegmentsToNearesPlate()
+    private unsafe void AddSegmentsToNearesPlate()
     {
-        foreach (Segment segment in mySegments!)
-        {
-            float distance = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-            Plate? nearestPlate = null;
-            foreach (Plate plate in myPlates)
-            {
-                float plateToSegmentDistance = (plate.Position - segment.Position).Length();
-                if (plateToSegmentDistance < distance)
-                {
-                    distance = plateToSegmentDistance;
-                    nearestPlate = plate;
-                }
-            }
-            nearestPlate!.Segments.Add(segment);
-            segment.Parent = nearestPlate;
-        }
+        Rlgl.EnableShader(myAddSegmentsToNearestPlateComputeShaderProgram!.Id);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.DisableShader();
+        Rlgl.MemoryBarrier();
 
-        foreach (Plate plate in myPlates)
-        {
-            plate.Recenter();
-        }
+        RecenterPlate();
+    }
+
+    private void RecenterPlate()
+    {
+        Rlgl.EnableShader(myRecenterPlateComputeShaderProgram!.Id);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.PlateCount / 64.0f), 1, 1);
+        Rlgl.DisableShader();
+        Rlgl.MemoryBarrier();
     }
 
     private void CreateEmptyHeightMapShaderBuffer()
     {
-        uint heightMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength * sizeof(float);
+        uint heightMapSize = myMapGenerationConfiguration.MapSize * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapSize);
     }
 
@@ -194,9 +204,8 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     {
         const float generationCooling = -0.1f;
 
-        uint heatMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        uint heatMapBufferSize = heatMapSize * sizeof(float);
-        float[] heatMap = new float[heatMapSize];
+        uint heatMapBufferSize = myMapGenerationConfiguration.MapSize * sizeof(float);
+        float[] heatMap = new float[myMapGenerationConfiguration.MapSize];
         Rlgl.MemoryBarrier();
         fixed (float* heatMapPointer = heatMap)
         {
@@ -240,9 +249,8 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     private unsafe void UpdateHeightMap()
     {
-        uint heightMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        uint heightMapBufferSize = heightMapSize * sizeof(float);
-        float[] heightMap = new float[heightMapSize];
+        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * sizeof(float);
+        float[] heightMap = new float[myMapGenerationConfiguration.MapSize];
         for (int segment = 0; segment < mySegments!.Length; segment++)
         {
             if (mySegments![segment] is null)
@@ -262,7 +270,17 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     public void Dispose()
     {
+        if (myIsDispoed)
+        {
+            return;
+        }
+
+        myAddSegmentsToNearestPlateComputeShaderProgram?.Dispose();
+        myRecenterPlateComputeShaderProgram?.Dispose();
+
         mySegments = null;
         myPlates.Clear();
+
+        myIsDispoed = true;
     }
 }

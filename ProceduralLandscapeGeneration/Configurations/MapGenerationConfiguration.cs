@@ -7,7 +7,7 @@ namespace ProceduralLandscapeGeneration.Configurations;
 
 internal class MapGenerationConfiguration : IMapGenerationConfiguration
 {
-    private IShaderBuffers myShaderBuffers;
+    private readonly IShaderBuffers myShaderBuffers;
 
     private bool myIsDisposed;
 
@@ -147,6 +147,8 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
+    public uint MapSize => HeightMapSideLength * HeightMapSideLength;
+
     private uint myHeightMapSideLength;
     public uint HeightMapSideLength
     {
@@ -215,7 +217,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
     {
         myShaderBuffers = shaderBuffers;
 
-        myMapGeneration = MapGenerationTypes.Cube;
+        myMapGeneration = MapGenerationTypes.Tectonics;
         myMeshCreation = ProcessorTypes.CPU;
         myHeightMapGeneration = ProcessorTypes.CPU;
 

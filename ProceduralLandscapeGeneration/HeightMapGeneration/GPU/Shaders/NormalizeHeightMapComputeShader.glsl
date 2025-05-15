@@ -9,18 +9,18 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
 
 struct HeightMapParameters
 {
-    uint seed;
-    float scale;
-    uint octaves;
-    float persistence;
-    float lacunarity;
-    int min;
-    int max;
+    uint Seed;
+    float Scale;
+    uint Octaves;
+    float Persistence;
+    float Lacunarity;
+    int Min;
+    int Max;
 };
 
-layout(std430, binding = 12) readonly restrict buffer heightMapParametersBuffer
+layout(std430, binding = 12) readonly restrict buffer heightMapParametersShaderBuffer
 {
-    HeightMapParameters parameters;
+    HeightMapParameters heightMapParameters;
 };
 
 float inverseLerp(float lower, float upper, float value)
@@ -36,5 +36,5 @@ void main()
     uint mapSize = sideLength * sideLength;
     if (id >= mapSize) return;
 
-    heightMap[id] = inverseLerp(float(parameters.min) / 100000, float(parameters.max) / 100000, heightMap[id]);
+    heightMap[id] = inverseLerp(float(heightMapParameters.Min) / 100000, float(heightMapParameters.Max) / 100000, heightMap[id]);
 }

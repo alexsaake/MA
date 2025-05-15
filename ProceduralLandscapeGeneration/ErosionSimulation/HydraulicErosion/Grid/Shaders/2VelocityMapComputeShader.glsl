@@ -75,14 +75,14 @@ uint getIndex(uint x, uint y)
 //https://github.com/karhu/terrain-erosion/blob/master/Simulation/FluidSimulation.cpp
 
 void main()
-{    
+{
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length();
-    if(id > heightMapLength)
+    uint gridHydraulicErosionCellsLength = gridHydraulicErosionCells.length();
+    if(id > gridHydraulicErosionCellsLength)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(gridHydraulicErosionCells.length()));
+    myHeightMapSideLength = uint(sqrt(gridHydraulicErosionCellsLength));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;

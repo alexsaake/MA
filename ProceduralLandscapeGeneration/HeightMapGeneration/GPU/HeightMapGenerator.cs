@@ -31,26 +31,25 @@ internal class HeightMapGenerator : IHeightMapGenerator
             Persistence = myMapGenerationConfiguration.NoisePersistence,
             Lacunarity = myMapGenerationConfiguration.NoiseLacunarity
         };
-        uint heightMapParametersBufferSize = (uint)sizeof(HeightMapParametersShaderBuffer);
-        uint heightMapParametersBufferId = Rlgl.LoadShaderBuffer(heightMapParametersBufferSize, &heightMapParameters, Rlgl.DYNAMIC_COPY);
+        uint heightMapParametersShaderBufferSize = (uint)sizeof(HeightMapParametersShaderBuffer);
+        uint heightMapParametersShaderBufferId = Rlgl.LoadShaderBuffer(heightMapParametersShaderBufferSize, &heightMapParameters, Rlgl.DYNAMIC_COPY);
 
-        uint heightMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        uint heightMapBufferSize = heightMapSize * sizeof(float);
+        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
-        ComputeShaderProgram heightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/GPU/Shaders/HeightMapGeneratorComputeShader.glsl");
-        Rlgl.EnableShader(heightMapComputeShaderProgram.Id);
-        Rlgl.ComputeShaderDispatch(heightMapSize, 1, 1);
+        ComputeShaderProgram generateHeightMap = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/GPU/Shaders/GenerateHeightMapComputeShader.glsl");
+        Rlgl.EnableShader(generateHeightMap.Id);
+        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
         Rlgl.DisableShader();
-        heightMapComputeShaderProgram.Dispose();
+        generateHeightMap.Dispose();
 
-        ComputeShaderProgram normalizeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/GPU/Shaders/NormalizeComputeShader.glsl");
-        Rlgl.EnableShader(normalizeComputeShaderProgram.Id);
-        Rlgl.ComputeShaderDispatch(heightMapSize, 1, 1);
+        ComputeShaderProgram normalizeHeightMap = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/GPU/Shaders/NormalizeHeightMapComputeShader.glsl");
+        Rlgl.EnableShader(normalizeHeightMap.Id);
+        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
         Rlgl.DisableShader();
-        normalizeComputeShaderProgram.Dispose();
+        normalizeHeightMap.Dispose();
 
-        Rlgl.UnloadShaderBuffer(heightMapParametersBufferId);
+        Rlgl.UnloadShaderBuffer(heightMapParametersShaderBufferId);
 
         myIsDisposed = false;
     }
@@ -68,19 +67,18 @@ internal class HeightMapGenerator : IHeightMapGenerator
         uint heatMapParametersBufferSize = (uint)sizeof(HeightMapParametersShaderBuffer);
         uint heatMapParametersBufferId = Rlgl.LoadShaderBuffer(heatMapParametersBufferSize, &heatMapParameters, Rlgl.DYNAMIC_COPY);
 
-        uint heatMapSize = myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength;
-        uint heatMapBufferSize = heatMapSize * sizeof(float);
+        uint heatMapBufferSize = myMapGenerationConfiguration.MapSize * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeatMap, heatMapBufferSize);
 
         ComputeShaderProgram heightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/GPU/Shaders/HeightMapGeneratorComputeShader.glsl");
         Rlgl.EnableShader(heightMapComputeShaderProgram.Id);
-        Rlgl.ComputeShaderDispatch(heatMapSize, 1, 1);
+        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
         Rlgl.DisableShader();
         heightMapComputeShaderProgram.Dispose();
 
         ComputeShaderProgram normalizeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/GPU/Shaders/NormalizeComputeShader.glsl");
         Rlgl.EnableShader(normalizeComputeShaderProgram.Id);
-        Rlgl.ComputeShaderDispatch(heatMapSize, 1, 1);
+        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
         Rlgl.DisableShader();
         normalizeComputeShaderProgram.Dispose();
 
@@ -103,7 +101,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateCubeMap()
     {
-        float[] map = new float[myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength];
+        float[] map = new float[myMapGenerationConfiguration.MapSize];
 
         int cudeSideLength = (int)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
         int index = 0;

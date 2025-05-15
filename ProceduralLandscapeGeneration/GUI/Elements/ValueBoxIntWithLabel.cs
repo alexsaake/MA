@@ -5,11 +5,11 @@ namespace ProceduralLandscapeGeneration.GUI.Elements;
 
 class ValueBoxIntWithLabel : IGUIElement
 {
-    private string myName;
-    private Action<int> myValueDelegate;
+    private readonly string myName;
+    private readonly Action<int> myValueDelegate;
     private int myValue;
-    private int myMinValue;
-    private int myMaxValue;
+    private readonly int myMinValue;
+    private readonly int myMaxValue;
 
     private bool myEditMode;
 

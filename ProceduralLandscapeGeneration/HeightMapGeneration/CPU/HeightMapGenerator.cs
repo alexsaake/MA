@@ -52,7 +52,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateNoiseMap()
     {
-        float[] noiseMap = new float[myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength];
+        float[] noiseMap = new float[myMapGenerationConfiguration.MapSize];
 
         Vector2[] octaveOffsets = new Vector2[myMapGenerationConfiguration.NoiseOctaves];
         for (int octave = 0; octave < myMapGenerationConfiguration.NoiseOctaves; octave++)
@@ -120,7 +120,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateCubeMap()
     {
-        float[] map = new float[myMapGenerationConfiguration.HeightMapSideLength * myMapGenerationConfiguration.HeightMapSideLength];
+        float[] map = new float[myMapGenerationConfiguration.MapSize];
 
         int cudeSideLength = (int)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
         int index = 0;

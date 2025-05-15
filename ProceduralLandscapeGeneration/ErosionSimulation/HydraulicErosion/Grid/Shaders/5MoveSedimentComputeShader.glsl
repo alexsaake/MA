@@ -30,6 +30,11 @@ layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
+    uint gridHydraulicErosionCellsLength = gridHydraulicErosionCells.length();
+    if(id > gridHydraulicErosionCellsLength)
+    {
+        return;
+    }
 
     GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[id];
 
