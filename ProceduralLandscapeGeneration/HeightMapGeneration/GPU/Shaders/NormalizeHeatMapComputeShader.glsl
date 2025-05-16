@@ -2,9 +2,9 @@
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-layout(std430, binding = 0) buffer heightMapShaderBuffer
+layout(std430, binding = 1) buffer heatMapShaderBuffer
 {
-    float[] heightMap;
+    float[] heatMap;
 };
 
 struct HeightMapParameters
@@ -31,10 +31,10 @@ float inverseLerp(float lower, float upper, float value)
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    if(id >= heightMap.length())
+    if(id >= heatMap.length())
     {
         return;
     }
 
-    heightMap[id] = inverseLerp(float(heightMapParameters.Min) / 100000, float(heightMapParameters.Max) / 100000, heightMap[id]);
+    heatMap[id] = inverseLerp(float(heightMapParameters.Min) / 100000, float(heightMapParameters.Max) / 100000, heatMap[id]);
 }

@@ -87,9 +87,9 @@ float perlinNoise(vec2 position, uint seed) {
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-layout(std430, binding = 0) buffer heightMapShaderBuffer
+layout(std430, binding = 1) buffer heatMapShaderBuffer
 {
-    float[] heightMap;
+    float[] heatMap;
 };
 
 struct HeightMapParameters
@@ -111,12 +111,12 @@ layout(std430, binding = 12) buffer heightMapParametersShaderBuffer
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length();
-    if(id >= heightMapLength)
+    uint heatMapLength = heatMap.length();
+    if(id >= heatMapLength)
     {
         return;
     }
-    uint heightMapSideLength = uint(sqrt(heightMapLength));
+    uint heightMapSideLength = uint(sqrt(heatMapLength));
 
     uint x = id % heightMapSideLength;
     uint y = id / heightMapSideLength;
@@ -139,7 +139,7 @@ void main()
         frequency *= heightMapParameters.Lacunarity;
     }
 
-    heightMap[id] = noiseHeight;
+    heatMap[id] = noiseHeight;
     int val = int(noiseHeight * 100000);
     atomicMin(heightMapParameters.Min, val);
     atomicMax(heightMapParameters.Max, val);
