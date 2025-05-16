@@ -27,7 +27,9 @@ struct PlateTectonicsPlate
     float Rotation;
     float Torque;
     float AngularVelocity;
+    int PlateSegments;
     vec2 Position;
+    vec2 TempPosition;
     vec2 Acceleration;
     vec2 Speed;
 };
@@ -42,7 +44,7 @@ void main()
 {
     uint id = gl_GlobalInvocationID.x;
     uint plateTectonicsSegmentsLength = plateTectonicsSegments.length();
-    if(id > plateTectonicsSegmentsLength)
+    if(id >= plateTectonicsSegmentsLength)
     {
         return;
     }

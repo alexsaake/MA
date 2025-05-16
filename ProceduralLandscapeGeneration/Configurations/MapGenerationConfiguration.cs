@@ -228,7 +228,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         NoiseLacunarity = 2.0f;
 
         IsPlateTectonicsRunning = false;
-        PlateCount = 10;
+        PlateCount = 3;
 
         HeightMapSideLength = 256;
         myHeightMultiplier = 32;

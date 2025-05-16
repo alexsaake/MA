@@ -32,7 +32,9 @@ struct PlateTectonicsPlate
     float Rotation;
     float Torque;
     float AngularVelocity;
+    int PlateSegments;
     vec2 Position;
+    vec2 TempPosition;
     vec2 Acceleration;
     vec2 Speed;
 };
@@ -60,10 +62,10 @@ vec2 Force(ivec2 position)
     }
 
     //Out-of-Bounds
-    if (position.x <= 0) fx = 0.0f;
-    else if (position.x >= myHeightMapSideLength - 1) fx = -0.0f;
-    if (position.y <= 0) fy = 0.0f;
-    else if (position.y >= myHeightMapSideLength - 1) fy = -0.0f;
+    if (position.x <= 0) fx = 0.0;
+    else if (position.x >= myHeightMapSideLength - 1) fx = -0.0;
+    if (position.y <= 0) fy = 0.0;
+    else if (position.y >= myHeightMapSideLength - 1) fy = -0.0;
 
     return vec2(fx, fy);
 }
@@ -85,7 +87,7 @@ void main()
 {
     uint id = gl_GlobalInvocationID.x;
     uint plateTectonicsSegmentsLength = plateTectonicsSegments.length();
-    if(id > plateTectonicsSegmentsLength)
+    if(id >= plateTectonicsSegmentsLength)
     {
         return;
     }
@@ -97,7 +99,7 @@ void main()
     vec2 force = Force(ivec2(plateTectonicsSegment.Position));
     vec2 direction = plateTectonicsSegment.Position - plateTectonicsPlate.Position;
 
-    plateTectonicsPlate.Acceleration -= Convection * force * 100;
+    plateTectonicsPlate.Acceleration -= Convection * force;
     plateTectonicsPlate.Torque -= Convection * length(direction) * length(force) * sin(Angle(force) - Angle(direction));
 
     plateTectonicsPlates[plateTectonicsSegment.Plate] = plateTectonicsPlate;

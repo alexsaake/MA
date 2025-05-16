@@ -22,9 +22,6 @@ layout(std430, binding = 16) buffer plateTectonicsPlatesShaderBuffer
 };
 
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
-#define PI 3.1415926535897932384626433832795
-float DT = 0.025;
-
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
@@ -34,22 +31,15 @@ void main()
     }
 
     PlateTectonicsPlate plateTectonicsPlate = plateTectonicsPlates[id];
-    
-    if (plateTectonicsPlate.Mass == 0)
-    {
-        return;
-    }
-    plateTectonicsPlate.Speed += DT * plateTectonicsPlate.Acceleration / plateTectonicsPlate.Mass;
-    if (plateTectonicsPlate.Inertia == 0)
-    {
-        return;
-    }
-    plateTectonicsPlate.AngularVelocity += DT * plateTectonicsPlate.Torque / plateTectonicsPlate.Inertia;
-    plateTectonicsPlate.Position += DT * plateTectonicsPlate.Speed;
-    plateTectonicsPlate.Rotation += DT * plateTectonicsPlate.AngularVelocity;
 
-    if (plateTectonicsPlate.Rotation > 2 * PI) plateTectonicsPlate.Rotation -= 2 * PI;
-    if (plateTectonicsPlate.Rotation < 0) plateTectonicsPlate.Rotation += 2 * PI;
+    if(plateTectonicsPlate.PlateSegments > 0)
+    {
+        plateTectonicsPlate.Position = plateTectonicsPlate.TempPosition / plateTectonicsPlate.PlateSegments;
+    }
+    else
+    {
+        plateTectonicsPlate.Position = vec2(0.0);
+    }
 
     plateTectonicsPlates[id] = plateTectonicsPlate;
 

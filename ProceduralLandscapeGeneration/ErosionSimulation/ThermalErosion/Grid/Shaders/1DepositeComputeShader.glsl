@@ -43,7 +43,7 @@ uint getIndex(uint x, uint y)
 void main()
 {    
     uint id = gl_GlobalInvocationID.x;
-    if(id > heightMap.length())
+    if(id >= heightMap.length())
     {
         return;
     }

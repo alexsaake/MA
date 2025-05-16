@@ -19,7 +19,9 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
 
     private IComputeShaderProgram? myAddSegmentsToNearestPlateComputeShaderProgram;
-    private IComputeShaderProgram? myRecenterPlatesComputeShaderProgram;
+    private IComputeShaderProgram? myPrepareRecenterPlatesComputeShaderProgram;
+    private IComputeShaderProgram? myAddPlateSegmentsComputeShaderProgram;
+    private IComputeShaderProgram? myRecenterPlatesPositionComputeShaderProgram;
     private IComputeShaderProgram? myCollideSegmentsComputeShaderProgram;
     private IComputeShaderProgram? myCascadeSegmentsComputeShaderProgram;
     private IComputeShaderProgram? myGrowSegmentsComputeShaderProgram;
@@ -45,7 +47,9 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     public void Initialize()
     {
         myAddSegmentsToNearestPlateComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/PlateTectonics/GPU/Shaders/AddSegmentsToNearestPlateComputeShader.glsl");
-        myRecenterPlatesComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/PlateTectonics/GPU/Shaders/RecenterPlatesComputeShader.glsl");
+        myPrepareRecenterPlatesComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/PlateTectonics/GPU/Shaders/PrepareRecenterPlatesComputeShader.glsl");
+        myAddPlateSegmentsComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/PlateTectonics/GPU/Shaders/AddPlateSegmentsComputeShader.glsl");
+        myRecenterPlatesPositionComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/PlateTectonics/GPU/Shaders/RecenterPlatesPositionComputeShader.glsl");
         myCollideSegmentsComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/PlateTectonics/GPU/Shaders/CollideSegmentsComputeShader.glsl");
         myCascadeSegmentsComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/PlateTectonics/GPU/Shaders/CascadeSegmentsComputeShader.glsl");
         myGrowSegmentsComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("HeightMapGeneration/PlateTectonics/GPU/Shaders/GrowSegmentsComputeShader.glsl");
@@ -114,7 +118,30 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     private void RecenterPlates()
     {
-        Rlgl.EnableShader(myRecenterPlatesComputeShaderProgram!.Id);
+        PrepareRecenterPlates();
+        AddPlateSegments();
+        RecenterPlatesPosition();
+    }
+
+    private void PrepareRecenterPlates()
+    {
+        Rlgl.EnableShader(myPrepareRecenterPlatesComputeShaderProgram!.Id);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.PlateCount / 64.0f), 1, 1);
+        Rlgl.DisableShader();
+        Rlgl.MemoryBarrier();
+    }
+
+    private void AddPlateSegments()
+    {
+        Rlgl.EnableShader(myAddPlateSegmentsComputeShaderProgram!.Id);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.DisableShader();
+        Rlgl.MemoryBarrier();
+    }
+
+    private void RecenterPlatesPosition()
+    {
+        Rlgl.EnableShader(myRecenterPlatesPositionComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.PlateCount / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
@@ -265,7 +292,9 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
         }
 
         myAddSegmentsToNearestPlateComputeShaderProgram?.Dispose();
-        myRecenterPlatesComputeShaderProgram?.Dispose();
+        myPrepareRecenterPlatesComputeShaderProgram?.Dispose();
+        myAddPlateSegmentsComputeShaderProgram?.Dispose();
+        myRecenterPlatesPositionComputeShaderProgram?.Dispose();
         myCollideSegmentsComputeShaderProgram?.Dispose();
         myCascadeSegmentsComputeShaderProgram?.Dispose();
         myGrowSegmentsComputeShaderProgram?.Dispose();

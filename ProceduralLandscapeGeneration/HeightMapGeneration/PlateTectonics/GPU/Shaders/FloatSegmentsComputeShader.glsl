@@ -45,7 +45,7 @@ void main()
 {
     uint id = gl_GlobalInvocationID.x;
     uint plateTectonicsSegmentsLength = plateTectonicsSegments.length();
-    if(id > plateTectonicsSegmentsLength)
+    if(id >= plateTectonicsSegmentsLength)
     {
         return;
     }

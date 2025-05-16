@@ -78,7 +78,7 @@ void main()
 {
     uint id = gl_GlobalInvocationID.x;
     uint gridHydraulicErosionCellsLength = gridHydraulicErosionCells.length();
-    if(id > gridHydraulicErosionCellsLength)
+    if(id >= gridHydraulicErosionCellsLength)
     {
         return;
     }

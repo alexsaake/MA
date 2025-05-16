@@ -114,7 +114,7 @@ void main()
         int plate = plateTectonicsSegments[index].Plate;
         if(plate == 0)
         {
-            terrainColor = vec3(0, 0, 0);
+            terrainColor = vec3(0.75, 0.75, 0.75);
         }
         if(plate == 1)
         {

@@ -140,7 +140,7 @@ void Cascade(ivec2 position)
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    if(id > heightMap.length())
+    if(id >= heightMap.length())
     {
         return;
     }

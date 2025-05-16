@@ -69,6 +69,12 @@
 	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\CascadeSegmentsComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\PrepareRecenterPlatesComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\RecenterPlatesPositionComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\UpdatePlatesAccelerationAndTorqueComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
@@ -96,7 +102,7 @@
 	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\CollideSegmentsComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\RecenterPlatesComputeShader.glsl">
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\AddPlateSegmentsComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Raylib-CsLo.pdb">

@@ -27,7 +27,9 @@ struct PlateTectonicsPlate
     float Rotation;
     float Torque;
     float AngularVelocity;
+    int PlateSegments;
     vec2 Position;
+    vec2 TempPosition;
     vec2 Acceleration;
     vec2 Speed;
 };
@@ -41,38 +43,18 @@ layout(std430, binding = 16) buffer plateTectonicsPlatesShaderBuffer
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint plateTectonicsPlatesLength = plateTectonicsPlates.length();
-    if(id > plateTectonicsPlatesLength)
+    if(id >= plateTectonicsPlates.length())
     {
         return;
     }
 
     PlateTectonicsPlate plateTectonicsPlate = plateTectonicsPlates[id];
 
-    vec2 position = vec2(-1.0);
-    float mass = 0.0;
-    float inertia = 0.0;
-    
-    uint plateSegments = 0;
-    for(uint segment = 0; segment < plateTectonicsSegments.length(); segment++)
-    {
-        if(plateTectonicsSegments[segment].Plate == id)
-        {
-            position += plateTectonicsSegments[segment].Position;
-            mass += plateTectonicsSegments[segment].Mass;
-            inertia += pow((position - plateTectonicsSegments[segment].Position).length(), 2.0) * plateTectonicsSegments[segment].Mass;
-            plateSegments++;
-        }
-    }
-
-    if(plateSegments > 0)
-    {
-        position /= plateSegments;
-    }
-
-    plateTectonicsPlate.Position = position;
-    plateTectonicsPlate.Mass = mass;
-    plateTectonicsPlate.Inertia = inertia;
+    plateTectonicsPlate.PlateSegments = 0;
+    plateTectonicsPlate.Position = vec2(0.0);
+    plateTectonicsPlate.TempPosition = vec2(0.0);
+    plateTectonicsPlate.Mass = 0.0;
+    plateTectonicsPlate.Inertia = 0.0;
 
     plateTectonicsPlates[id] = plateTectonicsPlate;
 

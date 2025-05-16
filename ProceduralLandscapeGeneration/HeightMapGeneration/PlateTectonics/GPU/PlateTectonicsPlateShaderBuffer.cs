@@ -9,8 +9,9 @@ internal struct PlateTectonicsPlateShaderBuffer
     public float Rotation;
     public float Torque;
     public float AngularVelocity;
-    private float padding1;
+    public int PlateSegments;
     public Vector2 Position;
+    public Vector2 TempPosition;
     public Vector2 Acceleration;
     public Vector2 Speed;
 }

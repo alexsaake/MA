@@ -53,7 +53,7 @@ void main()
 {
     uint id = gl_GlobalInvocationID.x;
     uint plateTectonicsSegmentsLength = plateTectonicsSegments.length();
-    if(id > plateTectonicsSegmentsLength)
+    if(id >= plateTectonicsSegmentsLength)
     {
         return;
     }
@@ -88,7 +88,8 @@ void main()
             }
 
             //Two Segments are Colliding, Subduce the Denser One
-            if(plateTectonicsSegment.Density > collidingSegment.Density && !collidingSegment.IsColliding)
+            if(plateTectonicsSegment.Density > collidingSegment.Density
+                && !collidingSegment.IsColliding)
             {
                 collidingSegment.IsColliding = true;
                 plateTectonicsSegment.IsAlive = false;

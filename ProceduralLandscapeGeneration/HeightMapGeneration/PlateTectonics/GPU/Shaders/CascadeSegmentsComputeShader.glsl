@@ -46,7 +46,7 @@ void main()
 {
     uint id = gl_GlobalInvocationID.x;
     uint plateTectonicsSegmentsLength = plateTectonicsSegments.length();
-    if(id > plateTectonicsSegmentsLength)
+    if(id >= plateTectonicsSegmentsLength)
     {
         return;
     }
@@ -72,7 +72,7 @@ void main()
             PlateTectonicsSegment cascadingSegment = plateTectonicsSegments[scanPositionIndex];
             
             float heightDifference = plateTectonicsSegment.Height - cascadingSegment.Height;
-            if(heightDifference < 0)
+            if(heightDifference <= 0)
             {
                 continue;
             }
