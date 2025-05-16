@@ -12,7 +12,6 @@ namespace ProceduralLandscapeGeneration.HeightMapGeneration.PlateTectonics.GPU;
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenerator
 {
-    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IRandom myRandom;
     private readonly IShaderBuffers myShaderBuffers;
@@ -36,7 +35,6 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     public PlateTectonicsHeightMapGenerator(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IRandom random, IShaderBuffers shaderBuffers, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory)
     {
-        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myRandom = random;
         myShaderBuffers = shaderBuffers;
@@ -168,6 +166,8 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
         Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
+
+        RecenterPlates();
     }
 
     private void CascadeSegments()

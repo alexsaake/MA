@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.Common;
+namespace ProceduralLandscapeGeneration.HeightMapGeneration.PlateTectonics;
 
 internal interface IPoissonDiskSampler
 {

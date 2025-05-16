@@ -1,6 +1,7 @@
-﻿using System.Numerics;
+﻿using ProceduralLandscapeGeneration.Common;
+using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.Common;
+namespace ProceduralLandscapeGeneration.HeightMapGeneration.PlateTectonics;
 
 //https://www.youtube.com/watch?v=7WcmyxyFO7o
 internal class PoissonDiskSampler : IPoissonDiskSampler
