@@ -48,15 +48,16 @@ uint getIndexV(ivec2 position)
     return (position.y * myHeightMapSideLength) + position.x;
 }
 
-bool isOutOfBounds(ivec2 position)
+bool IsOutOfBounds(ivec2 position)
 {
-    return position.x < 0 || position.x >= myHeightMapSideLength || position.y < 0 || position.y >= myHeightMapSideLength;
+    return position.x < 0 || position.x >= myHeightMapSideLength
+        || position.y < 0 || position.y >= myHeightMapSideLength;
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/cascade.hpp
 void Cascade(ivec2 position)
 {
-    if(isOutOfBounds(position))
+    if(IsOutOfBounds(position))
     {
         return;
     }
@@ -86,7 +87,7 @@ void Cascade(ivec2 position)
         ivec2 neighboringPosition = neighboringPositions[neighbor];
         ivec2 neighborPosition = position + neighboringPosition;
 
-        if(isOutOfBounds(neighborPosition))
+        if(IsOutOfBounds(neighborPosition))
         {
             continue;
         }

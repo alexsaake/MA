@@ -4,9 +4,14 @@ layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
 struct PlateTectonicsSegment
 {
-    uint Plate;
+    int Plate;
     float Mass;
     float Inertia;
+    float Density;
+    float Height;
+    float Thickness;
+    bool IsAlive;
+    bool IsColliding;
     vec2 Position;
 };
 
@@ -19,7 +24,12 @@ struct PlateTectonicsPlate
 {
     float Mass;
     float Inertia;
+    float Rotation;
+    float Torque;
+    float AngularVelocity;
     vec2 Position;
+    vec2 Acceleration;
+    vec2 Speed;
 };
 
 layout(std430, binding = 16) readonly restrict buffer plateTectonicsPlatesShaderBuffer
@@ -27,6 +37,7 @@ layout(std430, binding = 16) readonly restrict buffer plateTectonicsPlatesShader
     PlateTectonicsPlate[] plateTectonicsPlates;
 };
 
+//https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
@@ -42,10 +53,11 @@ void main()
 
     PlateTectonicsSegment plateTectonicsSegment = plateTectonicsSegments[id];
     plateTectonicsSegment.Position = vec2(x, y);
+    plateTectonicsSegment.IsAlive = true;
     
     float distance = float(plateTectonicsSegmentsLength);
-    uint nearestPlate = 0;
-    for(uint plate = 0; plate < plateTectonicsPlates.length(); plate++)
+    int nearestPlate = -1;
+    for(int plate = 0; plate < plateTectonicsPlates.length(); plate++)
     {
         float plateToSegmentDistance = length(plateTectonicsPlates[plate].Position - plateTectonicsSegment.Position);
         if(plateToSegmentDistance < distance)
@@ -54,7 +66,7 @@ void main()
             nearestPlate = plate;
         }
     }
-    plateTectonicsSegment.Plate = nearestPlate;
+    plateTectonicsSegment.Plate = nearestPlate;    
 
     plateTectonicsSegments[id] = plateTectonicsSegment;
 

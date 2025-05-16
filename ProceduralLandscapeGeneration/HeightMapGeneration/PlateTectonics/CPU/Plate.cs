@@ -5,7 +5,7 @@ using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.HeightMapGeneration.PlateTectonics;
+namespace ProceduralLandscapeGeneration.HeightMapGeneration.PlateTectonics.CPU;
 
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 internal class Plate
@@ -52,7 +52,7 @@ internal class Plate
         Position /= Segments.Count;
     }
 
-    public unsafe void Move(Segment[] allSegments)
+    public void Move(Segment[] allSegments)
     {
         float[] heatMap = ReadHeatMap();
 

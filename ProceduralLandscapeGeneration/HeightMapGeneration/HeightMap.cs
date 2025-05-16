@@ -31,7 +31,6 @@ internal class HeightMap : IHeightMap
                 break;
             case MapGenerationTypes.Tectonics:
                 myPlateTectonicsHeightMapGenerator.Initialize();
-                myPlateTectonicsHeightMapGenerator.GenerateHeightMap();
                 break;
             case MapGenerationTypes.Cube:
                 myHeightMapGenerator.GenerateCubeHeightMap();

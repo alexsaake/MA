@@ -106,7 +106,7 @@ internal class VertexShaderRenderer : IRenderer
         Raylib.SetShaderValue(myTerrainHeightMapShader, lightDirectionLocation, &lightDirection, ShaderUniformDataType.Vec3);
     }
 
-    private unsafe void SetShadowMapShaderValues(Vector3 heightMapCenter, Vector3 lightDirection)
+    private void SetShadowMapShaderValues(Vector3 heightMapCenter, Vector3 lightDirection)
     {
         myShadowMap = LoadShadowMapRenderTexture();
         Vector3 lightCameraPosition = heightMapCenter + lightDirection * -myMapGenerationConfiguration.HeightMapSideLength;
@@ -143,7 +143,7 @@ internal class VertexShaderRenderer : IRenderer
         return target;
     }
 
-    private unsafe void SetCamera(Vector3 heightMapCenter)
+    private void SetCamera(Vector3 heightMapCenter)
     {
         Vector3 cameraPosition = heightMapCenter + new Vector3(myMapGenerationConfiguration.HeightMapSideLength / 2, -myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 2);
         myCamera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
@@ -162,7 +162,7 @@ internal class VertexShaderRenderer : IRenderer
         mySeaLevelQuad.Materials[0].Shader = mySeaLevelQuadShader;
     }
 
-    public unsafe void Update()
+    public void Update()
     {
         UpdateCamera();
         if (myIsUpdateAvailable)
@@ -222,7 +222,7 @@ internal class VertexShaderRenderer : IRenderer
         Raylib.EndMode3D();
     }
 
-    private unsafe void DrawTerrainHeightMap()
+    private void DrawTerrainHeightMap()
     {
         Raylib.DrawModel(myTerrainHeightMap, Vector3.Zero, 1.0f, Color.White);
     }

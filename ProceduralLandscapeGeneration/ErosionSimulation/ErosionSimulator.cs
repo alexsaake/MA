@@ -33,7 +33,7 @@ internal class ErosionSimulator : IErosionSimulator
         myParticleWindErosion = particleWindErosion;
     }
 
-    public unsafe void Initialize()
+    public void Initialize()
     {
         myParticleHydraulicErosion.Initialize();
         myGridHydraulicErosion.Initialize();

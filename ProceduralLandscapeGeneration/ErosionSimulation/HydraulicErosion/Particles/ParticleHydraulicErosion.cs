@@ -35,7 +35,7 @@ internal class ParticleHydraulicErosion : IParticleHydraulicErosion
         myRandom = random;
     }
 
-    public unsafe void Initialize()
+    public void Initialize()
     {
         myParticleHydraulicErosionConfiguration.ParticlesChanged += OnParticlesChanged;
 
@@ -52,7 +52,7 @@ internal class ParticleHydraulicErosion : IParticleHydraulicErosion
         myHasParticlesChanged = true;
     }
 
-    private unsafe void AddHeightMapIndicesShaderBuffer()
+    private void AddHeightMapIndicesShaderBuffer()
     {
         switch (myErosionConfiguration.HydraulicErosionMode)
         {

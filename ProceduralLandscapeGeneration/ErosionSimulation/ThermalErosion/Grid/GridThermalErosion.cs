@@ -26,7 +26,7 @@ internal class GridThermalErosion : IGridThermalErosion
         myShaderBuffers = shaderBuffers;
     }
 
-    public unsafe void Initialize()
+    public void Initialize()
     {
         myFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/ThermalErosion/Grid/Shaders/0FlowComputeShader.glsl");
         myDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/ThermalErosion/Grid/Shaders/1DepositeComputeShader.glsl");
@@ -56,7 +56,7 @@ internal class GridThermalErosion : IGridThermalErosion
         }
     }
 
-    internal unsafe void Flow()
+    internal void Flow()
     {
         Rlgl.EnableShader(myFlowComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
@@ -64,7 +64,7 @@ internal class GridThermalErosion : IGridThermalErosion
         Rlgl.MemoryBarrier();
     }
 
-    internal unsafe void Deposite()
+    internal void Deposite()
     {
         Rlgl.EnableShader(myDepositeComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
@@ -87,7 +87,7 @@ internal class GridThermalErosion : IGridThermalErosion
         myIsDisposed = true;
     }
 
-    private unsafe void RemoveGridThermalErosionCellShaderBuffer()
+    private void RemoveGridThermalErosionCellShaderBuffer()
     {
         myShaderBuffers.Remove(ShaderBufferTypes.GridThermalErosionCell);
     }

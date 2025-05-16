@@ -57,10 +57,46 @@
 	  <None Update="ErosionSimulation\ThermalErosion\Shaders\VertexNormalThermalErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\Shaders\AddSegmentsToNearestPlateComputeShader.glsl">
+	  <None Update="HeightMapGeneration\GPU\Shaders\GenerateHeatMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\Shaders\RecenterPlateComputeShader.glsl">
+	  <None Update="HeightMapGeneration\GPU\Shaders\NormalizeHeatMapComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\AddSegmentsToNearestPlateComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\CascadeSegmentsComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\UpdatePlatesAccelerationAndTorqueComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\UpdateHeightMapComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\FillSegmentsGapComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\CopyTempSegmentsToSegmentsComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\UpdateTempSegmentsPositionComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\FloatSegmentsComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\UpdatePlatesPositionComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\GrowSegmentsComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\CollideSegmentsComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\RecenterPlatesComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Raylib-CsLo.pdb">

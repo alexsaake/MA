@@ -9,7 +9,7 @@ using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.GUI;
 
-internal unsafe class ConfigurationGUI : IConfigurationGUI
+internal class ConfigurationGUI : IConfigurationGUI
 {
     internal static Vector2 PanelSize = new Vector2(170, 25);
     internal static Vector2 ElementXOffset = new Vector2(10, 5);
@@ -141,7 +141,7 @@ internal unsafe class ConfigurationGUI : IConfigurationGUI
         myPlateTectonicsMapGenerationPanel.Add(new ValueBoxIntWithLabel("Plate Count", (value) => mapGenerationConfiguration.PlateCount = value, mapGenerationConfiguration.PlateCount, 0, 100));
     }
 
-    public unsafe void Draw()
+    public void Draw()
     {
         DrawErosionPanels();
         DrawMapGenerationPanels();

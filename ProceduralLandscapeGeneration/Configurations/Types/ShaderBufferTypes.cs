@@ -18,5 +18,6 @@ enum ShaderBufferTypes
     GridThermalErosionCell,
     WindErosionHeightMapIndices,
     PlateTectonicsSegments,
-    PlateTectonicsPlates
+    PlateTectonicsPlates,
+    PlateTectonicsTempSegments
 }

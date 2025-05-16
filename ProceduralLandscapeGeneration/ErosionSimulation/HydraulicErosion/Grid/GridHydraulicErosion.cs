@@ -67,7 +67,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
         myShaderBuffers.Add(ShaderBufferTypes.GridHydraulicErosionCell, (uint)(myMapGenerationConfiguration.MapSize * sizeof(GridHydraulicErosionCellShaderBuffer)));
     }
 
-    private unsafe void AddHeightMapIndicesShaderBuffer()
+    private void AddHeightMapIndicesShaderBuffer()
     {
         switch (myErosionConfiguration.HydraulicErosionMode)
         {

@@ -14,7 +14,7 @@ class Button : IGUIElement
         myOnClickDelegate = onClickDelegate;
     }
 
-    public unsafe void Draw(Vector2 position)
+    public void Draw(Vector2 position)
     {
         if(Raygui.GuiButton(new Rectangle(position, new Vector2(ConfigurationGUI.LabelSize.X + ConfigurationGUI.ElementSize.X, ConfigurationGUI.ElementSize.Y)), myText) == 1)
         {

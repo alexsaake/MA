@@ -21,7 +21,7 @@ internal class VertexNormalThermalErosion : IVertexNormalThermalErosion
         myComputeShaderProgramFactory = computeShaderProgramFactory;
     }
 
-    public unsafe void Initialize()
+    public void Initialize()
     {
         myThermalErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/ThermalErosion/Shaders/VertexNormalThermalErosionSimulationComputeShader.glsl");
 

@@ -48,11 +48,6 @@ uint getIndex(uint x, uint y)
     return (y * myHeightMapSideLength) + x;
 }
 
-bool isOutOfBounds(uint x, uint y)
-{
-    return x < 0 || x > myHeightMapSideLength || y < 0 || y > myHeightMapSideLength;
-}
-
 //https://aparis69.github.io/public_html/posts/terrain_erosion.html
 
 vec3 getScaledNormal(uint x, uint y)

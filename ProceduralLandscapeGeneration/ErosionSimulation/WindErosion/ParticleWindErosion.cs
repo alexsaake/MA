@@ -34,7 +34,7 @@ internal class ParticleWindErosion : IParticleWindErosion
         myRandom = random;
     }
 
-    public unsafe void Initialize()
+    public void Initialize()
     {
         myParticleWindErosionConfiguration.ParticlesChanged += OnParticlesChanged;
 
@@ -51,7 +51,7 @@ internal class ParticleWindErosion : IParticleWindErosion
         myHasParticlesChanged = true;
     }
 
-    private unsafe void AddHeightMapIndicesShaderBuffer()
+    private void AddHeightMapIndicesShaderBuffer()
     {
         myShaderBuffers.Add(ShaderBufferTypes.WindErosionHeightMapIndices, myParticleWindErosionConfiguration.Particles * sizeof(uint));
     }
@@ -61,7 +61,7 @@ internal class ParticleWindErosion : IParticleWindErosion
         myShaderBuffers.Add(ShaderBufferTypes.ParticlesWindErosion, (uint)(myParticleWindErosionConfiguration.Particles * sizeof(ParticleWindErosionShaderBuffer)));
     }
 
-    public unsafe void Simulate()
+    public void Simulate()
     {
         if (myParticleWindErosionConfiguration.PersistentSpeed.Length() == 0)
         {

@@ -4,10 +4,11 @@ using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Common.GPU.ComputeShaders;
 using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.Types;
+using ProceduralLandscapeGeneration.HeightMapGeneration.PlateTectonics.GPU;
 using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.HeightMapGeneration.PlateTectonics;
+namespace ProceduralLandscapeGeneration.HeightMapGeneration.PlateTectonics.CPU;
 
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenerator
@@ -81,7 +82,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
         Rlgl.MemoryBarrier();
     }
 
-    private unsafe void AddSegmentsToNearesPlate()
+    private void AddSegmentsToNearesPlate()
     {
         Rlgl.EnableShader(myAddSegmentsToNearestPlateComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);

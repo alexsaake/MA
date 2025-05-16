@@ -62,9 +62,10 @@ uint getIndexV(ivec2 position)
     return (position.y * myHeightMapSideLength) + position.x;
 }
 
-bool isOutOfBounds(ivec2 position)
+bool IsOutOfBounds(ivec2 position)
 {
-    return position.x < 0 || position.x >= myHeightMapSideLength || position.y < 0 || position.y >= myHeightMapSideLength;
+    return position.x < 0 || position.x >= myHeightMapSideLength
+        || position.y < 0 || position.y >= myHeightMapSideLength;
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/wind.hpp
@@ -129,7 +130,7 @@ bool Move()
 {
     const ivec2 position = ivec2(myParticleWindErosion.Position.x, myParticleWindErosion.Position.y);
 
-    if(isOutOfBounds(position))
+    if(IsOutOfBounds(position))
     {
         myParticleWindErosion.Sediment = 0.0;
         myParticleWindErosion.Age = 0;
@@ -198,7 +199,7 @@ bool Interact()
 
     const ivec2 currentPosition = ivec2(myParticleWindErosion.Position.x, myParticleWindErosion.Position.y);
 
-    if(isOutOfBounds(currentPosition))
+    if(IsOutOfBounds(currentPosition))
     {
         return false;
     }

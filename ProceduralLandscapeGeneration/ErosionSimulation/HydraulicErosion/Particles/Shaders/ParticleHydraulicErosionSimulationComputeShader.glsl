@@ -77,9 +77,10 @@ uint getIndexV(ivec2 position)
     return (position.y * myHeightMapSideLength) + position.x;
 }
 
-bool isOutOfBounds(ivec2 position)
+bool IsOutOfBounds(ivec2 position)
 {
-    return position.x < 0 || position.x >= myHeightMapSideLength || position.y < 0 || position.y >= myHeightMapSideLength;
+    return position.x < 0 || position.x >= myHeightMapSideLength
+        || position.y < 0 || position.y >= myHeightMapSideLength;
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/water.hpp
@@ -115,7 +116,7 @@ bool Move()
 {
     const ivec2 position = ivec2(myParticleHydraulicErosion.Position);
 
-    if(isOutOfBounds(position))
+    if(IsOutOfBounds(position))
     {
         myParticleHydraulicErosion.Sediment = 0;
         myParticleHydraulicErosion.Volume = 0;
@@ -151,13 +152,13 @@ bool Interact()
 {
     const ivec2 position = ivec2(myOriginalPosition);
 
-    if(isOutOfBounds(position))
+    if(IsOutOfBounds(position))
     {
         return false;
     }
 
     float h2;
-    if(isOutOfBounds(ivec2(myParticleHydraulicErosion.Position)))
+    if(IsOutOfBounds(ivec2(myParticleHydraulicErosion.Position)))
     {
         h2 = 0.99 * heightMap[getIndexV(position)];
     }
