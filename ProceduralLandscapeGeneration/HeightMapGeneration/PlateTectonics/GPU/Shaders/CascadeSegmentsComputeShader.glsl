@@ -53,7 +53,7 @@ void main()
     myHeightMapSideLength = uint(sqrt(plateTectonicsSegmentsLength));
 
     PlateTectonicsSegment plateTectonicsSegment = plateTectonicsSegments[id];
-
+    
     if(!plateTectonicsSegment.IsColliding)
     {
         return;
@@ -72,7 +72,8 @@ void main()
             PlateTectonicsSegment cascadingSegment = plateTectonicsSegments[scanPositionIndex];
             
             float heightDifference = plateTectonicsSegment.Height - cascadingSegment.Height;
-            if(heightDifference <= 0)
+            if(!cascadingSegment.IsAlive
+                || heightDifference <= 0)
             {
                 continue;
             }
@@ -93,7 +94,7 @@ void main()
             plateTectonicsSegments[scanPositionIndex] = cascadingSegment;
         }
     }
-
+    
     plateTectonicsSegment.IsColliding = false;
 
     plateTectonicsSegments[id] = plateTectonicsSegment;

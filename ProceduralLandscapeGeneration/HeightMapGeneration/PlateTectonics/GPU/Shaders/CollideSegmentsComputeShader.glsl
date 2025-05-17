@@ -65,6 +65,9 @@ void main()
     {
         plateTectonicsSegment.IsAlive = false;
         plateTectonicsSegment.Plate = -1;
+
+        plateTectonicsSegments[id] = plateTectonicsSegment;
+
         return;
     }
 
@@ -88,8 +91,7 @@ void main()
             }
 
             //Two Segments are Colliding, Subduce the Denser One
-            if(plateTectonicsSegment.Density > collidingSegment.Density
-                && !collidingSegment.IsColliding)
+            if(plateTectonicsSegment.Density > collidingSegment.Density)
             {
                 collidingSegment.IsColliding = true;
                 plateTectonicsSegment.IsAlive = false;
@@ -98,13 +100,20 @@ void main()
                 float massDifference = plateTectonicsSegment.Height * plateTectonicsSegment.Density;
                 float heightDifference = plateTectonicsSegment.Height;
 
-                collidingSegment.Thickness += heightDifference;  //Move Mass
+                collidingSegment.Thickness += heightDifference;
                 collidingSegment.Mass += massDifference;
                 collidingSegment = Buoyancy(collidingSegment);
 
                 plateTectonicsSegments[scanPositionIndex] = collidingSegment;
-
-                heatMap[scanPositionIndex] += subductionHeating;
+                
+                for(int j = -2; j <= 2; j++)
+                {
+                    for(int i = -2; i <= 2; i++)
+                    {
+                        uint subductionHeatingIndex = getIndexV(scanPosition + ivec2(i, j));
+                        heatMap[subductionHeatingIndex] = clamp(heatMap[subductionHeatingIndex] + subductionHeating, 0.0, 1.0);
+                    }
+                }
 
                 break;
             }

@@ -91,7 +91,14 @@ void main()
 
     plateTectonicsSegments[id] = deadSegment;
     
-    heatMap[id] += generationCooling;
+    for(int j = -2; j <= 2; j++)
+    {
+        for(int i = -2; i <= 2; i++)
+        {
+            uint generationCoolingIndex = getIndexV(deadSegment.Position + ivec2(i, j));
+            heatMap[generationCoolingIndex] = clamp(heatMap[generationCoolingIndex] + generationCooling, 0.0, 1.0);
+        }
+    }
 
     memoryBarrier();
 }
