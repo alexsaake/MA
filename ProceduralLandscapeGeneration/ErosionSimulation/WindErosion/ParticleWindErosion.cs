@@ -147,7 +147,7 @@ internal class ParticleWindErosion : IParticleWindErosion
         }
         fixed (uint* randomHeightMapIndicesPointer = randomParticleIndices)
         {
-            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HydraulicErosionHeightMapIndices], randomHeightMapIndicesPointer, myParticleWindErosionConfiguration.Particles * sizeof(uint), 0);
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.WindErosionHeightMapIndices], randomHeightMapIndicesPointer, myParticleWindErosionConfiguration.Particles * sizeof(uint), 0);
         }
         Rlgl.MemoryBarrier();
     }
