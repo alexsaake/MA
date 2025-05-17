@@ -43,26 +43,28 @@ internal class ConfigurationGUI : IConfigurationGUI
 
         myErosionPanel = new PanelWithElements("Erosion Simulation");
         myErosionPanel.Add(new ToggleSliderWithLabel("Running", "Off;On", (value) => erosionConfiguration.IsSimulationRunning = value == 1, erosionConfiguration.IsSimulationRunning ? 1 : 0));
+        myErosionPanel.Add(new ToggleSliderWithLabel("Particles Added", "Off;On", (value) =>
+        {
+            erosionConfiguration.IsWaterAdded = value == 1;
+            particleHydraulicErosionConfiguration.AreParticlesAdded = value == 1;
+            particleWindErosionConfiguration.AreParticlesAdded = value == 1;
+        }, erosionConfiguration.IsWaterAdded ? 1 : 0));
         myErosionPanel.Add(new ToggleSliderWithLabel("Hydraulic Erosion", "Off;On", (value) => erosionConfiguration.IsHydraulicErosionEnabled = value == 1, erosionConfiguration.IsHydraulicErosionEnabled ? 1 : 0));
         myErosionPanel.Add(new ComboBox("Hydraulic Particle;Hydraulic Grid", (value) =>
                                                                                             {
                                                                                                 erosionConfiguration.HydraulicErosionMode = (HydraulicErosionModeTypes)value;
                                                                                                 ErosionModeChanged?.Invoke(this, EventArgs.Empty);
                                                                                             }, (int)erosionConfiguration.HydraulicErosionMode));
-        myErosionPanel.Add(new ToggleSliderWithLabel("Rain Added", "Off;On", (value) =>
-        {
-            erosionConfiguration.IsWaterAdded = value == 1;
-            particleHydraulicErosionConfiguration.AreParticlesAdded = value == 1;
-            particleWindErosionConfiguration.AreParticlesAdded = value == 1;
-        }, erosionConfiguration.IsWaterAdded ? 1 : 0));
         myErosionPanel.Add(new ToggleSliderWithLabel("Water Displayed", "Off;On", (value) => erosionConfiguration.IsWaterDisplayed = value == 1, erosionConfiguration.IsWaterDisplayed ? 1 : 0));
-        myErosionPanel.Add(new ToggleSliderWithLabel("Sediment Displayed", "Off;On", (value) => erosionConfiguration.IsSedimentDisplayed = value == 1, erosionConfiguration.IsSedimentDisplayed ? 1 : 0));
+        ToggleSliderWithLabel sedimentDisplayedSlider = new ToggleSliderWithLabel("Sediment Displayed", "Off;On", (value) => erosionConfiguration.IsSedimentDisplayed = value == 1, erosionConfiguration.IsSedimentDisplayed ? 1 : 0);
+        myErosionPanel.Add(sedimentDisplayedSlider);
         myErosionPanel.Add(new ToggleSliderWithLabel("Wind Erosion", "Off;On", (value) => erosionConfiguration.IsWindErosionEnabled = value == 1, erosionConfiguration.IsWindErosionEnabled ? 1 : 0));
         myErosionPanel.Add(new ComboBox("Wind Particle", (value) =>
                                                                                             {
                                                                                                 erosionConfiguration.WindErosionMode = (WindErosionModeTypes)value;
                                                                                                 ErosionModeChanged?.Invoke(this, EventArgs.Empty);
                                                                                             }, (int)erosionConfiguration.WindErosionMode));
+        myErosionPanel.Add(sedimentDisplayedSlider);
         myErosionPanel.Add(new ToggleSliderWithLabel("Thermal Erosion", "Off;On", (value) => erosionConfiguration.IsThermalErosionEnabled = value == 1, erosionConfiguration.IsThermalErosionEnabled ? 1 : 0));
         myErosionPanel.Add(new ComboBox("Thermal Grid;Thermal Cascade;Thermal Vertex Normal", (value) =>
                                                                                             {
