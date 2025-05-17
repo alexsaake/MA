@@ -16,13 +16,14 @@ internal interface IMapGenerationConfiguration : IDisposable
     float NoiseLacunarity { get; set; }
 
     bool IsPlateTectonicsRunning { get; set; }
+    bool ArePlateTectonicsPlateColorsEnabled { get; set; }
     int PlateCount { get; set; }
 
     uint MapSize { get; }
     uint HeightMapSideLength { get; set; }
     uint HeightMultiplier { get; set; }
     CameraMode CameraMode { get; set; }
-    bool IsColorEnabled { get; set; }
+    bool AreTerrainColorsEnabled { get; set; }
 
     event EventHandler? ResetRequired;
     event EventHandler? HeightMultiplierChanged;

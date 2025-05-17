@@ -27,7 +27,8 @@ layout(std430, binding = 0) readonly restrict buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    bool IsColorEnabled;
+    bool AreTerrainColorsEnabled;
+    bool ArePlateTectonicsPlateColorsEnabled;
 };
 
 layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
@@ -99,7 +100,7 @@ void addVertex(uint vertex, uint x, uint y)
     gl_MeshVerticesNV[vertex].gl_Position = position;
     v_out[vertex].position = position;
     vec3 terrainColor = vec3(1.0);
-    if(mapGenerationConfiguration.IsColorEnabled)
+    if(mapGenerationConfiguration.AreTerrainColorsEnabled)
     {
         if(terrainHeight < seaLevelHeight + 0.3)
         {

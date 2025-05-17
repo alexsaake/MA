@@ -147,6 +147,21 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
+    private bool myArePlateTectonicsPlateColorsEnabled;
+    public bool ArePlateTectonicsPlateColorsEnabled
+    {
+        get => myArePlateTectonicsPlateColorsEnabled;
+        set
+        {
+            if (myArePlateTectonicsPlateColorsEnabled == value)
+            {
+                return;
+            }
+            myArePlateTectonicsPlateColorsEnabled = value;
+            UpdateShaderBuffer();
+        }
+    }
+
     public uint MapSize => HeightMapSideLength * HeightMapSideLength;
 
     private uint myHeightMapSideLength;
@@ -180,17 +195,17 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
-    private bool myIsColorEnabled;
-    public bool IsColorEnabled
+    private bool myAreTerrainColorsEnabled;
+    public bool AreTerrainColorsEnabled
     {
-        get => myIsColorEnabled;
+        get => myAreTerrainColorsEnabled;
         set
         {
-            if (myIsColorEnabled == value)
+            if (myAreTerrainColorsEnabled == value)
             {
                 return;
             }
-            myIsColorEnabled = value;
+            myAreTerrainColorsEnabled = value;
             UpdateShaderBuffer();
         }
     }
@@ -228,12 +243,13 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         NoiseLacunarity = 2.0f;
 
         IsPlateTectonicsRunning = false;
+        myArePlateTectonicsPlateColorsEnabled = true;
         PlateCount = 3;
 
         HeightMapSideLength = 256;
         myHeightMultiplier = 32;
         myCameraMode = CameraMode.Custom;
-        myIsColorEnabled = false;
+        myAreTerrainColorsEnabled = false;
     }
 
     public void Initialize()
@@ -252,7 +268,8 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         MapGenerationConfigurationShaderBuffer mapGenerationConfigurationShaderBuffer = new MapGenerationConfigurationShaderBuffer()
         {
             HeightMultiplier = HeightMultiplier,
-            IsColorEnabled = IsColorEnabled
+            AreTerrainColorsEnabled = AreTerrainColorsEnabled,
+            ArePlateTectonicsPlateColorsEnabled = ArePlateTectonicsPlateColorsEnabled
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], &mapGenerationConfigurationShaderBuffer, (uint)sizeof(MapGenerationConfigurationShaderBuffer), 0);
     }

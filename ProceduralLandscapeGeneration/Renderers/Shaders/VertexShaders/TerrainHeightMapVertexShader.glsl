@@ -8,7 +8,8 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    bool IsColorEnabled;
+    bool AreTerrainColorsEnabled;
+    bool ArePlateTectonicsPlateColorsEnabled;
 };
 
 layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
@@ -109,63 +110,52 @@ void main()
     fragNormal = transpose(inverse(mat3(matModel))) * normal;
     
     vec3 terrainColor = vec3(1.0);
-    if(plateTectonicsSegments.length() > 0)
+    if(plateTectonicsSegments.length() > 0
+        && mapGenerationConfiguration.ArePlateTectonicsPlateColorsEnabled)
     {
         int plate = plateTectonicsSegments[index].Plate;
         if(plate == 0)
         {
-            terrainColor = vec3(0.75, 0.75, 0.75);
+            terrainColor = vec3(1, 0, 0);
         }
         if(plate == 1)
         {
-            terrainColor = vec3(1, 0, 0);
+            terrainColor = vec3(0, 1, 0);
         }
         if(plate == 2)
         {
-            terrainColor = vec3(0, 1, 0);
+            terrainColor = vec3(0, 0, 1);
         }
         if(plate == 3)
         {
-            terrainColor = vec3(0, 0, 1);
+            terrainColor = vec3(1, 0, 1);
         }
         if(plate == 4)
         {
-            terrainColor = vec3(1, 0, 1);
+            terrainColor = vec3(0, 1, 1);
         }
         if(plate == 5)
         {
-            terrainColor = vec3(0, 1, 1);
+            terrainColor = vec3(1, 1, 0);
         }
         if(plate == 6)
         {
-            terrainColor = vec3(1, 1, 0);
+            terrainColor = vec3(0.5, 0, 0);
         }
         if(plate == 7)
         {
-            terrainColor = vec3(0.5, 0, 0);
+            terrainColor = vec3(0, 0.5, 0);
         }
         if(plate == 8)
         {
-            terrainColor = vec3(0, 0.5, 0);
+            terrainColor = vec3(0, 0, 0.5);
         }
         if(plate == 9)
         {
-            terrainColor = vec3(0, 0, 0.5);
-        }
-        if(plate == 10)
-        {
             terrainColor = vec3(0.5, 0, 0.5);
         }
-        if(plate == 11)
-        {
-            terrainColor = vec3(0, 0.5, 0.5);
-        }
-        if(plate == 12)
-        {
-            terrainColor = vec3(0.5, 0.5, 0);
-        }
     }
-    if(mapGenerationConfiguration.IsColorEnabled)
+    else if(mapGenerationConfiguration.AreTerrainColorsEnabled)
     {
         if(terrainHeight < seaLevelHeight + 0.3)
         {

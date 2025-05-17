@@ -3,7 +3,8 @@
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    bool IsColorEnabled;
+    bool AreTerrainColorsEnabled;
+    bool ArePlateTectonicsPlateColorsEnabled;
 };
 
 layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer

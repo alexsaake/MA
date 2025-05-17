@@ -75,7 +75,7 @@ internal class Application : IApplication
             {
                 myHeightMap.SimulatePlateTectonics();
             }
-            else if (myErosionConfiguration.IsSimulationRunning)
+            if (myErosionConfiguration.IsSimulationRunning)
             {
                 myErosionSimulator.Simulate();
             }
