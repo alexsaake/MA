@@ -157,7 +157,7 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
         myWaterIncrease = 0.001f;
         myGravity = 9.81f;
         myDampening = 0.5f;
-        myMaximalErosionDepth = 1.0f;
+        myMaximalErosionDepth = 0.001f;
         mySedimentCapacity = 0.1f;
         mySuspensionRate = 0.05f;
         myDepositionRate = 0.04f;

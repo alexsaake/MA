@@ -27,12 +27,6 @@ layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
     GridHydraulicErosionCell[] gridHydraulicErosionCells;
 };
 
-struct ErosionConfiguration
-{
-    float SeaLevel;
-    float TimeDelta;
-};
-
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
@@ -42,6 +36,12 @@ struct MapGenerationConfiguration
 layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
     MapGenerationConfiguration mapGenerationConfiguration;
+};
+
+struct ErosionConfiguration
+{
+    float SeaLevel;
+    float TimeDelta;
 };
 
 layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
@@ -97,7 +97,12 @@ void main()
     
     GridHydraulicErosionCell gridHydraulicErosionCell  = gridHydraulicErosionCells[id];
     
-    float totalHeight = (heightMap[id] + gridHydraulicErosionCell.WaterHeight) * mapGenerationConfiguration.HeightMultiplier;
+    float height = heightMap[id];
+    if(height < erosionConfiguration.SeaLevel)
+    {
+        gridHydraulicErosionCell.WaterHeight = erosionConfiguration.SeaLevel - height;
+    }
+    float totalHeight = (height + gridHydraulicErosionCell.WaterHeight) * mapGenerationConfiguration.HeightMultiplier;
 
     if(x > 0)
     {
