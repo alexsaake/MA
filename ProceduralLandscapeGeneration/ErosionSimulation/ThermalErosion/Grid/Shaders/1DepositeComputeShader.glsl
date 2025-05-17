@@ -22,8 +22,8 @@ struct GridThermalErosionCell
 {
     float FlowLeft;
     float FlowRight;
-    float FlowTop;
-    float FlowBottom;
+    float FlowUp;
+    float FlowDown;
 };
 
 layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
@@ -54,8 +54,8 @@ void main()
     
     GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[id];
 
-    float flowIn = gridThermalErosionCells[getIndex(x - 1, y)].FlowRight + gridThermalErosionCells[getIndex(x + 1, y)].FlowLeft + gridThermalErosionCells[getIndex(x, y - 1)].FlowTop + gridThermalErosionCells[getIndex(x, y + 1)].FlowBottom;
-    float flowOut = gridThermalErosionCell.FlowRight + gridThermalErosionCell.FlowLeft + gridThermalErosionCell.FlowTop + gridThermalErosionCell.FlowBottom;
+    float flowIn = gridThermalErosionCells[getIndex(x - 1, y)].FlowRight + gridThermalErosionCells[getIndex(x + 1, y)].FlowLeft + gridThermalErosionCells[getIndex(x, y - 1)].FlowUp + gridThermalErosionCells[getIndex(x, y + 1)].FlowDown;
+    float flowOut = gridThermalErosionCell.FlowRight + gridThermalErosionCell.FlowLeft + gridThermalErosionCell.FlowUp + gridThermalErosionCell.FlowDown;
 
 	float volumeDelta = (flowIn - flowOut) * erosionConfiguration.TimeDelta;
 

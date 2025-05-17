@@ -46,8 +46,8 @@ public class GridThermalErosionTests
         {
             Assert.That(cell.FlowLeft, Is.Zero);
             Assert.That(cell.FlowRight, Is.Zero);
-            Assert.That(cell.FlowTop, Is.Zero);
-            Assert.That(cell.FlowBottom, Is.Zero);
+            Assert.That(cell.FlowUp, Is.Zero);
+            Assert.That(cell.FlowDown, Is.Zero);
         }
     }
 

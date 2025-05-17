@@ -6,6 +6,7 @@ public struct GridErosionConfigurationShaderBuffer
     public float Gravity;
     public float Dampening;
     public float MaximalErosionDepth;
+    public float SedimentCapacity;
     public float SuspensionRate;
     public float DepositionRate;
     public float EvaporationRate;

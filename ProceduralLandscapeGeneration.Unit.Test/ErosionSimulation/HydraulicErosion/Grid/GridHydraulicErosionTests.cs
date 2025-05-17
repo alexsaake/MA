@@ -46,8 +46,8 @@ public class GridHydraulicErosionTests
         {
             Assert.That(gridPoint.FlowLeft, Is.Zero);
             Assert.That(gridPoint.FlowRight, Is.Zero);
-            Assert.That(gridPoint.FlowTop, Is.Zero);
-            Assert.That(gridPoint.FlowBottom, Is.Zero);
+            Assert.That(gridPoint.FlowUp, Is.Zero);
+            Assert.That(gridPoint.FlowDown, Is.Zero);
         }
     }
 
@@ -71,8 +71,8 @@ public class GridHydraulicErosionTests
         {
             Assert.That(gridPoint.FlowLeft, Is.Zero);
             Assert.That(gridPoint.FlowRight, Is.Zero);
-            Assert.That(gridPoint.FlowTop, Is.Zero);
-            Assert.That(gridPoint.FlowBottom, Is.Zero);
+            Assert.That(gridPoint.FlowUp, Is.Zero);
+            Assert.That(gridPoint.FlowDown, Is.Zero);
         }
     }
 
@@ -113,8 +113,8 @@ public class GridHydraulicErosionTests
         GridHydraulicErosionCellShaderBuffer centerGridPoint = gridHydraulicErosionCells[GetIndex(1, 1)];
         Assert.That(centerGridPoint.FlowLeft, Is.EqualTo(expectedFlow).Within(0.00001f));
         Assert.That(centerGridPoint.FlowRight, Is.EqualTo(expectedFlow).Within(0.00001f));
-        Assert.That(centerGridPoint.FlowTop, Is.EqualTo(expectedFlow).Within(0.00001f));
-        Assert.That(centerGridPoint.FlowBottom, Is.EqualTo(expectedFlow).Within(0.00001f));
+        Assert.That(centerGridPoint.FlowUp, Is.EqualTo(expectedFlow).Within(0.00001f));
+        Assert.That(centerGridPoint.FlowDown, Is.EqualTo(expectedFlow).Within(0.00001f));
     }
 
     [Test]

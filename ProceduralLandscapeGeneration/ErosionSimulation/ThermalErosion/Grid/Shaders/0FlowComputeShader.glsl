@@ -45,8 +45,8 @@ struct GridThermalErosionCell
 {
     float FlowLeft;
     float FlowRight;
-    float FlowTop;
-    float FlowBottom;
+    float FlowUp;
+    float FlowDown;
 };
 
 layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
@@ -102,16 +102,16 @@ void main()
 		flowRight = heightDifferenceRight;
 	}
 
-	float flowTop = 0;
+	float FlowUp = 0;
 	if (tangensAngleTop > thermalErosionConfiguration.TangensTalusAngle)
 	{
-		flowTop = heightDifferenceTop;
+		FlowUp = heightDifferenceTop;
 	}
 
-	float flowBottom = 0;
+	float FlowDown = 0;
 	if (tangensAngleBottom > thermalErosionConfiguration.TangensTalusAngle)
 	{
-		flowBottom = heightDifferenceBottom;
+		FlowDown = heightDifferenceBottom;
 	}
 
 	// Output flux
@@ -139,20 +139,20 @@ void main()
 
 		if(y > 0)
 		{
-			gridThermalErosionCell.FlowBottom = max(volumeToBeMoved * flowBottom / totalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.FlowDown = max(volumeToBeMoved * FlowDown / totalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
-			gridThermalErosionCell.FlowBottom = 0;
+			gridThermalErosionCell.FlowDown = 0;
 		}
 		
 		if(y < myHeightMapSideLength - 1)
 		{
-			gridThermalErosionCell.FlowTop = max(volumeToBeMoved * flowTop / totalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.FlowUp = max(volumeToBeMoved * FlowUp / totalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
-			gridThermalErosionCell.FlowTop = 0;
+			gridThermalErosionCell.FlowUp = 0;
 		}
 	}
 

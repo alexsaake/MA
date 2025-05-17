@@ -7,6 +7,7 @@ internal interface IGridErosionConfiguration : IDisposable
     float Gravity { get; set; }
     float Dampening { get; set; }
     float MaximalErosionDepth { get; set; }
+    float SedimentCapacity { get; set; }
     float SuspensionRate { get; set; }
     float DepositionRate { get; set; }
     float EvaporationRate { get; set; }

@@ -27,16 +27,10 @@
 	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\1FlowComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\2VelocityMapComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\2WaterSedimentMoveVelocityMapEvaporateComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\3SuspendDepositeComputeShader.glsl">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\4EvaporateComputeShader.glsl">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\5MoveSedimentComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="ErosionSimulation\ThermalErosion\Grid\Shaders\1DepositeComputeShader.glsl">

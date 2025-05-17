@@ -35,12 +35,15 @@ layout(std430, binding = 3) buffer particleWindErosionShaderBuffer
 struct GridHydraulicErosionCell
 {
     float WaterHeight;
-    float SuspendedSediment;
-    float TempSediment;
     float FlowLeft;
     float FlowRight;
-    float FlowTop;
-    float FlowBottom;    
+    float FlowUp;
+    float FlowDown;
+    float SuspendedSediment;
+    float SedimentFlowLeft;
+    float SedimentFlowRight;
+    float SedimentFlowUp;
+    float SedimentFlowDown;
     vec2 Velocity;
 };
 

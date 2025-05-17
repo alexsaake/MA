@@ -48,6 +48,11 @@ layout(std430, binding = 16) readonly restrict buffer plateTectonicsPlatesShader
 uint myHeightMapSideLength;
 float generationCooling = -0.1;
 
+uint getIndexV(ivec2 position)
+{
+    return (position.y * myHeightMapSideLength) + position.x;
+}
+
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
@@ -95,7 +100,7 @@ void main()
     {
         for(int i = -2; i <= 2; i++)
         {
-            uint generationCoolingIndex = getIndexV(deadSegment.Position + ivec2(i, j));
+            uint generationCoolingIndex = getIndexV(ivec2(deadSegment.Position) + ivec2(i, j));
             heatMap[generationCoolingIndex] = clamp(heatMap[generationCoolingIndex] + generationCooling, 0.0, 1.0);
         }
     }

@@ -18,18 +18,14 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     private readonly IShaderBuffers myShaderBuffers;
     private readonly IRandom myRandom;
 
-    private ComputeShaderProgram? myRainHydraulicErosionGridSimulationComputeShaderProgram;
-    private ComputeShaderProgram? myFlowHydraulicErosionGridSimulationComputeShaderProgram;
-    private ComputeShaderProgram? myVelocityMapHydraulicErosionGridSimulationComputeShaderProgram;
-    private ComputeShaderProgram? mySuspendDepositeHydraulicErosionGridSimulationComputeShaderProgram;
-    private ComputeShaderProgram? myEvaporateHydraulicErosionGridSimulationComputeShaderProgram;
-    private ComputeShaderProgram? myMoveSedimentHydraulicErosionGridSimulationComputeShaderProgram;
+    private ComputeShaderProgram? myRainComputeShaderProgram;
+    private ComputeShaderProgram? myFlowComputeShaderProgram;
+    private ComputeShaderProgram? myWaterSedimentMoveVelocityMapEvaporateComputeShaderProgram;
+    private ComputeShaderProgram? mySuspendDepositeComputeShaderProgram;
 
     private bool myHasRainDropsChangedChanged;
     private bool myIsDisposed;
 
-    //https://trossvik.com/procedural/
-    //https://lilyraeburn.com/Thesis.html
     public GridHydraulicErosion(IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IMapGenerationConfiguration mapGenerationConfiguration, IShaderBuffers shaderBuffers, IRandom random)
     {
         myErosionConfiguration = erosionConfiguration;
@@ -44,12 +40,10 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     {
         myGridErosionConfiguration.RainDropsChanged += OnRainDropsChanged;
 
-        myRainHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/0RainComputeShader.glsl");
-        myFlowHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/1FlowComputeShader.glsl");
-        myVelocityMapHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/2VelocityMapComputeShader.glsl");
-        mySuspendDepositeHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/3SuspendDepositeComputeShader.glsl");
-        myEvaporateHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/4EvaporateComputeShader.glsl");
-        myMoveSedimentHydraulicErosionGridSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/5MoveSedimentComputeShader.glsl");
+        myRainComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/0RainComputeShader.glsl");
+        myFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/1FlowComputeShader.glsl");
+        myWaterSedimentMoveVelocityMapEvaporateComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/2WaterSedimentMoveVelocityMapEvaporateComputeShader.glsl");
+        mySuspendDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/3SuspendDepositeComputeShader.glsl");
 
         AddGridHydraulicErosionCellShaderBuffer();
         AddHeightMapIndicesShaderBuffer();
@@ -99,10 +93,8 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
                 AddRain();
             }
             Flow();
-            VelocityMap();
+            WaterSedimentMoveVelocityMapEvaporate();
             SuspendDeposite();
-            Evaporate();
-            MoveSediment();
         }
     }
 
@@ -115,7 +107,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
         }
         CreateRandomIndices();
 
-        Rlgl.EnableShader(myRainHydraulicErosionGridSimulationComputeShaderProgram!.Id);
+        Rlgl.EnableShader(myRainComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myGridErosionConfiguration.RainDrops / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
@@ -123,15 +115,15 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
 
     internal void Flow()
     {
-        Rlgl.EnableShader(myFlowHydraulicErosionGridSimulationComputeShaderProgram!.Id);
+        Rlgl.EnableShader(myFlowComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
 
-    internal void VelocityMap()
+    internal void WaterSedimentMoveVelocityMapEvaporate()
     {
-        Rlgl.EnableShader(myVelocityMapHydraulicErosionGridSimulationComputeShaderProgram!.Id);
+        Rlgl.EnableShader(myWaterSedimentMoveVelocityMapEvaporateComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
@@ -139,23 +131,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
 
     internal void SuspendDeposite()
     {
-        Rlgl.EnableShader(mySuspendDepositeHydraulicErosionGridSimulationComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
-        Rlgl.DisableShader();
-        Rlgl.MemoryBarrier();
-    }
-
-    internal void Evaporate()
-    {
-        Rlgl.EnableShader(myEvaporateHydraulicErosionGridSimulationComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
-        Rlgl.DisableShader();
-        Rlgl.MemoryBarrier();
-    }
-
-    internal void MoveSediment()
-    {
-        Rlgl.EnableShader(myMoveSedimentHydraulicErosionGridSimulationComputeShaderProgram!.Id);
+        Rlgl.EnableShader(mySuspendDepositeComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
@@ -184,12 +160,10 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
 
         myGridErosionConfiguration.RainDropsChanged -= OnRainDropsChanged;
 
-        myRainHydraulicErosionGridSimulationComputeShaderProgram?.Dispose();
-        myFlowHydraulicErosionGridSimulationComputeShaderProgram?.Dispose();
-        myVelocityMapHydraulicErosionGridSimulationComputeShaderProgram?.Dispose();
-        mySuspendDepositeHydraulicErosionGridSimulationComputeShaderProgram?.Dispose();
-        myEvaporateHydraulicErosionGridSimulationComputeShaderProgram?.Dispose();
-        myMoveSedimentHydraulicErosionGridSimulationComputeShaderProgram?.Dispose();
+        myRainComputeShaderProgram?.Dispose();
+        myFlowComputeShaderProgram?.Dispose();
+        myWaterSedimentMoveVelocityMapEvaporateComputeShaderProgram?.Dispose();
+        mySuspendDepositeComputeShaderProgram?.Dispose();
 
         RemoveHeightMapIndicesShaderBuffer();
         RemoveGridHydraulicErosionCellShaderBuffer();

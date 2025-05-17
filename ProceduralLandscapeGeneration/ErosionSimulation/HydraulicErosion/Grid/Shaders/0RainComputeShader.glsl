@@ -5,12 +5,15 @@ layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 struct GridHydraulicErosionCell
 {
     float WaterHeight;
-    float SuspendedSediment;
-    float TempSediment;
     float FlowLeft;
     float FlowRight;
-    float FlowTop;
-    float FlowBottom;
+    float FlowUp;
+    float FlowDown;
+    float SuspendedSediment;
+    float SedimentFlowLeft;
+    float SedimentFlowRight;
+    float SedimentFlowUp;
+    float SedimentFlowDown;
     vec2 Velocity;
 };
 
@@ -36,6 +39,7 @@ struct GridErosionConfiguration
     float Gravity;
     float Dampening;
     float MaximalErosionDepth;
+    float SedimentCapacity;
     float SuspensionRate;
     float DepositionRate;
     float EvaporationRate;

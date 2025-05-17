@@ -86,6 +86,7 @@ internal class ConfigurationGUI : IConfigurationGUI
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => gridErosionConfiguration.Gravity = value, gridErosionConfiguration.Gravity));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Dampening", (value) => gridErosionConfiguration.Dampening = value, gridErosionConfiguration.Dampening));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Maximal Erosion Depth", (value) => gridErosionConfiguration.MaximalErosionDepth = value, gridErosionConfiguration.MaximalErosionDepth));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Sediment Capacity", (value) => gridErosionConfiguration.SedimentCapacity = value, gridErosionConfiguration.SedimentCapacity));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Suspension Rate", (value) => gridErosionConfiguration.SuspensionRate = value, gridErosionConfiguration.SuspensionRate));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Deposition Rate", (value) => gridErosionConfiguration.DepositionRate = value, gridErosionConfiguration.DepositionRate));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => gridErosionConfiguration.EvaporationRate = value, gridErosionConfiguration.EvaporationRate));

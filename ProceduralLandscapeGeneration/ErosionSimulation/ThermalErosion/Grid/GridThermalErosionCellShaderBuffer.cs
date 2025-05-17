@@ -4,6 +4,6 @@ public struct GridThermalErosionCellShaderBuffer
 {
     public float FlowLeft;
     public float FlowRight;
-    public float FlowTop;
-    public float FlowBottom;
+    public float FlowUp;
+    public float FlowDown;
 }
