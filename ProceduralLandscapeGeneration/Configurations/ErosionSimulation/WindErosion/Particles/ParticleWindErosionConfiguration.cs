@@ -1,10 +1,9 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
-using ProceduralLandscapeGeneration.Configurations.ShaderBuffers;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.Configurations.Particles;
+namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion.Particles;
 
 internal class ParticleWindErosionConfiguration : IParticleWindErosionConfiguration
 {

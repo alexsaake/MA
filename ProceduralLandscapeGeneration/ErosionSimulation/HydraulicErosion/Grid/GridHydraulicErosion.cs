@@ -1,10 +1,11 @@
 ﻿using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Common.GPU.ComputeShaders;
-using ProceduralLandscapeGeneration.Configurations;
-using ProceduralLandscapeGeneration.Configurations.Grid;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
+using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
-using ProceduralLandscapeGeneration.Configurations.Types.ErosionMode;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;

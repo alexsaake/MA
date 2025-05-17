@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.Configurations.Types.ErosionMode;
+﻿namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalErosion;
 
 internal enum ThermalErosionModeTypes
 {

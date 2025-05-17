@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using ProceduralLandscapeGeneration.Configurations;
+using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.HeightMapGeneration.PlateTectonics;
 

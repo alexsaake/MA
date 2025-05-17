@@ -1,6 +1,8 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Configurations;
-using ProceduralLandscapeGeneration.Configurations.Grid;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
+using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 using ProceduralLandscapeGeneration.ErosionSimulation;
 using ProceduralLandscapeGeneration.GUI;
 using Raylib_cs;

@@ -1,9 +1,8 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
-using ProceduralLandscapeGeneration.Configurations.ShaderBuffers;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Configurations.Grid;
+namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
 
 internal class GridErosionConfiguration : IGridErosionConfiguration
 {

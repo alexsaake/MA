@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.Configurations.Particles;
+namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion.Particles;
 
 internal interface IParticleWindErosionConfiguration : IDisposable
 {

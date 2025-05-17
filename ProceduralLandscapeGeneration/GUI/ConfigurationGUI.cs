@@ -1,8 +1,13 @@
 ﻿using ProceduralLandscapeGeneration.Configurations;
-using ProceduralLandscapeGeneration.Configurations.Grid;
-using ProceduralLandscapeGeneration.Configurations.Particles;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Particles;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalErosion;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion.Particles;
+using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
-using ProceduralLandscapeGeneration.Configurations.Types.ErosionMode;
 using ProceduralLandscapeGeneration.GUI.Elements;
 using Raylib_cs;
 using System.Numerics;
@@ -36,7 +41,7 @@ internal class ConfigurationGUI : IConfigurationGUI
     public event EventHandler? ErosionResetRequired;
     public event EventHandler? ErosionModeChanged;
 
-    public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
+    public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
@@ -78,9 +83,9 @@ internal class ConfigurationGUI : IConfigurationGUI
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => erosionConfiguration.TimeDelta = value, erosionConfiguration.TimeDelta));
 
         myThermalErosionPanel = new PanelWithElements("Thermal Erosion");
-        myThermalErosionPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => erosionConfiguration.TalusAngle = value, erosionConfiguration.TalusAngle, 0, 89));
-        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Erosion Rate", (value) => erosionConfiguration.ErosionRate = value, erosionConfiguration.ErosionRate));
-        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Dampening", (value) => erosionConfiguration.Dampening = value, erosionConfiguration.Dampening));
+        myThermalErosionPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => thermalErosionConfiguration.TalusAngle = value, thermalErosionConfiguration.TalusAngle, 0, 89));
+        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Erosion Rate", (value) => thermalErosionConfiguration.ErosionRate = value, thermalErosionConfiguration.ErosionRate));
+        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Dampening", (value) => thermalErosionConfiguration.Dampening = value, thermalErosionConfiguration.Dampening));
 
         myGridErosionPanel = new PanelWithElements("Grid Hydraulic Erosion");
         myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridErosionConfiguration.RainDrops = (uint)value, (int)gridErosionConfiguration.RainDrops, 1, 100000));

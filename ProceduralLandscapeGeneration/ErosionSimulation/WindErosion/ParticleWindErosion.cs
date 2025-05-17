@@ -2,7 +2,9 @@
 using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Common.GPU.ComputeShaders;
 using ProceduralLandscapeGeneration.Configurations;
-using ProceduralLandscapeGeneration.Configurations.Particles;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion.Particles;
+using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 

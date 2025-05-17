@@ -1,6 +1,8 @@
-﻿using ProceduralLandscapeGeneration.Configurations.Types.ErosionMode;
+﻿using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalErosion;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion;
 
-namespace ProceduralLandscapeGeneration.Configurations;
+namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 
 internal interface IErosionConfiguration : IDisposable
 {
@@ -19,10 +21,6 @@ internal interface IErosionConfiguration : IDisposable
     bool IsSeaLevelDisplayed { get; set; }
     float SeaLevel { get; set; }
     float TimeDelta { get; set; }
-
-    int TalusAngle { get; set; }
-    float ErosionRate { get; set; }
-    float Dampening { get; set; }
 
     void Initialize();
 }

@@ -1,10 +1,11 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
-using ProceduralLandscapeGeneration.Configurations.ShaderBuffers;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalErosion;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion;
 using ProceduralLandscapeGeneration.Configurations.Types;
-using ProceduralLandscapeGeneration.Configurations.Types.ErosionMode;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Configurations;
+namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 
 internal class ErosionConfiguration : IErosionConfiguration
 {
@@ -57,51 +58,6 @@ internal class ErosionConfiguration : IErosionConfiguration
         }
     }
 
-    private int myTalusAngle;
-    public int TalusAngle
-    {
-        get => myTalusAngle;
-        set
-        {
-            if (myTalusAngle == value)
-            {
-                return;
-            }
-            myTalusAngle = value;
-            UpdateShaderBuffer();
-        }
-    }
-
-    private float myDampening;
-    public float Dampening
-    {
-        get => myDampening;
-        set
-        {
-            if (myDampening == value)
-            {
-                return;
-            }
-            myDampening = value;
-            UpdateShaderBuffer();
-        }
-    }
-
-    private float myErosionRate;
-    public float ErosionRate
-    {
-        get => myErosionRate;
-        set
-        {
-            if (myErosionRate == value)
-            {
-                return;
-            }
-            myErosionRate = value;
-            UpdateShaderBuffer();
-        }
-    }
-
     public ErosionConfiguration(IShaderBuffers shaderBuffers)
     {
         myShaderBuffers = shaderBuffers;
@@ -122,10 +78,6 @@ internal class ErosionConfiguration : IErosionConfiguration
         IsSeaLevelDisplayed = false;
         mySeaLevel = 0.2f;
         myTimeDelta = 1.0f;
-
-        myTalusAngle = 33;
-        myErosionRate = 1.0f;
-        myDampening = 0.8f;
     }
 
     public void Initialize()
@@ -147,18 +99,6 @@ internal class ErosionConfiguration : IErosionConfiguration
             TimeDelta = TimeDelta
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ErosionConfiguration], &erosionConfigurationShaderBuffer, (uint)sizeof(ErosionConfigurationShaderBuffer), 0);
-
-        if (!myShaderBuffers.ContainsKey(ShaderBufferTypes.ThermalErosionConfiguration))
-        {
-            myShaderBuffers.Add(ShaderBufferTypes.ThermalErosionConfiguration, (uint)sizeof(ThermalErosionConfigurationShaderBuffer));
-        }
-        ThermalErosionConfigurationShaderBuffer thermalErosionConfigurationShaderBuffer = new ThermalErosionConfigurationShaderBuffer()
-        {
-            TangensTalusAngle = MathF.Tan(TalusAngle * (MathF.PI / 180)),
-            ErosionRate = ErosionRate,
-            Dampening = Dampening
-        };
-        Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ThermalErosionConfiguration], &thermalErosionConfigurationShaderBuffer, (uint)sizeof(ThermalErosionConfigurationShaderBuffer), 0);
     }
 
     public void Dispose()
@@ -167,8 +107,6 @@ internal class ErosionConfiguration : IErosionConfiguration
         {
             return;
         }
-
-        myShaderBuffers.Remove(ShaderBufferTypes.ThermalErosionConfiguration);
 
         myShaderBuffers.Remove(ShaderBufferTypes.ErosionConfiguration);
 

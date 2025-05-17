@@ -1,9 +1,8 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
-using ProceduralLandscapeGeneration.Configurations.ShaderBuffers;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Configurations.Particles;
+namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Particles;
 
 internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosionConfiguration
 {

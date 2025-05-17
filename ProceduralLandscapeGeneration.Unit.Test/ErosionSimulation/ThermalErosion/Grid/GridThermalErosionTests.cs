@@ -3,6 +3,7 @@ using NUnit.Framework;
 using NUnit.Framework.Internal;
 using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Configurations;
+using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.DependencyInjection;
 using ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion.Grid;

@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.Configurations.ShaderBuffers;
+﻿namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
 
 public struct GridErosionConfigurationShaderBuffer
 {

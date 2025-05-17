@@ -1,7 +1,11 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Configurations;
-using ProceduralLandscapeGeneration.Configurations.Grid;
-using ProceduralLandscapeGeneration.Configurations.Particles;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Particles;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalErosion;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion.Particles;
+using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 
 namespace ProceduralLandscapeGeneration.DependencyInjection.Modules;
 
@@ -17,5 +21,6 @@ internal class ConfigurationsModule : Module
         containerBuilder.RegisterType<GridErosionConfiguration>().As<IGridErosionConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ParticleHydraulicErosionConfiguration>().As<IParticleHydraulicErosionConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ParticleWindErosionConfiguration>().As<IParticleWindErosionConfiguration>().SingleInstance();
+        containerBuilder.RegisterType<ThermalErosionConfiguration>().As<IThermalErosionConfiguration>().SingleInstance();
     }
 }

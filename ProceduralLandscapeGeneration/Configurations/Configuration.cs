@@ -1,5 +1,8 @@
-﻿using ProceduralLandscapeGeneration.Configurations.Grid;
-using ProceduralLandscapeGeneration.Configurations.Particles;
+﻿using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Particles;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion.Particles;
+using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 
 namespace ProceduralLandscapeGeneration.Configurations;
 

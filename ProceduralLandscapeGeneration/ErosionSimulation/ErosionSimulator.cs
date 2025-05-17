@@ -1,5 +1,7 @@
-﻿using ProceduralLandscapeGeneration.Configurations;
-using ProceduralLandscapeGeneration.Configurations.Types.ErosionMode;
+﻿using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalErosion;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion;
 using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
 using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Particles;
 using ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion;

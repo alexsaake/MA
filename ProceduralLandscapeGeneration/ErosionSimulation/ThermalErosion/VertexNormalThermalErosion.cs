@@ -1,5 +1,6 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU.ComputeShaders;
-using ProceduralLandscapeGeneration.Configurations;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
+using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion;

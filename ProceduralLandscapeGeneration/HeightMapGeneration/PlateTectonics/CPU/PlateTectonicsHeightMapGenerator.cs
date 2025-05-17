@@ -3,6 +3,7 @@ using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Common.GPU.ComputeShaders;
 using ProceduralLandscapeGeneration.Configurations;
+using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.HeightMapGeneration.PlateTectonics.GPU;
 using Raylib_cs;

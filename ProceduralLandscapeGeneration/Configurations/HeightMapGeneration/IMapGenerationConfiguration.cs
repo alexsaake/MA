@@ -1,7 +1,7 @@
 ﻿using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Configurations;
+namespace ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 
 internal interface IMapGenerationConfiguration : IDisposable
 {

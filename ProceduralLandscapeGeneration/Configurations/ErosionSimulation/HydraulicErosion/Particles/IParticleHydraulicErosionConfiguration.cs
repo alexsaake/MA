@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.Configurations.Particles;
+﻿namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Particles;
 
 internal interface IParticleHydraulicErosionConfiguration : IDisposable
 {
