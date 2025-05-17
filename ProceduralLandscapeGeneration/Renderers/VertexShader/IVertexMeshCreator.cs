@@ -1,6 +1,6 @@
 ﻿using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Renderers;
+namespace ProceduralLandscapeGeneration.Renderers.VertexShader;
 
 internal interface IVertexMeshCreator
 {

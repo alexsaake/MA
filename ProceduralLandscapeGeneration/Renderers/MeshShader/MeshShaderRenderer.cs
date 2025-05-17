@@ -3,11 +3,11 @@ using ProceduralLandscapeGeneration.Configurations.Types.ErosionMode;
 using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.Renderers;
+namespace ProceduralLandscapeGeneration.Renderers.MeshShader;
 
 internal class MeshShaderRenderer : IRenderer
 {
-    private const string ShaderDirectory = "Renderers/Shaders/MeshShaders/";
+    private const string ShaderDirectory = "Renderers/MeshShader/Shaders/";
 
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;

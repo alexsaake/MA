@@ -6,11 +6,11 @@ using ProceduralLandscapeGeneration.GUI;
 using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.Renderers;
+namespace ProceduralLandscapeGeneration.Renderers.VertexShader;
 
 internal class VertexShaderRenderer : IRenderer
 {
-    private const string ShaderDirectory = "Renderers/Shaders/VertexShaders/";
+    private const string ShaderDirectory = "Renderers/VertexShader/Shaders/";
 
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
@@ -203,22 +203,22 @@ internal class VertexShaderRenderer : IRenderer
     public void Draw()
     {
         Raylib.BeginMode3D(myCamera);
-        DrawTerrainHeightMap();
-        if ((myErosionConfiguration.IsHydraulicErosionEnabled
-            || myErosionConfiguration.IsWindErosionEnabled)
-                && myErosionConfiguration.IsSedimentDisplayed)
-        {
-            Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
-        }
-        if (myErosionConfiguration.IsHydraulicErosionEnabled
-            && myErosionConfiguration.IsWaterDisplayed)
-        {
-            Raylib.DrawModel(myWaterHeightMap, Vector3.Zero, 1.0f, Color.White);
-        }
-        if (myErosionConfiguration.IsSeaLevelDisplayed)
-        {
-            Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
-        }
+            DrawTerrainHeightMap();
+            if ((myErosionConfiguration.IsHydraulicErosionEnabled
+                || myErosionConfiguration.IsWindErosionEnabled)
+                    && myErosionConfiguration.IsSedimentDisplayed)
+            {
+                Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
+            }
+            if (myErosionConfiguration.IsHydraulicErosionEnabled
+                && myErosionConfiguration.IsWaterDisplayed)
+            {
+                Raylib.DrawModel(myWaterHeightMap, Vector3.Zero, 1.0f, Color.White);
+            }
+            if (myErosionConfiguration.IsSeaLevelDisplayed)
+            {
+                Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
+            }
         Raylib.EndMode3D();
     }
 

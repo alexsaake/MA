@@ -51,8 +51,8 @@ vec4 oceanColor = vec4(0, 0.4, 0.8, 0.5);
 
 void addVertex(uint vertex, uint x, uint y)
 {
-    float waterHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
-    vec4 position = mvp * vec4(x, y, waterHeight, 1.0);
+    float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
+    vec4 position = mvp * vec4(x, y, seaLevelHeight, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
     v_out[vertex].color = oceanColor;
@@ -64,15 +64,15 @@ void main()
 
     addVertex(0, 0, 0);
     addVertex(1, mapSize, 0);
-    addVertex(2, 0, mapSize);
-    addVertex(3, mapSize, mapSize);
+    addVertex(2, mapSize, mapSize);
+    addVertex(3, 0, mapSize);
             
     gl_PrimitiveIndicesNV[0] = 0;
     gl_PrimitiveIndicesNV[1] = 1;
-    gl_PrimitiveIndicesNV[2] = 3;
+    gl_PrimitiveIndicesNV[2] = 2;
     gl_PrimitiveIndicesNV[3] = 0;
-    gl_PrimitiveIndicesNV[4] = 3;
-    gl_PrimitiveIndicesNV[5] = 2;
+    gl_PrimitiveIndicesNV[4] = 2;
+    gl_PrimitiveIndicesNV[5] = 3;
 
     gl_PrimitiveCountNV = PRIMITIVES;
 }

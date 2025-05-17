@@ -33,5 +33,6 @@ out vec4 fragColor;
 void main()
 {
     fragColor = vertexColor;
-    gl_Position = mvp * vec4(vertexPosition.xy, erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier, 1.0);
+    float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
+    gl_Position = mvp * vec4(vertexPosition.xy, seaLevelHeight, 1.0);
 }

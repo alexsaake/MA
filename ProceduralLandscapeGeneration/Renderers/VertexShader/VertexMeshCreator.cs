@@ -2,7 +2,7 @@
 using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.Renderers;
+namespace ProceduralLandscapeGeneration.Renderers.VertexShader;
 
 internal class VertexMeshCreator : IVertexMeshCreator
 {
@@ -16,7 +16,7 @@ internal class VertexMeshCreator : IVertexMeshCreator
     public unsafe Mesh CreateHeightMapMesh()
     {
         Mesh mesh = new();
-        int vertexCount = (int)(myMapGenerationConfiguration.MapSize);
+        int vertexCount = (int)myMapGenerationConfiguration.MapSize;
         int triangleCount = (int)((myMapGenerationConfiguration.HeightMapSideLength - 1) * (myMapGenerationConfiguration.HeightMapSideLength - 1) * 2);
         AllocateMeshData(&mesh, vertexCount, triangleCount);
 

@@ -105,34 +105,34 @@
 	  <None Update="raylib.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\MeshShaders\Particle\SedimentParticleMeshShader.glsl">
+	  <None Update="Renderers\MeshShader\Shaders\Particle\SedimentParticleMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\MeshShaders\Particle\WaterParticleMeshShader.glsl">
+	  <None Update="Renderers\MeshShader\Shaders\Particle\WaterParticleMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\VertexShaders\SedimentHeightMapVertexShader.glsl">
+	  <None Update="Renderers\VertexShader\Shaders\SedimentHeightMapVertexShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\VertexShaders\WaterHeightMapVertexShader.glsl">
+	  <None Update="Renderers\VertexShader\Shaders\WaterHeightMapVertexShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\MeshShaders\SeaLevelQuadMeshFragmentShader.glsl">
+	  <None Update="Renderers\MeshShader\Shaders\SeaLevelQuadMeshFragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\VertexShaders\SeaLevelQuadFragmentShader.glsl">
+	  <None Update="Renderers\VertexShader\Shaders\SeaLevelQuadFragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\MeshShaders\SeaLevelQuadMeshShader.glsl">
+	  <None Update="Renderers\MeshShader\Shaders\SeaLevelQuadMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\VertexShaders\SeaLevelQuadVertexShader.glsl">
+	  <None Update="Renderers\VertexShader\Shaders\SeaLevelQuadVertexShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\MeshShaders\Grid\SedimentHeightMapMeshShader.glsl">
+	  <None Update="Renderers\MeshShader\Shaders\Grid\SedimentHeightMapMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\MeshShaders\Grid\WaterHeightMapMeshShader.glsl">
+	  <None Update="Renderers\MeshShader\Shaders\Grid\WaterHeightMapMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Simulation\Grid\Shaders\HydraulicErosionSimulationGridPassSixComputeShader.glsl">
@@ -171,16 +171,16 @@
 	  <None Update="HeightMapGeneration\GPU\Shaders\GenerateHeightMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\MeshShaders\TerrainHeightMapMeshShader.glsl">
+	  <None Update="Renderers\MeshShader\Shaders\TerrainHeightMapMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\MeshShaders\TerrainHeightMapMeshFragmentShader.glsl">
+	  <None Update="Renderers\MeshShader\Shaders\TerrainHeightMapMeshFragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\VertexShaders\TerrainHeightMapFragmentShader.glsl">
+	  <None Update="Renderers\VertexShader\Shaders\TerrainHeightMapFragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\Shaders\VertexShaders\TerrainHeightMapVertexShader.glsl">
+	  <None Update="Renderers\VertexShader\Shaders\TerrainHeightMapVertexShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
   </ItemGroup>

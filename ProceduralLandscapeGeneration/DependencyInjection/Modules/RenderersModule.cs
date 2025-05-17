@@ -1,6 +1,8 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.Renderers;
+using ProceduralLandscapeGeneration.Renderers.MeshShader;
+using ProceduralLandscapeGeneration.Renderers.VertexShader;
 
 namespace ProceduralLandscapeGeneration.DependencyInjection.Modules;
 
