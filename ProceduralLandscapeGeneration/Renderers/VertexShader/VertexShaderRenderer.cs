@@ -3,7 +3,7 @@ using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
 using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
-using ProceduralLandscapeGeneration.ErosionSimulation;
+using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap;
 using ProceduralLandscapeGeneration.GUI;
 using Raylib_cs;
 using System.Numerics;

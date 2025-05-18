@@ -1,10 +1,10 @@
 ﻿using Autofac;
-using ProceduralLandscapeGeneration.ErosionSimulation;
-using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
-using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Particles;
-using ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion;
-using ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion.Grid;
-using ProceduralLandscapeGeneration.ErosionSimulation.WindErosion;
+using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap;
+using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.HydraulicErosion.Grid;
+using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.HydraulicErosion.Particles;
+using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.ThermalErosion;
+using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.ThermalErosion.Grid;
+using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.WindErosion.Particles;
 
 namespace ProceduralLandscapeGeneration.DependencyInjection.Modules;
 

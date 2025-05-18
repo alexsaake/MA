@@ -8,10 +8,12 @@ using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
+namespace ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.HydraulicErosion.Grid;
 
 internal class GridHydraulicErosion : IGridHydraulicErosion
 {
+    private const string ShaderDirectory = "ErosionSimulation/HeightMap/HydraulicErosion/Grid/Shaders/";
+
     private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IGridErosionConfiguration myGridErosionConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
@@ -41,10 +43,10 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     {
         myGridErosionConfiguration.RainDropsChanged += OnRainDropsChanged;
 
-        myRainComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/0RainComputeShader.glsl");
-        myFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/1FlowComputeShader.glsl");
-        myWaterSedimentMoveVelocityMapEvaporateComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/2WaterSedimentMoveVelocityMapEvaporateComputeShader.glsl");
-        mySuspendDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Grid/Shaders/3SuspendDepositeComputeShader.glsl");
+        myRainComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}0RainComputeShader.glsl");
+        myFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}1FlowComputeShader.glsl");
+        myWaterSedimentMoveVelocityMapEvaporateComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}2WaterSedimentMoveVelocityMapEvaporateComputeShader.glsl");
+        mySuspendDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}3SuspendDepositeComputeShader.glsl");
 
         AddGridHydraulicErosionCellShaderBuffer();
         AddHeightMapIndicesShaderBuffer();

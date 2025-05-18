@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion;
+﻿namespace ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.ThermalErosion;
 
 internal interface ICascadeThermalErosion : IDisposable
 {

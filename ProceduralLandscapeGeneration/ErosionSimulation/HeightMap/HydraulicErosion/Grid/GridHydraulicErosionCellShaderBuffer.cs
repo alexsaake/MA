@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
+namespace ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.HydraulicErosion.Grid;
 
 public struct GridHydraulicErosionCellShaderBuffer
 {

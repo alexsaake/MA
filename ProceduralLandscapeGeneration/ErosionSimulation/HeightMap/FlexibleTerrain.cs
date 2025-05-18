@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.ErosionSimulation;
+﻿namespace ProceduralLandscapeGeneration.ErosionSimulation.HeightMap;
 
 internal class FlexibleTerrain
 {

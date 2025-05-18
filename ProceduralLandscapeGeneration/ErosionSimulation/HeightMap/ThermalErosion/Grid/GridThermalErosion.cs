@@ -5,10 +5,12 @@ using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion.Grid;
+namespace ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.ThermalErosion.Grid;
 
 internal class GridThermalErosion : IGridThermalErosion
 {
+    private const string ShaderDirectory = "ErosionSimulation/HeightMap/ThermalErosion/Grid/Shaders/";
+
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
@@ -29,8 +31,8 @@ internal class GridThermalErosion : IGridThermalErosion
 
     public void Initialize()
     {
-        myFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/ThermalErosion/Grid/Shaders/0FlowComputeShader.glsl");
-        myDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/ThermalErosion/Grid/Shaders/1DepositeComputeShader.glsl");
+        myFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}0FlowComputeShader.glsl");
+        myDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}1DepositeComputeShader.glsl");
 
         AddGridThermalErosionCellShaderBuffer();
 

@@ -3,11 +3,10 @@ using NUnit.Framework;
 using NUnit.Framework.Internal;
 using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Configurations;
-using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
-using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
+using ProceduralLandscapeGeneration.Configurations.Grid;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.DependencyInjection;
-using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
+using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.HydraulicErosion.Grid;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.HydraulicErosion.Grid;

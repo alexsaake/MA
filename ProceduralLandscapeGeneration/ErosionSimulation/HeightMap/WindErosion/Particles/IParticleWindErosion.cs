@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.ErosionSimulation.WindErosion;
+﻿namespace ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.WindErosion.Particles;
 
 internal interface IParticleWindErosion : IDisposable
 {

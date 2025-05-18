@@ -2,7 +2,7 @@
 using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
-using ProceduralLandscapeGeneration.ErosionSimulation;
+using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap;
 using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.HeightMapGeneration;
 using ProceduralLandscapeGeneration.Renderers;

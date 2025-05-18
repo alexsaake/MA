@@ -9,10 +9,12 @@ using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Particles;
+namespace ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.HydraulicErosion.Particles;
 
 internal class ParticleHydraulicErosion : IParticleHydraulicErosion
 {
+    private const string ShaderDirectory = "ErosionSimulation/HeightMap/HydraulicErosion/Particles/Shaders/";
+
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
@@ -41,7 +43,7 @@ internal class ParticleHydraulicErosion : IParticleHydraulicErosion
     {
         myParticleHydraulicErosionConfiguration.ParticlesChanged += OnParticlesChanged;
 
-        myHydraulicErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/HydraulicErosion/Particles/Shaders/ParticleHydraulicErosionSimulationComputeShader.glsl");
+        myHydraulicErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}ParticleHydraulicErosionSimulationComputeShader.glsl");
 
         AddParticlesHydraulicErosionShaderBuffer();
         AddHeightMapIndicesShaderBuffer();

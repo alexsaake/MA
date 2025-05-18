@@ -8,10 +8,12 @@ using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.ErosionSimulation.WindErosion;
+namespace ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.WindErosion.Particles;
 
 internal class ParticleWindErosion : IParticleWindErosion
 {
+    private const string ShaderDirectory = "ErosionSimulation/HeightMap/WindErosion/Particles/Shaders/";
+
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
@@ -40,7 +42,7 @@ internal class ParticleWindErosion : IParticleWindErosion
     {
         myParticleWindErosionConfiguration.ParticlesChanged += OnParticlesChanged;
 
-        myWindErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/WindErosion/Shaders/ParticleWindErosionSimulationComputeShader.glsl");
+        myWindErosionParticleSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}ParticleWindErosionSimulationComputeShader.glsl");
 
         AddParticlesWindErosionShaderBuffer();
         AddHeightMapIndicesShaderBuffer();

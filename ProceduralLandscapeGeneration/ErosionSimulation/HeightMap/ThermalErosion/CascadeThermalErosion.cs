@@ -3,10 +3,12 @@ using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion;
+namespace ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.ThermalErosion;
 
 internal class CascadeThermalErosion : ICascadeThermalErosion
 {
+    private const string ShaderDirectory = "ErosionSimulation/HeightMap/ThermalErosion/Shaders/";
+
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
@@ -24,7 +26,7 @@ internal class CascadeThermalErosion : ICascadeThermalErosion
 
     public void Initialize()
     {
-        myThermalErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram("ErosionSimulation/ThermalErosion/Shaders/CascadeThermalErosionSimulationComputeShader.glsl");
+        myThermalErosionSimulationComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}CascadeThermalErosionSimulationComputeShader.glsl");
 
         myIsDisposed = false;
     }

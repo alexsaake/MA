@@ -1,4 +1,4 @@
-﻿namespace ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
+﻿namespace ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.HydraulicErosion.Grid;
 
 internal interface IGridHydraulicErosion : IDisposable
 {
