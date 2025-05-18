@@ -69,6 +69,7 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
 uniform mat4 mvp;
 
 uint myMapSize;
+uint myHeightMapLength;
 
 uint getIndex(uint x, uint y)
 {
@@ -110,7 +111,11 @@ vec3 snowColor = vec3(1.0, 0.9, 0.9);
 void addVertex(uint vertex, uint x, uint y)
 {
     uint index = getIndex(x, y);
-    float height = heightMap[index];
+    float height;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
     float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     vec3 normal = getScaledNormal(x, y);
@@ -224,12 +229,12 @@ void addVertex(uint vertex, uint x, uint y)
 void main()
 {
     uint threadNumber = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
-    if(threadNumber >= heightMapLength)
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(threadNumber >= myHeightMapLength)
     {
         return;
     }
-    myMapSize = uint(sqrt(heightMapLength));
+    myMapSize = uint(sqrt(myHeightMapLength));
     uint meshletSize = uint(sqrt(VERTICES));
     uint yMeshletCount = uint(ceil(float(myMapSize) / (meshletSize - 1)));
     uint xOffset = uint(floor(threadNumber / yMeshletCount)) * (meshletSize - 1);

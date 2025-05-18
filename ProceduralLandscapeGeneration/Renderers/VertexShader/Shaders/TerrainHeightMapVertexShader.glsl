@@ -107,8 +107,12 @@ void main()
 
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
-
-    float height = heightMap[index];
+    
+    float height;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * heightMapLength];
+    }
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
     float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     fragPosition = vec3(matModel * vec4(vertexPosition.xy, terrainHeight, 1.0));

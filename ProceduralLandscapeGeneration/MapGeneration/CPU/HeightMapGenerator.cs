@@ -139,6 +139,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
         return map;
     }
+
     private uint GetLayerCount()
     {
         switch (myMapGenerationConfiguration.MapType)

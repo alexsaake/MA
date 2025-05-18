@@ -75,7 +75,7 @@ void main()
     plateTectonicsSegment.Position = vec2(x, y);
     plateTectonicsSegment.IsAlive = true;
     
-    float distance = float(plateTectonicsSegmentsLength);
+    float distance = float(heightMapLength);
     int nearestPlate = -1;
     for(int plate = 0; plate < plateTectonicsPlates.length(); plate++)
     {

@@ -105,5 +105,10 @@ void main()
     
     fragColor = sedimentColor;
     float zOffset = 0.00004;
-    gl_Position =  mvp * vec4(vertexPosition.xy, (heightMap[index] - zOffset + suspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
+    float height;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * heightMapLength];
+    }
+    gl_Position =  mvp * vec4(vertexPosition.xy, (height - zOffset + suspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 }
