@@ -104,7 +104,7 @@ uint myHeightMapLength;
 float SuspendFromTop(uint index, float requiredSediment)
 {
     float suspendedSediment = 0;
-    for(uint layer = mapGenerationConfiguration.LayerCount - 1; layer >= 0; layer--)
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
         uint offsetIndex = index + layer * myHeightMapLength;
         float height = heightMap[offsetIndex];

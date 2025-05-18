@@ -69,7 +69,7 @@ uint myHeightMapLength;
 float SuspendFromTop(uint index, float requiredSediment)
 {
     float suspendedSediment = 0;
-    for(uint layer = mapGenerationConfiguration.LayerCount - 1; layer >= 0; layer--)
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
         uint offsetIndex = index + layer * myHeightMapLength;
         float height = heightMap[offsetIndex];
@@ -277,7 +277,7 @@ bool Interact()
     if(difference < 0)
     {
         DepositeOnTop(getIndexV(currentPosition), abs(difference));
-        myParticleWindErosion.Sediment += difference;
+        myParticleWindErosion.Sediment = max(myParticleWindErosion.Sediment + difference, 0.0);
     }
     else
     {

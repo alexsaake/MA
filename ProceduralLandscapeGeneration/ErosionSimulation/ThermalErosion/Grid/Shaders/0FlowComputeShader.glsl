@@ -71,7 +71,7 @@ uint myHeightMapLength;
 
 float TangensTalusAngle(uint index)
 {
-	for(uint layer = mapGenerationConfiguration.LayerCount - 1; layer >= 0; layer--)
+	for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
 	{
 		if(heightMap[index + layer * myHeightMapLength] > 0)
 		{
