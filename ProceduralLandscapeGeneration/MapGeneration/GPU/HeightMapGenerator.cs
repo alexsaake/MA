@@ -37,7 +37,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
         myShaderBuffers.Add(ShaderBufferTypes.HeightMapParameters, heightMapParametersShaderBufferSize);
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMapParameters], &heightMapParameters, heightMapParametersShaderBufferSize, 0);
 
-        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * sizeof(float) * GetLayerCount();
+        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * sizeof(float) * myMapGenerationConfiguration.LayerCount;
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
         ComputeShaderProgram generateHeightMap = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateHeightMapComputeShader.glsl");
@@ -105,7 +105,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateCubeMap()
     {
-        float[] map = new float[myMapGenerationConfiguration.MapSize * GetLayerCount()];
+        float[] map = new float[myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount];
 
         int cudeSideLength = (int)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
         int index = 0;
@@ -123,17 +123,6 @@ internal class HeightMapGenerator : IHeightMapGenerator
         }
 
         return map;
-    }
-
-    private uint GetLayerCount()
-    {
-        switch (myMapGenerationConfiguration.MapType)
-        {
-            case MapTypes.MultiLayeredHeightMap:
-                return 2;
-            default:
-                return 1;
-        }
     }
 
     public void Dispose()

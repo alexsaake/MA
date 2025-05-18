@@ -99,19 +99,8 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     private void AddHeightMapShaderBuffer()
     {
-        uint heightMapSize = myMapGenerationConfiguration.MapSize * sizeof(float) * GetLayerCount();
+        uint heightMapSize = myMapGenerationConfiguration.MapSize * sizeof(float) * myMapGenerationConfiguration.LayerCount;
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapSize);
-    }
-
-    private uint GetLayerCount()
-    {
-        switch (myMapGenerationConfiguration.MapType)
-        {
-            case MapTypes.MultiLayeredHeightMap:
-                return 2;
-            default:
-                return 1;
-        }
     }
 
     private unsafe void AddPlateTectonicsTempSegmentsShaderBuffer()

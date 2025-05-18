@@ -28,7 +28,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     public unsafe void GenerateNoiseHeightMap()
     {
-        float[] heightMap = GenerateNoiseMap(GetLayerCount());
+        float[] heightMap = GenerateNoiseMap(myMapGenerationConfiguration.);
 
         uint heightMapShaderBufferSize = (uint)heightMap.Length * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapShaderBufferSize);
@@ -120,7 +120,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateCubeMap()
     {
-        float[] map = new float[myMapGenerationConfiguration.MapSize * GetLayerCount()];
+        float[] map = new float[myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount];
 
         int cudeSideLength = (int)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
         int index = 0;
@@ -138,17 +138,6 @@ internal class HeightMapGenerator : IHeightMapGenerator
         }
 
         return map;
-    }
-
-    private uint GetLayerCount()
-    {
-        switch (myMapGenerationConfiguration.MapType)
-        {
-            case MapTypes.MultiLayeredHeightMap:
-                return 2;
-            default:
-                return 1;
-        }
     }
 
     public void Dispose()
