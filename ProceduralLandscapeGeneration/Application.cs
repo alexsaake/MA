@@ -1,10 +1,10 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
-using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
-using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap;
+using ProceduralLandscapeGeneration.Configurations.MapGeneration;
+using ProceduralLandscapeGeneration.ErosionSimulation;
 using ProceduralLandscapeGeneration.GUI;
-using ProceduralLandscapeGeneration.HeightMapGeneration;
+using ProceduralLandscapeGeneration.MapGeneration;
 using ProceduralLandscapeGeneration.Renderers;
 using Raylib_cs;
 

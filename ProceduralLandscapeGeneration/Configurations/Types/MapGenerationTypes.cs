@@ -1,8 +1,7 @@
 ﻿namespace ProceduralLandscapeGeneration.Configurations.Types;
 
-internal enum MapGenerationTypes
+internal enum MapTypes
 {
-    Noise,
-    Tectonics,
-    Cube
+    HeightMap,
+    MultiLayeredHeightMap
 }

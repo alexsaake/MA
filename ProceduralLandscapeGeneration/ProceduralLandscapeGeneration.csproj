@@ -21,82 +21,82 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <None Update="ErosionSimulation\HeightMap\HydraulicErosion\Grid\Shaders\0RainComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\0RainComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\HeightMap\HydraulicErosion\Grid\Shaders\1FlowComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\1FlowComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\HeightMap\HydraulicErosion\Grid\Shaders\2WaterSedimentMoveVelocityMapEvaporateComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\2WaterSedimentMoveVelocityMapEvaporateComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\HeightMap\HydraulicErosion\Grid\Shaders\3SuspendDepositeComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\3SuspendDepositeComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\HeightMap\ThermalErosion\Grid\Shaders\1DepositeComputeShader.glsl">
+	  <None Update="ErosionSimulation\ThermalErosion\Grid\Shaders\1DepositeComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\HeightMap\ThermalErosion\Grid\Shaders\0FlowComputeShader.glsl">
+	  <None Update="ErosionSimulation\ThermalErosion\Grid\Shaders\0FlowComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\HeightMap\HydraulicErosion\Particles\Shaders\ParticleHydraulicErosionSimulationComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Particles\Shaders\ParticleHydraulicErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\HeightMap\WindErosion\Particles\Shaders\ParticleWindErosionSimulationComputeShader.glsl">
+	  <None Update="ErosionSimulation\WindErosion\Particles\Shaders\ParticleWindErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\HeightMap\ThermalErosion\Shaders\CascadeThermalErosionSimulationComputeShader.glsl">
+	  <None Update="ErosionSimulation\ThermalErosion\Shaders\CascadeThermalErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\HeightMap\ThermalErosion\Shaders\VertexNormalThermalErosionSimulationComputeShader.glsl">
+	  <None Update="ErosionSimulation\ThermalErosion\Shaders\VertexNormalThermalErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\GPU\Shaders\GenerateHeatMapComputeShader.glsl">
+	  <None Update="MapGeneration\GPU\Shaders\HeightMap\GenerateHeatMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\GPU\Shaders\NormalizeHeatMapComputeShader.glsl">
+	  <None Update="MapGeneration\GPU\Shaders\HeightMap\NormalizeHeatMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\AddSegmentsToNearestPlateComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\AddSegmentsToNearestPlateComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\CascadeSegmentsComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\CascadeSegmentsComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\PrepareRecenterPlatesComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\PrepareRecenterPlatesComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\RecenterPlatesPositionComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\RecenterPlatesPositionComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\UpdatePlatesAccelerationAndTorqueComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\UpdatePlatesAccelerationAndTorqueComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\UpdateHeightMapComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\UpdateHeightMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\FillSegmentsGapComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\FillSegmentsGapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\CopyTempSegmentsToSegmentsComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\CopyTempSegmentsToSegmentsComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\UpdateTempSegmentsPositionComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\UpdateTempSegmentsPositionComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\FloatSegmentsComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\FloatSegmentsComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\UpdatePlatesPositionComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\UpdatePlatesPositionComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\GrowSegmentsComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\GrowSegmentsComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\CollideSegmentsComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\CollideSegmentsComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\PlateTectonics\GPU\Shaders\AddPlateSegmentsComputeShader.glsl">
+	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\AddPlateSegmentsComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Raylib-CsLo.pdb">
@@ -159,7 +159,7 @@
 	  <None Update="Simulation\Particles\Shaders\HydraulicErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\GPU\Shaders\NormalizeHeightMapComputeShader.glsl">
+	  <None Update="MapGeneration\GPU\Shaders\HeightMap\NormalizeHeightMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Simulation\Shaders\ThermalErosionSimulationComputeShader.glsl">
@@ -168,7 +168,7 @@
 	  <None Update="Simulation\Particles\Shaders\WindErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="HeightMapGeneration\GPU\Shaders\GenerateHeightMapComputeShader.glsl">
+	  <None Update="MapGeneration\GPU\Shaders\HeightMap\GenerateHeightMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Renderers\MeshShader\Shaders\TerrainHeightMapMeshShader.glsl">

@@ -5,7 +5,7 @@ using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicEr
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Particles;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalErosion;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion.Particles;
-using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
+using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 
 namespace ProceduralLandscapeGeneration.DependencyInjection.Modules;
 

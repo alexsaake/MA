@@ -1,7 +1,8 @@
 ﻿using Autofac;
 using ProceduralLandscapeGeneration.Configurations.Types;
-using ProceduralLandscapeGeneration.HeightMapGeneration;
-using ProceduralLandscapeGeneration.HeightMapGeneration.PlateTectonics;
+using ProceduralLandscapeGeneration.MapGeneration;
+using ProceduralLandscapeGeneration.MapGeneration.PlateTectonics;
+using ProceduralLandscapeGeneration.MapGeneration.PlateTectonics.GPU;
 
 namespace ProceduralLandscapeGeneration.DependencyInjection.Modules;
 
@@ -12,8 +13,8 @@ internal class HeightMapGenerationModule : Module
         base.Load(containerBuilder);
 
         containerBuilder.RegisterType<HeightMap>().As<IHeightMap>().SingleInstance();
-        containerBuilder.RegisterType<HeightMapGeneration.PlateTectonics.GPU.PlateTectonicsHeightMapGenerator>().As<IPlateTectonicsHeightMapGenerator>();
-        containerBuilder.RegisterType<HeightMapGeneration.GPU.HeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorTypes.GPU);
-        containerBuilder.RegisterType<HeightMapGeneration.CPU.HeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorTypes.CPU);
+        containerBuilder.RegisterType<PlateTectonicsHeightMapGenerator>().As<IPlateTectonicsHeightMapGenerator>();
+        containerBuilder.RegisterType<MapGeneration.GPU.HeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorTypes.GPU);
+        containerBuilder.RegisterType<MapGeneration.CPU.HeightMapGenerator>().Keyed<IHeightMapGenerator>(ProcessorTypes.CPU);
     }
 }

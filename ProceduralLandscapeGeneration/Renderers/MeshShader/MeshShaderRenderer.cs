@@ -1,7 +1,7 @@
 ﻿using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion;
-using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
+using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using Raylib_cs;
 using System.Numerics;
 

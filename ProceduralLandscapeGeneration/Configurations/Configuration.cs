@@ -1,8 +1,9 @@
 ﻿using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Particles;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalErosion;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion.Particles;
-using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
+using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 
 namespace ProceduralLandscapeGeneration.Configurations;
 
@@ -10,8 +11,10 @@ internal class Configuration : IConfiguration
 {
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
+    private readonly ILayersConfiguration myLayersConfiguration;
     private readonly IGridErosionConfiguration myGridErosionConfiguration;
     private readonly IParticleHydraulicErosionConfiguration myParticleHydraulicErosionConfiguration;
+    private readonly IThermalErosionConfiguration myThermalErosionConfiguration;
     private readonly IParticleWindErosionConfiguration myParticleWindErosionConfiguration;
 
     private bool myIsDisposed;
@@ -21,12 +24,14 @@ internal class Configuration : IConfiguration
     public int ParallelExecutions { get; set; }
     public int ShadowMapResolution { get; set; }
 
-    public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
+    public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, ILayersConfiguration layersConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
+        myLayersConfiguration = layersConfiguration;
         myGridErosionConfiguration = gridErosionConfiguration;
         myParticleHydraulicErosionConfiguration = particleHydraulicErosionConfiguration;
+        myThermalErosionConfiguration = thermalErosionConfiguration;
         myParticleWindErosionConfiguration = particleWindErosionConfiguration;
 
         ScreenWidth = 1920;
@@ -39,8 +44,10 @@ internal class Configuration : IConfiguration
     {
         myMapGenerationConfiguration.Initialize();
         myErosionConfiguration.Initialize();
+        myLayersConfiguration.Initialize();
         myGridErosionConfiguration.Initialize();
         myParticleHydraulicErosionConfiguration.Initialize();
+        myThermalErosionConfiguration.Initialize();
         myParticleWindErosionConfiguration.Initialize();
 
         myIsDisposed = false;
@@ -55,8 +62,10 @@ internal class Configuration : IConfiguration
 
         myMapGenerationConfiguration.Dispose();
         myErosionConfiguration.Dispose();
+        myLayersConfiguration.Dispose();
         myGridErosionConfiguration.Dispose();
         myParticleHydraulicErosionConfiguration.Dispose();
+        myThermalErosionConfiguration.Dispose();
         myParticleWindErosionConfiguration.Dispose();
 
         myIsDisposed = true;

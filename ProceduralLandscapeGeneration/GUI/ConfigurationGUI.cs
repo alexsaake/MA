@@ -6,7 +6,7 @@ using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicEr
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalErosion;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion.Particles;
-using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
+using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.GUI.Elements;
 using Raylib_cs;
@@ -26,9 +26,10 @@ internal class ConfigurationGUI : IConfigurationGUI
     private readonly IErosionConfiguration myErosionConfiguration;
 
     private readonly PanelWithElements myErosionPanel;
-    private readonly PanelWithElements myThermalErosionPanel;
+    private readonly PanelWithElements myLayersPanel;
     private readonly PanelWithElements myGridErosionPanel;
     private readonly PanelWithElements myParticleHydraulicErosionPanel;
+    private readonly PanelWithElements myThermalErosionPanel;
     private readonly PanelWithElements myParticleWindErosionPanel;
 
     private Vector2 myRightPanelPosition;
@@ -41,7 +42,7 @@ internal class ConfigurationGUI : IConfigurationGUI
     public event EventHandler? ErosionResetRequired;
     public event EventHandler? ErosionModeChanged;
 
-    public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration)
+    public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, ILayersConfiguration layersConfiguration)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
@@ -82,10 +83,9 @@ internal class ConfigurationGUI : IConfigurationGUI
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => erosionConfiguration.SeaLevel = value, erosionConfiguration.SeaLevel));
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => erosionConfiguration.TimeDelta = value, erosionConfiguration.TimeDelta));
 
-        myThermalErosionPanel = new PanelWithElements("Thermal Erosion");
-        myThermalErosionPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => thermalErosionConfiguration.TalusAngle = value, thermalErosionConfiguration.TalusAngle, 0, 89));
-        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Erosion Rate", (value) => thermalErosionConfiguration.ErosionRate = value, thermalErosionConfiguration.ErosionRate));
-        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Dampening", (value) => thermalErosionConfiguration.Dampening = value, thermalErosionConfiguration.Dampening));
+        myLayersPanel = new PanelWithElements("Layers");
+        myLayersPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.BedrockHardness = value, layersConfiguration.BedrockHardness));
+        myLayersPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => layersConfiguration.BedrockTalusAngle = (uint)value , (int)layersConfiguration.BedrockTalusAngle, 1, 89));
 
         myGridErosionPanel = new PanelWithElements("Grid Hydraulic Erosion");
         myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridErosionConfiguration.RainDrops = (uint)value, (int)gridErosionConfiguration.RainDrops, 1, 100000));
@@ -108,6 +108,10 @@ internal class ConfigurationGUI : IConfigurationGUI
         myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Maximal Erosion Depth", (value) => particleHydraulicErosionConfiguration.MaximalErosionDepth = value, particleHydraulicErosionConfiguration.MaximalErosionDepth));
         myParticleHydraulicErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => particleHydraulicErosionConfiguration.Gravity = value, particleHydraulicErosionConfiguration.Gravity));
 
+        myThermalErosionPanel = new PanelWithElements("Thermal Erosion");
+        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Erosion Rate", (value) => thermalErosionConfiguration.ErosionRate = value, thermalErosionConfiguration.ErosionRate));
+        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Dampening", (value) => thermalErosionConfiguration.Dampening = value, thermalErosionConfiguration.Dampening));
+
         myParticleWindErosionPanel = new PanelWithElements("Particle Wind Erosion");
         myParticleWindErosionPanel.Add(new ValueBoxIntWithLabel("Particles", (value) => particleWindErosionConfiguration.Particles = (uint)value, (int)particleWindErosionConfiguration.Particles, 1, 1000000));
         myParticleWindErosionPanel.Add(new ValueBoxIntWithLabel("Maximum Age", (value) => particleWindErosionConfiguration.MaxAge = (uint)value, (int)particleWindErosionConfiguration.MaxAge, 1, 1024));
@@ -120,6 +124,7 @@ internal class ConfigurationGUI : IConfigurationGUI
         myRightPanelPosition = new Vector2(configuration.ScreenWidth - PanelSize.X, 0); ;
 
         myMapGenerationPanel = new PanelWithElements("Map Generation");
+        myMapGenerationPanel.Add(new ComboBox("Height Map;Multi-Layered Height Map", (value) => mapGenerationConfiguration.MapType = (MapTypes)value, (int)mapGenerationConfiguration.MapType));
         myMapGenerationPanel.Add(new ComboBox("Noise;Tectonics;Cube", (value) => mapGenerationConfiguration.MapGeneration = (MapGenerationTypes)value, (int)mapGenerationConfiguration.MapGeneration));
         myMapGenerationPanel.Add(new Button("Reset", () => MapResetRequired?.Invoke(this, EventArgs.Empty)));
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Mesh Creation", "CPU;GPU", (value) => mapGenerationConfiguration.MeshCreation = (ProcessorTypes)value, (int)mapGenerationConfiguration.MeshCreation));
@@ -159,17 +164,18 @@ internal class ConfigurationGUI : IConfigurationGUI
     private void DrawErosionPanels()
     {
         myErosionPanel.Draw(Vector2.Zero);
-        Vector2 hydraulicOffset = myErosionPanel.BottomLeft;
+        myLayersPanel.Draw(myErosionPanel.BottomLeft);
+        Vector2 hydraulicOffset = myLayersPanel.BottomLeft;
         if (myErosionConfiguration.IsHydraulicErosionEnabled)
         {
             switch (myErosionConfiguration.HydraulicErosionMode)
             {
                 case HydraulicErosionModeTypes.ParticleHydraulic:
-                    myParticleHydraulicErosionPanel.Draw(myErosionPanel.BottomLeft);
+                    myParticleHydraulicErosionPanel.Draw(myLayersPanel.BottomLeft);
                     hydraulicOffset = myParticleHydraulicErosionPanel.BottomLeft;
                     break;
                 case HydraulicErosionModeTypes.GridHydraulic:
-                    myGridErosionPanel.Draw(myErosionPanel.BottomLeft);
+                    myGridErosionPanel.Draw(myLayersPanel.BottomLeft);
                     hydraulicOffset = myGridErosionPanel.BottomLeft;
                     break;
             }

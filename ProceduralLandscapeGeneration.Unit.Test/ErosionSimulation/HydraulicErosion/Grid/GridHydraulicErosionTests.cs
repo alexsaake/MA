@@ -6,7 +6,7 @@ using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.Grid;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.DependencyInjection;
-using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.HydraulicErosion.Grid;
+using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.HydraulicErosion.Grid;

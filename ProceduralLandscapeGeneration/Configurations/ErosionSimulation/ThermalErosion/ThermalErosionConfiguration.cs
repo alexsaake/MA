@@ -10,21 +10,6 @@ internal class ThermalErosionConfiguration : IThermalErosionConfiguration
 
     private bool myIsDisposed;
 
-    private int myTalusAngle;
-    public int TalusAngle
-    {
-        get => myTalusAngle;
-        set
-        {
-            if (myTalusAngle == value)
-            {
-                return;
-            }
-            myTalusAngle = value;
-            UpdateShaderBuffer();
-        }
-    }
-
     private float myErosionRate;
     public float ErosionRate
     {
@@ -59,7 +44,6 @@ internal class ThermalErosionConfiguration : IThermalErosionConfiguration
     {
         myShaderBuffers = shaderBuffers;
 
-        myTalusAngle = 33;
         myErosionRate = 1.0f;
         myDampening = 0.8f;
     }
@@ -79,7 +63,6 @@ internal class ThermalErosionConfiguration : IThermalErosionConfiguration
         }
         ThermalErosionConfigurationShaderBuffer thermalErosionConfigurationShaderBuffer = new ThermalErosionConfigurationShaderBuffer()
         {
-            TangensTalusAngle = MathF.Tan(TalusAngle * (MathF.PI / 180)),
             ErosionRate = ErosionRate,
             Dampening = Dampening
         };

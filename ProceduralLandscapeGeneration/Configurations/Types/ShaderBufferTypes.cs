@@ -19,5 +19,7 @@ enum ShaderBufferTypes
     WindErosionHeightMapIndices,
     PlateTectonicsSegments,
     PlateTectonicsPlates,
-    PlateTectonicsTempSegments
+    PlateTectonicsTempSegments,
+    MultiLayeredHeightMap,
+    LayersConfiguration
 }

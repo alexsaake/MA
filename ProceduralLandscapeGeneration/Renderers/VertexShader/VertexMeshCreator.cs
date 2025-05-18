@@ -1,4 +1,4 @@
-﻿using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
+﻿using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using Raylib_cs;
 using System.Numerics;
 

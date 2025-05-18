@@ -1,10 +1,11 @@
 ﻿using Autofac;
-using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap;
-using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.HydraulicErosion.Grid;
-using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.HydraulicErosion.Particles;
-using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.ThermalErosion;
-using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.ThermalErosion.Grid;
-using ProceduralLandscapeGeneration.ErosionSimulation.HeightMap.WindErosion.Particles;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
+using ProceduralLandscapeGeneration.ErosionSimulation;
+using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
+using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Particles;
+using ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion;
+using ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion.Grid;
+using ProceduralLandscapeGeneration.ErosionSimulation.WindErosion.Particles;
 
 namespace ProceduralLandscapeGeneration.DependencyInjection.Modules;
 
@@ -15,6 +16,7 @@ internal class ErosionSimulationModule : Module
         base.Load(containerBuilder);
 
         containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>().SingleInstance();
+        containerBuilder.RegisterType<LayersConfiguration>().As<ILayersConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ParticleHydraulicErosion>().As<IParticleHydraulicErosion>();
         containerBuilder.RegisterType<GridHydraulicErosion>().As<IGridHydraulicErosion>();
         containerBuilder.RegisterType<GridThermalErosion>().As<IGridThermalErosion>();

@@ -1,4 +1,4 @@
-﻿using ProceduralLandscapeGeneration.Configurations.HeightMapGeneration;
+﻿using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 
 namespace ProceduralLandscapeGeneration.Common;
 
