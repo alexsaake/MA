@@ -51,6 +51,17 @@ layout(std430, binding = 14) readonly restrict buffer windErosionHeightMapIndice
     uint[] windErosionHeightMapIndices;
 };
 
+struct LayersConfiguration
+{
+    float BedrockHardness;
+    float BedrockTangensTalusAngle;
+};
+
+layout(std430, binding = 19) buffer layersConfigurationShaderBuffer
+{
+    LayersConfiguration layersConfiguration;
+};
+
 uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
@@ -215,14 +226,18 @@ bool Interact()
 
     float lift = (1.0 - collision) * length(myParticleWindErosion.Speed);
 
-    float capacity = 1 * (force * hfac + 0.02 * lift * hfac);
+    float capacity = 1.0 * (force * hfac + 0.02 * lift * hfac);
 
     // Mass Transfer to Equilibrium
 
-    float diff = capacity - myParticleWindErosion.Sediment;
+    float difference = particleWindErosionConfiguration.SuspensionRate * (capacity - myParticleWindErosion.Sediment);
+    if(difference > 0)
+    {
+        difference *= (1.0 - layersConfiguration.BedrockHardness);
+    }
 
-    myParticleWindErosion.Sediment += particleWindErosionConfiguration.SuspensionRate * diff;
-    heightMap[getIndexV(currentPosition)] -= particleWindErosionConfiguration.SuspensionRate * diff;
+    myParticleWindErosion.Sediment += difference;
+    heightMap[getIndexV(currentPosition)] -= difference;
 
     myParticleWindErosion.Age++;
 

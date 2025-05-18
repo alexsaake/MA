@@ -66,6 +66,17 @@ layout(std430, binding = 11) readonly restrict buffer hydraulicErosionHeightMapI
     uint[] hydraulicErosionHeightMapIndices;
 };
 
+struct LayersConfiguration
+{
+    float BedrockHardness;
+    float BedrockTangensTalusAngle;
+};
+
+layout(std430, binding = 19) buffer layersConfigurationShaderBuffer
+{
+    LayersConfiguration layersConfiguration;
+};
+
 uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
@@ -151,48 +162,48 @@ bool Move()
 
 bool Interact()
 {
-    const ivec2 position = ivec2(myOriginalPosition);
+    const ivec2 originalPosition = ivec2(myOriginalPosition);
 
-    if(IsOutOfBounds(position))
+    if(IsOutOfBounds(originalPosition))
     {
         return false;
     }
 
-    float h2;
+    float currentHeight;
     if(IsOutOfBounds(ivec2(myParticleHydraulicErosion.Position)))
     {
-        h2 = 0.99 * heightMap[getIndexV(position)];
+        currentHeight = 0.99 * heightMap[getIndexV(originalPosition)];
     }
     else
     {
         ivec2 currentPosition = ivec2(myParticleHydraulicErosion.Position);
-        h2 = heightMap[getIndexV(currentPosition)];
+        currentHeight = heightMap[getIndexV(currentPosition)];
     }
 
-    float cEq = heightMap[getIndexV(position)] - h2;
-    if(cEq < 0)
+    float heightDifference = heightMap[getIndexV(originalPosition)] - currentHeight;
+    if(heightDifference < 0)
     {
-        cEq = 0;
+        heightDifference = 0;
     }
 
-    float cDiff = (cEq * myParticleHydraulicErosion.Volume - myParticleHydraulicErosion.Sediment);
+    float capacity = (heightDifference * myParticleHydraulicErosion.Volume - myParticleHydraulicErosion.Sediment);
 
-    float effD = particleHydraulicErosionConfiguration.DepositionRate;
-    if(effD < 0)
+    if(capacity < 0)
     {
-        effD = 0;
-    }
-
-    if(effD * cDiff < 0)
-    {
-        if(effD * cDiff < -myParticleHydraulicErosion.Sediment)
+        if(particleHydraulicErosionConfiguration.DepositionRate * capacity < -myParticleHydraulicErosion.Sediment)
         {
-            cDiff = -myParticleHydraulicErosion.Sediment / effD;
+            capacity = -myParticleHydraulicErosion.Sediment / particleHydraulicErosionConfiguration.DepositionRate;
         }
     }
 
-    myParticleHydraulicErosion.Sediment += effD * cDiff;
-    heightMap[getIndexV(position)] -= effD * cDiff;
+    float difference = particleHydraulicErosionConfiguration.DepositionRate * capacity;
+    if(difference > 0)
+    {
+        difference *= (1.0 - layersConfiguration.BedrockHardness);
+    }
+
+    myParticleHydraulicErosion.Sediment += difference;
+    heightMap[getIndexV(originalPosition)] -= difference;
 
     myParticleHydraulicErosion.Volume *= (1.0 - particleHydraulicErosionConfiguration.EvaporationRate);
 

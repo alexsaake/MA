@@ -67,6 +67,17 @@ layout(std430, binding = 9) buffer gridErosionConfigurationShaderBuffer
     GridErosionConfiguration gridErosionConfiguration;
 };
 
+struct LayersConfiguration
+{
+    float BedrockHardness;
+    float BedrockTangensTalusAngle;
+};
+
+layout(std430, binding = 19) buffer layersConfigurationShaderBuffer
+{
+    LayersConfiguration layersConfiguration;
+};
+
 uint myHeightMapSideLength;
 
 uint getIndex(uint x, uint y)
@@ -151,7 +162,7 @@ void main()
 
 	if (sedimentCapacity > gridHydraulicErosionCell.SuspendedSediment)
 	{
-		float soilSuspended = max(gridErosionConfiguration.SuspensionRate * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
+		float soilSuspended = max(gridErosionConfiguration.SuspensionRate * (1.0 - layersConfiguration.BedrockHardness) * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
 		heightMap[id] -= soilSuspended;
 		gridHydraulicErosionCell.SuspendedSediment += soilSuspended;
 	}

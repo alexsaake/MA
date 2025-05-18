@@ -44,7 +44,7 @@ internal class LayersConfiguration : ILayersConfiguration
     {
         myShaderBuffers = shaderBuffers;
 
-        myBedrockHardness = 0.9f;
+        myBedrockHardness = 0.95f;
         myBedrockTalusAngle = 89;
     }
 
