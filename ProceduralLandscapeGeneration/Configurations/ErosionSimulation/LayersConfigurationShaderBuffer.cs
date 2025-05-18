@@ -2,6 +2,6 @@
 
 internal struct LayersConfigurationShaderBuffer
 {
-    public float BedrockHardness;
-    public float BedrockTangensTalusAngle;
+    public float Hardness;
+    public float TangensTalusAngle;
 }

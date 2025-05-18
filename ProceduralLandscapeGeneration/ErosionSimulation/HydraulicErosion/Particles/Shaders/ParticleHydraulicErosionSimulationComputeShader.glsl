@@ -69,13 +69,13 @@ layout(std430, binding = 11) readonly restrict buffer hydraulicErosionHeightMapI
 
 struct LayersConfiguration
 {
-    float BedrockHardness;
-    float BedrockTangensTalusAngle;
+    float Hardness;
+    float TangensTalusAngle;
 };
 
 layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 {
-    LayersConfiguration layersConfiguration;
+    LayersConfiguration[] layersConfiguration;
 };
 
 uint myHeightMapSideLength;
@@ -99,6 +99,47 @@ bool IsOutOfBounds(ivec2 position)
 //https://github.com/erosiv/soillib/blob/main/source/particle/water.hpp
 ParticleHydraulicErosion myParticleHydraulicErosion;
 vec2 myOriginalPosition;
+uint myHeightMapLength;
+
+float SuspendFromTop(uint index, float requiredSediment)
+{
+    float suspendedSediment = 0;
+    for(uint layer = mapGenerationConfiguration.LayerCount - 1; layer >= 0; layer--)
+    {
+        uint offsetIndex = index + layer * myHeightMapLength;
+        float height = heightMap[offsetIndex];
+        float hardness = (1.0 - layersConfiguration[layer].Hardness);
+        float toBeSuspendedSediment = requiredSediment * hardness;
+        if(height >= toBeSuspendedSediment)
+        {
+            heightMap[offsetIndex] -= toBeSuspendedSediment;
+            suspendedSediment += toBeSuspendedSediment;
+            break;
+        }
+        else
+        {
+            heightMap[offsetIndex] = 0;
+            requiredSediment -= height * hardness;
+            suspendedSediment += height * hardness;
+        }
+    }
+    return suspendedSediment;
+}
+
+void DepositeOnTop(uint index, float sediment)
+{
+    heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength] += sediment;
+}
+
+float totalHeight(uint index)
+{
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
+    return height;
+}
 
 vec3 getScaledNormal(uint x, uint y)
 {
@@ -107,15 +148,15 @@ vec3 getScaledNormal(uint x, uint y)
     {
         return vec3(0.0, 0.0, 1.0);
     }
-
-    float rb = heightMap[getIndex(x + 1, y - 1)];
-    float lb = heightMap[getIndex(x - 1, y - 1)];
-    float r = heightMap[getIndex(x + 1, y)];
-    float l = heightMap[getIndex(x - 1, y)];
-    float rt = heightMap[getIndex(x + 1, y + 1)];
-    float lt = heightMap[getIndex(x - 1, y + 1)];
-    float t = heightMap[getIndex(x, y + 1)];
-    float b = heightMap[getIndex(x, y - 1)];
+    
+    float rb = totalHeight(getIndex(x + 1, y - 1));
+    float lb = totalHeight(getIndex(x - 1, y - 1));
+    float r = totalHeight(getIndex(x + 1, y));
+    float l = totalHeight(getIndex(x - 1, y));
+    float rt = totalHeight(getIndex(x + 1, y + 1));
+    float lt = totalHeight(getIndex(x - 1, y + 1));
+    float t = totalHeight(getIndex(x, y + 1));
+    float b = totalHeight(getIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -138,9 +179,9 @@ bool Move()
 
     if(myParticleHydraulicErosion.Age > particleHydraulicErosionConfiguration.MaxAge
     || myParticleHydraulicErosion.Volume < particleHydraulicErosionConfiguration.MinimumVolume
-    || heightMap[getIndexV(position)] <= erosionConfiguration.SeaLevel - particleHydraulicErosionConfiguration.MaximalErosionDepth)
+    || totalHeight(getIndexV(position)) <= erosionConfiguration.SeaLevel - particleHydraulicErosionConfiguration.MaximalErosionDepth)
     {
-        heightMap[getIndexV(position)] += myParticleHydraulicErosion.Sediment;
+        DepositeOnTop(getIndexV(position), myParticleHydraulicErosion.Sediment);
         myParticleHydraulicErosion.Sediment = 0;
         myParticleHydraulicErosion.Volume = 0;
         return false;
@@ -173,15 +214,15 @@ bool Interact()
     float currentHeight;
     if(IsOutOfBounds(ivec2(myParticleHydraulicErosion.Position)))
     {
-        currentHeight = 0.99 * heightMap[getIndexV(originalPosition)];
+        currentHeight = 0.99 * totalHeight(getIndexV(originalPosition));
     }
     else
     {
         ivec2 currentPosition = ivec2(myParticleHydraulicErosion.Position);
-        currentHeight = heightMap[getIndexV(currentPosition)];
+        currentHeight = totalHeight(getIndexV(currentPosition));
     }
 
-    float heightDifference = heightMap[getIndexV(originalPosition)] - currentHeight;
+    float heightDifference = totalHeight(getIndexV(originalPosition)) - currentHeight;
     if(heightDifference < 0)
     {
         heightDifference = 0;
@@ -200,11 +241,14 @@ bool Interact()
     float difference = particleHydraulicErosionConfiguration.DepositionRate * capacity;
     if(difference > 0)
     {
-        difference *= (1.0 - layersConfiguration.BedrockHardness);
+        float suspendedSediment = SuspendFromTop(getIndexV(originalPosition), difference);
+        myParticleHydraulicErosion.Sediment += suspendedSediment;
     }
-
-    myParticleHydraulicErosion.Sediment += difference;
-    heightMap[getIndexV(originalPosition)] -= difference;
+    else
+    {
+        DepositeOnTop(getIndexV(originalPosition), abs(difference));
+        myParticleHydraulicErosion.Sediment += difference;
+    }
 
     myParticleHydraulicErosion.Volume *= (1.0 - particleHydraulicErosionConfiguration.EvaporationRate);
 
@@ -216,12 +260,12 @@ bool Interact()
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
     if(id >= particlesHydraulicErosion.length())
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(heightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
 
     myParticleHydraulicErosion = particlesHydraulicErosion[id];
 

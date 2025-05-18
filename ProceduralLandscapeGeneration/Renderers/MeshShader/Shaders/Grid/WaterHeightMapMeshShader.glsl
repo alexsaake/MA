@@ -62,6 +62,16 @@ uniform mat4 mvp;
 uint myMapSize;
 uint myHeightMapLength;
 
+float totalHeight(uint index)
+{
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
+    return height;
+}
+
 uint getIndex(uint x, uint y)
 {
     return (y * myMapSize) + x;
@@ -73,11 +83,7 @@ void addVertex(uint vertex, uint x, uint y)
 {
     uint index = getIndex(x, y);
     float zOffset = 0.00004;
-    float height;
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
-    {
-        height += heightMap[index + layer * myHeightMapLength];
-    }
+    float height = totalHeight(index);
     vec4 position = mvp * vec4(x, y, (height - zOffset + gridHydraulicErosionCells[index].WaterHeight) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;

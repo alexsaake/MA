@@ -54,16 +54,57 @@ layout(std430, binding = 14) readonly restrict buffer windErosionHeightMapIndice
 
 struct LayersConfiguration
 {
-    float BedrockHardness;
-    float BedrockTangensTalusAngle;
+    float Hardness;
+    float TangensTalusAngle;
 };
 
 layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 {
-    LayersConfiguration layersConfiguration;
+    LayersConfiguration[] layersConfiguration;
 };
 
 uint myHeightMapSideLength;
+uint myHeightMapLength;
+
+float SuspendFromTop(uint index, float requiredSediment)
+{
+    float suspendedSediment = 0;
+    for(uint layer = mapGenerationConfiguration.LayerCount - 1; layer >= 0; layer--)
+    {
+        uint offsetIndex = index + layer * myHeightMapLength;
+        float height = heightMap[offsetIndex];
+        float hardness = (1.0 - layersConfiguration[layer].Hardness);
+        float toBeSuspendedSediment = requiredSediment * hardness;
+        if(height >= toBeSuspendedSediment)
+        {
+            heightMap[offsetIndex] -= toBeSuspendedSediment;
+            suspendedSediment += toBeSuspendedSediment;
+            break;
+        }
+        else
+        {
+            heightMap[offsetIndex] = 0;
+            requiredSediment -= height * hardness;
+            suspendedSediment += height * hardness;
+        }
+    }
+    return suspendedSediment;
+}
+
+void DepositeOnTop(uint index, float sediment)
+{
+    heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength] += sediment;
+}
+
+float totalHeight(uint index)
+{
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
+    return height;
+}
 
 uint getIndex(uint x, uint y)
 {
@@ -92,15 +133,15 @@ vec3 getScaledNormal(uint x, uint y)
     {
         return vec3(0.0, 0.0, 1.0);
     }
-
-    float rb = heightMap[getIndex(x + 1, y - 1)];
-    float lb = heightMap[getIndex(x - 1, y - 1)];
-    float r = heightMap[getIndex(x + 1, y)];
-    float l = heightMap[getIndex(x - 1, y)];
-    float rt = heightMap[getIndex(x + 1, y + 1)];
-    float lt = heightMap[getIndex(x - 1, y + 1)];
-    float t = heightMap[getIndex(x, y + 1)];
-    float b = heightMap[getIndex(x, y - 1)];
+    
+    float rb = totalHeight(getIndex(x + 1, y - 1));
+    float lb = totalHeight(getIndex(x - 1, y - 1));
+    float r = totalHeight(getIndex(x + 1, y));
+    float l = totalHeight(getIndex(x - 1, y));
+    float rt = totalHeight(getIndex(x + 1, y + 1));
+    float lt = totalHeight(getIndex(x - 1, y + 1));
+    float t = totalHeight(getIndex(x, y + 1));
+    float b = totalHeight(getIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -152,7 +193,7 @@ bool Move()
 
     if(myParticleWindErosion.Age > particleWindErosionConfiguration.MaxAge)
     {
-        heightMap[getIndexV(position)] += myParticleWindErosion.Sediment;
+        DepositeOnTop(getIndexV(position), myParticleWindErosion.Sediment);
         myParticleWindErosion.Sediment = 0.0;
         myParticleWindErosion.Age = 0;
         return false;
@@ -160,7 +201,7 @@ bool Move()
 
     // Compute Movement
 
-    const float height = heightMap[getIndexV(position)];
+    const float height = totalHeight(getIndexV(position));
     if (myParticleWindErosion.Age == 0 || myParticleWindErosion.Position.z < height)
     {
         myParticleWindErosion.Position.z = height;
@@ -219,7 +260,7 @@ bool Interact()
 
     // Compute Mass Transport
     
-    const float height = heightMap[getIndexV(currentPosition)];
+    const float height = totalHeight(getIndexV(currentPosition));
     const vec3 normal = getScaledNormal(currentPosition.x, currentPosition.y);
     const float hfac = exp(-(myParticleWindErosion.Position.z - height) / BoundaryLayer);
     const float collision = max(0.0, -dot(normalize(myParticleWindErosion.Speed), normal));
@@ -232,13 +273,17 @@ bool Interact()
     // Mass Transfer to Equilibrium
 
     float difference = particleWindErosionConfiguration.SuspensionRate * (capacity - myParticleWindErosion.Sediment);
-    if(difference > 0)
-    {
-        difference *= (1.0 - layersConfiguration.BedrockHardness);
-    }
 
-    myParticleWindErosion.Sediment += difference;
-    heightMap[getIndexV(currentPosition)] -= difference;
+    if(difference < 0)
+    {
+        DepositeOnTop(getIndexV(currentPosition), abs(difference));
+        myParticleWindErosion.Sediment += difference;
+    }
+    else
+    {
+        float suspendedSediment = SuspendFromTop(getIndexV(currentPosition), difference);
+        myParticleWindErosion.Sediment += suspendedSediment;
+    }
 
     myParticleWindErosion.Age++;
 
@@ -248,12 +293,12 @@ bool Interact()
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
     if(id >= particlesWindErosion.length())
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(heightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
 
     myParticleWindErosion = particlesWindErosion[id];
     

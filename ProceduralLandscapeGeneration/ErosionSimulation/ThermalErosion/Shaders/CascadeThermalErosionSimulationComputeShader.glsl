@@ -44,16 +44,63 @@ layout(std430, binding = 10) readonly restrict buffer thermalErosionConfiguratio
 
 struct LayersConfiguration
 {
-    float BedrockHardness;
-    float BedrockTangensTalusAngle;
+    float Hardness;
+    float TangensTalusAngle;
 };
 
 layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 {
-    LayersConfiguration layersConfiguration;
+    LayersConfiguration[] layersConfiguration;
 };
 
 uint myHeightMapSideLength;
+uint myHeightMapLength;
+
+float TangensTalusAngle(uint index)
+{
+	for(uint layer = mapGenerationConfiguration.LayerCount - 1; layer >= 0; layer--)
+	{
+		if(heightMap[index + layer * myHeightMapLength] > 0)
+		{
+			return layersConfiguration[layer].TangensTalusAngle;
+		}
+	}
+	return layersConfiguration[0].TangensTalusAngle;
+}
+
+void RemoveFromTop(uint index, float sediment)
+{
+    for(uint layer = mapGenerationConfiguration.LayerCount - 1; layer >= 0; layer--)
+    {
+        uint offsetIndex = index + layer * myHeightMapLength;
+        float height = heightMap[offsetIndex];
+        if(height >= sediment)
+        {
+            heightMap[offsetIndex] -= height;
+            break;
+        }
+        else
+        {
+            heightMap[offsetIndex] = 0;
+            sediment -= height;
+        }
+    }
+}
+
+void DepositeOnTop(uint index, float sediment)
+{
+    heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength] += sediment;
+}
+
+float totalHeight(uint index)
+{
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
+    return height;
+}
 
 uint getIndexV(ivec2 position)
 {
@@ -104,7 +151,7 @@ void Cascade(ivec2 position)
             continue;
         }
 
-        float height = heightMap[getIndexV(neighborPosition)];
+        float height = totalHeight(getIndexV(neighborPosition));
         neighborCells[neighbors].position = neighborPosition;
         neighborCells[neighbors].height = height;
         neighborCells[neighbors].distance = length(neighboringPosition);
@@ -113,7 +160,7 @@ void Cascade(ivec2 position)
 
     // Local Matrix, Target Height
 
-    float heightAverage = heightMap[getIndexV(position)];
+    float heightAverage = totalHeight(getIndexV(position));
     for(int neighbor = 0; neighbor < neighbors; neighbor++)
     {
         heightAverage += neighborCells[neighbor].height;
@@ -136,7 +183,7 @@ void Cascade(ivec2 position)
         uint bindex = getIndexV(bpos);
 
         // The Amount of Excess Difference!
-        float excess = abs(heightDifference) - neighborCells[neighbor].distance * layersConfiguration.BedrockTangensTalusAngle / mapGenerationConfiguration.HeightMultiplier;
+        float excess = abs(heightDifference) - neighborCells[neighbor].distance * TangensTalusAngle(gl_GlobalInvocationID.x) / mapGenerationConfiguration.HeightMultiplier;
         if (excess <= 0)
         {
             continue;
@@ -144,20 +191,29 @@ void Cascade(ivec2 position)
 
         // Actual Amount Transferred
         float transfer = excess * thermalErosionConfiguration.ErosionRate * erosionConfiguration.TimeDelta * (1.0 - thermalErosionConfiguration.Dampening);
-        heightMap[tindex] -= transfer;
-        heightMap[bindex] += transfer;
+        
+        if(transfer > 0)
+        {
+            RemoveFromTop(tindex, transfer);
+            DepositeOnTop(bindex, transfer);
+        }
+        else
+        {
+            RemoveFromTop(bindex, abs(transfer));
+            DepositeOnTop(tindex, abs(transfer));
+        }
     }
 }
 
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
-    if(id >= heightMapLength)
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(id >= myHeightMapLength)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(heightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;

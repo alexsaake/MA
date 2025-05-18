@@ -44,13 +44,13 @@ layout(std430, binding = 10) readonly restrict buffer thermalErosionConfiguratio
 
 struct LayersConfiguration
 {
-    float BedrockHardness;
-    float BedrockTangensTalusAngle;
+    float Hardness;
+    float TangensTalusAngle;
 };
 
 layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 {
-    LayersConfiguration layersConfiguration;
+    LayersConfiguration[] layersConfiguration;
 };
 
 uint myHeightMapSideLength;
@@ -61,6 +61,53 @@ uint getIndex(uint x, uint y)
 }
 
 //https://aparis69.github.io/public_html/posts/terrain_erosion.html
+uint myHeightMapLength;
+
+float TangensTalusAngle(uint index)
+{
+	for(uint layer = mapGenerationConfiguration.LayerCount - 1; layer >= 0; layer--)
+	{
+		if(heightMap[index + layer * myHeightMapLength] > 0)
+		{
+			return layersConfiguration[layer].TangensTalusAngle;
+		}
+	}
+	return layersConfiguration[0].TangensTalusAngle;
+}
+
+void RemoveFromTop(uint index, float sediment)
+{
+    for(uint layer = mapGenerationConfiguration.LayerCount - 1; layer >= 0; layer--)
+    {
+        uint offsetIndex = index + layer * myHeightMapLength;
+        float height = heightMap[offsetIndex];
+        if(height >= sediment)
+        {
+            heightMap[offsetIndex] -= height;
+            break;
+        }
+        else
+        {
+            heightMap[offsetIndex] = 0;
+            sediment -= height;
+        }
+    }
+}
+
+void DepositeOnTop(uint index, float sediment)
+{
+    heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength] += sediment;
+}
+
+float totalHeight(uint index)
+{
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
+    return height;
+}
 
 vec3 getScaledNormal(uint x, uint y)
 {
@@ -69,15 +116,15 @@ vec3 getScaledNormal(uint x, uint y)
     {
         return vec3(0.0, 0.0, 1.0);
     }
-
-    float rb = heightMap[getIndex(x + 1, y - 1)];
-    float lb = heightMap[getIndex(x - 1, y - 1)];
-    float r = heightMap[getIndex(x + 1, y)];
-    float l = heightMap[getIndex(x - 1, y)];
-    float rt = heightMap[getIndex(x + 1, y + 1)];
-    float lt = heightMap[getIndex(x - 1, y + 1)];
-    float t = heightMap[getIndex(x, y + 1)];
-    float b = heightMap[getIndex(x, y - 1)];
+    
+    float rb = totalHeight(getIndex(x + 1, y - 1));
+    float lb = totalHeight(getIndex(x - 1, y - 1));
+    float r = totalHeight(getIndex(x + 1, y));
+    float l = totalHeight(getIndex(x - 1, y));
+    float rt = totalHeight(getIndex(x + 1, y + 1));
+    float lt = totalHeight(getIndex(x - 1, y + 1));
+    float t = totalHeight(getIndex(x, y + 1));
+    float b = totalHeight(getIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -90,12 +137,12 @@ vec3 getScaledNormal(uint x, uint y)
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
-    if(id >= heightMapLength)
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(id >= myHeightMapLength)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(heightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;
@@ -151,14 +198,22 @@ void main()
     {
         return;
     }
-    float heightDifference = heightMap[id] - heightMap[neighborIndex];
+    float heightDifference = totalHeight(id) - totalHeight(neighborIndex);
 	float tangensAngle = heightDifference * mapGenerationConfiguration.HeightMultiplier / 1.0;
 
-    if (tangensAngle > layersConfiguration.BedrockTangensTalusAngle)
+    if (tangensAngle > TangensTalusAngle(id))
     {
         float heightChange = heightDifference * thermalErosionConfiguration.ErosionRate * erosionConfiguration.TimeDelta * (1.0 - thermalErosionConfiguration.Dampening);
-        heightMap[id] -= heightChange;
-        heightMap[neighborIndex] += heightChange;
+        if(heightChange > 0)
+        {
+            RemoveFromTop(id, heightChange);
+            DepositeOnTop(neighborIndex, heightChange);
+        }
+        else
+        {
+            RemoveFromTop(neighborIndex, abs(heightChange));
+            DepositeOnTop(id, abs(heightChange));
+        }
         
         memoryBarrier();
     }

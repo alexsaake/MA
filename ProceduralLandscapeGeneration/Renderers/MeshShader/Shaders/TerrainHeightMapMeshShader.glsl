@@ -68,8 +68,18 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
 
 uniform mat4 mvp;
 
-uint myMapSize;
+uint myHeightMapSideLength;
 uint myHeightMapLength;
+
+float totalHeight(uint index)
+{
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
+    return height;
+}
 
 uint getIndex(uint x, uint y)
 {
@@ -78,20 +88,20 @@ uint getIndex(uint x, uint y)
 
 vec3 getScaledNormal(uint x, uint y)
 {
-    if (x < 1 || x > myMapSize - 2
-        || y < 1 || y > myMapSize - 2)
+    if (x < 1 || x > myHeightMapSideLength - 2
+        || y < 1 || y > myHeightMapSideLength - 2)
     {
         return vec3(0.0, 0.0, 1.0);
     }
-
-    float rb = heightMap[getIndex(x + 1, y - 1)];
-    float lb = heightMap[getIndex(x - 1, y - 1)];
-    float r = heightMap[getIndex(x + 1, y)];
-    float l = heightMap[getIndex(x - 1, y)];
-    float rt = heightMap[getIndex(x + 1, y + 1)];
-    float lt = heightMap[getIndex(x - 1, y + 1)];
-    float t = heightMap[getIndex(x, y + 1)];
-    float b = heightMap[getIndex(x, y - 1)];
+    
+    float rb = totalHeight(getIndex(x + 1, y - 1));
+    float lb = totalHeight(getIndex(x - 1, y - 1));
+    float r = totalHeight(getIndex(x + 1, y));
+    float l = totalHeight(getIndex(x - 1, y));
+    float rt = totalHeight(getIndex(x + 1, y + 1));
+    float lt = totalHeight(getIndex(x - 1, y + 1));
+    float t = totalHeight(getIndex(x, y + 1));
+    float b = totalHeight(getIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -111,11 +121,7 @@ vec3 snowColor = vec3(1.0, 0.9, 0.9);
 void addVertex(uint vertex, uint x, uint y)
 {
     uint index = getIndex(x, y);
-    float height;
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
-    {
-        height += heightMap[index + layer * myHeightMapLength];
-    }
+    float height = totalHeight(index);
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
     float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     vec3 normal = getScaledNormal(x, y);
@@ -234,13 +240,13 @@ void main()
     {
         return;
     }
-    myMapSize = uint(sqrt(myHeightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
     uint meshletSize = uint(sqrt(VERTICES));
-    uint yMeshletCount = uint(ceil(float(myMapSize) / (meshletSize - 1)));
+    uint yMeshletCount = uint(ceil(float(myHeightMapSideLength) / (meshletSize - 1)));
     uint xOffset = uint(floor(threadNumber / yMeshletCount)) * (meshletSize - 1);
     uint yOffset = (threadNumber % yMeshletCount) * (meshletSize - 1);
 
-    if(xOffset + (meshletSize - 1) > myMapSize || yOffset + (meshletSize - 1) > myMapSize)
+    if(xOffset + (meshletSize - 1) > myHeightMapSideLength || yOffset + (meshletSize - 1) > myHeightMapSideLength)
     {
         return;
     }

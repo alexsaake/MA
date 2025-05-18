@@ -26,7 +26,8 @@ internal class ConfigurationGUI : IConfigurationGUI
     private readonly IErosionConfiguration myErosionConfiguration;
 
     private readonly PanelWithElements myErosionPanel;
-    private readonly PanelWithElements myLayersPanel;
+    private readonly PanelWithElements myBedrockLayerPanel;
+    private readonly PanelWithElements myRegolithLayerPanel;
     private readonly PanelWithElements myGridErosionPanel;
     private readonly PanelWithElements myParticleHydraulicErosionPanel;
     private readonly PanelWithElements myThermalErosionPanel;
@@ -83,9 +84,13 @@ internal class ConfigurationGUI : IConfigurationGUI
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => erosionConfiguration.SeaLevel = value, erosionConfiguration.SeaLevel));
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => erosionConfiguration.TimeDelta = value, erosionConfiguration.TimeDelta));
 
-        myLayersPanel = new PanelWithElements("Layers");
-        myLayersPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.BedrockHardness = value, layersConfiguration.BedrockHardness));
-        myLayersPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => layersConfiguration.BedrockTalusAngle = (uint)value , (int)layersConfiguration.BedrockTalusAngle, 1, 89));
+        myBedrockLayerPanel = new PanelWithElements("Bedrock Layer");
+        myBedrockLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.BedrockHardness = value, layersConfiguration.BedrockHardness));
+        myBedrockLayerPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => layersConfiguration.BedrockTalusAngle = (uint)value, (int)layersConfiguration.BedrockTalusAngle, 1, 89));
+
+        myRegolithLayerPanel = new PanelWithElements("Regolith Layer");
+        myRegolithLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.RegolithHardness = value, layersConfiguration.RegolithHardness));
+        myRegolithLayerPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => layersConfiguration.RegolithTalusAngle = (uint)value, (int)layersConfiguration.RegolithTalusAngle, 1, 89));
 
         myGridErosionPanel = new PanelWithElements("Grid Hydraulic Erosion");
         myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridErosionConfiguration.RainDrops = (uint)value, (int)gridErosionConfiguration.RainDrops, 1, 100000));
@@ -164,18 +169,26 @@ internal class ConfigurationGUI : IConfigurationGUI
     private void DrawErosionPanels()
     {
         myErosionPanel.Draw(Vector2.Zero);
-        myLayersPanel.Draw(myErosionPanel.BottomLeft);
-        Vector2 hydraulicOffset = myLayersPanel.BottomLeft;
+        myBedrockLayerPanel.Draw(myErosionPanel.BottomLeft);
+        Vector2 layerOffset = myBedrockLayerPanel.BottomLeft;
+        switch (myMapGenerationConfiguration.LayerCount)
+        {
+            case 2:
+                myRegolithLayerPanel.Draw(myBedrockLayerPanel.BottomLeft);
+                layerOffset = myRegolithLayerPanel.BottomLeft;
+                break;
+        }
+        Vector2 hydraulicOffset = layerOffset;
         if (myErosionConfiguration.IsHydraulicErosionEnabled)
         {
             switch (myErosionConfiguration.HydraulicErosionMode)
             {
                 case HydraulicErosionModeTypes.ParticleHydraulic:
-                    myParticleHydraulicErosionPanel.Draw(myLayersPanel.BottomLeft);
+                    myParticleHydraulicErosionPanel.Draw(layerOffset);
                     hydraulicOffset = myParticleHydraulicErosionPanel.BottomLeft;
                     break;
                 case HydraulicErosionModeTypes.GridHydraulic:
-                    myGridErosionPanel.Draw(myLayersPanel.BottomLeft);
+                    myGridErosionPanel.Draw(layerOffset);
                     hydraulicOffset = myGridErosionPanel.BottomLeft;
                     break;
             }

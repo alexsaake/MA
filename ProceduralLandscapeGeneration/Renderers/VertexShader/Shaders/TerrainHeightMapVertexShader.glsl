@@ -48,6 +48,17 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
 };
 
 uint myHeightMapSideLength;
+uint myHeightMapLength;
+
+float totalHeight(uint index)
+{
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
+    return height;
+}
 
 uint getIndex(uint x, uint y)
 {
@@ -62,14 +73,14 @@ vec3 getScaledNormal(uint x, uint y)
         return vec3(0.0, 0.0, 1.0);
     }
 
-    float rb = heightMap[getIndex(x + 1, y - 1)];
-    float lb = heightMap[getIndex(x - 1, y - 1)];
-    float r = heightMap[getIndex(x + 1, y)];
-    float l = heightMap[getIndex(x - 1, y)];
-    float rt = heightMap[getIndex(x + 1, y + 1)];
-    float lt = heightMap[getIndex(x - 1, y + 1)];
-    float t = heightMap[getIndex(x, y + 1)];
-    float b = heightMap[getIndex(x, y - 1)];
+    float rb = totalHeight(getIndex(x + 1, y - 1));
+    float lb = totalHeight(getIndex(x - 1, y - 1));
+    float r = totalHeight(getIndex(x + 1, y));
+    float l = totalHeight(getIndex(x - 1, y));
+    float rt = totalHeight(getIndex(x + 1, y + 1));
+    float lt = totalHeight(getIndex(x - 1, y + 1));
+    float t = totalHeight(getIndex(x, y + 1));
+    float b = totalHeight(getIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -98,21 +109,17 @@ vec3 snowColor = vec3(1.0, 0.9, 0.9);
 void main()
 {
     uint index = gl_VertexID;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
-    if(index >= heightMapLength)
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(index >= myHeightMapLength)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(heightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
 
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
     
-    float height;
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
-    {
-        height += heightMap[index + layer * heightMapLength];
-    }
+    float height = totalHeight(index);
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
     float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     fragPosition = vec3(matModel * vec4(vertexPosition.xy, terrainHeight, 1.0));
@@ -167,52 +174,66 @@ void main()
     }
     else if(mapGenerationConfiguration.AreTerrainColorsEnabled)
     {
-        if(terrainHeight < seaLevelHeight + 0.3)
+        if(mapGenerationConfiguration.LayerCount == 2)
         {
-            if(normal.z > 0.3)
+            if(heightMap[index + myHeightMapLength] > 0)
             {
                 terrainColor = beachColor;
             }
             else
             {
-                terrainColor = oceanCliff;
+                terrainColor = mountainColor;
             }
         }
         else
         {
-            if(normal.z > 0.4)
+            if(terrainHeight < seaLevelHeight + 0.3)
             {
-                if(height > 0.9)
+                if(normal.z > 0.3)
                 {
-                    terrainColor = snowColor;
-                }
-                else if(height > 0.7)
-                {
-                    terrainColor = mountainColor;
+                    terrainColor = beachColor;
                 }
                 else
                 {
-                    terrainColor = woodsColor;
-                }
-            }
-            else if(normal.z > 0.3)
-            {
-                if(height > 0.9)
-                {
-                    terrainColor = snowColor;
-                }
-                else if(height > 0.8)
-                {
-                    terrainColor = mountainColor;
-                }
-                else
-                {
-                    terrainColor = pastureColor;
+                    terrainColor = oceanCliff;
                 }
             }
             else
             {
-                terrainColor = mountainColor;
+                if(normal.z > 0.4)
+                {
+                    if(height > 0.9)
+                    {
+                        terrainColor = snowColor;
+                    }
+                    else if(height > 0.7)
+                    {
+                        terrainColor = mountainColor;
+                    }
+                    else
+                    {
+                        terrainColor = woodsColor;
+                    }
+                }
+                else if(normal.z > 0.3)
+                {
+                    if(height > 0.9)
+                    {
+                        terrainColor = snowColor;
+                    }
+                    else if(height > 0.8)
+                    {
+                        terrainColor = mountainColor;
+                    }
+                    else
+                    {
+                        terrainColor = pastureColor;
+                    }
+                }
+                else
+                {
+                    terrainColor = mountainColor;
+                }
             }
         }
     }

@@ -28,7 +28,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     public unsafe void GenerateNoiseHeightMap()
     {
-        float[] heightMap = GenerateNoiseMap(myMapGenerationConfiguration.);
+        float[] heightMap = GenerateNoiseMap(myMapGenerationConfiguration.LayerCount);
 
         uint heightMapShaderBufferSize = (uint)heightMap.Length * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapShaderBufferSize);

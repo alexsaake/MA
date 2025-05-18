@@ -60,15 +60,27 @@ out vec4 fragColor;
 
 vec4 waterColor = vec4(0.0, 0.0, 1.0, 0.25);
 
+uint myHeightMapLength;
+
+float totalHeight(uint index)
+{
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
+    return height;
+}
+
 void main()
 {
     uint index = gl_VertexID;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
-    if(index >= heightMapLength)
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(index >= myHeightMapLength)
     {
         return;
     }
-    uint sideLength = uint(sqrt(heightMapLength));    
+    uint sideLength = uint(sqrt(myHeightMapLength));    
     uint x = index % sideLength;
     uint y = index / sideLength;
 
@@ -84,10 +96,6 @@ void main()
 
     fragColor = waterColor;
     float zOffset = 0.00004;
-    float height;
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
-    {
-        height += heightMap[index + layer * heightMapLength];
-    }
+    float height = totalHeight(index);
     gl_Position =  mvp * vec4(vertexPosition.xy, (height - zOffset + waterHeight) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 }

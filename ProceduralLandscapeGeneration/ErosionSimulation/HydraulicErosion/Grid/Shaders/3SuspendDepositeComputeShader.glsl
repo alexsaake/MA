@@ -70,16 +70,57 @@ layout(std430, binding = 9) buffer gridErosionConfigurationShaderBuffer
 
 struct LayersConfiguration
 {
-    float BedrockHardness;
-    float BedrockTangensTalusAngle;
+    float Hardness;
+    float TangensTalusAngle;
 };
 
 layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 {
-    LayersConfiguration layersConfiguration;
+    LayersConfiguration[] layersConfiguration;
 };
 
 uint myHeightMapSideLength;
+uint myHeightMapLength;
+
+float SuspendFromTop(uint index, float requiredSediment)
+{
+    float suspendedSediment = 0;
+    for(uint layer = mapGenerationConfiguration.LayerCount - 1; layer >= 0; layer--)
+    {
+        uint offsetIndex = index + layer * myHeightMapLength;
+        float height = heightMap[offsetIndex];
+        float hardness = (1.0 - layersConfiguration[layer].Hardness);
+        float toBeSuspendedSediment = requiredSediment * hardness;
+        if(height >= toBeSuspendedSediment)
+        {
+            heightMap[offsetIndex] -= toBeSuspendedSediment;
+            suspendedSediment += toBeSuspendedSediment;
+            break;
+        }
+        else
+        {
+            heightMap[offsetIndex] = 0;
+            requiredSediment -= height * hardness;
+            suspendedSediment += height * hardness;
+        }
+    }
+    return suspendedSediment;
+}
+
+void DepositeOnTop(uint index, float sediment)
+{
+    heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength] += sediment;
+}
+
+float totalHeight(uint index)
+{
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
+    return height;
+}
 
 uint getIndex(uint x, uint y)
 {
@@ -100,26 +141,26 @@ uint getIndexVector(vec2 position)
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
-    if(id >= heightMapLength)
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(id >= myHeightMapLength)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(heightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;
     
     GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[id];
 
-    float height = heightMap[id];
+    float height = totalHeight(id);
     float heightLeft;
     float heightRight;
     float heightDown;
     float heightUp;
     if(x > 0)
     {
-        heightLeft = heightMap[getIndex(x - 1, y)];
+        heightLeft = totalHeight(getIndex(x - 1, y));
     }
     else
     {
@@ -127,7 +168,7 @@ void main()
     }
     if(x < myHeightMapSideLength - 1)
     {
-        heightRight = heightMap[getIndex(x + 1, y)];
+        heightRight = totalHeight(getIndex(x + 1, y));
     }
     else
     {
@@ -135,7 +176,7 @@ void main()
     }
     if(y > 0)
     {
-        heightDown = heightMap[getIndex(x, y - 1)];
+        heightDown = totalHeight(getIndex(x, y - 1));
     }
     else
     {
@@ -143,7 +184,7 @@ void main()
     }
     if(y < myHeightMapSideLength - 1)
     {
-        heightUp = heightMap[getIndex(x, y + 1)];
+        heightUp = totalHeight(getIndex(x, y + 1));
     }
     else
     {
@@ -163,14 +204,14 @@ void main()
 
 	if (sedimentCapacity > gridHydraulicErosionCell.SuspendedSediment)
 	{
-		float soilSuspended = max(gridErosionConfiguration.SuspensionRate * (1.0 - layersConfiguration.BedrockHardness) * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
-		heightMap[id] -= soilSuspended;
-		gridHydraulicErosionCell.SuspendedSediment += soilSuspended;
+		float soilSuspended = max(gridErosionConfiguration.SuspensionRate * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
+		float suspendedSediment = SuspendFromTop(id, soilSuspended);
+		gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
 	}
 	else if (sedimentCapacity < gridHydraulicErosionCell.SuspendedSediment)
 	{
 		float soilDeposited = min(gridErosionConfiguration.DepositionRate * (gridHydraulicErosionCell.SuspendedSediment - sedimentCapacity) * erosionConfiguration.TimeDelta, gridHydraulicErosionCell.SuspendedSediment);
-		heightMap[id] += soilDeposited;
+		DepositeOnTop(id, soilDeposited);
 		gridHydraulicErosionCell.SuspendedSediment -= soilDeposited;
 	}
 	

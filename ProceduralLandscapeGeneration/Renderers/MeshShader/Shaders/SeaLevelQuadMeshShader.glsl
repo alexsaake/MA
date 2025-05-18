@@ -50,6 +50,18 @@ uniform mat4 mvp;
 
 vec4 oceanColor = vec4(0, 0.4, 0.8, 0.5);
 
+uint myHeightMapLength;
+
+float totalHeight(uint index)
+{
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
+    return height;
+}
+
 void addVertex(uint vertex, uint x, uint y)
 {
     float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
@@ -61,8 +73,8 @@ void addVertex(uint vertex, uint x, uint y)
 
 void main()
 {
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
-    uint mapSize = uint(sqrt(heightMapLength));
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    uint mapSize = uint(sqrt(myHeightMapLength));
 
     addVertex(0, 0, 0);
     addVertex(1, mapSize, 0);

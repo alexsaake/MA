@@ -68,11 +68,23 @@ uint getIndex(uint x, uint y)
 
 vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
 
+uint myHeightMapLength;
+
+float totalHeight(uint index)
+{
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
+    return height;
+}
+
 void addVertex(uint vertex, uint x, uint y)
 {
     uint index = getIndex(x, y);
     float zOffset = 0.00004;
-    vec4 position = mvp * vec4(x, y, (heightMap[index] - zOffset + gridHydraulicErosionCells[index].SuspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
+    vec4 position = mvp * vec4(x, y, (totalHeight(index) - zOffset + gridHydraulicErosionCells[index].SuspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
     v_out[vertex].position = position;
@@ -83,12 +95,12 @@ void addVertex(uint vertex, uint x, uint y)
 void main()
 {
     uint threadNumber = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
-    if(threadNumber >= heightMapLength)
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(threadNumber >= myHeightMapLength)
     {
         return;
     }
-    myMapSize = uint(sqrt(heightMapLength));
+    myMapSize = uint(sqrt(myHeightMapLength));
     uint meshletSize = uint(sqrt(VERTICES));
     uint yMeshletCount = uint(ceil(float(myMapSize) / (meshletSize - 1)));
     uint xOffset = uint(floor(threadNumber / yMeshletCount)) * (meshletSize - 1);

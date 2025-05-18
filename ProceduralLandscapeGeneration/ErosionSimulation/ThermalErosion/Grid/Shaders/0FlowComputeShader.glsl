@@ -57,16 +57,39 @@ layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
 
 struct LayersConfiguration
 {
-    float BedrockHardness;
-    float BedrockTangensTalusAngle;
+    float Hardness;
+    float TangensTalusAngle;
 };
 
 layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 {
-    LayersConfiguration layersConfiguration;
+    LayersConfiguration[] layersConfiguration;
 };
 
 uint myHeightMapSideLength;
+uint myHeightMapLength;
+
+float TangensTalusAngle(uint index)
+{
+	for(uint layer = mapGenerationConfiguration.LayerCount - 1; layer >= 0; layer--)
+	{
+		if(heightMap[index + layer * myHeightMapLength] > 0)
+		{
+			return layersConfiguration[layer].TangensTalusAngle;
+		}
+	}
+	return layersConfiguration[0].TangensTalusAngle;
+}
+
+float totalHeight(uint index)
+{
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
+    return height;
+}
 
 uint getIndex(uint x, uint y)
 {
@@ -78,22 +101,22 @@ uint getIndex(uint x, uint y)
 void main()
 {	
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
-    if(id >= heightMapLength)
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(id >= myHeightMapLength)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(heightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;
     
     GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[id];
 
-	float heightDifferenceLeft = max(heightMap[id] - heightMap[getIndex(x - 1, y)], 0.0);
-	float heightDifferenceRight = max(heightMap[id] - heightMap[getIndex(x + 1, y)], 0.0);
-	float heightDifferenceTop = max(heightMap[id] - heightMap[getIndex(x, y + 1)], 0.0);
-	float heightDifferenceBottom = max(heightMap[id] - heightMap[getIndex(x, y - 1)], 0.0);
+	float heightDifferenceLeft = max(totalHeight(id) - totalHeight(getIndex(x - 1, y)), 0.0);
+	float heightDifferenceRight = max(totalHeight(id) - totalHeight(getIndex(x + 1, y)), 0.0);
+	float heightDifferenceTop = max(totalHeight(id) - totalHeight(getIndex(x, y + 1)), 0.0);
+	float heightDifferenceBottom = max(totalHeight(id) - totalHeight(getIndex(x, y - 1)), 0.0);
 	float maxHeightDifference = max(max(heightDifferenceLeft, heightDifferenceRight), max(heightDifferenceBottom, heightDifferenceTop));
 
 	float volumeToBeMoved = maxHeightDifference * thermalErosionConfiguration.ErosionRate * (1.0 - thermalErosionConfiguration.Dampening);
@@ -104,25 +127,25 @@ void main()
 	float tangensAngleBottom = heightDifferenceBottom * mapGenerationConfiguration.HeightMultiplier / 1.0;
 	
 	float flowLeft = 0;
-	if (tangensAngleLeft > layersConfiguration.BedrockTangensTalusAngle)
+	if (tangensAngleLeft > TangensTalusAngle(id))
 	{
 		flowLeft = heightDifferenceLeft;
 	}
 
 	float flowRight = 0;
-	if (tangensAngleRight > layersConfiguration.BedrockTangensTalusAngle)
+	if (tangensAngleRight > TangensTalusAngle(id))
 	{
 		flowRight = heightDifferenceRight;
 	}
 
 	float FlowUp = 0;
-	if (tangensAngleTop > layersConfiguration.BedrockTangensTalusAngle)
+	if (tangensAngleTop > TangensTalusAngle(id))
 	{
 		FlowUp = heightDifferenceTop;
 	}
 
 	float FlowDown = 0;
-	if (tangensAngleBottom > layersConfiguration.BedrockTangensTalusAngle)
+	if (tangensAngleBottom > TangensTalusAngle(id))
 	{
 		FlowDown = heightDifferenceBottom;
 	}
