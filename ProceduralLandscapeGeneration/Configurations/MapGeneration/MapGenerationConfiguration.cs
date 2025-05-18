@@ -25,7 +25,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
-    public uint Layers = 2;
+    public uint LayerCount => MapType == MapTypes.HeightMap ? 1u : 2u;
 
     private MapGenerationTypes myMapGeneration;
     public MapGenerationTypes MapGeneration
@@ -285,6 +285,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         MapGenerationConfigurationShaderBuffer mapGenerationConfigurationShaderBuffer = new MapGenerationConfigurationShaderBuffer()
         {
             HeightMultiplier = HeightMultiplier,
+            LayerCount = LayerCount,
             AreTerrainColorsEnabled = AreTerrainColorsEnabled,
             ArePlateTectonicsPlateColorsEnabled = ArePlateTectonicsPlateColorsEnabled
         };

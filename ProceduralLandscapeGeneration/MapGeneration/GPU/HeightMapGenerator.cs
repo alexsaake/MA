@@ -8,7 +8,7 @@ namespace ProceduralLandscapeGeneration.MapGeneration.GPU;
 
 internal class HeightMapGenerator : IHeightMapGenerator
 {
-    private string ShaderDirectory => $"MapGeneration/GPU/Shaders/{myMapGenerationConfiguration.MapType}/";
+    private string ShaderDirectory => $"MapGeneration/GPU/Shaders/";
 
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
@@ -37,7 +37,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
         myShaderBuffers.Add(ShaderBufferTypes.HeightMapParameters, heightMapParametersShaderBufferSize);
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMapParameters], &heightMapParameters, heightMapParametersShaderBufferSize, 0);
 
-        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * sizeof(float);
+        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * sizeof(float) * GetLayerCount();
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
         ComputeShaderProgram generateHeightMap = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateHeightMapComputeShader.glsl");
@@ -105,7 +105,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateCubeMap()
     {
-        float[] map = new float[myMapGenerationConfiguration.MapSize];
+        float[] map = new float[myMapGenerationConfiguration.MapSize * GetLayerCount()];
 
         int cudeSideLength = (int)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
         int index = 0;
@@ -123,6 +123,17 @@ internal class HeightMapGenerator : IHeightMapGenerator
         }
 
         return map;
+    }
+
+    private uint GetLayerCount()
+    {
+        switch (myMapGenerationConfiguration.MapType)
+        {
+            case MapTypes.MultiLayeredHeightMap:
+                return 2;
+            default:
+                return 1;
+        }
     }
 
     public void Dispose()

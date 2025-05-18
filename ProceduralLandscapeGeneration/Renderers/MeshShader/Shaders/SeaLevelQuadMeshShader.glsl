@@ -25,6 +25,7 @@ layout(std430, binding = 0) readonly restrict buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
+    uint LayerCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -60,7 +61,8 @@ void addVertex(uint vertex, uint x, uint y)
 
 void main()
 {
-    uint mapSize = uint(sqrt(heightMap.length()));
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    uint mapSize = uint(sqrt(heightMapLength));
 
     addVertex(0, 0, 0);
     addVertex(1, mapSize, 0);

@@ -30,6 +30,7 @@ layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
+    uint LayerCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -86,12 +87,12 @@ uint getIndex(uint x, uint y)
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint gridHydraulicErosionCellsLength = gridHydraulicErosionCells.length();
-    if(id >= gridHydraulicErosionCellsLength)
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(id >= heightMapLength)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(gridHydraulicErosionCellsLength));
+    myHeightMapSideLength = uint(sqrt(heightMapLength));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;

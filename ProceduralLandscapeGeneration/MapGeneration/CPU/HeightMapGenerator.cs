@@ -28,7 +28,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     public unsafe void GenerateNoiseHeightMap()
     {
-        float[] heightMap = GenerateNoiseMap();
+        float[] heightMap = GenerateNoiseMap(GetLayerCount());
 
         uint heightMapShaderBufferSize = (uint)heightMap.Length * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapShaderBufferSize);
@@ -40,7 +40,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     public unsafe void GenerateNoiseHeatMap()
     {
-        float[] heatMap = GenerateNoiseMap();
+        float[] heatMap = GenerateNoiseMap(1);
 
         uint heatMapShaderBufferSize = (uint)heatMap.Length * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeatMap, heatMapShaderBufferSize);
@@ -50,9 +50,9 @@ internal class HeightMapGenerator : IHeightMapGenerator
         }
     }
 
-    private float[] GenerateNoiseMap()
+    private float[] GenerateNoiseMap(uint layers)
     {
-        float[] noiseMap = new float[myMapGenerationConfiguration.MapSize];
+        float[] noiseMap = new float[myMapGenerationConfiguration.MapSize * layers];
 
         Vector2[] octaveOffsets = new Vector2[myMapGenerationConfiguration.NoiseOctaves];
         for (int octave = 0; octave < myMapGenerationConfiguration.NoiseOctaves; octave++)
@@ -120,7 +120,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateCubeMap()
     {
-        float[] map = new float[myMapGenerationConfiguration.MapSize];
+        float[] map = new float[myMapGenerationConfiguration.MapSize * GetLayerCount()];
 
         int cudeSideLength = (int)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
         int index = 0;
@@ -138,6 +138,16 @@ internal class HeightMapGenerator : IHeightMapGenerator
         }
 
         return map;
+    }
+    private uint GetLayerCount()
+    {
+        switch (myMapGenerationConfiguration.MapType)
+        {
+            case MapTypes.MultiLayeredHeightMap:
+                return 2;
+            default:
+                return 1;
+        }
     }
 
     public void Dispose()

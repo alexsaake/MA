@@ -55,6 +55,7 @@ layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
+    uint LayerCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -75,8 +76,12 @@ vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
 void main()
 {
     uint index = gl_VertexID;
-    
-    uint sideLength = uint(sqrt(heightMap.length()));    
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(index >= heightMapLength)
+    {
+        return;
+    }
+    uint sideLength = uint(sqrt(heightMapLength));    
     uint x = index % sideLength;
     uint y = index / sideLength;
 

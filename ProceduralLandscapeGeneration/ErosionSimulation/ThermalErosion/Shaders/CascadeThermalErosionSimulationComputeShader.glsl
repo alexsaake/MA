@@ -10,6 +10,7 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
+    uint LayerCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -47,7 +48,7 @@ struct LayersConfiguration
     float BedrockTangensTalusAngle;
 };
 
-layout(std430, binding = 19) buffer layersConfigurationShaderBuffer
+layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 {
     LayersConfiguration layersConfiguration;
 };
@@ -151,11 +152,12 @@ void Cascade(ivec2 position)
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    if(id >= heightMap.length())
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(id >= heightMapLength)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(heightMap.length()));
+    myHeightMapSideLength = uint(sqrt(heightMapLength));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;

@@ -8,6 +8,7 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
+    uint LayerCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -97,7 +98,12 @@ vec3 snowColor = vec3(1.0, 0.9, 0.9);
 void main()
 {
     uint index = gl_VertexID;
-    myHeightMapSideLength = uint(sqrt(heightMap.length()));
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(index >= heightMapLength)
+    {
+        return;
+    }
+    myHeightMapSideLength = uint(sqrt(heightMapLength));
 
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;

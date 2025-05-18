@@ -23,6 +23,7 @@ layout(std430, binding = 3) buffer particleWindErosionShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
+    uint LayerCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -57,7 +58,7 @@ struct LayersConfiguration
     float BedrockTangensTalusAngle;
 };
 
-layout(std430, binding = 19) buffer layersConfigurationShaderBuffer
+layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 {
     LayersConfiguration layersConfiguration;
 };
@@ -247,11 +248,12 @@ bool Interact()
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
     if(id >= particlesWindErosion.length())
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(heightMap.length()));
+    myHeightMapSideLength = uint(sqrt(heightMapLength));
 
     myParticleWindErosion = particlesWindErosion[id];
     

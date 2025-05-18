@@ -7,6 +7,19 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
+struct MapGenerationConfiguration
+{
+    float HeightMultiplier;
+    uint LayerCount;
+    bool AreTerrainColorsEnabled;
+    bool ArePlateTectonicsPlateColorsEnabled;
+};
+
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+{
+    MapGenerationConfiguration mapGenerationConfiguration;
+};
+
 struct ErosionConfiguration
 {
     float SeaLevel;
@@ -43,11 +56,12 @@ uint getIndex(uint x, uint y)
 void main()
 {    
     uint id = gl_GlobalInvocationID.x;
-    if(id >= heightMap.length())
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(id >= heightMapLength)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(gridThermalErosionCells.length()));
+    myHeightMapSideLength = uint(sqrt(heightMapLength));
 
     uint x = id % myHeightMapSideLength;
     uint y = id / myHeightMapSideLength;

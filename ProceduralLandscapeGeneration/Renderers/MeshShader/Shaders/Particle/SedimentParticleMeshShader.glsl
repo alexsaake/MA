@@ -47,6 +47,7 @@ layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
+    uint LayerCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -82,7 +83,12 @@ void addVertex(uint vertex, uint x, uint y)
 void main()
 {
     uint threadNumber = gl_GlobalInvocationID.x;
-    myMapSize = uint(sqrt(heightMap.length()));
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(threadNumber >= heightMapLength)
+    {
+        return;
+    }
+    myMapSize = uint(sqrt(heightMapLength));
     uint meshletSize = uint(sqrt(VERTICES));
     uint yMeshletCount = uint(ceil(float(myMapSize) / (meshletSize - 1)));
     uint xOffset = uint(floor(threadNumber / yMeshletCount)) * (meshletSize - 1);

@@ -2,6 +2,11 @@
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
+layout(std430, binding = 0) buffer heightMapShaderBuffer
+{
+    float[] heightMap;
+};
+
 layout(std430, binding = 1) buffer heatMapShaderBuffer
 {
     float[] heatMap;
@@ -18,6 +23,19 @@ struct PlateTectonicsSegment
     bool IsAlive;
     bool IsColliding;
     vec2 Position;
+};
+
+struct MapGenerationConfiguration
+{
+    float HeightMultiplier;
+    uint LayerCount;
+    bool AreTerrainColorsEnabled;
+    bool ArePlateTectonicsPlateColorsEnabled;
+};
+
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+{
+    MapGenerationConfiguration mapGenerationConfiguration;
 };
 
 layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
@@ -49,12 +67,12 @@ float Langmuir(float k, float x)
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint plateTectonicsSegmentsLength = plateTectonicsSegments.length();
-    if(id >= plateTectonicsSegmentsLength)
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(id >= heightMapLength)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(plateTectonicsSegmentsLength));
+    myHeightMapSideLength = uint(sqrt(heightMapLength));
 
     PlateTectonicsSegment plateTectonicsSegment = plateTectonicsSegments[id];
 

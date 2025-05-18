@@ -2,9 +2,27 @@
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
+layout(std430, binding = 0) buffer heightMapShaderBuffer
+{
+    float[] heightMap;
+};
+
 layout(std430, binding = 1) buffer heatMapShaderBuffer
 {
     float[] heatMap;
+};
+
+struct MapGenerationConfiguration
+{
+    float HeightMultiplier;
+    uint LayerCount;
+    bool AreTerrainColorsEnabled;
+    bool ArePlateTectonicsPlateColorsEnabled;
+};
+
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+{
+    MapGenerationConfiguration mapGenerationConfiguration;
 };
 
 struct PlateTectonicsSegment
@@ -56,8 +74,8 @@ uint getIndexV(ivec2 position)
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint plateTectonicsSegmentsLength = plateTectonicsSegments.length();
-    if(id >= plateTectonicsSegmentsLength)
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(id >= heightMapLength)
     {
         return;
     }
@@ -67,7 +85,7 @@ void main()
     {
         return;
     }
-    uint heightMapSideLength = uint(sqrt(plateTectonicsSegmentsLength));
+    uint heightMapSideLength = uint(sqrt(heightMapLength));
 
     uint x = id % heightMapSideLength;
     uint y = id / heightMapSideLength;
