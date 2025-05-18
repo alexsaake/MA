@@ -76,7 +76,7 @@ void RemoveFromTop(uint index, float sediment)
         float height = heightMap[offsetIndex];
         if(height >= sediment)
         {
-            heightMap[offsetIndex] -= height;
+            heightMap[offsetIndex] -= sediment;
             break;
         }
         else

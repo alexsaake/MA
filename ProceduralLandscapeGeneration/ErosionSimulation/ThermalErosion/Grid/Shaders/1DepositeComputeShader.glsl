@@ -44,17 +44,6 @@ layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
     GridThermalErosionCell[] gridThermalErosionCells;
 };
 
-struct LayersConfiguration
-{
-    float Hardness;
-    float TangensTalusAngle;
-};
-
-layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
-{
-    LayersConfiguration[] layersConfiguration;
-};
-
 uint myHeightMapSideLength;
 uint myHeightMapLength;
 
@@ -66,7 +55,7 @@ void RemoveFromTop(uint index, float sediment)
         float height = heightMap[offsetIndex];
         if(height >= sediment)
         {
-            heightMap[offsetIndex] -= height;
+            heightMap[offsetIndex] -= sediment;
             break;
         }
         else

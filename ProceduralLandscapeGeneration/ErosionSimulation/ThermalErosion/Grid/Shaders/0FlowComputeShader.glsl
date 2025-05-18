@@ -127,25 +127,26 @@ void main()
 	float tangensAngleBottom = heightDifferenceBottom * mapGenerationConfiguration.HeightMultiplier / 1.0;
 	
 	float flowLeft = 0;
-	if (tangensAngleLeft > TangensTalusAngle(id))
+	float talusAngle = TangensTalusAngle(id);
+	if (tangensAngleLeft > talusAngle)
 	{
 		flowLeft = heightDifferenceLeft;
 	}
 
 	float flowRight = 0;
-	if (tangensAngleRight > TangensTalusAngle(id))
+	if (tangensAngleRight > talusAngle)
 	{
 		flowRight = heightDifferenceRight;
 	}
 
 	float FlowUp = 0;
-	if (tangensAngleTop > TangensTalusAngle(id))
+	if (tangensAngleTop > talusAngle)
 	{
 		FlowUp = heightDifferenceTop;
 	}
 
 	float FlowDown = 0;
-	if (tangensAngleBottom > TangensTalusAngle(id))
+	if (tangensAngleBottom > talusAngle)
 	{
 		FlowDown = heightDifferenceBottom;
 	}
