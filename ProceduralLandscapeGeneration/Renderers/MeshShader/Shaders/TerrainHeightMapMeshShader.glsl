@@ -83,7 +83,7 @@ float totalHeight(uint index)
 
 uint getIndex(uint x, uint y)
 {
-    return (y * myMapSize) + x;
+    return (y * myHeightMapSideLength) + x;
 }
 
 vec3 getScaledNormal(uint x, uint y)
