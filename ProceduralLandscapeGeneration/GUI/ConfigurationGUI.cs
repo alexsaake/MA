@@ -115,7 +115,6 @@ internal class ConfigurationGUI : IConfigurationGUI
 
         myThermalErosionPanel = new PanelWithElements("Thermal Erosion");
         myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Erosion Rate", (value) => thermalErosionConfiguration.ErosionRate = value, thermalErosionConfiguration.ErosionRate));
-        myThermalErosionPanel.Add(new ValueBoxFloatWithLabel("Dampening", (value) => thermalErosionConfiguration.Dampening = value, thermalErosionConfiguration.Dampening));
 
         myParticleWindErosionPanel = new PanelWithElements("Particle Wind Erosion");
         myParticleWindErosionPanel.Add(new ValueBoxIntWithLabel("Particles", (value) => particleWindErosionConfiguration.Particles = (uint)value, (int)particleWindErosionConfiguration.Particles, 1, 1000000));

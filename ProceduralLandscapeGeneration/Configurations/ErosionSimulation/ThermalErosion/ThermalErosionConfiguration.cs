@@ -44,8 +44,7 @@ internal class ThermalErosionConfiguration : IThermalErosionConfiguration
     {
         myShaderBuffers = shaderBuffers;
 
-        myErosionRate = 1.0f;
-        myDampening = 0.8f;
+        myErosionRate = 0.2f;
     }
 
     public void Initialize()
@@ -63,8 +62,7 @@ internal class ThermalErosionConfiguration : IThermalErosionConfiguration
         }
         ThermalErosionConfigurationShaderBuffer thermalErosionConfigurationShaderBuffer = new ThermalErosionConfigurationShaderBuffer()
         {
-            ErosionRate = ErosionRate,
-            Dampening = Dampening
+            ErosionRate = ErosionRate
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ThermalErosionConfiguration], &thermalErosionConfigurationShaderBuffer, (uint)sizeof(ThermalErosionConfigurationShaderBuffer), 0);
     }

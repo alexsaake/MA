@@ -62,17 +62,17 @@ internal class ErosionConfiguration : IErosionConfiguration
     {
         myShaderBuffers = shaderBuffers;
 
-        IsHydraulicErosionEnabled = true;
+        IsHydraulicErosionEnabled = false;
         HydraulicErosionMode = HydraulicErosionModeTypes.GridHydraulic;
         IsWindErosionEnabled = false;
         WindErosionMode = WindErosionModeTypes.ParticleWind;
-        IsThermalErosionEnabled = false;
-        ThermalErosionMode = ThermalErosionModeTypes.CascadeThermal;
+        IsThermalErosionEnabled = true;
+        ThermalErosionMode = ThermalErosionModeTypes.GridThermal;
 
         IsSimulationRunning = false;
         IterationsPerStep = 1;
-        IsWaterAdded = true;
-        IsWaterDisplayed = true;
+        IsWaterAdded = false;
+        IsWaterDisplayed = false;
         IsSedimentDisplayed = false;
 
         IsSeaLevelDisplayed = false;

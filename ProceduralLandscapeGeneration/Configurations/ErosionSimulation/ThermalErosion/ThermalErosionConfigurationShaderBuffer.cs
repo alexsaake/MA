@@ -3,5 +3,4 @@
 internal struct ThermalErosionConfigurationShaderBuffer
 {
     public float ErosionRate;
-    public float Dampening;
 }

@@ -174,9 +174,9 @@ void main()
     }
     else if(mapGenerationConfiguration.AreTerrainColorsEnabled)
     {
-        if(mapGenerationConfiguration.LayerCount == 2)
+        if(mapGenerationConfiguration.LayerCount > 1)
         {
-            if(heightMap[index + myHeightMapLength] > 0)
+            if(heightMap[index + myHeightMapLength] > 0.00001)
             {
                 terrainColor = beachColor;
             }

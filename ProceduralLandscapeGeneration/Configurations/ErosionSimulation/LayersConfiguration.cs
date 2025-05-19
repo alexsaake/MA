@@ -78,10 +78,10 @@ internal class LayersConfiguration : ILayersConfiguration
         myMapGenerationConfiguration = mapGenerationConfiguration;
 
         myBedrockHardness = 0.95f;
-        myBedrockTalusAngle = 89;
+        myBedrockTalusAngle = 80;
 
         myRegolithHardness = 0.2f;
-        myRegolithTalusAngle = 33;
+        myRegolithTalusAngle = 45;
     }
 
     public void Initialize()

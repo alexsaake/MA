@@ -34,7 +34,6 @@ layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderB
 struct ThermalErosionConfiguration
 {
     float ErosionRate;
-    float Dampening;
 };
 
 layout(std430, binding = 10) readonly restrict buffer thermalErosionConfigurationShaderBuffer
@@ -56,6 +55,19 @@ layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 uint myHeightMapSideLength;
 uint myHeightMapLength;
 
+float HeightTopmostLayer(uint index)
+{
+	for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+	{
+        float height = heightMap[index + layer * myHeightMapLength];
+		if(height > 0)
+		{
+			return height;
+		}
+	}
+	return 0;   
+}
+
 float TangensTalusAngle(uint index)
 {
 	for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
@@ -68,23 +80,27 @@ float TangensTalusAngle(uint index)
 	return layersConfiguration[0].TangensTalusAngle;
 }
 
-void RemoveFromTop(uint index, float sediment)
+float RemoveFromTop(uint index, float sediment)
 {
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
         uint offsetIndex = index + layer * myHeightMapLength;
         float height = heightMap[offsetIndex];
-        if(height >= sediment)
+        if(height > 0)
         {
-            heightMap[offsetIndex] -= sediment;
-            break;
-        }
-        else
-        {
-            heightMap[offsetIndex] = 0;
-            sediment -= height;
+            if(height > sediment)
+            {
+                heightMap[offsetIndex] -= sediment;
+                return sediment;
+            }
+            else
+            {
+                heightMap[offsetIndex] = 0;
+                return sediment - height;
+            }
         }
     }
+    return 0;
 }
 
 void DepositeOnTop(uint index, float sediment)
@@ -121,6 +137,8 @@ void Cascade(ivec2 position)
         return;
     }
 
+    uint index = getIndexV(position);
+
     // Get Non-Out-of-Bounds Neighbors
 
     const ivec2 neighboringPositions[] = {
@@ -134,10 +152,10 @@ void Cascade(ivec2 position)
         ivec2(1, 1)
     };
 
-    struct Point {
-        ivec2 position;
-        float height;
-        float distance;
+    struct Point
+    {
+        ivec2 Position;
+        float TotalHeight;
     } neighborCells[8];
 
     int neighbors = 0;
@@ -151,57 +169,32 @@ void Cascade(ivec2 position)
             continue;
         }
 
-        float height = totalHeight(getIndexV(neighborPosition));
-        neighborCells[neighbors].position = neighborPosition;
-        neighborCells[neighbors].height = height;
-        neighborCells[neighbors].distance = length(neighboringPosition);
+        neighborCells[neighbors].Position = neighborPosition;
+        neighborCells[neighbors].TotalHeight = totalHeight(getIndexV(neighborPosition));
         neighbors++;
     }
 
     // Local Matrix, Target Height
 
-    float heightAverage = totalHeight(getIndexV(position));
-    for(int neighbor = 0; neighbor < neighbors; neighbor++)
-    {
-        heightAverage += neighborCells[neighbor].height;
-    }
-    heightAverage /= float(neighbors + 1);
-
+    float totalHeight = totalHeight(index);
+    float tangensTalusAngle = TangensTalusAngle(index);
     for (int neighbor = 0; neighbor < neighbors; neighbor++)
     {
         // Full Height-Different Between Positions!
-        float heightDifference = heightAverage - neighborCells[neighbor].height;
-        if (heightDifference == 0)
-        {
-            continue;
-        }
-
-        ivec2 tpos = (heightDifference > 0) ? position : neighborCells[neighbor].position;
-        ivec2 bpos = (heightDifference > 0) ? neighborCells[neighbor].position : position;
-
-        uint tindex = getIndexV(tpos);
-        uint bindex = getIndexV(bpos);
-
-        // The Amount of Excess Difference!
-        float excess = abs(heightDifference) - neighborCells[neighbor].distance * TangensTalusAngle(gl_GlobalInvocationID.x) / mapGenerationConfiguration.HeightMultiplier;
-        if (excess <= 0)
+        float heightDifference = totalHeight - neighborCells[neighbor].TotalHeight;
+	    float tangensAngle = heightDifference * mapGenerationConfiguration.HeightMultiplier / 1.0;
+        if (heightDifference < 0
+            || tangensAngle < tangensTalusAngle)
         {
             continue;
         }
 
         // Actual Amount Transferred
-        float transfer = excess * thermalErosionConfiguration.ErosionRate * erosionConfiguration.TimeDelta * (1.0 - thermalErosionConfiguration.Dampening);
+        float heightTopmostLayer = HeightTopmostLayer(index);
+        float transfer = min(heightDifference, heightTopmostLayer) * thermalErosionConfiguration.ErosionRate * erosionConfiguration.TimeDelta;
         
-        if(transfer > 0)
-        {
-            RemoveFromTop(tindex, transfer);
-            DepositeOnTop(bindex, transfer);
-        }
-        else
-        {
-            RemoveFromTop(bindex, abs(transfer));
-            DepositeOnTop(tindex, abs(transfer));
-        }
+        float removedSediment = RemoveFromTop(index, transfer);
+        DepositeOnTop(getIndexV(neighborCells[neighbor].Position), removedSediment);
     }
 }
 
