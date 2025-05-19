@@ -25,7 +25,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
-    public uint LayerCount => MapType == MapTypes.HeightMap ? 1u : 3u;
+    public uint LayerCount => MapType == MapTypes.HeightMap ? 1u : 2u;
 
     private MapGenerationTypes myMapGeneration;
     public MapGenerationTypes MapGeneration

@@ -185,13 +185,14 @@ void main()
     }
     else if(mapGenerationConfiguration.AreTerrainColorsEnabled)
     {
-        if(mapGenerationConfiguration.LayerCount > 2)
+        if(mapGenerationConfiguration.LayerCount > 1)
         {
             if(SedimentHeight(index) > 0.00001)
             {
                 terrainColor = beachColor;
             }
-            else if(ClayHeight(index) > 0.00001)
+            else if(mapGenerationConfiguration.LayerCount > 2
+                && ClayHeight(index) > 0.00001)
             {
                 terrainColor = clayColor;
             }
