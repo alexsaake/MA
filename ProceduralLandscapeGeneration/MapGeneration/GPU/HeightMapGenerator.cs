@@ -107,22 +107,30 @@ internal class HeightMapGenerator : IHeightMapGenerator
     {
         float[] map = new float[myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount];
 
-        int cudeSideLength = (int)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
-        int index = 0;
-        for (int y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
+        uint cubeSideLength = (uint)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
+
+        uint cube1Position = myMapGenerationConfiguration.HeightMapSideLength / 4;
+        AddCube(map, cube1Position, cube1Position, 0, cubeSideLength);
+
+        if (myMapGenerationConfiguration.LayerCount > 1)
         {
-            for (int x = 0; x < myMapGenerationConfiguration.HeightMapSideLength; x++)
-            {
-                if (x > myMapGenerationConfiguration.HeightMapSideLength / 2 - cudeSideLength / 2 && x < myMapGenerationConfiguration.HeightMapSideLength / 2 + cudeSideLength / 2
-                && y > myMapGenerationConfiguration.HeightMapSideLength / 2 - cudeSideLength / 2 && y < myMapGenerationConfiguration.HeightMapSideLength / 2 + cudeSideLength / 2)
-                {
-                    map[index] = 1;
-                }
-                index++;
-            }
+            uint cube2Position = myMapGenerationConfiguration.HeightMapSideLength / 4 + myMapGenerationConfiguration.HeightMapSideLength / 4 * 2;
+            AddCube(map, cube2Position, cube2Position, 1, cubeSideLength);
         }
 
         return map;
+    }
+
+    private void AddCube(float[] map, uint x, uint y, uint layer, uint size)
+    {
+        for (uint j = 0; j < size; j++)
+        {
+            for (uint i = 0; i < size; i++)
+            {
+                uint index = myMapGenerationConfiguration.GetIndex(x + i, y + j);
+                map[index + layer * myMapGenerationConfiguration.MapSize] = 1;
+            }
+        }
     }
 
     public void Dispose()
