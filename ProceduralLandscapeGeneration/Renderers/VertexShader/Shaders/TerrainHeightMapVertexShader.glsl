@@ -50,6 +50,16 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
 uint myHeightMapSideLength;
 uint myHeightMapLength;
 
+float SedimentHeight(uint index)
+{
+    return heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength];
+}
+
+float ClayHeight(uint index)
+{
+    return heightMap[index + 1 * myHeightMapLength];
+}
+
 float totalHeight(uint index)
 {
     float height = 0;
@@ -100,6 +110,7 @@ out vec3 fragNormal;
 out vec4 fragColor;
 
 vec3 oceanCliff = vec3(0.2, 0.2, 0.1);
+vec3 clayColor = vec3(0.5, 0.3, 0.3);
 vec3 beachColor = vec3(1.0, 0.9, 0.6);
 vec3 pastureColor = vec3(0.5, 0.6, 0.4);
 vec3 woodsColor = vec3(0.2, 0.3, 0.2);
@@ -174,11 +185,15 @@ void main()
     }
     else if(mapGenerationConfiguration.AreTerrainColorsEnabled)
     {
-        if(mapGenerationConfiguration.LayerCount > 1)
+        if(mapGenerationConfiguration.LayerCount > 2)
         {
-            if(heightMap[index + myHeightMapLength] > 0.00001)
+            if(SedimentHeight(index) > 0.00001)
             {
                 terrainColor = beachColor;
+            }
+            else if(ClayHeight(index) > 0.00001)
+            {
+                terrainColor = clayColor;
             }
             else
             {

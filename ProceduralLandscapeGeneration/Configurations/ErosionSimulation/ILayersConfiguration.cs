@@ -4,8 +4,10 @@
     {
         float BedrockHardness { get; set; }
         uint BedrockTalusAngle { get; set; }
-        float RegolithHardness { get; set; }
-        uint RegolithTalusAngle { get; set; }
+        float ClayHardness { get; set; }
+        uint ClayTalusAngle { get; set; }
+        float SedimentHardness { get; set; }
+        uint SedimentTalusAngle { get; set; }
 
         void Initialize();
     }

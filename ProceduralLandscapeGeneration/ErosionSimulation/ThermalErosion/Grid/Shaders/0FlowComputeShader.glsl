@@ -68,9 +68,9 @@ layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 uint myHeightMapSideLength;
 uint myHeightMapLength;
 
-float RegolithHeight(uint index)
+float SedimentHeight(uint index)
 {
-    return heightMap[index + myHeightMapLength];
+    return heightMap[index + mapGenerationConfiguration.LayerCount * myHeightMapLength];
 }
 
 float BedrockHeight(uint index)
@@ -197,46 +197,46 @@ void main()
 		float totalHeightDifferenceDown = max(totalHeight - TotalHeight(getIndex(x, y - 1)), 0.0);
 		float maxTotalHeightDifference = max(max(totalHeightDifferenceLeft, totalHeightDifferenceRight), max(totalHeightDifferenceDown, totalHeightDifferenceUp));
 		
-		float regolithVolumeToBeMoved = 0;
+		float sedimentVolumeToBeMoved = 0;
 		if(maxTotalHeightDifference > 0)
 		{
-			float regolithHeight = RegolithHeight(id);
-			if(maxTotalHeightDifference < regolithHeight)
+			float sedimentHeight = SedimentHeight(id);
+			if(maxTotalHeightDifference < sedimentHeight)
 			{
-				regolithVolumeToBeMoved = maxTotalHeightDifference * thermalErosionConfiguration.ErosionRate;
+				sedimentVolumeToBeMoved = maxTotalHeightDifference * thermalErosionConfiguration.ErosionRate;
 			}
 			else
 			{
-				regolithVolumeToBeMoved = regolithHeight * thermalErosionConfiguration.ErosionRate;
+				sedimentVolumeToBeMoved = sedimentHeight * thermalErosionConfiguration.ErosionRate;
 			}
 		}
 	
-		float regolithTangensAngleLeft = totalHeightDifferenceLeft * mapGenerationConfiguration.HeightMultiplier / 1.0;
-		float regolithTangensAngleRight = totalHeightDifferenceRight * mapGenerationConfiguration.HeightMultiplier / 1.0;
-		float regolithTangensAngleUp = totalHeightDifferenceUp * mapGenerationConfiguration.HeightMultiplier / 1.0;
-		float regolithTangensAngleDown = totalHeightDifferenceDown * mapGenerationConfiguration.HeightMultiplier / 1.0;
+		float sedimentTangensAngleLeft = totalHeightDifferenceLeft * mapGenerationConfiguration.HeightMultiplier / 1.0;
+		float sedimentTangensAngleRight = totalHeightDifferenceRight * mapGenerationConfiguration.HeightMultiplier / 1.0;
+		float sedimentTangensAngleUp = totalHeightDifferenceUp * mapGenerationConfiguration.HeightMultiplier / 1.0;
+		float sedimentTangensAngleDown = totalHeightDifferenceDown * mapGenerationConfiguration.HeightMultiplier / 1.0;
 	
 		float flowLeft = 0;
-		float regolithTalusAngle = layersConfiguration[1].TangensTalusAngle;
-		if (regolithTangensAngleLeft > regolithTalusAngle)
+		float sedimentTalusAngle = layersConfiguration[1].TangensTalusAngle;
+		if (sedimentTangensAngleLeft > sedimentTalusAngle)
 		{
 			flowLeft = totalHeightDifferenceLeft;
 		}
 
 		float flowRight = 0;
-		if (regolithTangensAngleRight > regolithTalusAngle)
+		if (sedimentTangensAngleRight > sedimentTalusAngle)
 		{
 			flowRight = totalHeightDifferenceRight;
 		}
 
 		float flowDown = 0;
-		if (regolithTangensAngleDown > regolithTalusAngle)
+		if (sedimentTangensAngleDown > sedimentTalusAngle)
 		{
 			flowDown = totalHeightDifferenceDown;
 		}
 
 		float flowUp = 0;
-		if (regolithTangensAngleUp > regolithTalusAngle)
+		if (sedimentTangensAngleUp > sedimentTalusAngle)
 		{
 			flowUp = totalHeightDifferenceUp;
 		}
@@ -245,7 +245,7 @@ void main()
 		float totalTotalHeightDifference = totalHeightDifferenceLeft + totalHeightDifferenceRight + totalHeightDifferenceDown + totalHeightDifferenceUp;
 		if(x > 0)
 		{
-			gridThermalErosionCell.FlowLeft += max(regolithVolumeToBeMoved * flowLeft / totalTotalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.FlowLeft += max(sedimentVolumeToBeMoved * flowLeft / totalTotalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
@@ -254,7 +254,7 @@ void main()
 		
 		if(x < myHeightMapSideLength - 1)
 		{
-			gridThermalErosionCell.FlowRight += max(regolithVolumeToBeMoved * flowRight / totalTotalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.FlowRight += max(sedimentVolumeToBeMoved * flowRight / totalTotalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
@@ -263,7 +263,7 @@ void main()
 
 		if(y > 0)
 		{
-			gridThermalErosionCell.FlowDown += max(regolithVolumeToBeMoved * flowDown / totalTotalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.FlowDown += max(sedimentVolumeToBeMoved * flowDown / totalTotalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
@@ -272,7 +272,7 @@ void main()
 		
 		if(y < myHeightMapSideLength - 1)
 		{
-			gridThermalErosionCell.FlowUp += max(regolithVolumeToBeMoved * flowUp / totalTotalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.FlowUp += max(sedimentVolumeToBeMoved * flowUp / totalTotalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{

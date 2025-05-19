@@ -42,32 +42,62 @@ internal class LayersConfiguration : ILayersConfiguration
         }
     }
 
-    private float myRegolithHardness;
-    public float RegolithHardness
+    private float myClayHardness;
+    public float ClayHardness
     {
-        get => myRegolithHardness;
+        get => myClayHardness;
         set
         {
-            if (myRegolithHardness == value)
+            if (myClayHardness == value)
             {
                 return;
             }
-            myRegolithHardness = value;
+            myClayHardness = value;
             UpdateShaderBuffer();
         }
     }
 
-    private uint myRegolithTalusAngle;
-    public uint RegolithTalusAngle
+    private uint myClayTalusAngle;
+    public uint ClayTalusAngle
     {
-        get => myRegolithTalusAngle;
+        get => myClayTalusAngle;
         set
         {
-            if (myRegolithTalusAngle == value)
+            if (myClayTalusAngle == value)
             {
                 return;
             }
-            myRegolithTalusAngle = value;
+            myClayTalusAngle = value;
+            UpdateShaderBuffer();
+        }
+    }
+
+    private float mySedimentHardness;
+    public float SedimentHardness
+    {
+        get => mySedimentHardness;
+        set
+        {
+            if (mySedimentHardness == value)
+            {
+                return;
+            }
+            mySedimentHardness = value;
+            UpdateShaderBuffer();
+        }
+    }
+
+    private uint mySedimentTalusAngle;
+    public uint SedimentTalusAngle
+    {
+        get => mySedimentTalusAngle;
+        set
+        {
+            if (mySedimentTalusAngle == value)
+            {
+                return;
+            }
+            mySedimentTalusAngle = value;
             UpdateShaderBuffer();
         }
     }
@@ -80,8 +110,11 @@ internal class LayersConfiguration : ILayersConfiguration
         myBedrockHardness = 0.95f;
         myBedrockTalusAngle = 80;
 
-        myRegolithHardness = 0.2f;
-        myRegolithTalusAngle = 45;
+        myClayHardness = 0.6f;
+        myClayTalusAngle = 45;
+
+        mySedimentHardness = 0.2f;
+        mySedimentTalusAngle = 15;
     }
 
     public void Initialize()
@@ -121,8 +154,28 @@ internal class LayersConfiguration : ILayersConfiguration
                     },
                     new LayersConfigurationShaderBuffer()
                     {
-                        Hardness = RegolithHardness,
-                        TangensTalusAngle = GetTangens(RegolithTalusAngle)
+                        Hardness = SedimentHardness,
+                        TangensTalusAngle = GetTangens(SedimentTalusAngle)
+                    }
+                };
+                break;
+            case 3:
+                layersConfigurationShaderBuffer = new LayersConfigurationShaderBuffer[]
+                {
+                    new LayersConfigurationShaderBuffer()
+                    {
+                        Hardness = BedrockHardness,
+                        TangensTalusAngle = GetTangens(BedrockTalusAngle)
+                    },
+                    new LayersConfigurationShaderBuffer()
+                    {
+                        Hardness = ClayHardness,
+                        TangensTalusAngle = GetTangens(ClayTalusAngle)
+                    },
+                    new LayersConfigurationShaderBuffer()
+                    {
+                        Hardness = SedimentHardness,
+                        TangensTalusAngle = GetTangens(SedimentTalusAngle)
                     }
                 };
                 break;
