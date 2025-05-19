@@ -102,29 +102,29 @@ internal class LayersConfiguration : ILayersConfiguration
         switch (myMapGenerationConfiguration.LayerCount)
         {
             case 1:
-                layersConfigurationShaderBuffer = new LayersConfigurationShaderBuffer[myMapGenerationConfiguration.LayerCount];
+                layersConfigurationShaderBuffer = new LayersConfigurationShaderBuffer[]
                 {
                     new LayersConfigurationShaderBuffer()
                     {
                         Hardness = BedrockHardness,
                         TangensTalusAngle = GetTangens(BedrockTalusAngle)
-                    };
-                }
+                    }
+                };
                 break;
             case 2:
-                layersConfigurationShaderBuffer = new LayersConfigurationShaderBuffer[myMapGenerationConfiguration.LayerCount];
+                layersConfigurationShaderBuffer = new LayersConfigurationShaderBuffer[]
                 {
                     new LayersConfigurationShaderBuffer()
                     {
                         Hardness = BedrockHardness,
                         TangensTalusAngle = GetTangens(BedrockTalusAngle)
-                    };
+                    },
                     new LayersConfigurationShaderBuffer()
                     {
                         Hardness = RegolithHardness,
                         TangensTalusAngle = GetTangens(RegolithTalusAngle)
-                    };
-                }
+                    }
+                };
                 break;
         }
         fixed (void* layersConfigurationShaderBufferPointer = layersConfigurationShaderBuffer)
