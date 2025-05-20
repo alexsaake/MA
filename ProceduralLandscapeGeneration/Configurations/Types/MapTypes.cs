@@ -4,5 +4,7 @@ internal enum MapGenerationTypes
 {
     Noise,
     Tectonics,
-    Cube
+    Cubes,
+    SlopedCanyon,
+    SlopedCliff
 }

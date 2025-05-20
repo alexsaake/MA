@@ -90,7 +90,7 @@ internal class ErosionConfiguration : IErosionConfiguration
         IsWaterDisplayed = false;
         IsSedimentDisplayed = false;
 
-        IsSeaLevelDisplayed = false;
+        IsSeaLevelDisplayed = true;
         mySeaLevel = 0.2f;
 
         myIsWaterKeptInBoundaries = true;

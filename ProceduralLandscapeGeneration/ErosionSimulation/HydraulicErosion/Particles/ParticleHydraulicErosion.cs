@@ -79,7 +79,16 @@ internal class ParticleHydraulicErosion : IParticleHydraulicErosion
             ResetHydraulicErosionShaderBuffers();
             myHasParticlesChanged = false;
         }
-        CreateRandomIndices();
+        switch (myMapGenerationConfiguration.MapGeneration)
+        {
+            case MapGenerationTypes.SlopedCanyon:
+            case MapGenerationTypes.SlopedCliff:
+                CreateRiverHeadIndices();
+                break;
+            default:
+                CreateRandomIndices();
+                break;
+        }
 
         for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
         {
@@ -94,6 +103,20 @@ internal class ParticleHydraulicErosion : IParticleHydraulicErosion
     {
         RemoveParticlesHydraulicErosionShaderBuffer();
         AddParticlesHydraulicErosionShaderBuffer();
+    }
+
+    private unsafe void CreateRiverHeadIndices()
+    {
+        uint[] randomRainDropIndices = new uint[myParticleHydraulicErosionConfiguration.Particles];
+        for (uint rainDrop = 0; rainDrop < myParticleHydraulicErosionConfiguration.Particles; rainDrop++)
+        {
+            randomRainDropIndices[rainDrop] = myMapGenerationConfiguration.GetIndex(myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 10);
+        }
+        fixed (void* randomRainDropIndicesPointer = randomRainDropIndices)
+        {
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HydraulicErosionHeightMapIndices], randomRainDropIndicesPointer, myParticleHydraulicErosionConfiguration.Particles * sizeof(uint), 0);
+        }
+        Rlgl.MemoryBarrier();
     }
 
     private unsafe void CreateRandomIndices()

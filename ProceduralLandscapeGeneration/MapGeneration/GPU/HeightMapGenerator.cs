@@ -57,34 +57,6 @@ internal class HeightMapGenerator : IHeightMapGenerator
         myIsDisposed = false;
     }
 
-    public unsafe void GenerateSlopedCanyonHeightMap()
-    {
-        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount * sizeof(float);
-        myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
-
-        ComputeShaderProgram generateNoiseHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateNoiseHeightMapComputeShader.glsl");
-        Rlgl.EnableShader(generateNoiseHeightMapComputeShaderProgram.Id);
-        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
-        Rlgl.DisableShader();
-        generateNoiseHeightMapComputeShaderProgram.Dispose();
-
-        myIsDisposed = false;
-    }
-
-    public unsafe void GenerateSlopedCliffHeightMap()
-    {
-        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount * sizeof(float);
-        myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
-
-        ComputeShaderProgram generateNoiseHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateNoiseHeightMapComputeShader.glsl");
-        Rlgl.EnableShader(generateNoiseHeightMapComputeShaderProgram.Id);
-        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
-        Rlgl.DisableShader();
-        generateNoiseHeightMapComputeShaderProgram.Dispose();
-
-        myIsDisposed = false;
-    }
-
     public unsafe void GenerateNoiseHeatMap()
     {
         HeightMapParametersShaderBuffer heatMapParametersShaderBuffer = new HeightMapParametersShaderBuffer()
@@ -165,6 +137,34 @@ internal class HeightMapGenerator : IHeightMapGenerator
                 map[index + layer * myMapGenerationConfiguration.MapSize] = 1;
             }
         }
+    }
+
+    public unsafe void GenerateSlopedCanyonHeightMap()
+    {
+        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount * sizeof(float);
+        myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
+
+        ComputeShaderProgram generateNoiseHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateSlopedCanyonHeightMapComputeShader.glsl");
+        Rlgl.EnableShader(generateNoiseHeightMapComputeShaderProgram.Id);
+        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
+        Rlgl.DisableShader();
+        generateNoiseHeightMapComputeShaderProgram.Dispose();
+
+        myIsDisposed = false;
+    }
+
+    public unsafe void GenerateSlopedCliffHeightMap()
+    {
+        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount * sizeof(float);
+        myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
+
+        ComputeShaderProgram generateNoiseHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateSlopedCliffHeightMapComputeShader.glsl");
+        Rlgl.EnableShader(generateNoiseHeightMapComputeShaderProgram.Id);
+        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
+        Rlgl.DisableShader();
+        generateNoiseHeightMapComputeShaderProgram.Dispose();
+
+        myIsDisposed = false;
     }
 
     public void Dispose()

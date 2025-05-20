@@ -250,7 +250,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         myShaderBuffers = shaderBuffers;
 
         myMapType = MapTypes.MultiLayeredHeightMap;
-        myMapGeneration = MapGenerationTypes.Cube;
+        myMapGeneration = MapGenerationTypes.SlopedCanyon;
         myMeshCreation = ProcessorTypes.CPU;
         myHeightMapGeneration = ProcessorTypes.GPU;
 

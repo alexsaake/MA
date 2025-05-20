@@ -148,6 +148,16 @@ internal class HeightMapGenerator : IHeightMapGenerator
         return map;
     }
 
+    public void GenerateSlopedCanyonHeightMap()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void GenerateSlopedCliffHeightMap()
+    {
+        throw new NotImplementedException();
+    }
+
     private void AddCube(float[] map, uint x, uint y, uint layer, uint size)
     {
         for (uint j = 0; j < size; j++)

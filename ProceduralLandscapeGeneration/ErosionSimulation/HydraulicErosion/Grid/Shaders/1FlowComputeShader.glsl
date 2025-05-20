@@ -117,7 +117,7 @@ void main()
         gridHydraulicErosionCell.WaterHeight = erosionConfiguration.SeaLevel - height;
     }
     float totalHeight = (height + gridHydraulicErosionCell.WaterHeight) * mapGenerationConfiguration.HeightMultiplier;
-    float outOfBoundsHeight = totalHeight - 0.1;
+    float outOfBoundsHeight = totalHeight - 0.2;
     if(x > 0)
     {
         uint leftIndex = getIndex(x - 1, y);

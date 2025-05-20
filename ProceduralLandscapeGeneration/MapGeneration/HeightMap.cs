@@ -32,8 +32,14 @@ internal class HeightMap : IHeightMap
             case MapGenerationTypes.Tectonics:
                 myPlateTectonicsHeightMapGenerator.Initialize();
                 break;
-            case MapGenerationTypes.Cube:
+            case MapGenerationTypes.Cubes:
                 myHeightMapGenerator.GenerateCubeHeightMap();
+                break;
+            case MapGenerationTypes.SlopedCanyon:
+                myHeightMapGenerator.GenerateSlopedCanyonHeightMap();
+                break;
+            case MapGenerationTypes.SlopedCliff:
+                myHeightMapGenerator.GenerateSlopedCliffHeightMap();
                 break;
         }
 

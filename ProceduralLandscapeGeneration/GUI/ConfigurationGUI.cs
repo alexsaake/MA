@@ -135,7 +135,7 @@ internal class ConfigurationGUI : IConfigurationGUI
 
         myMapGenerationPanel = new PanelWithElements("Map Generation");
         myMapGenerationPanel.Add(new ComboBox("Height Map;Multi-Layered Height Map", (value) => mapGenerationConfiguration.MapType = (MapTypes)value, (int)mapGenerationConfiguration.MapType));
-        myMapGenerationPanel.Add(new ComboBox("Noise;Tectonics;Cube", (value) => mapGenerationConfiguration.MapGeneration = (MapGenerationTypes)value, (int)mapGenerationConfiguration.MapGeneration));
+        myMapGenerationPanel.Add(new ComboBox("Noise;Tectonics;Cubes;Canyon;Cliff", (value) => mapGenerationConfiguration.MapGeneration = (MapGenerationTypes)value, (int)mapGenerationConfiguration.MapGeneration));
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "CPU;GPU", (value) => mapGenerationConfiguration.HeightMapGeneration = (ProcessorTypes)value, (int)mapGenerationConfiguration.HeightMapGeneration));
         myMapGenerationPanel.Add(new Button("Reset", () => MapResetRequired?.Invoke(this, EventArgs.Empty)));
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Mesh Creation", "CPU;GPU", (value) => mapGenerationConfiguration.MeshCreation = (ProcessorTypes)value, (int)mapGenerationConfiguration.MeshCreation));
