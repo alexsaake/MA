@@ -25,7 +25,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
-    public uint LayerCount => MapType == MapTypes.HeightMap ? 1u : 2u;
+    public uint LayerCount => MapType == MapTypes.HeightMap ? 1u : 3u;
 
     private MapGenerationTypes myMapGeneration;
     public MapGenerationTypes MapGeneration
@@ -71,6 +71,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
             ResetRequired?.Invoke(this, EventArgs.Empty);
         }
     }
+
     private int mySeed;
     public int Seed
     {
@@ -249,7 +250,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         myShaderBuffers = shaderBuffers;
 
         myMapType = MapTypes.MultiLayeredHeightMap;
-        myMapGeneration = MapGenerationTypes.Noise;
+        myMapGeneration = MapGenerationTypes.Cube;
         myMeshCreation = ProcessorTypes.CPU;
         myHeightMapGeneration = ProcessorTypes.GPU;
 

@@ -46,7 +46,7 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 uint myHeightMapSideLength;
 
-uint getIndexV(ivec2 position)
+uint GetIndexVector(ivec2 position)
 {
     return (position.y * myHeightMapSideLength) + position.x;
 }

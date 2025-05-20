@@ -56,6 +56,7 @@ struct ErosionConfiguration
 {
     float SeaLevel;
     float TimeDelta;
+	bool IsWaterKeptInBoundaries;
 };
 
 layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer

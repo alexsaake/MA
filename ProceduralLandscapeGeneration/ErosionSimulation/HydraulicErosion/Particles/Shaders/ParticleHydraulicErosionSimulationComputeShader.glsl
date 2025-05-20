@@ -38,6 +38,7 @@ struct ErosionConfiguration
 {
     float SeaLevel;
     float TimeDelta;
+	bool IsWaterKeptInBoundaries;
 };
 
 layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
@@ -80,12 +81,12 @@ layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 
 uint myHeightMapSideLength;
 
-uint getIndex(uint x, uint y)
+uint GetIndex(uint x, uint y)
 {
     return (y * myHeightMapSideLength) + x;
 }
 
-uint getIndexV(ivec2 position)
+uint GetIndexVector(ivec2 position)
 {
     return (position.y * myHeightMapSideLength) + position.x;
 }
@@ -149,14 +150,14 @@ vec3 getScaledNormal(uint x, uint y)
         return vec3(0.0, 0.0, 1.0);
     }
     
-    float rb = totalHeight(getIndex(x + 1, y - 1));
-    float lb = totalHeight(getIndex(x - 1, y - 1));
-    float r = totalHeight(getIndex(x + 1, y));
-    float l = totalHeight(getIndex(x - 1, y));
-    float rt = totalHeight(getIndex(x + 1, y + 1));
-    float lt = totalHeight(getIndex(x - 1, y + 1));
-    float t = totalHeight(getIndex(x, y + 1));
-    float b = totalHeight(getIndex(x, y - 1));
+    float rb = totalHeight(GetIndex(x + 1, y - 1));
+    float lb = totalHeight(GetIndex(x - 1, y - 1));
+    float r = totalHeight(GetIndex(x + 1, y));
+    float l = totalHeight(GetIndex(x - 1, y));
+    float rt = totalHeight(GetIndex(x + 1, y + 1));
+    float lt = totalHeight(GetIndex(x - 1, y + 1));
+    float t = totalHeight(GetIndex(x, y + 1));
+    float b = totalHeight(GetIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -179,9 +180,9 @@ bool Move()
 
     if(myParticleHydraulicErosion.Age > particleHydraulicErosionConfiguration.MaxAge
     || myParticleHydraulicErosion.Volume < particleHydraulicErosionConfiguration.MinimumVolume
-    || totalHeight(getIndexV(position)) <= erosionConfiguration.SeaLevel - particleHydraulicErosionConfiguration.MaximalErosionDepth)
+    || totalHeight(GetIndexVector(position)) <= erosionConfiguration.SeaLevel - particleHydraulicErosionConfiguration.MaximalErosionDepth)
     {
-        DepositeOnTop(getIndexV(position), myParticleHydraulicErosion.Sediment);
+        DepositeOnTop(GetIndexVector(position), myParticleHydraulicErosion.Sediment);
         myParticleHydraulicErosion.Sediment = 0;
         myParticleHydraulicErosion.Volume = 0;
         return false;
@@ -214,15 +215,15 @@ bool Interact()
     float currentHeight;
     if(IsOutOfBounds(ivec2(myParticleHydraulicErosion.Position)))
     {
-        currentHeight = 0.99 * totalHeight(getIndexV(originalPosition));
+        currentHeight = 0.99 * totalHeight(GetIndexVector(originalPosition));
     }
     else
     {
         ivec2 currentPosition = ivec2(myParticleHydraulicErosion.Position);
-        currentHeight = totalHeight(getIndexV(currentPosition));
+        currentHeight = totalHeight(GetIndexVector(currentPosition));
     }
 
-    float heightDifference = totalHeight(getIndexV(originalPosition)) - currentHeight;
+    float heightDifference = totalHeight(GetIndexVector(originalPosition)) - currentHeight;
     if(heightDifference < 0)
     {
         heightDifference = 0;
@@ -241,12 +242,12 @@ bool Interact()
     float difference = particleHydraulicErosionConfiguration.DepositionRate * capacity;
     if(difference > 0)
     {
-        float suspendedSediment = SuspendFromTop(getIndexV(originalPosition), difference);
+        float suspendedSediment = SuspendFromTop(GetIndexVector(originalPosition), difference);
         myParticleHydraulicErosion.Sediment += suspendedSediment;
     }
     else
     {
-        DepositeOnTop(getIndexV(originalPosition), abs(difference));
+        DepositeOnTop(GetIndexVector(originalPosition), abs(difference));
         myParticleHydraulicErosion.Sediment += difference;
     }
 

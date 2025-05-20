@@ -41,7 +41,7 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 uint myHeightMapSideLength;
 
-uint getIndexV(ivec2 position)
+uint GetIndexVector(ivec2 position)
 {
     return (position.y * myHeightMapSideLength) + position.x;
 }
@@ -86,7 +86,7 @@ void main()
             {
                 continue;
             }
-            uint scanPositionIndex = getIndexV(scanPosition);
+            uint scanPositionIndex = GetIndexVector(scanPosition);
             PlateTectonicsSegment cascadingSegment = plateTectonicsSegments[scanPositionIndex];
             
             float heightDifference = plateTectonicsSegment.Height - cascadingSegment.Height;

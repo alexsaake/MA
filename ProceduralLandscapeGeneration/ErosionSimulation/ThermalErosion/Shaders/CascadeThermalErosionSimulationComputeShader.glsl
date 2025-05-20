@@ -24,6 +24,7 @@ struct ErosionConfiguration
 {
     float SeaLevel;
     float TimeDelta;
+	bool IsWaterKeptInBoundaries;
 };
 
 layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
@@ -102,7 +103,7 @@ float TotalHeight(uint index)
     return height;
 }
 
-uint getIndexV(ivec2 position)
+uint GetIndexVector(ivec2 position)
 {
     return (position.y * myHeightMapSideLength) + position.x;
 }
@@ -166,7 +167,7 @@ void main()
             continue;
         }
 
-        uint neightborIndex = getIndexV(neighborPosition);
+        uint neightborIndex = GetIndexVector(neighborPosition);
         neighborCells[neighbors].Index = neightborIndex;
         neighborCells[neighbors].TotalHeight = TotalHeight(neightborIndex);
         neighborCells[neighbors].Distance = length(neighboringPosition);

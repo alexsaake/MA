@@ -51,10 +51,10 @@
 	  <None Update="ErosionSimulation\ThermalErosion\Shaders\VertexNormalThermalErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="MapGeneration\GPU\Shaders\GenerateHeatMapComputeShader.glsl">
+	  <None Update="MapGeneration\GPU\Shaders\GenerateNoiseHeatMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="MapGeneration\GPU\Shaders\NormalizeHeatMapComputeShader.glsl">
+	  <None Update="MapGeneration\GPU\Shaders\NormalizeNoiseHeatMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="MapGeneration\PlateTectonics\GPU\Shaders\AddSegmentsToNearestPlateComputeShader.glsl">
@@ -159,7 +159,7 @@
 	  <None Update="Simulation\Particles\Shaders\HydraulicErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="MapGeneration\GPU\Shaders\NormalizeHeightMapComputeShader.glsl">
+	  <None Update="MapGeneration\GPU\Shaders\NormalizeNoiseHeightMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Simulation\Shaders\ThermalErosionSimulationComputeShader.glsl">
@@ -168,7 +168,7 @@
 	  <None Update="Simulation\Particles\Shaders\WindErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="MapGeneration\GPU\Shaders\GenerateHeightMapComputeShader.glsl">
+	  <None Update="MapGeneration\GPU\Shaders\GenerateNoiseHeightMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Renderers\MeshShader\Shaders\TerrainHeightMapMeshShader.glsl">

@@ -56,7 +56,7 @@ PlateTectonicsSegment Buoyancy(PlateTectonicsSegment segment)
     return segment;
 }
 
-uint getIndexV(ivec2 position)
+uint GetIndexVector(ivec2 position)
 {
     return (position.y * myHeightMapSideLength) + position.x;
 }
@@ -99,7 +99,7 @@ void main()
                 continue;
             }
 
-            uint scanPositionIndex = getIndexV(scanPosition);
+            uint scanPositionIndex = GetIndexVector(scanPosition);
             PlateTectonicsSegment collidingSegment = plateTectonicsSegments[scanPositionIndex];
             if(ivec2(plateTectonicsSegment.Position) != ivec2(collidingSegment.Position)
                 || !collidingSegment.IsAlive
@@ -128,7 +128,7 @@ void main()
                 {
                     for(int i = -2; i <= 2; i++)
                     {
-                        uint subductionHeatingIndex = getIndexV(scanPosition + ivec2(i, j));
+                        uint subductionHeatingIndex = GetIndexVector(scanPosition + ivec2(i, j));
                         heatMap[subductionHeatingIndex] = clamp(heatMap[subductionHeatingIndex] + subductionHeating, 0.0, 1.0);
                     }
                 }

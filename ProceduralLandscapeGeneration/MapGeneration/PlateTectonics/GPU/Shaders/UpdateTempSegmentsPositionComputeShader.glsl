@@ -67,7 +67,7 @@ uint myHeightMapSideLength;
 #define PI 3.1415926535897932384626433832795
 float DT = 0.025;
 
-uint getIndexV(ivec2 position)
+uint GetIndexVector(ivec2 position)
 {
     return (position.y * myHeightMapSideLength) + position.x;
 }
@@ -114,7 +114,7 @@ void main()
     }
     plateTectonicsSegment.Position = newPosition;
 
-    plateTectonicsTempSegments[getIndexV(ivec2(plateTectonicsSegment.Position))] = plateTectonicsSegment;
+    plateTectonicsTempSegments[GetIndexVector(ivec2(plateTectonicsSegment.Position))] = plateTectonicsSegment;
 
     memoryBarrier();
 }

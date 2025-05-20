@@ -83,15 +83,16 @@ internal class ConfigurationGUI : IConfigurationGUI
         myErosionPanel.Add(new ValueBoxIntWithLabel("Iterations per Step", (value) => erosionConfiguration.IterationsPerStep = (uint)value, (int)erosionConfiguration.IterationsPerStep, 1, 1000));
         myErosionPanel.Add(new ToggleSliderWithLabel("Sea Level Displayed", "Off;On", (value) => erosionConfiguration.IsSeaLevelDisplayed = value == 1, erosionConfiguration.IsSeaLevelDisplayed ? 1 : 0));
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => erosionConfiguration.SeaLevel = value, erosionConfiguration.SeaLevel));
+        myErosionPanel.Add(new ToggleSliderWithLabel("Water Kept In Boundaries", "Off;On", (value) => erosionConfiguration.IsWaterKeptInBoundaries = value == 1, erosionConfiguration.IsWaterKeptInBoundaries ? 1 : 0));
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => erosionConfiguration.TimeDelta = value, erosionConfiguration.TimeDelta));
 
         myBedrockLayerPanel = new PanelWithElements("Bedrock Layer");
         myBedrockLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.BedrockHardness = value, layersConfiguration.BedrockHardness));
         myBedrockLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.BedrockAngleOfRepose = (uint)value, (int)layersConfiguration.BedrockAngleOfRepose, 1, 89));
 
-        myClayLayerPanel = new PanelWithElements("Clay Layer");
-        myClayLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.ClayHardness = value, layersConfiguration.ClayHardness));
-        myClayLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.ClayAngleOfRepose = (uint)value, (int)layersConfiguration.ClayAngleOfRepose, 1, 89));
+        myClayLayerPanel = new PanelWithElements("Coarse Sediment Layer");
+        myClayLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.CoarseSedimentHardness = value, layersConfiguration.CoarseSedimentHardness));
+        myClayLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.CoarseSedimentAngleOfRepose = (uint)value, (int)layersConfiguration.CoarseSedimentAngleOfRepose, 1, 89));
 
         mySedimentLayerPanel = new PanelWithElements("Fine Sediment Layer");
         mySedimentLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.FineSedimentHardness = value, layersConfiguration.FineSedimentHardness));

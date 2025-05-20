@@ -111,7 +111,7 @@ uint getIndex(uint x, uint y)
     return (y * myHeightMapSideLength) + x;
 }
 
-uint getIndexV(ivec2 position)
+uint GetIndexVector(ivec2 position)
 {
     return (position.y * myHeightMapSideLength) + position.x;
 }
@@ -193,7 +193,7 @@ bool Move()
 
     if(myParticleWindErosion.Age > particleWindErosionConfiguration.MaxAge)
     {
-        DepositeOnTop(getIndexV(position), myParticleWindErosion.Sediment);
+        DepositeOnTop(GetIndexVector(position), myParticleWindErosion.Sediment);
         myParticleWindErosion.Sediment = 0.0;
         myParticleWindErosion.Age = 0;
         return false;
@@ -201,7 +201,7 @@ bool Move()
 
     // Compute Movement
 
-    const float height = totalHeight(getIndexV(position));
+    const float height = totalHeight(GetIndexVector(position));
     if (myParticleWindErosion.Age == 0 || myParticleWindErosion.Position.z < height)
     {
         myParticleWindErosion.Position.z = height;
@@ -260,7 +260,7 @@ bool Interact()
 
     // Compute Mass Transport
     
-    const float height = totalHeight(getIndexV(currentPosition));
+    const float height = totalHeight(GetIndexVector(currentPosition));
     const vec3 normal = getScaledNormal(currentPosition.x, currentPosition.y);
     const float hfac = exp(-(myParticleWindErosion.Position.z - height) / BoundaryLayer);
     const float collision = max(0.0, -dot(normalize(myParticleWindErosion.Speed), normal));
@@ -276,12 +276,12 @@ bool Interact()
 
     if(difference < 0)
     {
-        DepositeOnTop(getIndexV(currentPosition), abs(difference));
+        DepositeOnTop(GetIndexVector(currentPosition), abs(difference));
         myParticleWindErosion.Sediment = max(myParticleWindErosion.Sediment + difference, 0.0);
     }
     else
     {
-        float suspendedSediment = SuspendFromTop(getIndexV(currentPosition), difference);
+        float suspendedSediment = SuspendFromTop(GetIndexVector(currentPosition), difference);
         myParticleWindErosion.Sediment += suspendedSediment;
     }
 

@@ -24,6 +24,7 @@ struct ErosionConfiguration
 {
     float SeaLevel;
     float TimeDelta;
+	bool IsWaterKeptInBoundaries;
 };
 
 layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
@@ -47,10 +48,14 @@ struct GridThermalErosionCell
     float BedrockFlowRight;
     float BedrockFlowUp;
     float BedrockFlowDown;
-    float SedimentFlowLeft;
-    float SedimentFlowRight;
-    float SedimentFlowUp;
-    float SedimentFlowDown;
+    float CoarseSedimentFlowLeft;
+    float CoarseSedimentFlowRight;
+    float CoarseSedimentFlowUp;
+    float CoarseSedimentFlowDown;
+    float FineSedimentFlowLeft;
+    float FineSedimentFlowRight;
+    float FineSedimentFlowUp;
+    float FineSedimentFlowDown;
 };
 
 layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
@@ -72,9 +77,14 @@ layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 uint myHeightMapSideLength;
 uint myHeightMapLength;
 
-float SedimentHeight(uint index)
+float FineSedimentHeight(uint index)
 {
     return heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength];
+}
+
+float CoarseSedimentHeight(uint index)
+{
+    return heightMap[index + 1 * myHeightMapLength];
 }
 
 float BedrockHeight(uint index)
@@ -82,7 +92,17 @@ float BedrockHeight(uint index)
     return heightMap[index];
 }
 
-float TotalHeight(uint index)
+float TotalCoarseSedimentHeight(uint index)
+{
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount - 1; layer++)
+    {
+        height += heightMap[index + layer * myHeightMapLength];
+    }
+    return height;
+}
+
+float TotalFineSedimentHeight(uint index)
 {
     float height = 0;
     for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
@@ -192,95 +212,187 @@ void main()
 		gridThermalErosionCell.BedrockFlowUp = 0;
 	}
 
-	if(mapGenerationConfiguration.LayerCount > 1)
+	if(mapGenerationConfiguration.LayerCount > 2)
 	{
-		float totalHeight = TotalHeight(id);
-		float totalHeightDifferenceLeft = max(totalHeight - TotalHeight(getIndex(x - 1, y)), 0.0);
-		float totalHeightDifferenceRight = max(totalHeight - TotalHeight(getIndex(x + 1, y)), 0.0);
-		float totalHeightDifferenceUp = max(totalHeight - TotalHeight(getIndex(x, y + 1)), 0.0);
-		float totalHeightDifferenceDown = max(totalHeight - TotalHeight(getIndex(x, y - 1)), 0.0);
-		float maxTotalHeightDifference = max(max(totalHeightDifferenceLeft, totalHeightDifferenceRight), max(totalHeightDifferenceDown, totalHeightDifferenceUp));
+		float totalCoarseSedimentHeight = TotalCoarseSedimentHeight(id);
+		float totalCoarseSedimentHeightDifferenceLeft = max(totalCoarseSedimentHeight - TotalCoarseSedimentHeight(getIndex(x - 1, y)), 0.0);
+		float totalCoarseSedimentHeightDifferenceRight = max(totalCoarseSedimentHeight - TotalCoarseSedimentHeight(getIndex(x + 1, y)), 0.0);
+		float totalCoarseSedimentHeightDifferenceUp = max(totalCoarseSedimentHeight - TotalCoarseSedimentHeight(getIndex(x, y + 1)), 0.0);
+		float totalCoarseSedimentHeightDifferenceDown = max(totalCoarseSedimentHeight - TotalCoarseSedimentHeight(getIndex(x, y - 1)), 0.0);
+		float maxTotalCoarseSedimentHeightDifference = max(max(totalCoarseSedimentHeightDifferenceLeft, totalCoarseSedimentHeightDifferenceRight), max(totalCoarseSedimentHeightDifferenceDown, totalCoarseSedimentHeightDifferenceUp));
 		
 		float sedimentVolumeToBeMoved = 0;
-		if(maxTotalHeightDifference > 0)
+		if(maxTotalCoarseSedimentHeightDifference > 0)
 		{
-			float sedimentHeight = SedimentHeight(id);
-			if(maxTotalHeightDifference < sedimentHeight)
+			float coarseSedimentHeight = CoarseSedimentHeight(id) / 4;
+			if(maxTotalCoarseSedimentHeightDifference < coarseSedimentHeight)
 			{
-				sedimentVolumeToBeMoved = maxTotalHeightDifference * thermalErosionConfiguration.ErosionRate;
+				sedimentVolumeToBeMoved = maxTotalCoarseSedimentHeightDifference * thermalErosionConfiguration.ErosionRate;
 			}
 			else
 			{
-				sedimentVolumeToBeMoved = sedimentHeight * thermalErosionConfiguration.ErosionRate;
+				sedimentVolumeToBeMoved = coarseSedimentHeight * thermalErosionConfiguration.ErosionRate;
 			}
 		}
 	
-		float sedimentTangensAngleLeft = totalHeightDifferenceLeft * mapGenerationConfiguration.HeightMultiplier / 1.0;
-		float sedimentTangensAngleRight = totalHeightDifferenceRight * mapGenerationConfiguration.HeightMultiplier / 1.0;
-		float sedimentTangensAngleUp = totalHeightDifferenceUp * mapGenerationConfiguration.HeightMultiplier / 1.0;
-		float sedimentTangensAngleDown = totalHeightDifferenceDown * mapGenerationConfiguration.HeightMultiplier / 1.0;
+		float sedimentTangensAngleLeft = totalCoarseSedimentHeightDifferenceLeft * mapGenerationConfiguration.HeightMultiplier / 1.0;
+		float sedimentTangensAngleRight = totalCoarseSedimentHeightDifferenceRight * mapGenerationConfiguration.HeightMultiplier / 1.0;
+		float sedimentTangensAngleUp = totalCoarseSedimentHeightDifferenceUp * mapGenerationConfiguration.HeightMultiplier / 1.0;
+		float sedimentTangensAngleDown = totalCoarseSedimentHeightDifferenceDown * mapGenerationConfiguration.HeightMultiplier / 1.0;
 	
 		float flowLeft = 0;
-		float sedimentAngleOfRepose = layersConfiguration[1].TangensAngleOfRepose;
-		if (sedimentTangensAngleLeft > sedimentAngleOfRepose)
+		float coarseSedimentAngleOfRepose = layersConfiguration[1].TangensAngleOfRepose;
+		if (sedimentTangensAngleLeft > coarseSedimentAngleOfRepose)
 		{
-			flowLeft = totalHeightDifferenceLeft;
+			flowLeft = totalCoarseSedimentHeightDifferenceLeft;
 		}
 
 		float flowRight = 0;
-		if (sedimentTangensAngleRight > sedimentAngleOfRepose)
+		if (sedimentTangensAngleRight > coarseSedimentAngleOfRepose)
 		{
-			flowRight = totalHeightDifferenceRight;
+			flowRight = totalCoarseSedimentHeightDifferenceRight;
 		}
 
 		float flowDown = 0;
-		if (sedimentTangensAngleDown > sedimentAngleOfRepose)
+		if (sedimentTangensAngleDown > coarseSedimentAngleOfRepose)
 		{
-			flowDown = totalHeightDifferenceDown;
+			flowDown = totalCoarseSedimentHeightDifferenceDown;
 		}
 
 		float flowUp = 0;
-		if (sedimentTangensAngleUp > sedimentAngleOfRepose)
+		if (sedimentTangensAngleUp > coarseSedimentAngleOfRepose)
 		{
-			flowUp = totalHeightDifferenceUp;
+			flowUp = totalCoarseSedimentHeightDifferenceUp;
 		}
 
 		// Output flux
-		float totalTotalHeightDifference = totalHeightDifferenceLeft + totalHeightDifferenceRight + totalHeightDifferenceDown + totalHeightDifferenceUp;
+		float totalTotalCoarseSedimentHeightDifference = totalCoarseSedimentHeightDifferenceLeft + totalCoarseSedimentHeightDifferenceRight + totalCoarseSedimentHeightDifferenceDown + totalCoarseSedimentHeightDifferenceUp;
 		if(x > 0)
 		{
-			gridThermalErosionCell.SedimentFlowLeft = max(sedimentVolumeToBeMoved * flowLeft / totalTotalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.CoarseSedimentFlowLeft = max(sedimentVolumeToBeMoved * flowLeft / totalTotalCoarseSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
-			gridThermalErosionCell.SedimentFlowLeft = 0;
+			gridThermalErosionCell.CoarseSedimentFlowLeft = 0;
 		}
 		
 		if(x < myHeightMapSideLength - 1)
 		{
-			gridThermalErosionCell.SedimentFlowRight = max(sedimentVolumeToBeMoved * flowRight / totalTotalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.CoarseSedimentFlowRight = max(sedimentVolumeToBeMoved * flowRight / totalTotalCoarseSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
-			gridThermalErosionCell.SedimentFlowRight = 0;
+			gridThermalErosionCell.CoarseSedimentFlowRight = 0;
 		}
 
 		if(y > 0)
 		{
-			gridThermalErosionCell.SedimentFlowDown = max(sedimentVolumeToBeMoved * flowDown / totalTotalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.CoarseSedimentFlowDown = max(sedimentVolumeToBeMoved * flowDown / totalTotalCoarseSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
-			gridThermalErosionCell.SedimentFlowDown = 0;
+			gridThermalErosionCell.CoarseSedimentFlowDown = 0;
 		}
 		
 		if(y < myHeightMapSideLength - 1)
 		{
-			gridThermalErosionCell.SedimentFlowUp = max(sedimentVolumeToBeMoved * flowUp / totalTotalHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.CoarseSedimentFlowUp = max(sedimentVolumeToBeMoved * flowUp / totalTotalCoarseSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
-			gridThermalErosionCell.SedimentFlowUp = 0;
+			gridThermalErosionCell.CoarseSedimentFlowUp = 0;
+		}
+	}
+	
+	if(mapGenerationConfiguration.LayerCount > 1)
+	{
+		float totalFineSedimentHeight = TotalFineSedimentHeight(id);
+		float totalFineSedimentHeightDifferenceLeft = max(totalFineSedimentHeight - TotalFineSedimentHeight(getIndex(x - 1, y)), 0.0);
+		float totalFineSedimentHeightDifferenceRight = max(totalFineSedimentHeight - TotalFineSedimentHeight(getIndex(x + 1, y)), 0.0);
+		float totalFineSedimentHeightDifferenceUp = max(totalFineSedimentHeight - TotalFineSedimentHeight(getIndex(x, y + 1)), 0.0);
+		float totalFineSedimentHeightDifferenceDown = max(totalFineSedimentHeight - TotalFineSedimentHeight(getIndex(x, y - 1)), 0.0);
+		float maxTotalFineSedimentHeightDifference = max(max(totalFineSedimentHeightDifferenceLeft, totalFineSedimentHeightDifferenceRight), max(totalFineSedimentHeightDifferenceDown, totalFineSedimentHeightDifferenceUp));
+		
+		float sedimentVolumeToBeMoved = 0;
+		if(maxTotalFineSedimentHeightDifference > 0)
+		{
+			float fineSedimentHeight = FineSedimentHeight(id) / 4;
+			if(maxTotalFineSedimentHeightDifference < fineSedimentHeight)
+			{
+				sedimentVolumeToBeMoved = maxTotalFineSedimentHeightDifference * thermalErosionConfiguration.ErosionRate;
+			}
+			else
+			{
+				sedimentVolumeToBeMoved = fineSedimentHeight * thermalErosionConfiguration.ErosionRate;
+			}
+		}
+	
+		float sedimentTangensAngleLeft = totalFineSedimentHeightDifferenceLeft * mapGenerationConfiguration.HeightMultiplier / 1.0;
+		float sedimentTangensAngleRight = totalFineSedimentHeightDifferenceRight * mapGenerationConfiguration.HeightMultiplier / 1.0;
+		float sedimentTangensAngleUp = totalFineSedimentHeightDifferenceUp * mapGenerationConfiguration.HeightMultiplier / 1.0;
+		float sedimentTangensAngleDown = totalFineSedimentHeightDifferenceDown * mapGenerationConfiguration.HeightMultiplier / 1.0;
+	
+		float flowLeft = 0;
+		float fineSedimentAngleOfRepose = layersConfiguration[mapGenerationConfiguration.LayerCount - 1].TangensAngleOfRepose;
+		if (sedimentTangensAngleLeft > fineSedimentAngleOfRepose)
+		{
+			flowLeft = totalFineSedimentHeightDifferenceLeft;
+		}
+
+		float flowRight = 0;
+		if (sedimentTangensAngleRight > fineSedimentAngleOfRepose)
+		{
+			flowRight = totalFineSedimentHeightDifferenceRight;
+		}
+
+		float flowDown = 0;
+		if (sedimentTangensAngleDown > fineSedimentAngleOfRepose)
+		{
+			flowDown = totalFineSedimentHeightDifferenceDown;
+		}
+
+		float flowUp = 0;
+		if (sedimentTangensAngleUp > fineSedimentAngleOfRepose)
+		{
+			flowUp = totalFineSedimentHeightDifferenceUp;
+		}
+
+		// Output flux
+		float totalTotalFineSedimentHeightDifference = totalFineSedimentHeightDifferenceLeft + totalFineSedimentHeightDifferenceRight + totalFineSedimentHeightDifferenceDown + totalFineSedimentHeightDifferenceUp;
+		if(x > 0)
+		{
+			gridThermalErosionCell.FineSedimentFlowLeft = max(sedimentVolumeToBeMoved * flowLeft / totalTotalFineSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+		}
+		else
+		{
+			gridThermalErosionCell.FineSedimentFlowLeft = 0;
+		}
+		
+		if(x < myHeightMapSideLength - 1)
+		{
+			gridThermalErosionCell.FineSedimentFlowRight = max(sedimentVolumeToBeMoved * flowRight / totalTotalFineSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+		}
+		else
+		{
+			gridThermalErosionCell.FineSedimentFlowRight = 0;
+		}
+
+		if(y > 0)
+		{
+			gridThermalErosionCell.FineSedimentFlowDown = max(sedimentVolumeToBeMoved * flowDown / totalTotalFineSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+		}
+		else
+		{
+			gridThermalErosionCell.FineSedimentFlowDown = 0;
+		}
+		
+		if(y < myHeightMapSideLength - 1)
+		{
+			gridThermalErosionCell.FineSedimentFlowUp = max(sedimentVolumeToBeMoved * flowUp / totalTotalFineSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+		}
+		else
+		{
+			gridThermalErosionCell.FineSedimentFlowUp = 0;
 		}
 	}
 

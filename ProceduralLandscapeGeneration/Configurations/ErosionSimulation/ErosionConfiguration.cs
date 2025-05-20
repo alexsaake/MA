@@ -43,6 +43,21 @@ internal class ErosionConfiguration : IErosionConfiguration
         }
     }
 
+    private bool myIsWaterKeptInBoundaries;
+    public bool IsWaterKeptInBoundaries
+    {
+        get => myIsWaterKeptInBoundaries;
+        set
+        {
+            if (myIsWaterKeptInBoundaries == value)
+            {
+                return;
+            }
+            myIsWaterKeptInBoundaries = value;
+            UpdateShaderBuffer();
+        }
+    }
+
     private float myTimeDelta;
     public float TimeDelta
     {
@@ -77,6 +92,9 @@ internal class ErosionConfiguration : IErosionConfiguration
 
         IsSeaLevelDisplayed = false;
         mySeaLevel = 0.2f;
+
+        myIsWaterKeptInBoundaries = true;
+
         myTimeDelta = 1.0f;
     }
 
@@ -96,7 +114,8 @@ internal class ErosionConfiguration : IErosionConfiguration
         ErosionConfigurationShaderBuffer erosionConfigurationShaderBuffer = new ErosionConfigurationShaderBuffer()
         {
             SeaLevel = SeaLevel,
-            TimeDelta = TimeDelta
+            TimeDelta = TimeDelta,
+            IsWaterKeptInBoundaries = IsWaterKeptInBoundaries
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ErosionConfiguration], &erosionConfigurationShaderBuffer, (uint)sizeof(ErosionConfigurationShaderBuffer), 0);
     }

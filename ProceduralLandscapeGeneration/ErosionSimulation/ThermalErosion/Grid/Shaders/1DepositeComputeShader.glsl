@@ -24,6 +24,7 @@ struct ErosionConfiguration
 {
     float SeaLevel;
     float TimeDelta;
+	bool IsWaterKeptInBoundaries;
 };
 
 layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
@@ -37,10 +38,14 @@ struct GridThermalErosionCell
     float BedrockFlowRight;
     float BedrockFlowUp;
     float BedrockFlowDown;
-    float SedimentFlowLeft;
-    float SedimentFlowRight;
-    float SedimentFlowUp;
-    float SedimentFlowDown;
+    float CoarseSedimentFlowLeft;
+    float CoarseSedimentFlowRight;
+    float CoarseSedimentFlowUp;
+    float CoarseSedimentFlowDown;
+    float FineSedimentFlowLeft;
+    float FineSedimentFlowRight;
+    float FineSedimentFlowUp;
+    float FineSedimentFlowDown;
 };
 
 layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
@@ -56,13 +61,31 @@ void RemoveFromBedrock(uint index, float sediment)
     heightMap[index] = max(heightMap[index] - sediment, 0.0);
 }
 
-void RemoveFromSediment(uint index, float sediment)
+void RemoveFromCoarseSediment(uint index, float sediment)
+{
+    uint offsetIndex = index + 1 * myHeightMapLength;
+    heightMap[offsetIndex] = max(heightMap[offsetIndex] - sediment, 0.0);
+}
+
+void RemoveFromFineSediment(uint index, float sediment)
 {
     uint offsetIndex = index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength;
     heightMap[offsetIndex] = max(heightMap[offsetIndex] - sediment, 0.0);
 }
 
-void DepositeOnTop(uint index, float sediment)
+void DepositeOnCoarseSediment(uint index, float sediment)
+{
+    if(mapGenerationConfiguration.LayerCount > 2)
+    {
+        heightMap[index + 1 * myHeightMapLength] += sediment;
+    }
+    else
+    {
+        heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength] += sediment;
+    }
+}
+
+void DepositeOnFineSediment(uint index, float sediment)
 {
     heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength] += sediment;
 }
@@ -109,20 +132,33 @@ void main()
     }
     else
     {
-        DepositeOnTop(id, bedrockVolumeDelta);
+        DepositeOnCoarseSediment(id, bedrockVolumeDelta);
     }
 
-    float sedimentFlowIn = gridThermalErosionCells[getIndex(x - 1, y)].SedimentFlowRight + gridThermalErosionCells[getIndex(x + 1, y)].SedimentFlowLeft + gridThermalErosionCells[getIndex(x, y - 1)].SedimentFlowUp + gridThermalErosionCells[getIndex(x, y + 1)].SedimentFlowDown;
-    float sedimentFlowOut = gridThermalErosionCell.SedimentFlowRight + gridThermalErosionCell.SedimentFlowLeft + gridThermalErosionCell.SedimentFlowUp + gridThermalErosionCell.SedimentFlowDown;
+    float coarseSedimentFlowIn = gridThermalErosionCells[getIndex(x - 1, y)].CoarseSedimentFlowRight + gridThermalErosionCells[getIndex(x + 1, y)].CoarseSedimentFlowLeft + gridThermalErosionCells[getIndex(x, y - 1)].CoarseSedimentFlowUp + gridThermalErosionCells[getIndex(x, y + 1)].CoarseSedimentFlowDown;
+    float coarseSedimentFlowOut = gridThermalErosionCell.CoarseSedimentFlowRight + gridThermalErosionCell.CoarseSedimentFlowLeft + gridThermalErosionCell.CoarseSedimentFlowUp + gridThermalErosionCell.CoarseSedimentFlowDown;
     
-	float sedimentVolumeDelta = (sedimentFlowIn - sedimentFlowOut) * erosionConfiguration.TimeDelta;
-    if(sedimentVolumeDelta < 0)
+	float coarseSedimentVolumeDelta = (coarseSedimentFlowIn - coarseSedimentFlowOut) * erosionConfiguration.TimeDelta;
+    if(coarseSedimentVolumeDelta < 0)
     {
-        RemoveFromSediment(id, abs(sedimentVolumeDelta));
+        RemoveFromCoarseSediment(id, abs(coarseSedimentVolumeDelta));
     }
     else
     {
-        DepositeOnTop(id, sedimentVolumeDelta);
+        DepositeOnFineSediment(id, coarseSedimentVolumeDelta);
+    }
+
+    float fineSedimentFlowIn = gridThermalErosionCells[getIndex(x - 1, y)].FineSedimentFlowRight + gridThermalErosionCells[getIndex(x + 1, y)].FineSedimentFlowLeft + gridThermalErosionCells[getIndex(x, y - 1)].FineSedimentFlowUp + gridThermalErosionCells[getIndex(x, y + 1)].FineSedimentFlowDown;
+    float fineSedimentFlowOut = gridThermalErosionCell.FineSedimentFlowRight + gridThermalErosionCell.FineSedimentFlowLeft + gridThermalErosionCell.FineSedimentFlowUp + gridThermalErosionCell.FineSedimentFlowDown;
+    
+	float fineSedimentVolumeDelta = (fineSedimentFlowIn - fineSedimentFlowOut) * erosionConfiguration.TimeDelta;
+    if(fineSedimentVolumeDelta < 0)
+    {
+        RemoveFromFineSediment(id, abs(fineSedimentVolumeDelta));
+    }
+    else
+    {
+        DepositeOnFineSediment(id, fineSedimentVolumeDelta);
     }
     
     memoryBarrier();

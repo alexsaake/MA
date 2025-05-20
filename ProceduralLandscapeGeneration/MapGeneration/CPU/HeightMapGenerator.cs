@@ -4,7 +4,6 @@ using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
-using System;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.MapGeneration.CPU;
@@ -64,6 +63,12 @@ internal class HeightMapGenerator : IHeightMapGenerator
         float maxNoiseHeight = float.MinValue;
         float minNoiseHeight = float.MaxValue;
 
+        uint indexOffset = 0;
+        if(layers > 2)
+        {
+            indexOffset = myMapGenerationConfiguration.MapSize;
+        }
+
         for (int y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
         {
             for (int x = 0; x < myMapGenerationConfiguration.HeightMapSideLength; x++)
@@ -92,7 +97,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
                 {
                     minNoiseHeight = noiseHeight;
                 }
-                noiseMap[x + y * myMapGenerationConfiguration.HeightMapSideLength] = noiseHeight;
+                noiseMap[indexOffset + x + y * myMapGenerationConfiguration.HeightMapSideLength] = noiseHeight;
             }
         }
 
@@ -100,7 +105,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
         {
             for (int x = 0; x < myMapGenerationConfiguration.HeightMapSideLength; x++)
             {
-                noiseMap[x + y * myMapGenerationConfiguration.HeightMapSideLength] = Math.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x + y * myMapGenerationConfiguration.HeightMapSideLength]);
+                noiseMap[indexOffset + x + y * myMapGenerationConfiguration.HeightMapSideLength] = Math.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[indexOffset + x + y * myMapGenerationConfiguration.HeightMapSideLength]);
             }
         }
 
@@ -131,7 +136,13 @@ internal class HeightMapGenerator : IHeightMapGenerator
         if(myMapGenerationConfiguration.LayerCount > 1)
         {
             uint cube2Position = myMapGenerationConfiguration.HeightMapSideLength / 4 + myMapGenerationConfiguration.HeightMapSideLength / 4 * 2;
-            AddCube(map, cube2Position, cube2Position, 1, cubeSideLength);
+            AddCube(map, cube2Position, cube2Position, myMapGenerationConfiguration.LayerCount - 1, cubeSideLength);
+        }
+
+        if (myMapGenerationConfiguration.LayerCount > 2)
+        {
+            uint cube3Position = myMapGenerationConfiguration.HeightMapSideLength / 4 + myMapGenerationConfiguration.HeightMapSideLength / 4;
+            AddCube(map, cube3Position, cube3Position, myMapGenerationConfiguration.LayerCount - 2, cubeSideLength);
         }
 
         return map;
