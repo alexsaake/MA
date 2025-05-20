@@ -2,6 +2,7 @@
 using ProceduralLandscapeGeneration.Common.GPU.ComputeShaders;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
+using ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion.Grid;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.MapGeneration.GPU;
@@ -37,7 +38,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
         myShaderBuffers.Add(ShaderBufferTypes.HeightMapParameters, heightMapParametersShaderBufferSize);
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMapParameters], &heightMapParameters, heightMapParametersShaderBufferSize, 0);
 
-        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * sizeof(float) * myMapGenerationConfiguration.LayerCount;
+        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
         ComputeShaderProgram generateHeightMap = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateHeightMapComputeShader.glsl");

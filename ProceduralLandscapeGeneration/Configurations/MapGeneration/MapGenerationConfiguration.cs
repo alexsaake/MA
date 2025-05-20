@@ -249,9 +249,9 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         myShaderBuffers = shaderBuffers;
 
         myMapType = MapTypes.MultiLayeredHeightMap;
-        myMapGeneration = MapGenerationTypes.Cube;
+        myMapGeneration = MapGenerationTypes.Noise;
         myMeshCreation = ProcessorTypes.CPU;
-        myHeightMapGeneration = ProcessorTypes.CPU;
+        myHeightMapGeneration = ProcessorTypes.GPU;
 
         Seed = 1337;
         NoiseScale = 2.0f;
