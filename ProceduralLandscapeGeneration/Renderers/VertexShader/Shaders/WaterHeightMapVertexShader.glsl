@@ -62,7 +62,7 @@ vec4 waterColor = vec4(0.0, 0.0, 1.0, 0.25);
 
 uint myHeightMapLength;
 
-float totalHeight(uint index)
+float TotalHeight(uint index)
 {
     float height = 0;
     for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
@@ -96,6 +96,6 @@ void main()
 
     fragColor = waterColor;
     float zOffset = 0.00004;
-    float height = totalHeight(index);
+    float height = TotalHeight(index);
     gl_Position =  mvp * vec4(vertexPosition.xy, (height - zOffset + waterHeight) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 }

@@ -33,12 +33,17 @@ void main()
     uint x = index % heightMapSideLength;
     uint y = index / heightMapSideLength;
     
-    float bedrockHeight = 0.1 + 0.9 * min(pow((abs(x - (heightMapSideLength / 2.0)) / heightMapSideLength) * 2, 2) + ((heightMapSideLength - y) / float(heightMapSideLength)), 1.0);
-    heightMap[index] = bedrockHeight;
-
+    float bedrockHeight = 0.8 + 0.2 * ((abs(x - (heightMapSideLength / 2.0)) / heightMapSideLength) * 2);
+    if(x > heightMapSideLength / 2 - heightMapSideLength / 100
+        && x < heightMapSideLength / 2 + heightMapSideLength / 100)
+    {
+            bedrockHeight = 0.5 + 0.3 * (((abs(x - (heightMapSideLength / 2.0)) / heightMapSideLength) * 2) + ((heightMapSideLength - y) / float(heightMapSideLength)));
+    }
     if(mapGenerationConfiguration.LayerCount > 1)
     {
-        float sedimentHeight = max(((1.0 - bedrockHeight) - 0.05) * (0.9 + 0.1 * (abs(x - (heightMapSideLength / 2.0)) / heightMapSideLength) * 2), 0.0);
+        float sedimentHeight = 0.4;
+        bedrockHeight -= sedimentHeight;
         heightMap[index + 1 * heightMapLength] = sedimentHeight;
     }
+    heightMap[index] = bedrockHeight;
 }

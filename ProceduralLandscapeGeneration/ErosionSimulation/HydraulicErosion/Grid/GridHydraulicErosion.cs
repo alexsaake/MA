@@ -108,16 +108,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
             ResetHeightMapIndicesShaderBuffers();
             myHasRainDropsChangedChanged = false;
         }
-        switch(myMapGenerationConfiguration.MapGeneration)
-        {
-            case MapGenerationTypes.SlopedCanyon:
-            case MapGenerationTypes.SlopedCliff:
-                CreateRiverHeadIndices();
-                break;
-            default:
-                CreateRandomIndices();
-                break;
-        }
+        CreateRandomIndices();
 
         Rlgl.EnableShader(myRainComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myGridErosionConfiguration.RainDrops / 64.0f), 1, 1);
@@ -146,20 +137,6 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
         Rlgl.EnableShader(mySuspendDepositeComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
-        Rlgl.MemoryBarrier();
-    }
-
-    private unsafe void CreateRiverHeadIndices()
-    {
-        uint[] randomRainDropIndices = new uint[myGridErosionConfiguration.RainDrops];
-        for (uint rainDrop = 0; rainDrop < myGridErosionConfiguration.RainDrops; rainDrop++)
-        {
-            randomRainDropIndices[rainDrop] = myMapGenerationConfiguration.GetIndex(myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 10);
-        }
-        fixed (void* randomRainDropIndicesPointer = randomRainDropIndices)
-        {
-            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HydraulicErosionHeightMapIndices], randomRainDropIndicesPointer, myGridErosionConfiguration.RainDrops * sizeof(uint), 0);
-        }
         Rlgl.MemoryBarrier();
     }
 

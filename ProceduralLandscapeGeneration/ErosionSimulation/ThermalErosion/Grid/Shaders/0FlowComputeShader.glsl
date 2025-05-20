@@ -112,7 +112,7 @@ float TotalFineSedimentHeight(uint index)
     return height;
 }
 
-uint getIndex(uint x, uint y)
+uint GetIndex(uint x, uint y)
 {
     return uint((y * myHeightMapSideLength) + x);
 }
@@ -135,10 +135,10 @@ void main()
     GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[id];
 
 	float bedrockHeight = BedrockHeight(id);
-	float bedrockHeightDifferenceLeft = max(bedrockHeight - BedrockHeight(getIndex(x - 1, y)), 0.0);
-	float bedrockHeightDifferenceRight = max(bedrockHeight - BedrockHeight(getIndex(x + 1, y)), 0.0);
-	float bedrockHeightDifferenceUp = max(bedrockHeight - BedrockHeight(getIndex(x, y + 1)), 0.0);
-	float bedrockHeightDifferenceDown = max(bedrockHeight - BedrockHeight(getIndex(x, y - 1)), 0.0);
+	float bedrockHeightDifferenceLeft = max(bedrockHeight - BedrockHeight(GetIndex(x - 1, y)), 0.0);
+	float bedrockHeightDifferenceRight = max(bedrockHeight - BedrockHeight(GetIndex(x + 1, y)), 0.0);
+	float bedrockHeightDifferenceUp = max(bedrockHeight - BedrockHeight(GetIndex(x, y + 1)), 0.0);
+	float bedrockHeightDifferenceDown = max(bedrockHeight - BedrockHeight(GetIndex(x, y - 1)), 0.0);
 	float maxBedrockHeightDifference = max(max(bedrockHeightDifferenceLeft, bedrockHeightDifferenceRight), max(bedrockHeightDifferenceDown, bedrockHeightDifferenceUp));
 
 	float bedrockVolumeToBeMoved = maxBedrockHeightDifference * thermalErosionConfiguration.ErosionRate;
@@ -215,10 +215,10 @@ void main()
 	if(mapGenerationConfiguration.LayerCount > 2)
 	{
 		float totalCoarseSedimentHeight = TotalCoarseSedimentHeight(id);
-		float totalCoarseSedimentHeightDifferenceLeft = max(totalCoarseSedimentHeight - TotalCoarseSedimentHeight(getIndex(x - 1, y)), 0.0);
-		float totalCoarseSedimentHeightDifferenceRight = max(totalCoarseSedimentHeight - TotalCoarseSedimentHeight(getIndex(x + 1, y)), 0.0);
-		float totalCoarseSedimentHeightDifferenceUp = max(totalCoarseSedimentHeight - TotalCoarseSedimentHeight(getIndex(x, y + 1)), 0.0);
-		float totalCoarseSedimentHeightDifferenceDown = max(totalCoarseSedimentHeight - TotalCoarseSedimentHeight(getIndex(x, y - 1)), 0.0);
+		float totalCoarseSedimentHeightDifferenceLeft = max(totalCoarseSedimentHeight - TotalCoarseSedimentHeight(GetIndex(x - 1, y)), 0.0);
+		float totalCoarseSedimentHeightDifferenceRight = max(totalCoarseSedimentHeight - TotalCoarseSedimentHeight(GetIndex(x + 1, y)), 0.0);
+		float totalCoarseSedimentHeightDifferenceUp = max(totalCoarseSedimentHeight - TotalCoarseSedimentHeight(GetIndex(x, y + 1)), 0.0);
+		float totalCoarseSedimentHeightDifferenceDown = max(totalCoarseSedimentHeight - TotalCoarseSedimentHeight(GetIndex(x, y - 1)), 0.0);
 		float maxTotalCoarseSedimentHeightDifference = max(max(totalCoarseSedimentHeightDifferenceLeft, totalCoarseSedimentHeightDifferenceRight), max(totalCoarseSedimentHeightDifferenceDown, totalCoarseSedimentHeightDifferenceUp));
 		
 		float sedimentVolumeToBeMoved = 0;
@@ -307,10 +307,10 @@ void main()
 	if(mapGenerationConfiguration.LayerCount > 1)
 	{
 		float totalFineSedimentHeight = TotalFineSedimentHeight(id);
-		float totalFineSedimentHeightDifferenceLeft = max(totalFineSedimentHeight - TotalFineSedimentHeight(getIndex(x - 1, y)), 0.0);
-		float totalFineSedimentHeightDifferenceRight = max(totalFineSedimentHeight - TotalFineSedimentHeight(getIndex(x + 1, y)), 0.0);
-		float totalFineSedimentHeightDifferenceUp = max(totalFineSedimentHeight - TotalFineSedimentHeight(getIndex(x, y + 1)), 0.0);
-		float totalFineSedimentHeightDifferenceDown = max(totalFineSedimentHeight - TotalFineSedimentHeight(getIndex(x, y - 1)), 0.0);
+		float totalFineSedimentHeightDifferenceLeft = max(totalFineSedimentHeight - TotalFineSedimentHeight(GetIndex(x - 1, y)), 0.0);
+		float totalFineSedimentHeightDifferenceRight = max(totalFineSedimentHeight - TotalFineSedimentHeight(GetIndex(x + 1, y)), 0.0);
+		float totalFineSedimentHeightDifferenceUp = max(totalFineSedimentHeight - TotalFineSedimentHeight(GetIndex(x, y + 1)), 0.0);
+		float totalFineSedimentHeightDifferenceDown = max(totalFineSedimentHeight - TotalFineSedimentHeight(GetIndex(x, y - 1)), 0.0);
 		float maxTotalFineSedimentHeightDifference = max(max(totalFineSedimentHeightDifferenceLeft, totalFineSedimentHeightDifferenceRight), max(totalFineSedimentHeightDifferenceDown, totalFineSedimentHeightDifferenceUp));
 		
 		float sedimentVolumeToBeMoved = 0;

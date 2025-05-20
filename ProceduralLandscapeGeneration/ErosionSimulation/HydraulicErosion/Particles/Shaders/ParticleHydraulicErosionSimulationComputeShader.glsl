@@ -142,7 +142,7 @@ float totalHeight(uint index)
     return height;
 }
 
-vec3 getScaledNormal(uint x, uint y)
+vec3 GetScaledNormal(uint x, uint y)
 {
     if (x < 1 || x > myHeightMapSideLength - 2
         || y < 1 || y > myHeightMapSideLength - 2)
@@ -188,7 +188,7 @@ bool Move()
         return false;
     }
 
-    const vec3 normal = getScaledNormal(position.x, position.y);
+    const vec3 normal = GetScaledNormal(position.x, position.y);
 
     myParticleHydraulicErosion.Speed += particleHydraulicErosionConfiguration.Gravity * normal.xy / myParticleHydraulicErosion.Volume;
 

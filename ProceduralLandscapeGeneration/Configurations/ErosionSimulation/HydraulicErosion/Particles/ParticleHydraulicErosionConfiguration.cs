@@ -1,4 +1,5 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
+using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 
@@ -147,7 +148,7 @@ internal class ParticleHydraulicErosionConfiguration : IParticleHydraulicErosion
 
     public event EventHandler<EventArgs>? ParticlesChanged;
 
-    public ParticleHydraulicErosionConfiguration(IShaderBuffers shaderBuffers, IErosionConfiguration erosionConfiguration)
+    public ParticleHydraulicErosionConfiguration(IShaderBuffers shaderBuffers, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration)
     {
         myShaderBuffers = shaderBuffers;
 

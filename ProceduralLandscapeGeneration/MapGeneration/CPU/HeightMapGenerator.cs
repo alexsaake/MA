@@ -153,7 +153,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
         throw new NotImplementedException();
     }
 
-    public void GenerateSlopedCliffHeightMap()
+    public void GenerateCoastlineCliffHeightMap()
     {
         throw new NotImplementedException();
     }

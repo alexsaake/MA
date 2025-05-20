@@ -123,12 +123,12 @@ float totalHeight(uint index)
     return height;
 }
 
-uint getIndex(uint x, uint y)
+uint GetIndex(uint x, uint y)
 {
     return uint((y * myHeightMapSideLength) + x);
 }
 
-uint getIndexVector(vec2 position)
+uint GetIndexVector(vec2 position)
 {
     return uint((position.y * myHeightMapSideLength) + position.x);
 }
@@ -161,7 +161,7 @@ void main()
     float heightUp;
     if(x > 0)
     {
-        heightLeft = totalHeight(getIndex(x - 1, y));
+        heightLeft = totalHeight(GetIndex(x - 1, y));
     }
     else
     {
@@ -169,7 +169,7 @@ void main()
     }
     if(x < myHeightMapSideLength - 1)
     {
-        heightRight = totalHeight(getIndex(x + 1, y));
+        heightRight = totalHeight(GetIndex(x + 1, y));
     }
     else
     {
@@ -177,7 +177,7 @@ void main()
     }
     if(y > 0)
     {
-        heightDown = totalHeight(getIndex(x, y - 1));
+        heightDown = totalHeight(GetIndex(x, y - 1));
     }
     else
     {
@@ -185,7 +185,7 @@ void main()
     }
     if(y < myHeightMapSideLength - 1)
     {
-        heightUp = totalHeight(getIndex(x, y + 1));
+        heightUp = totalHeight(GetIndex(x, y + 1));
     }
     else
     {

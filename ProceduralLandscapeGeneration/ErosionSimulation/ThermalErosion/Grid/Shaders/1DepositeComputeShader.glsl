@@ -100,7 +100,7 @@ float totalHeight(uint index)
     return height;
 }
 
-uint getIndex(uint x, uint y)
+uint GetIndex(uint x, uint y)
 {
     return uint((y * myHeightMapSideLength) + x);
 }
@@ -122,7 +122,7 @@ void main()
     
     GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[id];
     
-    float bedrockFlowIn = gridThermalErosionCells[getIndex(x - 1, y)].BedrockFlowRight + gridThermalErosionCells[getIndex(x + 1, y)].BedrockFlowLeft + gridThermalErosionCells[getIndex(x, y - 1)].BedrockFlowUp + gridThermalErosionCells[getIndex(x, y + 1)].BedrockFlowDown;
+    float bedrockFlowIn = gridThermalErosionCells[GetIndex(x - 1, y)].BedrockFlowRight + gridThermalErosionCells[GetIndex(x + 1, y)].BedrockFlowLeft + gridThermalErosionCells[GetIndex(x, y - 1)].BedrockFlowUp + gridThermalErosionCells[GetIndex(x, y + 1)].BedrockFlowDown;
     float bedrockFlowOut = gridThermalErosionCell.BedrockFlowRight + gridThermalErosionCell.BedrockFlowLeft + gridThermalErosionCell.BedrockFlowUp + gridThermalErosionCell.BedrockFlowDown;
     
 	float bedrockVolumeDelta = (bedrockFlowIn - bedrockFlowOut) * erosionConfiguration.TimeDelta;
@@ -135,7 +135,7 @@ void main()
         DepositeOnCoarseSediment(id, bedrockVolumeDelta);
     }
 
-    float coarseSedimentFlowIn = gridThermalErosionCells[getIndex(x - 1, y)].CoarseSedimentFlowRight + gridThermalErosionCells[getIndex(x + 1, y)].CoarseSedimentFlowLeft + gridThermalErosionCells[getIndex(x, y - 1)].CoarseSedimentFlowUp + gridThermalErosionCells[getIndex(x, y + 1)].CoarseSedimentFlowDown;
+    float coarseSedimentFlowIn = gridThermalErosionCells[GetIndex(x - 1, y)].CoarseSedimentFlowRight + gridThermalErosionCells[GetIndex(x + 1, y)].CoarseSedimentFlowLeft + gridThermalErosionCells[GetIndex(x, y - 1)].CoarseSedimentFlowUp + gridThermalErosionCells[GetIndex(x, y + 1)].CoarseSedimentFlowDown;
     float coarseSedimentFlowOut = gridThermalErosionCell.CoarseSedimentFlowRight + gridThermalErosionCell.CoarseSedimentFlowLeft + gridThermalErosionCell.CoarseSedimentFlowUp + gridThermalErosionCell.CoarseSedimentFlowDown;
     
 	float coarseSedimentVolumeDelta = (coarseSedimentFlowIn - coarseSedimentFlowOut) * erosionConfiguration.TimeDelta;
@@ -148,7 +148,7 @@ void main()
         DepositeOnFineSediment(id, coarseSedimentVolumeDelta);
     }
 
-    float fineSedimentFlowIn = gridThermalErosionCells[getIndex(x - 1, y)].FineSedimentFlowRight + gridThermalErosionCells[getIndex(x + 1, y)].FineSedimentFlowLeft + gridThermalErosionCells[getIndex(x, y - 1)].FineSedimentFlowUp + gridThermalErosionCells[getIndex(x, y + 1)].FineSedimentFlowDown;
+    float fineSedimentFlowIn = gridThermalErosionCells[GetIndex(x - 1, y)].FineSedimentFlowRight + gridThermalErosionCells[GetIndex(x + 1, y)].FineSedimentFlowLeft + gridThermalErosionCells[GetIndex(x, y - 1)].FineSedimentFlowUp + gridThermalErosionCells[GetIndex(x, y + 1)].FineSedimentFlowDown;
     float fineSedimentFlowOut = gridThermalErosionCell.FineSedimentFlowRight + gridThermalErosionCell.FineSedimentFlowLeft + gridThermalErosionCell.FineSedimentFlowUp + gridThermalErosionCell.FineSedimentFlowDown;
     
 	float fineSedimentVolumeDelta = (fineSedimentFlowIn - fineSedimentFlowOut) * erosionConfiguration.TimeDelta;

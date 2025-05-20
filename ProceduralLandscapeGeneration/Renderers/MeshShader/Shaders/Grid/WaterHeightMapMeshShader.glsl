@@ -72,7 +72,7 @@ float totalHeight(uint index)
     return height;
 }
 
-uint getIndex(uint x, uint y)
+uint GetIndex(uint x, uint y)
 {
     return (y * myMapSize) + x;
 }
@@ -81,7 +81,7 @@ vec4 waterColor = vec4(0.0, 0.0, 1.0, 0.25);
 
 void addVertex(uint vertex, uint x, uint y)
 {
-    uint index = getIndex(x, y);
+    uint index = GetIndex(x, y);
     float zOffset = 0.00004;
     float height = totalHeight(index);
     vec4 position = mvp * vec4(x, y, (height - zOffset + gridHydraulicErosionCells[index].WaterHeight) * mapGenerationConfiguration.HeightMultiplier, 1.0);

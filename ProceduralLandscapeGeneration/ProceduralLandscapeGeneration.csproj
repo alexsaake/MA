@@ -51,7 +51,7 @@
 	  <None Update="ErosionSimulation\ThermalErosion\Shaders\VertexNormalThermalErosionSimulationComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="MapGeneration\GPU\Shaders\GenerateSlopedCliffHeightMapComputeShader.glsl">
+	  <None Update="MapGeneration\GPU\Shaders\GenerateCoastlineCliffHeightMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="MapGeneration\GPU\Shaders\GenerateSlopedCanyonHeightMapComputeShader.glsl">

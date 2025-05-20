@@ -25,14 +25,17 @@ internal class ConfigurationGUI : IConfigurationGUI
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
 
+    private Vector2 myLeftPanel1Position;
     private readonly PanelWithElements myErosionPanel;
-    private readonly PanelWithElements myBedrockLayerPanel;
-    private readonly PanelWithElements myClayLayerPanel;
-    private readonly PanelWithElements mySedimentLayerPanel;
     private readonly PanelWithElements myGridErosionPanel;
     private readonly PanelWithElements myParticleHydraulicErosionPanel;
     private readonly PanelWithElements myThermalErosionPanel;
     private readonly PanelWithElements myParticleWindErosionPanel;
+
+    private Vector2 myLeftPanel2Position;
+    private readonly PanelWithElements myBedrockLayerPanel;
+    private readonly PanelWithElements myCoarseSedimentLayerPanel;
+    private readonly PanelWithElements myFineSedimentLayerPanel;
 
     private Vector2 myRightPanelPosition;
     private readonly PanelWithElements myMapGenerationPanel;
@@ -49,6 +52,8 @@ internal class ConfigurationGUI : IConfigurationGUI
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
 
+        myLeftPanel1Position = Vector2.Zero;
+
         myErosionPanel = new PanelWithElements("Erosion Simulation");
         myErosionPanel.Add(new ToggleSliderWithLabel("Running", "Off;On", (value) => erosionConfiguration.IsSimulationRunning = value == 1, erosionConfiguration.IsSimulationRunning ? 1 : 0));
         myErosionPanel.Add(new ToggleSliderWithLabel("Particles Added", "Off;On", (value) =>
@@ -63,40 +68,26 @@ internal class ConfigurationGUI : IConfigurationGUI
                                                                                                 erosionConfiguration.HydraulicErosionMode = (HydraulicErosionModeTypes)value;
                                                                                                 ErosionModeChanged?.Invoke(this, EventArgs.Empty);
                                                                                             }, (int)erosionConfiguration.HydraulicErosionMode));
-        myErosionPanel.Add(new ToggleSliderWithLabel("Water Displayed", "Off;On", (value) => erosionConfiguration.IsWaterDisplayed = value == 1, erosionConfiguration.IsWaterDisplayed ? 1 : 0));
-        ToggleSliderWithLabel sedimentDisplayedSlider = new ToggleSliderWithLabel("Sediment Displayed", "Off;On", (value) => erosionConfiguration.IsSedimentDisplayed = value == 1, erosionConfiguration.IsSedimentDisplayed ? 1 : 0);
-        myErosionPanel.Add(sedimentDisplayedSlider);
-        myErosionPanel.Add(new ToggleSliderWithLabel("Wind Erosion", "Off;On", (value) => erosionConfiguration.IsWindErosionEnabled = value == 1, erosionConfiguration.IsWindErosionEnabled ? 1 : 0));
-        myErosionPanel.Add(new ComboBox("Wind Particle", (value) =>
-                                                                                            {
-                                                                                                erosionConfiguration.WindErosionMode = (WindErosionModeTypes)value;
-                                                                                                ErosionModeChanged?.Invoke(this, EventArgs.Empty);
-                                                                                            }, (int)erosionConfiguration.WindErosionMode));
-        myErosionPanel.Add(sedimentDisplayedSlider);
         myErosionPanel.Add(new ToggleSliderWithLabel("Thermal Erosion", "Off;On", (value) => erosionConfiguration.IsThermalErosionEnabled = value == 1, erosionConfiguration.IsThermalErosionEnabled ? 1 : 0));
         myErosionPanel.Add(new ComboBox("Thermal Grid;Thermal Cascade;Thermal Vertex Normal", (value) =>
                                                                                             {
                                                                                                 erosionConfiguration.ThermalErosionMode = (ThermalErosionModeTypes)value;
                                                                                                 ErosionModeChanged?.Invoke(this, EventArgs.Empty);
                                                                                             }, (int)erosionConfiguration.ThermalErosionMode));
+        myErosionPanel.Add(new ToggleSliderWithLabel("Wind Erosion", "Off;On", (value) => erosionConfiguration.IsWindErosionEnabled = value == 1, erosionConfiguration.IsWindErosionEnabled ? 1 : 0));
+        myErosionPanel.Add(new ComboBox("Wind Particle", (value) =>
+        {
+            erosionConfiguration.WindErosionMode = (WindErosionModeTypes)value;
+            ErosionModeChanged?.Invoke(this, EventArgs.Empty);
+        }, (int)erosionConfiguration.WindErosionMode));
         myErosionPanel.Add(new Button("Reset", () => ErosionResetRequired?.Invoke(this, EventArgs.Empty)));
         myErosionPanel.Add(new ValueBoxIntWithLabel("Iterations per Step", (value) => erosionConfiguration.IterationsPerStep = (uint)value, (int)erosionConfiguration.IterationsPerStep, 1, 1000));
+        myErosionPanel.Add(new ToggleSliderWithLabel("Water Displayed", "Off;On", (value) => erosionConfiguration.IsWaterDisplayed = value == 1, erosionConfiguration.IsWaterDisplayed ? 1 : 0));
+        myErosionPanel.Add(new ToggleSliderWithLabel("Sediment Displayed", "Off;On", (value) => erosionConfiguration.IsSedimentDisplayed = value == 1, erosionConfiguration.IsSedimentDisplayed ? 1 : 0));
         myErosionPanel.Add(new ToggleSliderWithLabel("Sea Level Displayed", "Off;On", (value) => erosionConfiguration.IsSeaLevelDisplayed = value == 1, erosionConfiguration.IsSeaLevelDisplayed ? 1 : 0));
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => erosionConfiguration.SeaLevel = value, erosionConfiguration.SeaLevel));
         myErosionPanel.Add(new ToggleSliderWithLabel("Water Kept In Boundaries", "Off;On", (value) => erosionConfiguration.IsWaterKeptInBoundaries = value == 1, erosionConfiguration.IsWaterKeptInBoundaries ? 1 : 0));
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => erosionConfiguration.TimeDelta = value, erosionConfiguration.TimeDelta));
-
-        myBedrockLayerPanel = new PanelWithElements("Bedrock Layer");
-        myBedrockLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.BedrockHardness = value, layersConfiguration.BedrockHardness));
-        myBedrockLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.BedrockAngleOfRepose = (uint)value, (int)layersConfiguration.BedrockAngleOfRepose, 1, 89));
-
-        myClayLayerPanel = new PanelWithElements("Coarse Sediment Layer");
-        myClayLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.CoarseSedimentHardness = value, layersConfiguration.CoarseSedimentHardness));
-        myClayLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.CoarseSedimentAngleOfRepose = (uint)value, (int)layersConfiguration.CoarseSedimentAngleOfRepose, 1, 89));
-
-        mySedimentLayerPanel = new PanelWithElements("Fine Sediment Layer");
-        mySedimentLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.FineSedimentHardness = value, layersConfiguration.FineSedimentHardness));
-        mySedimentLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.FineSedimentAngleOfRepose = (uint)value, (int)layersConfiguration.FineSedimentAngleOfRepose, 1, 89));
 
         myGridErosionPanel = new PanelWithElements("Grid Hydraulic Erosion");
         myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridErosionConfiguration.RainDrops = (uint)value, (int)gridErosionConfiguration.RainDrops, 1, 100000));
@@ -131,11 +122,26 @@ internal class ConfigurationGUI : IConfigurationGUI
         myParticleWindErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => particleWindErosionConfiguration.Gravity = value, particleWindErosionConfiguration.Gravity));
 
 
+        myLeftPanel2Position = new Vector2(PanelSize.X + 2, 0);
+
+        myBedrockLayerPanel = new PanelWithElements("Bedrock Layer");
+        myBedrockLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.BedrockHardness = value, layersConfiguration.BedrockHardness));
+        myBedrockLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.BedrockAngleOfRepose = (uint)value, (int)layersConfiguration.BedrockAngleOfRepose, 1, 89));
+
+        myCoarseSedimentLayerPanel = new PanelWithElements("Coarse Sediment Layer");
+        myCoarseSedimentLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.CoarseSedimentHardness = value, layersConfiguration.CoarseSedimentHardness));
+        myCoarseSedimentLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.CoarseSedimentAngleOfRepose = (uint)value, (int)layersConfiguration.CoarseSedimentAngleOfRepose, 1, 89));
+
+        myFineSedimentLayerPanel = new PanelWithElements("Fine Sediment Layer");
+        myFineSedimentLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.FineSedimentHardness = value, layersConfiguration.FineSedimentHardness));
+        myFineSedimentLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.FineSedimentAngleOfRepose = (uint)value, (int)layersConfiguration.FineSedimentAngleOfRepose, 1, 89));
+
+
         myRightPanelPosition = new Vector2(configuration.ScreenWidth - PanelSize.X, 0); ;
 
         myMapGenerationPanel = new PanelWithElements("Map Generation");
         myMapGenerationPanel.Add(new ComboBox("Height Map;Multi-Layered Height Map", (value) => mapGenerationConfiguration.MapType = (MapTypes)value, (int)mapGenerationConfiguration.MapType));
-        myMapGenerationPanel.Add(new ComboBox("Noise;Tectonics;Cubes;Canyon;Cliff", (value) => mapGenerationConfiguration.MapGeneration = (MapGenerationTypes)value, (int)mapGenerationConfiguration.MapGeneration));
+        myMapGenerationPanel.Add(new ComboBox("Noise;Tectonics;Cubes;Canyon;Coastline Cliff", (value) => mapGenerationConfiguration.MapGeneration = (MapGenerationTypes)value, (int)mapGenerationConfiguration.MapGeneration));
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "CPU;GPU", (value) => mapGenerationConfiguration.HeightMapGeneration = (ProcessorTypes)value, (int)mapGenerationConfiguration.HeightMapGeneration));
         myMapGenerationPanel.Add(new Button("Reset", () => MapResetRequired?.Invoke(this, EventArgs.Empty)));
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Mesh Creation", "CPU;GPU", (value) => mapGenerationConfiguration.MeshCreation = (ProcessorTypes)value, (int)mapGenerationConfiguration.MeshCreation));
@@ -167,52 +173,29 @@ internal class ConfigurationGUI : IConfigurationGUI
     public void Draw()
     {
         DrawErosionPanels();
+        DrawLayersPanels();
         DrawMapGenerationPanels();
     }
 
     private void DrawErosionPanels()
     {
-        myErosionPanel.Draw(Vector2.Zero);
-        myBedrockLayerPanel.Draw(myErosionPanel.BottomLeft);
-        Vector2 layerOffset = myBedrockLayerPanel.BottomLeft;
-        switch (myMapGenerationConfiguration.LayerCount)
-        {
-            case 2:
-                mySedimentLayerPanel.Draw(myBedrockLayerPanel.BottomLeft);
-                layerOffset = mySedimentLayerPanel.BottomLeft;
-                break;
-            case 3:
-                myClayLayerPanel.Draw(myBedrockLayerPanel.BottomLeft);
-                mySedimentLayerPanel.Draw(myClayLayerPanel.BottomLeft);
-                layerOffset = mySedimentLayerPanel.BottomLeft;
-                break;
-        }
-        Vector2 hydraulicOffset = layerOffset;
+        myErosionPanel.Draw(myLeftPanel1Position);
+        Vector2 hydraulicOffset = myErosionPanel.BottomLeft;
         if (myErosionConfiguration.IsHydraulicErosionEnabled)
         {
             switch (myErosionConfiguration.HydraulicErosionMode)
             {
                 case HydraulicErosionModeTypes.ParticleHydraulic:
-                    myParticleHydraulicErosionPanel.Draw(layerOffset);
+                    myParticleHydraulicErosionPanel.Draw(myErosionPanel.BottomLeft);
                     hydraulicOffset = myParticleHydraulicErosionPanel.BottomLeft;
                     break;
                 case HydraulicErosionModeTypes.GridHydraulic:
-                    myGridErosionPanel.Draw(layerOffset);
+                    myGridErosionPanel.Draw(myErosionPanel.BottomLeft);
                     hydraulicOffset = myGridErosionPanel.BottomLeft;
                     break;
             }
         }
-        Vector2 windOffset = hydraulicOffset;
-        if (myErosionConfiguration.IsWindErosionEnabled)
-        {
-            switch (myErosionConfiguration.WindErosionMode)
-            {
-                case WindErosionModeTypes.ParticleWind:
-                    myParticleWindErosionPanel.Draw(hydraulicOffset);
-                    windOffset = myParticleWindErosionPanel.BottomLeft;
-                    break;
-            }
-        }
+        Vector2 thermalOffset = hydraulicOffset;
         if (myErosionConfiguration.IsThermalErosionEnabled)
         {
             switch (myErosionConfiguration.ThermalErosionMode)
@@ -220,9 +203,37 @@ internal class ConfigurationGUI : IConfigurationGUI
                 case ThermalErosionModeTypes.GridThermal:
                 case ThermalErosionModeTypes.CascadeThermal:
                 case ThermalErosionModeTypes.VertexNormalThermal:
-                    myThermalErosionPanel.Draw(windOffset);
+                    myThermalErosionPanel.Draw(hydraulicOffset);
+                    thermalOffset = myThermalErosionPanel.BottomLeft;
                     break;
             }
+        }
+        if (myErosionConfiguration.IsWindErosionEnabled)
+        {
+            switch (myErosionConfiguration.WindErosionMode)
+            {
+                case WindErosionModeTypes.ParticleWind:
+                    myParticleWindErosionPanel.Draw(thermalOffset);
+                    break;
+            }
+        }
+    }
+
+    private void DrawLayersPanels()
+    {
+        myBedrockLayerPanel.Draw(myLeftPanel2Position);
+        Vector2 layerOffset = myBedrockLayerPanel.BottomLeft;
+        switch (myMapGenerationConfiguration.LayerCount)
+        {
+            case 2:
+                myFineSedimentLayerPanel.Draw(myBedrockLayerPanel.BottomLeft);
+                layerOffset = myFineSedimentLayerPanel.BottomLeft;
+                break;
+            case 3:
+                myCoarseSedimentLayerPanel.Draw(myBedrockLayerPanel.BottomLeft);
+                myFineSedimentLayerPanel.Draw(myCoarseSedimentLayerPanel.BottomLeft);
+                layerOffset = myFineSedimentLayerPanel.BottomLeft;
+                break;
         }
     }
 

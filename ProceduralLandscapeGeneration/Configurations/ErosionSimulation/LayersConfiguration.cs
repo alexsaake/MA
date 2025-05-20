@@ -107,10 +107,10 @@ internal class LayersConfiguration : ILayersConfiguration
         myShaderBuffers = shaderBuffers;
         myMapGenerationConfiguration = mapGenerationConfiguration;
 
-        myBedrockHardness = 0.95f;
-        myBedrockAngleOfRepose = 89;
+        myBedrockHardness = 0.9f;
+        myBedrockAngleOfRepose = 80;
 
-        myCoarseSedimentHardness = 0.6f;
+        myCoarseSedimentHardness = 0.4f;
         myCoarseSedimentAngleOfRepose = 45;
 
         myFineSedimentHardness = 0.2f;

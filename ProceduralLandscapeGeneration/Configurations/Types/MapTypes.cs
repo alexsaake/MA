@@ -6,5 +6,5 @@ internal enum MapGenerationTypes
     Tectonics,
     Cubes,
     SlopedCanyon,
-    SlopedCliff
+    CoastlineCliff
 }

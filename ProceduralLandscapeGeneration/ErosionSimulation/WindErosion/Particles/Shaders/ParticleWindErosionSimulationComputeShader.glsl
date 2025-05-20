@@ -96,7 +96,7 @@ void DepositeOnTop(uint index, float sediment)
     heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength] += sediment;
 }
 
-float totalHeight(uint index)
+float TotalHeight(uint index)
 {
     float height = 0;
     for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
@@ -106,7 +106,7 @@ float totalHeight(uint index)
     return height;
 }
 
-uint getIndex(uint x, uint y)
+uint GetIndex(uint x, uint y)
 {
     return (y * myHeightMapSideLength) + x;
 }
@@ -126,7 +126,7 @@ bool IsOutOfBounds(ivec2 position)
 ParticleWindErosion myParticleWindErosion;
 const float BoundaryLayer = 2.0;
 
-vec3 getScaledNormal(uint x, uint y)
+vec3 GetScaledNormal(uint x, uint y)
 {
     if (x < 1 || x > myHeightMapSideLength - 2
         || y < 1 || y > myHeightMapSideLength - 2)
@@ -134,14 +134,14 @@ vec3 getScaledNormal(uint x, uint y)
         return vec3(0.0, 0.0, 1.0);
     }
     
-    float rb = totalHeight(getIndex(x + 1, y - 1));
-    float lb = totalHeight(getIndex(x - 1, y - 1));
-    float r = totalHeight(getIndex(x + 1, y));
-    float l = totalHeight(getIndex(x - 1, y));
-    float rt = totalHeight(getIndex(x + 1, y + 1));
-    float lt = totalHeight(getIndex(x - 1, y + 1));
-    float t = totalHeight(getIndex(x, y + 1));
-    float b = totalHeight(getIndex(x, y - 1));
+    float rb = TotalHeight(GetIndex(x + 1, y - 1));
+    float lb = TotalHeight(GetIndex(x - 1, y - 1));
+    float r = TotalHeight(GetIndex(x + 1, y));
+    float l = TotalHeight(GetIndex(x - 1, y));
+    float rt = TotalHeight(GetIndex(x + 1, y + 1));
+    float lt = TotalHeight(GetIndex(x - 1, y + 1));
+    float t = TotalHeight(GetIndex(x, y + 1));
+    float b = TotalHeight(GetIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -201,13 +201,13 @@ bool Move()
 
     // Compute Movement
 
-    const float height = totalHeight(GetIndexVector(position));
+    const float height = TotalHeight(GetIndexVector(position));
     if (myParticleWindErosion.Age == 0 || myParticleWindErosion.Position.z < height)
     {
         myParticleWindErosion.Position.z = height;
     }
     vec3 persistentSpeed = vec3(particleWindErosionConfiguration.PersistentSpeed, 0.0);
-    const vec3 normal = getScaledNormal(position.x, position.y);
+    const vec3 normal = GetScaledNormal(position.x, position.y);
     const float hfac = exp(-(myParticleWindErosion.Position.z - height) / BoundaryLayer);
     const float shadow = 1.0 - max(0.0, dot(normalize(persistentSpeed), normal));
     const float collision = max(0.0, -dot(normalize(myParticleWindErosion.Speed), normal));
@@ -260,8 +260,8 @@ bool Interact()
 
     // Compute Mass Transport
     
-    const float height = totalHeight(GetIndexVector(currentPosition));
-    const vec3 normal = getScaledNormal(currentPosition.x, currentPosition.y);
+    const float height = TotalHeight(GetIndexVector(currentPosition));
+    const vec3 normal = GetScaledNormal(currentPosition.x, currentPosition.y);
     const float hfac = exp(-(myParticleWindErosion.Position.z - height) / BoundaryLayer);
     const float collision = max(0.0, -dot(normalize(myParticleWindErosion.Speed), normal));
     const float force = max(0.0, -dot(normalize(myParticleWindErosion.Speed), normal) * length(myParticleWindErosion.Speed));

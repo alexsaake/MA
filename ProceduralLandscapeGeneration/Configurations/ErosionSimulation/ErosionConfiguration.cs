@@ -79,10 +79,10 @@ internal class ErosionConfiguration : IErosionConfiguration
 
         IsHydraulicErosionEnabled = false;
         HydraulicErosionMode = HydraulicErosionModeTypes.GridHydraulic;
+        IsThermalErosionEnabled = false;
+        ThermalErosionMode = ThermalErosionModeTypes.GridThermal;
         IsWindErosionEnabled = false;
         WindErosionMode = WindErosionModeTypes.ParticleWind;
-        IsThermalErosionEnabled = true;
-        ThermalErosionMode = ThermalErosionModeTypes.GridThermal;
 
         IsSimulationRunning = false;
         IterationsPerStep = 1;
@@ -93,7 +93,7 @@ internal class ErosionConfiguration : IErosionConfiguration
         IsSeaLevelDisplayed = true;
         mySeaLevel = 0.2f;
 
-        myIsWaterKeptInBoundaries = true;
+        myIsWaterKeptInBoundaries = false;
 
         myTimeDelta = 1.0f;
     }

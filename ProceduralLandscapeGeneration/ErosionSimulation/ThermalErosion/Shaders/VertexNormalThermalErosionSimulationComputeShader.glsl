@@ -55,7 +55,7 @@ layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 
 uint myHeightMapSideLength;
 
-uint getIndex(uint x, uint y)
+uint GetIndex(uint x, uint y)
 {
     return (y * myHeightMapSideLength) + x;
 }
@@ -110,7 +110,7 @@ float TotalHeight(uint index)
     return height;
 }
 
-vec3 getScaledNormal(uint x, uint y)
+vec3 GetScaledNormal(uint x, uint y)
 {
     if (x < 1 || x > myHeightMapSideLength - 2
         || y < 1 || y > myHeightMapSideLength - 2)
@@ -118,14 +118,14 @@ vec3 getScaledNormal(uint x, uint y)
         return vec3(0.0, 0.0, 1.0);
     }
     
-    float rb = TotalHeight(getIndex(x + 1, y - 1));
-    float lb = TotalHeight(getIndex(x - 1, y - 1));
-    float r = TotalHeight(getIndex(x + 1, y));
-    float l = TotalHeight(getIndex(x - 1, y));
-    float rt = TotalHeight(getIndex(x + 1, y + 1));
-    float lt = TotalHeight(getIndex(x - 1, y + 1));
-    float t = TotalHeight(getIndex(x, y + 1));
-    float b = TotalHeight(getIndex(x, y - 1));
+    float rb = TotalHeight(GetIndex(x + 1, y - 1));
+    float lb = TotalHeight(GetIndex(x - 1, y - 1));
+    float r = TotalHeight(GetIndex(x + 1, y));
+    float l = TotalHeight(GetIndex(x - 1, y));
+    float rt = TotalHeight(GetIndex(x + 1, y + 1));
+    float lt = TotalHeight(GetIndex(x - 1, y + 1));
+    float t = TotalHeight(GetIndex(x, y + 1));
+    float b = TotalHeight(GetIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -148,7 +148,7 @@ void main()
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
 
-    vec2 normal = getScaledNormal(x, y).xy;
+    vec2 normal = GetScaledNormal(x, y).xy;
     float tolerance = 0.3;
     if(normal.x > 0)
     {
@@ -194,7 +194,7 @@ void main()
             normal.y = -1;
         }
     }
-    uint neighborIndex = getIndex(x + int(normal.x), y + int(normal.y));
+    uint neighborIndex = GetIndex(x + int(normal.x), y + int(normal.y));
     float distance = length(normal);
     if(index == neighborIndex
         || neighborIndex < 0

@@ -144,25 +144,25 @@ internal class HeightMapGenerator : IHeightMapGenerator
         uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
-        ComputeShaderProgram generateNoiseHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateSlopedCanyonHeightMapComputeShader.glsl");
-        Rlgl.EnableShader(generateNoiseHeightMapComputeShaderProgram.Id);
+        ComputeShaderProgram generateSlopedCanyonHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateSlopedCanyonHeightMapComputeShader.glsl");
+        Rlgl.EnableShader(generateSlopedCanyonHeightMapComputeShaderProgram.Id);
         Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
         Rlgl.DisableShader();
-        generateNoiseHeightMapComputeShaderProgram.Dispose();
+        generateSlopedCanyonHeightMapComputeShaderProgram.Dispose();
 
         myIsDisposed = false;
     }
 
-    public unsafe void GenerateSlopedCliffHeightMap()
+    public unsafe void GenerateCoastlineCliffHeightMap()
     {
         uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
-        ComputeShaderProgram generateNoiseHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateSlopedCliffHeightMapComputeShader.glsl");
-        Rlgl.EnableShader(generateNoiseHeightMapComputeShaderProgram.Id);
+        ComputeShaderProgram generateCoastlineCliffHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateCoastlineCliffHeightMapComputeShader.glsl");
+        Rlgl.EnableShader(generateCoastlineCliffHeightMapComputeShaderProgram.Id);
         Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
         Rlgl.DisableShader();
-        generateNoiseHeightMapComputeShaderProgram.Dispose();
+        generateCoastlineCliffHeightMapComputeShaderProgram.Dispose();
 
         myIsDisposed = false;
     }

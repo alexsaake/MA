@@ -51,17 +51,17 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
 uint myHeightMapSideLength;
 uint myHeightMapLength;
 
-float SedimentHeight(uint index)
+float FineSedimentHeight(uint index)
 {
     return heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength];
 }
 
-float ClayHeight(uint index)
+float CoarseSedimentHeight(uint index)
 {
     return heightMap[index + 1 * myHeightMapLength];
 }
 
-float totalHeight(uint index)
+float TotalHeight(uint index)
 {
     float height = 0;
     for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
@@ -71,12 +71,12 @@ float totalHeight(uint index)
     return height;
 }
 
-uint getIndex(uint x, uint y)
+uint GetIndex(uint x, uint y)
 {
     return (y * myHeightMapSideLength) + x;
 }
 
-vec3 getScaledNormal(uint x, uint y)
+vec3 GetScaledNormal(uint x, uint y)
 {
     if (x < 1 || x > myHeightMapSideLength - 2
         || y < 1 || y > myHeightMapSideLength - 2)
@@ -84,14 +84,14 @@ vec3 getScaledNormal(uint x, uint y)
         return vec3(0.0, 0.0, 1.0);
     }
 
-    float rb = totalHeight(getIndex(x + 1, y - 1));
-    float lb = totalHeight(getIndex(x - 1, y - 1));
-    float r = totalHeight(getIndex(x + 1, y));
-    float l = totalHeight(getIndex(x - 1, y));
-    float rt = totalHeight(getIndex(x + 1, y + 1));
-    float lt = totalHeight(getIndex(x - 1, y + 1));
-    float t = totalHeight(getIndex(x, y + 1));
-    float b = totalHeight(getIndex(x, y - 1));
+    float rb = TotalHeight(GetIndex(x + 1, y - 1));
+    float lb = TotalHeight(GetIndex(x - 1, y - 1));
+    float r = TotalHeight(GetIndex(x + 1, y));
+    float l = TotalHeight(GetIndex(x - 1, y));
+    float rt = TotalHeight(GetIndex(x + 1, y + 1));
+    float lt = TotalHeight(GetIndex(x - 1, y + 1));
+    float t = TotalHeight(GetIndex(x, y + 1));
+    float b = TotalHeight(GetIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -131,11 +131,11 @@ void main()
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
     
-    float height = totalHeight(index);
+    float height = TotalHeight(index);
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
     float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     fragPosition = vec3(matModel * vec4(vertexPosition.xy, terrainHeight, 1.0));
-    vec3 normal = getScaledNormal(x, y);
+    vec3 normal = GetScaledNormal(x, y);
     fragNormal = transpose(inverse(mat3(matModel))) * normal;
     
     vec3 terrainColor = vec3(1.0);
@@ -188,12 +188,12 @@ void main()
     {
         if(mapGenerationConfiguration.LayerCount > 1)
         {
-            if(SedimentHeight(index) > 0.00001)
+            if(FineSedimentHeight(index) > 0.00001)
             {
                 terrainColor = beachColor;
             }
             else if(mapGenerationConfiguration.LayerCount > 2
-                && ClayHeight(index) > 0.00001)
+                && CoarseSedimentHeight(index) > 0.00001)
             {
                 terrainColor = clayColor;
             }

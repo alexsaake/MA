@@ -82,12 +82,12 @@ float totalHeight(uint index)
     return height;
 }
 
-uint getIndex(uint x, uint y)
+uint GetIndex(uint x, uint y)
 {
     return (y * myHeightMapSideLength) + x;
 }
 
-vec3 getScaledNormal(uint x, uint y)
+vec3 GetScaledNormal(uint x, uint y)
 {
     if (x < 1 || x > myHeightMapSideLength - 2
         || y < 1 || y > myHeightMapSideLength - 2)
@@ -95,14 +95,14 @@ vec3 getScaledNormal(uint x, uint y)
         return vec3(0.0, 0.0, 1.0);
     }
     
-    float rb = totalHeight(getIndex(x + 1, y - 1));
-    float lb = totalHeight(getIndex(x - 1, y - 1));
-    float r = totalHeight(getIndex(x + 1, y));
-    float l = totalHeight(getIndex(x - 1, y));
-    float rt = totalHeight(getIndex(x + 1, y + 1));
-    float lt = totalHeight(getIndex(x - 1, y + 1));
-    float t = totalHeight(getIndex(x, y + 1));
-    float b = totalHeight(getIndex(x, y - 1));
+    float rb = totalHeight(GetIndex(x + 1, y - 1));
+    float lb = totalHeight(GetIndex(x - 1, y - 1));
+    float r = totalHeight(GetIndex(x + 1, y));
+    float l = totalHeight(GetIndex(x - 1, y));
+    float rt = totalHeight(GetIndex(x + 1, y + 1));
+    float lt = totalHeight(GetIndex(x - 1, y + 1));
+    float t = totalHeight(GetIndex(x, y + 1));
+    float b = totalHeight(GetIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -121,11 +121,11 @@ vec3 snowColor = vec3(1.0, 0.9, 0.9);
 
 void addVertex(uint vertex, uint x, uint y)
 {
-    uint index = getIndex(x, y);
+    uint index = GetIndex(x, y);
     float height = totalHeight(index);
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
     float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
-    vec3 normal = getScaledNormal(x, y);
+    vec3 normal = GetScaledNormal(x, y);
     vec4 position = mvp * vec4(x, y, terrainHeight, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;

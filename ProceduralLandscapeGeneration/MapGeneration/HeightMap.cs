@@ -38,8 +38,8 @@ internal class HeightMap : IHeightMap
             case MapGenerationTypes.SlopedCanyon:
                 myHeightMapGenerator.GenerateSlopedCanyonHeightMap();
                 break;
-            case MapGenerationTypes.SlopedCliff:
-                myHeightMapGenerator.GenerateSlopedCliffHeightMap();
+            case MapGenerationTypes.CoastlineCliff:
+                myHeightMapGenerator.GenerateCoastlineCliffHeightMap();
                 break;
         }
 
