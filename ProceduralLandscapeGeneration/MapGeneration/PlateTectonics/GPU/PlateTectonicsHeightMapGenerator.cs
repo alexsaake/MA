@@ -165,20 +165,6 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
         FillSegmentsGap();
         UpdateHeightMap();
 
-        PlateTectonicsSegmentShaderBuffer[] plateTectonicsSegments = new PlateTectonicsSegmentShaderBuffer[myMapGenerationConfiguration.MapSize];
-        uint plateTectonicsSegmentsSize = (uint)(myMapGenerationConfiguration.MapSize * sizeof(PlateTectonicsSegmentShaderBuffer));
-        PlateTectonicsPlateShaderBuffer[] plateTectonicsPlate = new PlateTectonicsPlateShaderBuffer[myMapGenerationConfiguration.PlateCount];
-        uint plateTectonicsPlateSize = (uint)(myMapGenerationConfiguration.PlateCount * sizeof(PlateTectonicsPlateShaderBuffer));
-        fixed (void* plateTectonicsSegmentsPointer = plateTectonicsSegments)
-        {
-            Rlgl.ReadShaderBuffer(myShaderBuffers[ShaderBufferTypes.PlateTectonicsSegments], plateTectonicsSegmentsPointer, plateTectonicsSegmentsSize, 0);
-        }
-        fixed (void* plateTectonicsPlatePointer = plateTectonicsPlate)
-        {
-            Rlgl.ReadShaderBuffer(myShaderBuffers[ShaderBufferTypes.PlateTectonicsPlates], plateTectonicsPlatePointer, plateTectonicsPlateSize, 0);
-        }
-
-
         Console.WriteLine($"INFO: End of plate tectonics simulation.");
     }
 
