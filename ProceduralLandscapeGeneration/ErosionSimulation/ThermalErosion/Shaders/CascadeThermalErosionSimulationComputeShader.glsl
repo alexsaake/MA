@@ -156,6 +156,7 @@ void Cascade(ivec2 position)
     {
         ivec2 Position;
         float TotalHeight;
+        float Distance;
     } neighborCells[8];
 
     int neighbors = 0;
@@ -171,18 +172,24 @@ void Cascade(ivec2 position)
 
         neighborCells[neighbors].Position = neighborPosition;
         neighborCells[neighbors].TotalHeight = totalHeight(getIndexV(neighborPosition));
+        neighborCells[neighbors].Distance = length(neighboringPosition);
         neighbors++;
     }
 
     // Local Matrix, Target Height
+    float heightAverage = totalHeight(index);
+    for(int neighbor = 0; neighbor < neighbors; neighbor++)
+    {
+        heightAverage += neighborCells[neighbor].TotalHeight;
+    }
+    heightAverage /= float(neighbors + 1);
 
-    float totalHeight = totalHeight(index);
     float tangensAngleOfRepose = TangensAngleOfRepose(index);
     for (int neighbor = 0; neighbor < neighbors; neighbor++)
     {
         // Full Height-Different Between Positions!
-        float heightDifference = totalHeight - neighborCells[neighbor].TotalHeight;
-	    float tangensAngle = heightDifference * mapGenerationConfiguration.HeightMultiplier / 1.0;
+        float heightDifference = heightAverage - neighborCells[neighbor].TotalHeight;
+	    float tangensAngle = heightDifference * mapGenerationConfiguration.HeightMultiplier / 1.0 / neighborCells[neighbor].Distance;
         if (heightDifference < 0
             || tangensAngle < tangensAngleOfRepose)
         {

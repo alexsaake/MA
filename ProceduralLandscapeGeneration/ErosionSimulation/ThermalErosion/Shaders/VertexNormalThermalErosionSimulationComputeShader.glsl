@@ -210,6 +210,7 @@ void main()
         }
     }
     uint neighborIndex = getIndex(x + int(normal.x), y + int(normal.y));
+    float distance = length(normal);
     if(id == neighborIndex
         || neighborIndex < 0
         || neighborIndex > myHeightMapLength)
@@ -217,7 +218,7 @@ void main()
         return;
     }
     float heightDifference = TotalHeight(id) - TotalHeight(neighborIndex);
-	float tangensAngle = heightDifference * mapGenerationConfiguration.HeightMultiplier / 1.0;
+	float tangensAngle = heightDifference * mapGenerationConfiguration.HeightMultiplier / 1.0 / distance;
     if (heightDifference < 0
         || tangensAngle < TangensAngleOfRepose(id))
     {
