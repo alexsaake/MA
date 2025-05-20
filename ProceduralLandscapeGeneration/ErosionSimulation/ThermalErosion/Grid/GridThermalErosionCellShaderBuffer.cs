@@ -2,8 +2,12 @@
 
 public struct GridThermalErosionCellShaderBuffer
 {
-    public float FlowLeft;
-    public float FlowRight;
-    public float FlowUp;
-    public float FlowDown;
+    public float BedrockFlowLeft;
+    public float BedrockFlowRight;
+    public float BedrockFlowUp;
+    public float BedrockFlowDown;
+    public float SedimentFlowLeft;
+    public float SedimentFlowRight;
+    public float SedimentFlowUp;
+    public float SedimentFlowDown;
 }

@@ -248,8 +248,8 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
     {
         myShaderBuffers = shaderBuffers;
 
-        myMapType = MapTypes.HeightMap;
-        myMapGeneration = MapGenerationTypes.Noise;
+        myMapType = MapTypes.MultiLayeredHeightMap;
+        myMapGeneration = MapGenerationTypes.Cube;
         myMeshCreation = ProcessorTypes.CPU;
         myHeightMapGeneration = ProcessorTypes.CPU;
 
@@ -266,7 +266,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         HeightMapSideLength = 256;
         myHeightMultiplier = 32;
         myCameraMode = CameraMode.Custom;
-        myAreTerrainColorsEnabled = false;
+        myAreTerrainColorsEnabled = true;
     }
 
     public void Initialize()

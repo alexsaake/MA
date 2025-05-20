@@ -33,10 +33,14 @@ layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderB
 
 struct GridThermalErosionCell
 {
-    float FlowLeft;
-    float FlowRight;
-    float FlowUp;
-    float FlowDown;
+    float BedrockFlowLeft;
+    float BedrockFlowRight;
+    float BedrockFlowUp;
+    float BedrockFlowDown;
+    float SedimentFlowLeft;
+    float SedimentFlowRight;
+    float SedimentFlowUp;
+    float SedimentFlowDown;
 };
 
 layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
@@ -47,23 +51,15 @@ layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
 uint myHeightMapSideLength;
 uint myHeightMapLength;
 
-void RemoveFromTop(uint index, float sediment)
+void RemoveFromBedrock(uint index, float sediment)
 {
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
-    {
-        uint offsetIndex = index + layer * myHeightMapLength;
-        float height = heightMap[offsetIndex];
-        if(height >= sediment)
-        {
-            heightMap[offsetIndex] -= sediment;
-            break;
-        }
-        else
-        {
-            heightMap[offsetIndex] = 0;
-            sediment -= height;
-        }
-    }
+    heightMap[index] = max(heightMap[index] - sediment, 0.0);
+}
+
+void RemoveFromSediment(uint index, float sediment)
+{
+    uint offsetIndex = index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength;
+    heightMap[offsetIndex] = max(heightMap[offsetIndex] - sediment, 0.0);
 }
 
 void DepositeOnTop(uint index, float sediment)
@@ -102,18 +98,31 @@ void main()
     uint y = id / myHeightMapSideLength;
     
     GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[id];
-
-    float flowIn = gridThermalErosionCells[getIndex(x - 1, y)].FlowRight + gridThermalErosionCells[getIndex(x + 1, y)].FlowLeft + gridThermalErosionCells[getIndex(x, y - 1)].FlowUp + gridThermalErosionCells[getIndex(x, y + 1)].FlowDown;
-    float flowOut = gridThermalErosionCell.FlowRight + gridThermalErosionCell.FlowLeft + gridThermalErosionCell.FlowUp + gridThermalErosionCell.FlowDown;
-
-	float volumeDelta = (flowIn - flowOut) * erosionConfiguration.TimeDelta;
-    if(volumeDelta < 0)
+    
+    float bedrockFlowIn = gridThermalErosionCells[getIndex(x - 1, y)].BedrockFlowRight + gridThermalErosionCells[getIndex(x + 1, y)].BedrockFlowLeft + gridThermalErosionCells[getIndex(x, y - 1)].BedrockFlowUp + gridThermalErosionCells[getIndex(x, y + 1)].BedrockFlowDown;
+    float bedrockFlowOut = gridThermalErosionCell.BedrockFlowRight + gridThermalErosionCell.BedrockFlowLeft + gridThermalErosionCell.BedrockFlowUp + gridThermalErosionCell.BedrockFlowDown;
+    
+	float bedrockVolumeDelta = (bedrockFlowIn - bedrockFlowOut) * erosionConfiguration.TimeDelta;
+    if(bedrockVolumeDelta < 0)
     {
-        RemoveFromTop(id, abs(volumeDelta));
+        RemoveFromBedrock(id, abs(bedrockVolumeDelta));
     }
     else
     {
-        DepositeOnTop(id, volumeDelta);
+        DepositeOnTop(id, bedrockVolumeDelta);
+    }
+
+    float sedimentFlowIn = gridThermalErosionCells[getIndex(x - 1, y)].SedimentFlowRight + gridThermalErosionCells[getIndex(x + 1, y)].SedimentFlowLeft + gridThermalErosionCells[getIndex(x, y - 1)].SedimentFlowUp + gridThermalErosionCells[getIndex(x, y + 1)].SedimentFlowDown;
+    float sedimentFlowOut = gridThermalErosionCell.SedimentFlowRight + gridThermalErosionCell.SedimentFlowLeft + gridThermalErosionCell.SedimentFlowUp + gridThermalErosionCell.SedimentFlowDown;
+    
+	float sedimentVolumeDelta = (sedimentFlowIn - sedimentFlowOut) * erosionConfiguration.TimeDelta;
+    if(sedimentVolumeDelta < 0)
+    {
+        RemoveFromSediment(id, abs(sedimentVolumeDelta));
+    }
+    else
+    {
+        DepositeOnTop(id, sedimentVolumeDelta);
     }
     
     memoryBarrier();

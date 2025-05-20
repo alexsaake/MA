@@ -55,19 +55,6 @@ layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
 uint myHeightMapSideLength;
 uint myHeightMapLength;
 
-float HeightTopmostLayer(uint index)
-{
-	for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
-	{
-        float height = heightMap[index + layer * myHeightMapLength];
-		if(height > 0)
-		{
-			return height;
-		}
-	}
-	return 0;   
-}
-
 float TangensAngleOfRepose(uint index)
 {
 	for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
@@ -80,7 +67,7 @@ float TangensAngleOfRepose(uint index)
 	return layersConfiguration[0].TangensAngleOfRepose;
 }
 
-float RemoveFromTop(uint index, float sediment)
+void RemoveFromTop(uint index, float sediment)
 {
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
@@ -88,19 +75,16 @@ float RemoveFromTop(uint index, float sediment)
         float height = heightMap[offsetIndex];
         if(height > 0)
         {
-            if(height > sediment)
+            if(height >= sediment)
             {
                 heightMap[offsetIndex] -= sediment;
-                return sediment;
             }
             else
             {
                 heightMap[offsetIndex] = 0;
-                return sediment - height;
             }
         }
     }
-    return 0;
 }
 
 void DepositeOnTop(uint index, float sediment)
@@ -108,7 +92,7 @@ void DepositeOnTop(uint index, float sediment)
     heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength] += sediment;
 }
 
-float totalHeight(uint index)
+float TotalHeight(uint index)
 {
     float height = 0;
     for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
@@ -130,14 +114,26 @@ bool IsOutOfBounds(ivec2 position)
 }
 
 //https://github.com/erosiv/soillib/blob/main/source/particle/cascade.hpp
-void Cascade(ivec2 position)
+
+void main()
 {
+    uint index = gl_GlobalInvocationID.x;
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    if(index >= myHeightMapLength)
+    {
+        return;
+    }
+    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
+
+    uint x = index % myHeightMapSideLength;
+    uint y = index / myHeightMapSideLength;
+
+    ivec2 position = ivec2(x, y);
+    
     if(IsOutOfBounds(position))
     {
         return;
     }
-
-    uint index = getIndexV(position);
 
     // Get Non-Out-of-Bounds Neighbors
 
@@ -154,7 +150,7 @@ void Cascade(ivec2 position)
 
     struct Point
     {
-        ivec2 Position;
+        uint Index;
         float TotalHeight;
         float Distance;
     } neighborCells[8];
@@ -170,14 +166,15 @@ void Cascade(ivec2 position)
             continue;
         }
 
-        neighborCells[neighbors].Position = neighborPosition;
-        neighborCells[neighbors].TotalHeight = totalHeight(getIndexV(neighborPosition));
+        uint neightborIndex = getIndexV(neighborPosition);
+        neighborCells[neighbors].Index = neightborIndex;
+        neighborCells[neighbors].TotalHeight = TotalHeight(neightborIndex);
         neighborCells[neighbors].Distance = length(neighboringPosition);
         neighbors++;
     }
 
     // Local Matrix, Target Height
-    float heightAverage = totalHeight(index);
+    float heightAverage = TotalHeight(index);
     for(int neighbor = 0; neighbor < neighbors; neighbor++)
     {
         heightAverage += neighborCells[neighbor].TotalHeight;
@@ -197,28 +194,11 @@ void Cascade(ivec2 position)
         }
 
         // Actual Amount Transferred
-        float heightTopmostLayer = HeightTopmostLayer(index);
-        float transfer = min(heightDifference, heightTopmostLayer) * thermalErosionConfiguration.ErosionRate * erosionConfiguration.TimeDelta;
+        float transfer = heightDifference * thermalErosionConfiguration.ErosionRate * erosionConfiguration.TimeDelta;
         
-        float removedSediment = RemoveFromTop(index, transfer);
-        DepositeOnTop(getIndexV(neighborCells[neighbor].Position), removedSediment);
+        RemoveFromTop(index, transfer);
+        DepositeOnTop(neighborCells[neighbor].Index, transfer);
     }
-}
-
-void main()
-{
-    uint id = gl_GlobalInvocationID.x;
-    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
-    if(id >= myHeightMapLength)
-    {
-        return;
-    }
-    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
-
-    uint x = id % myHeightMapSideLength;
-    uint y = id / myHeightMapSideLength;
-
-    Cascade(ivec2(x, y));
     
     memoryBarrier();
 }

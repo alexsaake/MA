@@ -62,19 +62,6 @@ uint getIndex(uint x, uint y)
 //https://aparis69.github.io/public_html/posts/terrain_erosion.html
 uint myHeightMapLength;
 
-float HeightTopmostLayer(uint index)
-{
-	for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
-	{
-        float height = heightMap[index + layer * myHeightMapLength];
-		if(height > 0)
-		{
-			return height;
-		}
-	}
-	return 0;   
-}
-
 float TangensAngleOfRepose(uint index)
 {
 	for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
@@ -87,7 +74,7 @@ float TangensAngleOfRepose(uint index)
 	return layersConfiguration[0].TangensAngleOfRepose;
 }
 
-float RemoveFromTop(uint index, float sediment)
+void RemoveFromTop(uint index, float sediment)
 {
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
@@ -95,19 +82,16 @@ float RemoveFromTop(uint index, float sediment)
         float height = heightMap[offsetIndex];
         if(height > 0)
         {
-            if(height > sediment)
+            if(height >= sediment)
             {
                 heightMap[offsetIndex] -= sediment;
-                return sediment;
             }
             else
             {
                 heightMap[offsetIndex] = 0;
-                return sediment - height;
             }
         }
     }
-    return 0;
 }
 
 void DepositeOnTop(uint index, float sediment)
@@ -152,16 +136,16 @@ vec3 getScaledNormal(uint x, uint y)
 
 void main()
 {
-    uint id = gl_GlobalInvocationID.x;
+    uint index = gl_GlobalInvocationID.x;
     myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
-    if(id >= myHeightMapLength)
+    if(index >= myHeightMapLength)
     {
         return;
     }
     myHeightMapSideLength = uint(sqrt(myHeightMapLength));
 
-    uint x = id % myHeightMapSideLength;
-    uint y = id / myHeightMapSideLength;
+    uint x = index % myHeightMapSideLength;
+    uint y = index / myHeightMapSideLength;
 
     vec2 normal = getScaledNormal(x, y).xy;
     float tolerance = 0.3;
@@ -211,25 +195,24 @@ void main()
     }
     uint neighborIndex = getIndex(x + int(normal.x), y + int(normal.y));
     float distance = length(normal);
-    if(id == neighborIndex
+    if(index == neighborIndex
         || neighborIndex < 0
         || neighborIndex > myHeightMapLength)
     {
         return;
     }
-    float heightDifference = TotalHeight(id) - TotalHeight(neighborIndex);
+    float heightDifference = TotalHeight(index) - TotalHeight(neighborIndex);
 	float tangensAngle = heightDifference * mapGenerationConfiguration.HeightMultiplier / 1.0 / distance;
     if (heightDifference < 0
-        || tangensAngle < TangensAngleOfRepose(id))
+        || tangensAngle < TangensAngleOfRepose(index))
     {
         return;
     }
 
-    float heightTopmostLayer = HeightTopmostLayer(id);
-    float heightChange = min(heightDifference, heightTopmostLayer) * thermalErosionConfiguration.ErosionRate * erosionConfiguration.TimeDelta;
+    float heightChange = heightDifference * thermalErosionConfiguration.ErosionRate * erosionConfiguration.TimeDelta;
 
-    float removedSediment = RemoveFromTop(id, heightChange);
-    DepositeOnTop(neighborIndex, removedSediment);
+    RemoveFromTop(index, heightChange);
+    DepositeOnTop(neighborIndex, heightChange);
         
     memoryBarrier();
 }

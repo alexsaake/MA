@@ -56,6 +56,16 @@ internal class GridThermalErosion : IGridThermalErosion
         {
             Flow();
             Deposite();
+
+            unsafe
+            {
+                uint size = (uint)(myMapGenerationConfiguration.MapSize * sizeof(GridThermalErosionCellShaderBuffer));
+                GridThermalErosionCellShaderBuffer[] cells = new GridThermalErosionCellShaderBuffer[size];
+                fixed (void* ptr = cells)
+                {
+                    Rlgl.ReadShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridThermalErosionCell], ptr, myMapGenerationConfiguration.MapSize, 0);
+                }
+            }
         }
     }
 
