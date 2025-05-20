@@ -93,9 +93,9 @@ internal class ConfigurationGUI : IConfigurationGUI
         myClayLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.ClayHardness = value, layersConfiguration.ClayHardness));
         myClayLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.ClayAngleOfRepose = (uint)value, (int)layersConfiguration.ClayAngleOfRepose, 1, 89));
 
-        mySedimentLayerPanel = new PanelWithElements("Sediment Layer");
-        mySedimentLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.SedimentHardness = value, layersConfiguration.SedimentHardness));
-        mySedimentLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.SedimentAngleOfRepose = (uint)value, (int)layersConfiguration.SedimentAngleOfRepose, 1, 89));
+        mySedimentLayerPanel = new PanelWithElements("Fine Sediment Layer");
+        mySedimentLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.FineSedimentHardness = value, layersConfiguration.FineSedimentHardness));
+        mySedimentLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.FineSedimentAngleOfRepose = (uint)value, (int)layersConfiguration.FineSedimentAngleOfRepose, 1, 89));
 
         myGridErosionPanel = new PanelWithElements("Grid Hydraulic Erosion");
         myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridErosionConfiguration.RainDrops = (uint)value, (int)gridErosionConfiguration.RainDrops, 1, 100000));

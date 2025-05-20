@@ -72,32 +72,32 @@ internal class LayersConfiguration : ILayersConfiguration
         }
     }
 
-    private float mySedimentHardness;
-    public float SedimentHardness
+    private float myFineSedimentHardness;
+    public float FineSedimentHardness
     {
-        get => mySedimentHardness;
+        get => myFineSedimentHardness;
         set
         {
-            if (mySedimentHardness == value)
+            if (myFineSedimentHardness == value)
             {
                 return;
             }
-            mySedimentHardness = value;
+            myFineSedimentHardness = value;
             UpdateShaderBuffer();
         }
     }
 
-    private uint mySedimentAngleOfRepose;
-    public uint SedimentAngleOfRepose
+    private uint myFineSedimentAngleOfRepose;
+    public uint FineSedimentAngleOfRepose
     {
-        get => mySedimentAngleOfRepose;
+        get => myFineSedimentAngleOfRepose;
         set
         {
-            if (mySedimentAngleOfRepose == value)
+            if (myFineSedimentAngleOfRepose == value)
             {
                 return;
             }
-            mySedimentAngleOfRepose = value;
+            myFineSedimentAngleOfRepose = value;
             UpdateShaderBuffer();
         }
     }
@@ -113,8 +113,8 @@ internal class LayersConfiguration : ILayersConfiguration
         myClayHardness = 0.6f;
         myClayAngleOfRepose = 45;
 
-        mySedimentHardness = 0.2f;
-        mySedimentAngleOfRepose = 15;
+        myFineSedimentHardness = 0.2f;
+        myFineSedimentAngleOfRepose = 15;
     }
 
     public void Initialize()
@@ -154,8 +154,8 @@ internal class LayersConfiguration : ILayersConfiguration
                     },
                     new LayersConfigurationShaderBuffer()
                     {
-                        Hardness = SedimentHardness,
-                        TangensAngleOfRepose = GetTangens(SedimentAngleOfRepose)
+                        Hardness = FineSedimentHardness,
+                        TangensAngleOfRepose = GetTangens(FineSedimentAngleOfRepose)
                     }
                 };
                 break;
@@ -174,8 +174,8 @@ internal class LayersConfiguration : ILayersConfiguration
                     },
                     new LayersConfigurationShaderBuffer()
                     {
-                        Hardness = SedimentHardness,
-                        TangensAngleOfRepose = GetTangens(SedimentAngleOfRepose)
+                        Hardness = FineSedimentHardness,
+                        TangensAngleOfRepose = GetTangens(FineSedimentAngleOfRepose)
                     }
                 };
                 break;

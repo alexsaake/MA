@@ -6,8 +6,8 @@
         uint BedrockAngleOfRepose { get; set; }
         float ClayHardness { get; set; }
         uint ClayAngleOfRepose { get; set; }
-        float SedimentHardness { get; set; }
-        uint SedimentAngleOfRepose { get; set; }
+        float FineSedimentHardness { get; set; }
+        uint FineSedimentAngleOfRepose { get; set; }
 
         void Initialize();
     }
