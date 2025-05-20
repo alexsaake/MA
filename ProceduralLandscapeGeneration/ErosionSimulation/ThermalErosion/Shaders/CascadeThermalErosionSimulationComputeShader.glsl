@@ -44,7 +44,7 @@ layout(std430, binding = 10) readonly restrict buffer thermalErosionConfiguratio
 struct LayersConfiguration
 {
     float Hardness;
-    float TangensTalusAngle;
+    float TangensAngleOfRepose;
 };
 
 layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
@@ -68,16 +68,16 @@ float HeightTopmostLayer(uint index)
 	return 0;   
 }
 
-float TangensTalusAngle(uint index)
+float TangensAngleOfRepose(uint index)
 {
 	for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
 	{
 		if(heightMap[index + layer * myHeightMapLength] > 0)
 		{
-			return layersConfiguration[layer].TangensTalusAngle;
+			return layersConfiguration[layer].TangensAngleOfRepose;
 		}
 	}
-	return layersConfiguration[0].TangensTalusAngle;
+	return layersConfiguration[0].TangensAngleOfRepose;
 }
 
 float RemoveFromTop(uint index, float sediment)
@@ -177,14 +177,14 @@ void Cascade(ivec2 position)
     // Local Matrix, Target Height
 
     float totalHeight = totalHeight(index);
-    float tangensTalusAngle = TangensTalusAngle(index);
+    float tangensAngleOfRepose = TangensAngleOfRepose(index);
     for (int neighbor = 0; neighbor < neighbors; neighbor++)
     {
         // Full Height-Different Between Positions!
         float heightDifference = totalHeight - neighborCells[neighbor].TotalHeight;
 	    float tangensAngle = heightDifference * mapGenerationConfiguration.HeightMultiplier / 1.0;
         if (heightDifference < 0
-            || tangensAngle < tangensTalusAngle)
+            || tangensAngle < tangensAngleOfRepose)
         {
             continue;
         }

@@ -3,11 +3,11 @@
     internal interface ILayersConfiguration : IDisposable
     {
         float BedrockHardness { get; set; }
-        uint BedrockTalusAngle { get; set; }
+        uint BedrockAngleOfRepose { get; set; }
         float ClayHardness { get; set; }
-        uint ClayTalusAngle { get; set; }
+        uint ClayAngleOfRepose { get; set; }
         float SedimentHardness { get; set; }
-        uint SedimentTalusAngle { get; set; }
+        uint SedimentAngleOfRepose { get; set; }
 
         void Initialize();
     }

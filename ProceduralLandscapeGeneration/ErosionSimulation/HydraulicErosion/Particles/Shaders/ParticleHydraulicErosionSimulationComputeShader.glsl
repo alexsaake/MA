@@ -70,7 +70,7 @@ layout(std430, binding = 11) readonly restrict buffer hydraulicErosionHeightMapI
 struct LayersConfiguration
 {
     float Hardness;
-    float TangensTalusAngle;
+    float TangensAngleOfRepose;
 };
 
 layout(std430, binding = 18) buffer layersConfigurationShaderBuffer

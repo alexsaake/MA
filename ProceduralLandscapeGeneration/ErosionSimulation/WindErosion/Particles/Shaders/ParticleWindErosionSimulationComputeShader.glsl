@@ -55,7 +55,7 @@ layout(std430, binding = 14) readonly restrict buffer windErosionHeightMapIndice
 struct LayersConfiguration
 {
     float Hardness;
-    float TangensTalusAngle;
+    float TangensAngleOfRepose;
 };
 
 layout(std430, binding = 18) buffer layersConfigurationShaderBuffer

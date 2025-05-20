@@ -87,15 +87,15 @@ internal class ConfigurationGUI : IConfigurationGUI
 
         myBedrockLayerPanel = new PanelWithElements("Bedrock Layer");
         myBedrockLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.BedrockHardness = value, layersConfiguration.BedrockHardness));
-        myBedrockLayerPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => layersConfiguration.BedrockTalusAngle = (uint)value, (int)layersConfiguration.BedrockTalusAngle, 1, 89));
+        myBedrockLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.BedrockAngleOfRepose = (uint)value, (int)layersConfiguration.BedrockAngleOfRepose, 1, 89));
 
         myClayLayerPanel = new PanelWithElements("Clay Layer");
         myClayLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.ClayHardness = value, layersConfiguration.ClayHardness));
-        myClayLayerPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => layersConfiguration.ClayTalusAngle = (uint)value, (int)layersConfiguration.ClayTalusAngle, 1, 89));
+        myClayLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.ClayAngleOfRepose = (uint)value, (int)layersConfiguration.ClayAngleOfRepose, 1, 89));
 
         mySedimentLayerPanel = new PanelWithElements("Sediment Layer");
         mySedimentLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.SedimentHardness = value, layersConfiguration.SedimentHardness));
-        mySedimentLayerPanel.Add(new ValueBoxIntWithLabel("Talus Angle", (value) => layersConfiguration.SedimentTalusAngle = (uint)value, (int)layersConfiguration.SedimentTalusAngle, 1, 89));
+        mySedimentLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.SedimentAngleOfRepose = (uint)value, (int)layersConfiguration.SedimentAngleOfRepose, 1, 89));
 
         myGridErosionPanel = new PanelWithElements("Grid Hydraulic Erosion");
         myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridErosionConfiguration.RainDrops = (uint)value, (int)gridErosionConfiguration.RainDrops, 1, 100000));

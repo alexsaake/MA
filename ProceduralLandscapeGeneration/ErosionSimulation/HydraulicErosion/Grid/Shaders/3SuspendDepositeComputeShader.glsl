@@ -71,7 +71,7 @@ layout(std430, binding = 9) buffer gridErosionConfigurationShaderBuffer
 struct LayersConfiguration
 {
     float Hardness;
-    float TangensTalusAngle;
+    float TangensAngleOfRepose;
 };
 
 layout(std430, binding = 18) buffer layersConfigurationShaderBuffer

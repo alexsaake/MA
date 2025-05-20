@@ -57,7 +57,7 @@ layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
 struct LayersConfiguration
 {
     float Hardness;
-    float TangensTalusAngle;
+    float TangensAngleOfRepose;
 };
 
 layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
@@ -125,26 +125,26 @@ void main()
 	float bedrockTangensAngleDown = bedrockHeightDifferenceDown * mapGenerationConfiguration.HeightMultiplier / 1.0;
 	
 	float flowLeft = 0;
-	float bedrockTalusAngle = layersConfiguration[0].TangensTalusAngle;
-	if (bedrockTangensAngleLeft > bedrockTalusAngle)
+	float bedrockAngleOfRepose = layersConfiguration[0].TangensAngleOfRepose;
+	if (bedrockTangensAngleLeft > bedrockAngleOfRepose)
 	{
 		flowLeft = bedrockHeightDifferenceLeft;
 	}
 
 	float flowRight = 0;
-	if (bedrockTangensAngleRight > bedrockTalusAngle)
+	if (bedrockTangensAngleRight > bedrockAngleOfRepose)
 	{
 		flowRight = bedrockHeightDifferenceRight;
 	}
 
 	float flowUp = 0;
-	if (bedrockTangensAngleUp > bedrockTalusAngle)
+	if (bedrockTangensAngleUp > bedrockAngleOfRepose)
 	{
 		flowUp = bedrockHeightDifferenceUp;
 	}
 
 	float flowDown = 0;
-	if (bedrockTangensAngleDown > bedrockTalusAngle)
+	if (bedrockTangensAngleDown > bedrockAngleOfRepose)
 	{
 		flowDown = bedrockHeightDifferenceDown;
 	}
@@ -217,26 +217,26 @@ void main()
 		float sedimentTangensAngleDown = totalHeightDifferenceDown * mapGenerationConfiguration.HeightMultiplier / 1.0;
 	
 		float flowLeft = 0;
-		float sedimentTalusAngle = layersConfiguration[1].TangensTalusAngle;
-		if (sedimentTangensAngleLeft > sedimentTalusAngle)
+		float sedimentAngleOfRepose = layersConfiguration[1].TangensAngleOfRepose;
+		if (sedimentTangensAngleLeft > sedimentAngleOfRepose)
 		{
 			flowLeft = totalHeightDifferenceLeft;
 		}
 
 		float flowRight = 0;
-		if (sedimentTangensAngleRight > sedimentTalusAngle)
+		if (sedimentTangensAngleRight > sedimentAngleOfRepose)
 		{
 			flowRight = totalHeightDifferenceRight;
 		}
 
 		float flowDown = 0;
-		if (sedimentTangensAngleDown > sedimentTalusAngle)
+		if (sedimentTangensAngleDown > sedimentAngleOfRepose)
 		{
 			flowDown = totalHeightDifferenceDown;
 		}
 
 		float flowUp = 0;
-		if (sedimentTangensAngleUp > sedimentTalusAngle)
+		if (sedimentTangensAngleUp > sedimentAngleOfRepose)
 		{
 			flowUp = totalHeightDifferenceUp;
 		}

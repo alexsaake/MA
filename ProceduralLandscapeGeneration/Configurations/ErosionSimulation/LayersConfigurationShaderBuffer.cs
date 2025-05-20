@@ -3,5 +3,5 @@
 internal struct LayersConfigurationShaderBuffer
 {
     public float Hardness;
-    public float TangensTalusAngle;
+    public float TangensAngleOfRepose;
 }

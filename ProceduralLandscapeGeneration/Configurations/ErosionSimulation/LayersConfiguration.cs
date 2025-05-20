@@ -27,17 +27,17 @@ internal class LayersConfiguration : ILayersConfiguration
         }
     }
 
-    private uint myBedrockTalusAngle;
-    public uint BedrockTalusAngle
+    private uint myBedrockAngleOfRepose;
+    public uint BedrockAngleOfRepose
     {
-        get => myBedrockTalusAngle;
+        get => myBedrockAngleOfRepose;
         set
         {
-            if (myBedrockTalusAngle == value)
+            if (myBedrockAngleOfRepose == value)
             {
                 return;
             }
-            myBedrockTalusAngle = value;
+            myBedrockAngleOfRepose = value;
             UpdateShaderBuffer();
         }
     }
@@ -57,17 +57,17 @@ internal class LayersConfiguration : ILayersConfiguration
         }
     }
 
-    private uint myClayTalusAngle;
-    public uint ClayTalusAngle
+    private uint myClayAngleOfRepose;
+    public uint ClayAngleOfRepose
     {
-        get => myClayTalusAngle;
+        get => myClayAngleOfRepose;
         set
         {
-            if (myClayTalusAngle == value)
+            if (myClayAngleOfRepose == value)
             {
                 return;
             }
-            myClayTalusAngle = value;
+            myClayAngleOfRepose = value;
             UpdateShaderBuffer();
         }
     }
@@ -87,17 +87,17 @@ internal class LayersConfiguration : ILayersConfiguration
         }
     }
 
-    private uint mySedimentTalusAngle;
-    public uint SedimentTalusAngle
+    private uint mySedimentAngleOfRepose;
+    public uint SedimentAngleOfRepose
     {
-        get => mySedimentTalusAngle;
+        get => mySedimentAngleOfRepose;
         set
         {
-            if (mySedimentTalusAngle == value)
+            if (mySedimentAngleOfRepose == value)
             {
                 return;
             }
-            mySedimentTalusAngle = value;
+            mySedimentAngleOfRepose = value;
             UpdateShaderBuffer();
         }
     }
@@ -108,13 +108,13 @@ internal class LayersConfiguration : ILayersConfiguration
         myMapGenerationConfiguration = mapGenerationConfiguration;
 
         myBedrockHardness = 0.95f;
-        myBedrockTalusAngle = 80;
+        myBedrockAngleOfRepose = 80;
 
         myClayHardness = 0.6f;
-        myClayTalusAngle = 45;
+        myClayAngleOfRepose = 45;
 
         mySedimentHardness = 0.2f;
-        mySedimentTalusAngle = 15;
+        mySedimentAngleOfRepose = 15;
     }
 
     public void Initialize()
@@ -140,7 +140,7 @@ internal class LayersConfiguration : ILayersConfiguration
                     new LayersConfigurationShaderBuffer()
                     {
                         Hardness = BedrockHardness,
-                        TangensTalusAngle = GetTangens(BedrockTalusAngle)
+                        TangensAngleOfRepose = GetTangens(BedrockAngleOfRepose)
                     }
                 };
                 break;
@@ -150,12 +150,12 @@ internal class LayersConfiguration : ILayersConfiguration
                     new LayersConfigurationShaderBuffer()
                     {
                         Hardness = BedrockHardness,
-                        TangensTalusAngle = GetTangens(BedrockTalusAngle)
+                        TangensAngleOfRepose = GetTangens(BedrockAngleOfRepose)
                     },
                     new LayersConfigurationShaderBuffer()
                     {
                         Hardness = SedimentHardness,
-                        TangensTalusAngle = GetTangens(SedimentTalusAngle)
+                        TangensAngleOfRepose = GetTangens(SedimentAngleOfRepose)
                     }
                 };
                 break;
@@ -165,17 +165,17 @@ internal class LayersConfiguration : ILayersConfiguration
                     new LayersConfigurationShaderBuffer()
                     {
                         Hardness = BedrockHardness,
-                        TangensTalusAngle = GetTangens(BedrockTalusAngle)
+                        TangensAngleOfRepose = GetTangens(BedrockAngleOfRepose)
                     },
                     new LayersConfigurationShaderBuffer()
                     {
                         Hardness = ClayHardness,
-                        TangensTalusAngle = GetTangens(ClayTalusAngle)
+                        TangensAngleOfRepose = GetTangens(ClayAngleOfRepose)
                     },
                     new LayersConfigurationShaderBuffer()
                     {
                         Hardness = SedimentHardness,
-                        TangensTalusAngle = GetTangens(SedimentTalusAngle)
+                        TangensAngleOfRepose = GetTangens(SedimentAngleOfRepose)
                     }
                 };
                 break;
