@@ -12,6 +12,7 @@ struct MapGenerationConfiguration
     float HeightMultiplier;
     uint RockTypeCount;
     uint LayerCount;
+    float SeaLevel;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -23,7 +24,6 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 struct ErosionConfiguration
 {
-    float SeaLevel;
     float TimeDelta;
 	bool IsWaterKeptInBoundaries;
 };

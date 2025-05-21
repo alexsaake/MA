@@ -10,6 +10,22 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
 
     private bool myIsDisposed;
 
+    private uint myHeightMultiplier;
+    public uint HeightMultiplier
+    {
+        get => myHeightMultiplier;
+        set
+        {
+            if (myHeightMultiplier == value)
+            {
+                return;
+            }
+            myHeightMultiplier = value;
+            UpdateShaderBuffer();
+            HeightMultiplierChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     private uint myRockTypeCount;
     public uint RockTypeCount
     {
@@ -37,6 +53,21 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
             }
             myLayerCount = value;
             ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private float mySeaLevel;
+    public float SeaLevel
+    {
+        get => mySeaLevel;
+        set
+        {
+            if (mySeaLevel == value)
+            {
+                return;
+            }
+            mySeaLevel = value;
+            UpdateShaderBuffer();
         }
     }
 
@@ -209,22 +240,6 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
-    private uint myHeightMultiplier;
-    public uint HeightMultiplier
-    {
-        get => myHeightMultiplier;
-        set
-        {
-            if (myHeightMultiplier == value)
-            {
-                return;
-            }
-            myHeightMultiplier = value;
-            UpdateShaderBuffer();
-            HeightMultiplierChanged?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
     private bool myAreTerrainColorsEnabled;
     public bool AreTerrainColorsEnabled
     {
@@ -263,7 +278,8 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         myShaderBuffers = shaderBuffers;
 
         myRockTypeCount = 3;
-        myLayerCount = 2;
+        myLayerCount = 1;
+        mySeaLevel = 0.2f;
 
         myMapGeneration = MapGenerationTypes.Noise;
         myMeshCreation = ProcessorTypes.CPU;
@@ -303,6 +319,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
             HeightMultiplier = HeightMultiplier,
             RockTypeCount = RockTypeCount,
             LayerCount = LayerCount,
+            SeaLevel = SeaLevel,
             AreTerrainColorsEnabled = AreTerrainColorsEnabled,
             ArePlateTectonicsPlateColorsEnabled = ArePlateTectonicsPlateColorsEnabled
         };

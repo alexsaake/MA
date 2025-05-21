@@ -48,6 +48,7 @@ struct MapGenerationConfiguration
     float HeightMultiplier;
     uint RockTypeCount;
     uint LayerCount;
+    float SeaLevel;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };

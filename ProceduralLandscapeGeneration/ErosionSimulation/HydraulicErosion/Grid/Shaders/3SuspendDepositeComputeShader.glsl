@@ -36,6 +36,7 @@ struct MapGenerationConfiguration
     float HeightMultiplier;
     uint RockTypeCount;
     uint LayerCount;
+    float SeaLevel;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -59,7 +60,6 @@ struct GridErosionConfiguration
 
 struct ErosionConfiguration
 {
-    float SeaLevel;
     float TimeDelta;
 	bool IsWaterKeptInBoundaries;
 };

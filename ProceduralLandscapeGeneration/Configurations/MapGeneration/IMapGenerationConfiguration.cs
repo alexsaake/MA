@@ -5,8 +5,10 @@ namespace ProceduralLandscapeGeneration.Configurations.MapGeneration;
 
 internal interface IMapGenerationConfiguration : IDisposable
 {
+    uint HeightMultiplier { get; set; }
     uint RockTypeCount { get; set; }
     uint LayerCount { get; set; }
+    float SeaLevel { get; set; }
     MapGenerationTypes MapGeneration { get; set; }
     ProcessorTypes MeshCreation { get; set; }
     ProcessorTypes HeightMapGeneration { get; set; }
@@ -23,7 +25,6 @@ internal interface IMapGenerationConfiguration : IDisposable
 
     uint MapSize { get; }
     uint HeightMapSideLength { get; set; }
-    uint HeightMultiplier { get; set; }
     CameraMode CameraMode { get; set; }
     bool AreTerrainColorsEnabled { get; set; }
 

@@ -28,21 +28,6 @@ internal class ErosionConfiguration : IErosionConfiguration
 
     public bool IsSeaLevelDisplayed { get; set; }
 
-    private float mySeaLevel;
-    public float SeaLevel
-    {
-        get => mySeaLevel;
-        set
-        {
-            if (mySeaLevel == value)
-            {
-                return;
-            }
-            mySeaLevel = value;
-            UpdateShaderBuffer();
-        }
-    }
-
     private bool myIsWaterKeptInBoundaries;
     public bool IsWaterKeptInBoundaries
     {

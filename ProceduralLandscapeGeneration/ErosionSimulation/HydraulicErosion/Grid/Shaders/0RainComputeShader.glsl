@@ -28,7 +28,6 @@ layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 
 struct ErosionConfiguration
 {
-    float SeaLevel;
     float TimeDelta;
 	bool IsWaterKeptInBoundaries;
 };
