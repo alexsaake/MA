@@ -93,7 +93,7 @@ float totalHeight(uint index)
 void main()
 {
     uint index = gl_VertexID;
-    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount / mapGenerationConfiguration.LayerCount;
+    myHeightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
     if(index >= myHeightMapLength)
     {
         return;
