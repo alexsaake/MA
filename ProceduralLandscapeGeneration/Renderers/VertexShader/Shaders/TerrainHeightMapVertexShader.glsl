@@ -111,12 +111,15 @@ out vec3 fragNormal;
 out vec4 fragColor;
 
 vec3 oceanCliff = vec3(0.2, 0.2, 0.1);
-vec3 clayColor = vec3(0.5, 0.3, 0.3);
 vec3 beachColor = vec3(1.0, 0.9, 0.6);
 vec3 pastureColor = vec3(0.5, 0.6, 0.4);
 vec3 woodsColor = vec3(0.2, 0.3, 0.2);
 vec3 mountainColor = vec3(0.6, 0.6, 0.6);
 vec3 snowColor = vec3(1.0, 0.9, 0.9);
+
+vec3 bedrockColor = mountainColor;
+vec3 coarseSedimentColor = vec3(0.5, 0.3, 0.3);
+vec3 fineSedimentColor = beachColor;
 
 void main()
 {
@@ -190,16 +193,16 @@ void main()
         {
             if(FineSedimentHeight(index) > 0.00001)
             {
-                terrainColor = beachColor;
+                terrainColor = fineSedimentColor;
             }
             else if(mapGenerationConfiguration.RockTypeCount > 2
                 && CoarseSedimentHeight(index) > 0.00001)
             {
-                terrainColor = clayColor;
+                terrainColor = coarseSedimentColor;
             }
             else
             {
-                terrainColor = mountainColor;
+                terrainColor = bedrockColor;
             }
         }
         else

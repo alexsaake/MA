@@ -72,7 +72,17 @@ uniform mat4 mvp;
 uint myHeightMapSideLength;
 uint myHeightMapLength;
 
-float totalHeight(uint index)
+float FineSedimentHeight(uint index)
+{
+    return heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength];
+}
+
+float CoarseSedimentHeight(uint index)
+{
+    return heightMap[index + 1 * myHeightMapLength];
+}
+
+float TotalHeight(uint index)
 {
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
@@ -95,14 +105,14 @@ vec3 GetScaledNormal(uint x, uint y)
         return vec3(0.0, 0.0, 1.0);
     }
     
-    float rb = totalHeight(GetIndex(x + 1, y - 1));
-    float lb = totalHeight(GetIndex(x - 1, y - 1));
-    float r = totalHeight(GetIndex(x + 1, y));
-    float l = totalHeight(GetIndex(x - 1, y));
-    float rt = totalHeight(GetIndex(x + 1, y + 1));
-    float lt = totalHeight(GetIndex(x - 1, y + 1));
-    float t = totalHeight(GetIndex(x, y + 1));
-    float b = totalHeight(GetIndex(x, y - 1));
+    float rb = TotalHeight(GetIndex(x + 1, y - 1));
+    float lb = TotalHeight(GetIndex(x - 1, y - 1));
+    float r = TotalHeight(GetIndex(x + 1, y));
+    float l = TotalHeight(GetIndex(x - 1, y));
+    float rt = TotalHeight(GetIndex(x + 1, y + 1));
+    float lt = TotalHeight(GetIndex(x - 1, y + 1));
+    float t = TotalHeight(GetIndex(x, y + 1));
+    float b = TotalHeight(GetIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -119,10 +129,14 @@ vec3 woodsColor = vec3(0.2, 0.3, 0.2);
 vec3 mountainColor = vec3(0.6, 0.6, 0.6);
 vec3 snowColor = vec3(1.0, 0.9, 0.9);
 
+vec3 bedrockColor = mountainColor;
+vec3 coarseSedimentColor = vec3(0.5, 0.3, 0.3);
+vec3 fineSedimentColor = beachColor;
+
 void addVertex(uint vertex, uint x, uint y)
 {
     uint index = GetIndex(x, y);
-    float height = totalHeight(index);
+    float height = TotalHeight(index);
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
     float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     vec3 normal = GetScaledNormal(x, y);
@@ -179,52 +193,71 @@ void addVertex(uint vertex, uint x, uint y)
     }
     else if(mapGenerationConfiguration.AreTerrainColorsEnabled)
     {
-        if(terrainHeight < seaLevelHeight + 0.3)
+        if(mapGenerationConfiguration.RockTypeCount > 1)
         {
-            if(normal.z > 0.3)
+            if(FineSedimentHeight(index) > 0.00001)
             {
-                terrainColor = beachColor;
+                terrainColor = fineSedimentColor;
+            }
+            else if(mapGenerationConfiguration.RockTypeCount > 2
+                && CoarseSedimentHeight(index) > 0.00001)
+            {
+                terrainColor = coarseSedimentColor;
             }
             else
             {
-                terrainColor = oceanCliff;
+                terrainColor = bedrockColor;
             }
         }
         else
         {
-            if(normal.z > 0.4)
+            if(terrainHeight < seaLevelHeight + 0.3)
             {
-                if(height > 0.9)
+                if(normal.z > 0.3)
                 {
-                    terrainColor = snowColor;
-                }
-                else if(height > 0.7)
-                {
-                    terrainColor = mountainColor;
+                    terrainColor = beachColor;
                 }
                 else
                 {
-                    terrainColor = woodsColor;
-                }
-            }
-            else if(normal.z > 0.3)
-            {
-                if(height > 0.9)
-                {
-                    terrainColor = snowColor;
-                }
-                else if(height > 0.8)
-                {
-                    terrainColor = mountainColor;
-                }
-                else
-                {
-                    terrainColor = pastureColor;
+                    terrainColor = oceanCliff;
                 }
             }
             else
             {
-                terrainColor = mountainColor;
+                if(normal.z > 0.4)
+                {
+                    if(height > 0.9)
+                    {
+                        terrainColor = snowColor;
+                    }
+                    else if(height > 0.7)
+                    {
+                        terrainColor = mountainColor;
+                    }
+                    else
+                    {
+                        terrainColor = woodsColor;
+                    }
+                }
+                else if(normal.z > 0.3)
+                {
+                    if(height > 0.9)
+                    {
+                        terrainColor = snowColor;
+                    }
+                    else if(height > 0.8)
+                    {
+                        terrainColor = mountainColor;
+                    }
+                    else
+                    {
+                        terrainColor = pastureColor;
+                    }
+                }
+                else
+                {
+                    terrainColor = mountainColor;
+                }
             }
         }
     }
