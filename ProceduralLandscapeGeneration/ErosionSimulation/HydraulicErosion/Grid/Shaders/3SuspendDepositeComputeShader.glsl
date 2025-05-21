@@ -10,16 +10,20 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
 struct GridHydraulicErosionCell
 {
     float WaterHeight;
-    float FlowLeft;
-    float FlowRight;
-    float FlowUp;
-    float FlowDown;
+
+    float WaterFlowLeft;
+    float WaterFlowRight;
+    float WaterFlowUp;
+    float WaterFlowDown;
+
     float SuspendedSediment;
+
     float SedimentFlowLeft;
     float SedimentFlowRight;
     float SedimentFlowUp;
     float SedimentFlowDown;
-    vec2 Velocity;
+
+    vec2 WaterVelocity;
 };
 
 layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
@@ -201,7 +205,7 @@ void main()
     float tiltAngle = sin(alpha);
 	
 	float erosionDepthLimit = (gridErosionConfiguration.MaximalErosionDepth - min(gridErosionConfiguration.MaximalErosionDepth, gridHydraulicErosionCell.WaterHeight)) / gridErosionConfiguration.MaximalErosionDepth;
-	float sedimentCapacity = gridErosionConfiguration.SedimentCapacity * tiltAngle * length(gridHydraulicErosionCell.Velocity) * erosionDepthLimit;
+	float sedimentCapacity = gridErosionConfiguration.SedimentCapacity * tiltAngle * length(gridHydraulicErosionCell.WaterVelocity) * erosionDepthLimit;
 
 	if (sedimentCapacity > gridHydraulicErosionCell.SuspendedSediment)
 	{

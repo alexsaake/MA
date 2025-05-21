@@ -44,18 +44,20 @@ layout(std430, binding = 10) readonly restrict buffer thermalErosionConfiguratio
 
 struct GridThermalErosionCell
 {
-    float BedrockFlowLeft;
-    float BedrockFlowRight;
-    float BedrockFlowUp;
-    float BedrockFlowDown;
-    float CoarseSedimentFlowLeft;
-    float CoarseSedimentFlowRight;
-    float CoarseSedimentFlowUp;
-    float CoarseSedimentFlowDown;
     float FineSedimentFlowLeft;
     float FineSedimentFlowRight;
     float FineSedimentFlowUp;
     float FineSedimentFlowDown;
+
+    float CoarseSedimentFlowLeft;
+    float CoarseSedimentFlowRight;
+    float CoarseSedimentFlowUp;
+    float CoarseSedimentFlowDown;
+
+    float BedrockFlowLeft;
+    float BedrockFlowRight;
+    float BedrockFlowUp;
+    float BedrockFlowDown;
 };
 
 layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
