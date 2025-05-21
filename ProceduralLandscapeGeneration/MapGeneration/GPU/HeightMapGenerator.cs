@@ -37,7 +37,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
         myShaderBuffers.Add(ShaderBufferTypes.HeightMapParameters, heightMapParametersShaderBufferSize);
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMapParameters], &heightMapParametersShaderBuffer, heightMapParametersShaderBufferSize, 0);
 
-        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount * sizeof(float);
+        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.RockTypeCount * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
         ComputeShaderProgram generateNoiseHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateNoiseHeightMapComputeShader.glsl");
@@ -105,43 +105,43 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateCubeMap()
     {
-        float[] map = new float[myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount];
+        float[] map = new float[myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.RockTypeCount];
 
         uint cubeSideLength = (uint)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
 
         uint cube1Position = myMapGenerationConfiguration.HeightMapSideLength / 4;
         AddCube(map, cube1Position, cube1Position, 0, cubeSideLength);
 
-        if (myMapGenerationConfiguration.LayerCount > 1)
+        if (myMapGenerationConfiguration.RockTypeCount > 1)
         {
             uint cube2Position = myMapGenerationConfiguration.HeightMapSideLength / 4 + myMapGenerationConfiguration.HeightMapSideLength / 4 * 2;
-            AddCube(map, cube2Position, cube2Position, myMapGenerationConfiguration.LayerCount - 1, cubeSideLength);
+            AddCube(map, cube2Position, cube2Position, myMapGenerationConfiguration.RockTypeCount - 1, cubeSideLength);
         }
 
-        if (myMapGenerationConfiguration.LayerCount > 2)
+        if (myMapGenerationConfiguration.RockTypeCount > 2)
         {
             uint cube3Position = myMapGenerationConfiguration.HeightMapSideLength / 4 + myMapGenerationConfiguration.HeightMapSideLength / 4;
-            AddCube(map, cube3Position, cube3Position, myMapGenerationConfiguration.LayerCount - 2, cubeSideLength);
+            AddCube(map, cube3Position, cube3Position, myMapGenerationConfiguration.RockTypeCount - 2, cubeSideLength);
         }
 
         return map;
     }
 
-    private void AddCube(float[] map, uint x, uint y, uint layer, uint size)
+    private void AddCube(float[] map, uint x, uint y, uint rockTypes, uint size)
     {
         for (uint j = 0; j < size; j++)
         {
             for (uint i = 0; i < size; i++)
             {
                 uint index = myMapGenerationConfiguration.GetIndex(x + i, y + j);
-                map[index + layer * myMapGenerationConfiguration.MapSize] = 1;
+                map[index + rockTypes * myMapGenerationConfiguration.MapSize] = 1;
             }
         }
     }
 
     public unsafe void GenerateSlopedCanyonHeightMap()
     {
-        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount * sizeof(float);
+        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.RockTypeCount * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
         ComputeShaderProgram generateSlopedCanyonHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateSlopedCanyonHeightMapComputeShader.glsl");
@@ -155,7 +155,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     public unsafe void GenerateCoastlineCliffHeightMap()
     {
-        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount * sizeof(float);
+        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.RockTypeCount * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
         ComputeShaderProgram generateCoastlineCliffHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateCoastlineCliffHeightMapComputeShader.glsl");

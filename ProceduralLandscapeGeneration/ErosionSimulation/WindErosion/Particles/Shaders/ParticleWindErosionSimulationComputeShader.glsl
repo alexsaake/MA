@@ -23,7 +23,7 @@ layout(std430, binding = 3) buffer particleWindErosionShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    uint LayerCount;
+    uint RockTypeCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -52,15 +52,15 @@ layout(std430, binding = 14) readonly restrict buffer windErosionHeightMapIndice
     uint[] windErosionHeightMapIndices;
 };
 
-struct LayersConfiguration
+struct RockTypeConfiguration
 {
     float Hardness;
     float TangensAngleOfRepose;
 };
 
-layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
+layout(std430, binding = 18) buffer rockTypesConfigurationShaderBuffer
 {
-    LayersConfiguration[] layersConfiguration;
+    RockTypeConfiguration[] rockTypesConfiguration;
 };
 
 uint myHeightMapSideLength;
@@ -69,11 +69,11 @@ uint myHeightMapLength;
 float SuspendFromTop(uint index, float requiredSediment)
 {
     float suspendedSediment = 0;
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
     {
-        uint offsetIndex = index + layer * myHeightMapLength;
+        uint offsetIndex = index + rockType * myHeightMapLength;
         float height = heightMap[offsetIndex];
-        float hardness = (1.0 - layersConfiguration[layer].Hardness);
+        float hardness = (1.0 - rockTypesConfiguration[rockType].Hardness);
         float toBeSuspendedSediment = requiredSediment * hardness;
         if(height >= toBeSuspendedSediment)
         {
@@ -93,15 +93,15 @@ float SuspendFromTop(uint index, float requiredSediment)
 
 void DepositeOnTop(uint index, float sediment)
 {
-    heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength] += sediment;
+    heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength] += sediment;
 }
 
 float TotalHeight(uint index)
 {
     float height = 0;
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + layer * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapLength];
     }
     return height;
 }
@@ -293,7 +293,7 @@ bool Interact()
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount;
     if(id >= particlesWindErosion.length())
     {
         return;

@@ -5,7 +5,7 @@ using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 
-internal class LayersConfiguration : ILayersConfiguration
+internal class RockTypesConfiguration : IRockTypesConfiguration
 {
     private readonly IShaderBuffers myShaderBuffers;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
@@ -102,7 +102,7 @@ internal class LayersConfiguration : ILayersConfiguration
         }
     }
 
-    public LayersConfiguration(IShaderBuffers shaderBuffers, IMapGenerationConfiguration mapGenerationConfiguration)
+    public RockTypesConfiguration(IShaderBuffers shaderBuffers, IMapGenerationConfiguration mapGenerationConfiguration)
     {
         myShaderBuffers = shaderBuffers;
         myMapGenerationConfiguration = mapGenerationConfiguration;
@@ -126,18 +126,18 @@ internal class LayersConfiguration : ILayersConfiguration
 
     private unsafe void UpdateShaderBuffer()
     {
-        if (myShaderBuffers.ContainsKey(ShaderBufferTypes.LayersConfiguration))
+        if (myShaderBuffers.ContainsKey(ShaderBufferTypes.RockTypeConfiguration))
         {
-            myShaderBuffers.Remove(ShaderBufferTypes.LayersConfiguration);
+            myShaderBuffers.Remove(ShaderBufferTypes.RockTypeConfiguration);
         }
-        myShaderBuffers.Add(ShaderBufferTypes.LayersConfiguration, (uint)sizeof(LayersConfigurationShaderBuffer) * myMapGenerationConfiguration.LayerCount);
-        LayersConfigurationShaderBuffer[] layersConfigurationShaderBuffer;
-        switch (myMapGenerationConfiguration.LayerCount)
+        myShaderBuffers.Add(ShaderBufferTypes.RockTypeConfiguration, (uint)sizeof(RockTypeConfigurationShaderBuffer) * myMapGenerationConfiguration.RockTypeCount);
+        RockTypeConfigurationShaderBuffer[] rockTypesConfigurationShaderBuffer;
+        switch (myMapGenerationConfiguration.RockTypeCount)
         {
             case 1:
-                layersConfigurationShaderBuffer = new LayersConfigurationShaderBuffer[]
+                rockTypesConfigurationShaderBuffer = new RockTypeConfigurationShaderBuffer[]
                 {
-                    new LayersConfigurationShaderBuffer()
+                    new RockTypeConfigurationShaderBuffer()
                     {
                         Hardness = BedrockHardness,
                         TangensAngleOfRepose = GetTangens(BedrockAngleOfRepose)
@@ -145,14 +145,14 @@ internal class LayersConfiguration : ILayersConfiguration
                 };
                 break;
             case 2:
-                layersConfigurationShaderBuffer = new LayersConfigurationShaderBuffer[]
+                rockTypesConfigurationShaderBuffer = new RockTypeConfigurationShaderBuffer[]
                 {
-                    new LayersConfigurationShaderBuffer()
+                    new RockTypeConfigurationShaderBuffer()
                     {
                         Hardness = BedrockHardness,
                         TangensAngleOfRepose = GetTangens(BedrockAngleOfRepose)
                     },
-                    new LayersConfigurationShaderBuffer()
+                    new RockTypeConfigurationShaderBuffer()
                     {
                         Hardness = FineSedimentHardness,
                         TangensAngleOfRepose = GetTangens(FineSedimentAngleOfRepose)
@@ -160,19 +160,19 @@ internal class LayersConfiguration : ILayersConfiguration
                 };
                 break;
             case 3:
-                layersConfigurationShaderBuffer = new LayersConfigurationShaderBuffer[]
+                rockTypesConfigurationShaderBuffer = new RockTypeConfigurationShaderBuffer[]
                 {
-                    new LayersConfigurationShaderBuffer()
+                    new RockTypeConfigurationShaderBuffer()
                     {
                         Hardness = BedrockHardness,
                         TangensAngleOfRepose = GetTangens(BedrockAngleOfRepose)
                     },
-                    new LayersConfigurationShaderBuffer()
+                    new RockTypeConfigurationShaderBuffer()
                     {
                         Hardness = CoarseSedimentHardness,
                         TangensAngleOfRepose = GetTangens(CoarseSedimentAngleOfRepose)
                     },
-                    new LayersConfigurationShaderBuffer()
+                    new RockTypeConfigurationShaderBuffer()
                     {
                         Hardness = FineSedimentHardness,
                         TangensAngleOfRepose = GetTangens(FineSedimentAngleOfRepose)
@@ -180,9 +180,9 @@ internal class LayersConfiguration : ILayersConfiguration
                 };
                 break;
         }
-        fixed (void* layersConfigurationShaderBufferPointer = layersConfigurationShaderBuffer)
+        fixed (void* rockTypesConfigurationShaderBufferPointer = rockTypesConfigurationShaderBuffer)
         {
-            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.LayersConfiguration], layersConfigurationShaderBufferPointer, (uint)sizeof(LayersConfigurationShaderBuffer) * myMapGenerationConfiguration.LayerCount, 0);
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.RockTypeConfiguration], rockTypesConfigurationShaderBufferPointer, (uint)sizeof(RockTypeConfigurationShaderBuffer) * myMapGenerationConfiguration.RockTypeCount, 0);
         }
     }
 
@@ -198,7 +198,7 @@ internal class LayersConfiguration : ILayersConfiguration
             return;
         }
 
-        myShaderBuffers.Remove(ShaderBufferTypes.LayersConfiguration);
+        myShaderBuffers.Remove(ShaderBufferTypes.RockTypeConfiguration);
 
         myIsDisposed = true;
     }

@@ -8,7 +8,7 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    uint LayerCount;
+    uint RockTypeCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -53,7 +53,7 @@ uint myHeightMapLength;
 
 float FineSedimentHeight(uint index)
 {
-    return heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength];
+    return heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength];
 }
 
 float CoarseSedimentHeight(uint index)
@@ -64,9 +64,9 @@ float CoarseSedimentHeight(uint index)
 float TotalHeight(uint index)
 {
     float height = 0;
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + layer * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapLength];
     }
     return height;
 }
@@ -121,7 +121,7 @@ vec3 snowColor = vec3(1.0, 0.9, 0.9);
 void main()
 {
     uint index = gl_VertexID;
-    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount;
     if(index >= myHeightMapLength)
     {
         return;
@@ -186,13 +186,13 @@ void main()
     }
     else if(mapGenerationConfiguration.AreTerrainColorsEnabled)
     {
-        if(mapGenerationConfiguration.LayerCount > 1)
+        if(mapGenerationConfiguration.RockTypeCount > 1)
         {
             if(FineSedimentHeight(index) > 0.00001)
             {
                 terrainColor = beachColor;
             }
-            else if(mapGenerationConfiguration.LayerCount > 2
+            else if(mapGenerationConfiguration.RockTypeCount > 2
                 && CoarseSedimentHeight(index) > 0.00001)
             {
                 terrainColor = clayColor;

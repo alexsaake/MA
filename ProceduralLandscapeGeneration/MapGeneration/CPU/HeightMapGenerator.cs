@@ -28,7 +28,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     public unsafe void GenerateNoiseHeightMap()
     {
-        float[] heightMap = GenerateNoiseMap(myMapGenerationConfiguration.LayerCount);
+        float[] heightMap = GenerateNoiseMap(myMapGenerationConfiguration.RockTypeCount);
 
         uint heightMapShaderBufferSize = (uint)heightMap.Length * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapShaderBufferSize);
@@ -50,9 +50,9 @@ internal class HeightMapGenerator : IHeightMapGenerator
         }
     }
 
-    private float[] GenerateNoiseMap(uint layers)
+    private float[] GenerateNoiseMap(uint rockTypes)
     {
-        float[] noiseMap = new float[myMapGenerationConfiguration.MapSize * layers];
+        float[] noiseMap = new float[myMapGenerationConfiguration.MapSize * rockTypes];
 
         Vector2[] octaveOffsets = new Vector2[myMapGenerationConfiguration.NoiseOctaves];
         for (int octave = 0; octave < myMapGenerationConfiguration.NoiseOctaves; octave++)
@@ -64,7 +64,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
         float minNoiseHeight = float.MaxValue;
 
         uint indexOffset = 0;
-        if(layers > 2)
+        if(rockTypes > 2)
         {
             indexOffset = myMapGenerationConfiguration.MapSize;
         }
@@ -126,23 +126,23 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateCubeMap()
     {
-        float[] map = new float[myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.LayerCount];
+        float[] map = new float[myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.RockTypeCount];
 
         uint cubeSideLength = (uint)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
 
         uint cube1Position = myMapGenerationConfiguration.HeightMapSideLength / 4;
         AddCube(map, cube1Position, cube1Position, 0, cubeSideLength);
 
-        if(myMapGenerationConfiguration.LayerCount > 1)
+        if(myMapGenerationConfiguration.RockTypeCount > 1)
         {
             uint cube2Position = myMapGenerationConfiguration.HeightMapSideLength / 4 + myMapGenerationConfiguration.HeightMapSideLength / 4 * 2;
-            AddCube(map, cube2Position, cube2Position, myMapGenerationConfiguration.LayerCount - 1, cubeSideLength);
+            AddCube(map, cube2Position, cube2Position, myMapGenerationConfiguration.RockTypeCount - 1, cubeSideLength);
         }
 
-        if (myMapGenerationConfiguration.LayerCount > 2)
+        if (myMapGenerationConfiguration.RockTypeCount > 2)
         {
             uint cube3Position = myMapGenerationConfiguration.HeightMapSideLength / 4 + myMapGenerationConfiguration.HeightMapSideLength / 4;
-            AddCube(map, cube3Position, cube3Position, myMapGenerationConfiguration.LayerCount - 2, cubeSideLength);
+            AddCube(map, cube3Position, cube3Position, myMapGenerationConfiguration.RockTypeCount - 2, cubeSideLength);
         }
 
         return map;
@@ -158,14 +158,14 @@ internal class HeightMapGenerator : IHeightMapGenerator
         throw new NotImplementedException();
     }
 
-    private void AddCube(float[] map, uint x, uint y, uint layer, uint size)
+    private void AddCube(float[] map, uint x, uint y, uint rockTypes, uint size)
     {
         for (uint j = 0; j < size; j++)
         {
             for (uint i = 0; i < size; i++)
             {
                 uint index = myMapGenerationConfiguration.GetIndex(x + i, y + j);
-                map[index + layer * myMapGenerationConfiguration.MapSize] = 1;
+                map[index + rockTypes * myMapGenerationConfiguration.MapSize] = 1;
             }
         }
     }

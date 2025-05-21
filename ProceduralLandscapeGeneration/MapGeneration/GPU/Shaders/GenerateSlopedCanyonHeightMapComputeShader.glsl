@@ -10,7 +10,7 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    uint LayerCount;
+    uint RockTypeCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -23,7 +23,7 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount;
     if(index >= heightMapLength)
     {
         return;
@@ -39,7 +39,7 @@ void main()
     {
             bedrockHeight = 0.5 + 0.3 * (((abs(x - (heightMapSideLength / 2.0)) / heightMapSideLength) * 2) + ((heightMapSideLength - y) / float(heightMapSideLength)));
     }
-    if(mapGenerationConfiguration.LayerCount > 1)
+    if(mapGenerationConfiguration.RockTypeCount > 1)
     {
         float sedimentHeight = 0.4;
         bedrockHeight -= sedimentHeight;

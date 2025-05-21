@@ -21,5 +21,5 @@ enum ShaderBufferTypes
     PlateTectonicsPlates,
     PlateTectonicsTempSegments,
     MultiLayeredHeightMap,
-    LayersConfiguration
+    RockTypeConfiguration
 }

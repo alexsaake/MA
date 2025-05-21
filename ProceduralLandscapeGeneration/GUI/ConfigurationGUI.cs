@@ -33,9 +33,9 @@ internal class ConfigurationGUI : IConfigurationGUI
     private readonly PanelWithElements myParticleWindErosionPanel;
 
     private Vector2 myLeftPanel2Position;
-    private readonly PanelWithElements myBedrockLayerPanel;
-    private readonly PanelWithElements myCoarseSedimentLayerPanel;
-    private readonly PanelWithElements myFineSedimentLayerPanel;
+    private readonly PanelWithElements myBedrockRockTypePanel;
+    private readonly PanelWithElements myCoarseSedimentRockTypePanel;
+    private readonly PanelWithElements myFineSedimentRockTypePanel;
 
     private Vector2 myRightPanelPosition;
     private readonly PanelWithElements myMapGenerationPanel;
@@ -47,7 +47,7 @@ internal class ConfigurationGUI : IConfigurationGUI
     public event EventHandler? ErosionResetRequired;
     public event EventHandler? ErosionModeChanged;
 
-    public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, ILayersConfiguration layersConfiguration)
+    public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IRockTypesConfiguration rockTypesConfiguration)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
@@ -124,17 +124,17 @@ internal class ConfigurationGUI : IConfigurationGUI
 
         myLeftPanel2Position = new Vector2(PanelSize.X + 2, 0);
 
-        myBedrockLayerPanel = new PanelWithElements("Bedrock Layer");
-        myBedrockLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.BedrockHardness = value, layersConfiguration.BedrockHardness));
-        myBedrockLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.BedrockAngleOfRepose = (uint)value, (int)layersConfiguration.BedrockAngleOfRepose, 1, 89));
+        myBedrockRockTypePanel = new PanelWithElements("Bedrock Rock Type");
+        myBedrockRockTypePanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => rockTypesConfiguration.BedrockHardness = value, rockTypesConfiguration.BedrockHardness));
+        myBedrockRockTypePanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => rockTypesConfiguration.BedrockAngleOfRepose = (uint)value, (int)rockTypesConfiguration.BedrockAngleOfRepose, 1, 89));
 
-        myCoarseSedimentLayerPanel = new PanelWithElements("Coarse Sediment Layer");
-        myCoarseSedimentLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.CoarseSedimentHardness = value, layersConfiguration.CoarseSedimentHardness));
-        myCoarseSedimentLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.CoarseSedimentAngleOfRepose = (uint)value, (int)layersConfiguration.CoarseSedimentAngleOfRepose, 1, 89));
+        myCoarseSedimentRockTypePanel = new PanelWithElements("Coarse Sediment Rock Type");
+        myCoarseSedimentRockTypePanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => rockTypesConfiguration.CoarseSedimentHardness = value, rockTypesConfiguration.CoarseSedimentHardness));
+        myCoarseSedimentRockTypePanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => rockTypesConfiguration.CoarseSedimentAngleOfRepose = (uint)value, (int)rockTypesConfiguration.CoarseSedimentAngleOfRepose, 1, 89));
 
-        myFineSedimentLayerPanel = new PanelWithElements("Fine Sediment Layer");
-        myFineSedimentLayerPanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => layersConfiguration.FineSedimentHardness = value, layersConfiguration.FineSedimentHardness));
-        myFineSedimentLayerPanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => layersConfiguration.FineSedimentAngleOfRepose = (uint)value, (int)layersConfiguration.FineSedimentAngleOfRepose, 1, 89));
+        myFineSedimentRockTypePanel = new PanelWithElements("Fine Sediment Rock Type");
+        myFineSedimentRockTypePanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => rockTypesConfiguration.FineSedimentHardness = value, rockTypesConfiguration.FineSedimentHardness));
+        myFineSedimentRockTypePanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => rockTypesConfiguration.FineSedimentAngleOfRepose = (uint)value, (int)rockTypesConfiguration.FineSedimentAngleOfRepose, 1, 89));
 
 
         myRightPanelPosition = new Vector2(configuration.ScreenWidth - PanelSize.X, 0); ;
@@ -173,7 +173,7 @@ internal class ConfigurationGUI : IConfigurationGUI
     public void Draw()
     {
         DrawErosionPanels();
-        DrawLayersPanels();
+        DrawRockTypesPanels();
         DrawMapGenerationPanels();
     }
 
@@ -219,20 +219,20 @@ internal class ConfigurationGUI : IConfigurationGUI
         }
     }
 
-    private void DrawLayersPanels()
+    private void DrawRockTypesPanels()
     {
-        myBedrockLayerPanel.Draw(myLeftPanel2Position);
-        Vector2 layerOffset = myBedrockLayerPanel.BottomLeft;
-        switch (myMapGenerationConfiguration.LayerCount)
+        myBedrockRockTypePanel.Draw(myLeftPanel2Position);
+        Vector2 rockTypesOffset = myBedrockRockTypePanel.BottomLeft;
+        switch (myMapGenerationConfiguration.RockTypeCount)
         {
             case 2:
-                myFineSedimentLayerPanel.Draw(myBedrockLayerPanel.BottomLeft);
-                layerOffset = myFineSedimentLayerPanel.BottomLeft;
+                myFineSedimentRockTypePanel.Draw(myBedrockRockTypePanel.BottomLeft);
+                rockTypesOffset = myFineSedimentRockTypePanel.BottomLeft;
                 break;
             case 3:
-                myCoarseSedimentLayerPanel.Draw(myBedrockLayerPanel.BottomLeft);
-                myFineSedimentLayerPanel.Draw(myCoarseSedimentLayerPanel.BottomLeft);
-                layerOffset = myFineSedimentLayerPanel.BottomLeft;
+                myCoarseSedimentRockTypePanel.Draw(myBedrockRockTypePanel.BottomLeft);
+                myFineSedimentRockTypePanel.Draw(myCoarseSedimentRockTypePanel.BottomLeft);
+                rockTypesOffset = myFineSedimentRockTypePanel.BottomLeft;
                 break;
         }
     }

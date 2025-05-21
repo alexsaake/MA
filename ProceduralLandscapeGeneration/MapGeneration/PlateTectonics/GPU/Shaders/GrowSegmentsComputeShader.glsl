@@ -28,7 +28,7 @@ struct PlateTectonicsSegment
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    uint LayerCount;
+    uint RockTypeCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -67,7 +67,7 @@ float Langmuir(float k, float x)
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount;
     if(id >= heightMapLength)
     {
         return;

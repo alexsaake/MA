@@ -51,7 +51,7 @@ layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    uint LayerCount;
+    uint RockTypeCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -77,9 +77,9 @@ uint myHeightMapLength;
 float totalHeight(uint index)
 {
     float height = 0;
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + layer * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapLength];
     }
     return height;
 }
@@ -99,7 +99,7 @@ void addVertex(uint vertex, uint x, uint y)
 void main()
 {
     uint threadNumber = gl_GlobalInvocationID.x;
-    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount;
     if(threadNumber >= myHeightMapLength)
     {
         return;

@@ -10,7 +10,7 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    uint LayerCount;
+    uint RockTypeCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -44,7 +44,7 @@ float inverseLerp(float lower, float upper, float value)
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount;
     if(index >= heightMapLength)
     {
         return;

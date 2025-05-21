@@ -95,7 +95,7 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    uint LayerCount;
+    uint RockTypeCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -124,7 +124,7 @@ layout(std430, binding = 12) buffer heightMapParametersShaderBuffer
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount;
     if(id >= heightMapLength)
     {
         return;

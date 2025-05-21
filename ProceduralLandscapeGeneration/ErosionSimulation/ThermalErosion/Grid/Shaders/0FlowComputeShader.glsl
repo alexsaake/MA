@@ -10,7 +10,7 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    uint LayerCount;
+    uint RockTypeCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -55,31 +55,31 @@ layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
     GridThermalErosionCell[] gridThermalErosionCells;
 };
 
-struct LayersConfiguration
+struct RockTypeConfiguration
 {
     float Hardness;
     float TangensAngleOfRepose;
 };
 
-layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
+layout(std430, binding = 18) buffer rockTypesConfigurationShaderBuffer
 {
-    LayersConfiguration[] layersConfiguration;
+    RockTypeConfiguration[] rockTypesConfiguration;
 };
 
 uint myHeightMapSideLength;
 uint myHeightMapLength;
 
-float LayerSedimentHeight(uint index, uint layer)
+float RockTypeSedimentHeight(uint index, uint rockType)
 {
-    return heightMap[index + layer * myHeightMapLength];
+    return heightMap[index + rockType * myHeightMapLength];
 }
 
-float TotalSedimentHeight(uint index, uint stopLayer)
+float TotalSedimentHeight(uint index, uint stopRockType)
 {
     float height = 0;
-    for(uint layer = 0; layer <= stopLayer; layer++)
+    for(uint rockType = 0; rockType <= stopRockType; rockType++)
     {
-        height += heightMap[index + layer * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapLength];
     }
     return height;
 }
@@ -94,7 +94,7 @@ uint GetIndex(uint x, uint y)
 void main()
 {	
     uint index = gl_GlobalInvocationID.x;
-    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount;
     if(index >= myHeightMapLength)
     {
         return;
@@ -104,29 +104,29 @@ void main()
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
 	
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
 	{
-        uint indexOffset = layer * myHeightMapLength;
+        uint indexOffset = rockType * myHeightMapLength;
 		GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[index + indexOffset];
 
-		float totalSedimentHeight = TotalSedimentHeight(index, layer);
-		float totalSedimentHeightDifferenceLeft = max(totalSedimentHeight - TotalSedimentHeight(GetIndex(x - 1, y), layer), 0.0);
-		float totalSedimentHeightDifferenceRight = max(totalSedimentHeight - TotalSedimentHeight(GetIndex(x + 1, y), layer), 0.0);
-		float totalSedimentHeightDifferenceUp = max(totalSedimentHeight - TotalSedimentHeight(GetIndex(x, y + 1), layer), 0.0);
-		float totalSedimentHeightDifferenceDown = max(totalSedimentHeight - TotalSedimentHeight(GetIndex(x, y - 1), layer), 0.0);
+		float totalSedimentHeight = TotalSedimentHeight(index, rockType);
+		float totalSedimentHeightDifferenceLeft = max(totalSedimentHeight - TotalSedimentHeight(GetIndex(x - 1, y), rockType), 0.0);
+		float totalSedimentHeightDifferenceRight = max(totalSedimentHeight - TotalSedimentHeight(GetIndex(x + 1, y), rockType), 0.0);
+		float totalSedimentHeightDifferenceUp = max(totalSedimentHeight - TotalSedimentHeight(GetIndex(x, y + 1), rockType), 0.0);
+		float totalSedimentHeightDifferenceDown = max(totalSedimentHeight - TotalSedimentHeight(GetIndex(x, y - 1), rockType), 0.0);
 		float maxTotalSedimentHeightDifference = max(max(totalSedimentHeightDifferenceLeft, totalSedimentHeightDifferenceRight), max(totalSedimentHeightDifferenceDown, totalSedimentHeightDifferenceUp));
 		
-		float layerSedimentHeight = LayerSedimentHeight(index, layer);
+		float rockTypeSedimentHeight = RockTypeSedimentHeight(index, rockType);
 		float sedimentVolumeToBeMoved = 0;
 		if(maxTotalSedimentHeightDifference > 0)
 		{
-			if(maxTotalSedimentHeightDifference < layerSedimentHeight)
+			if(maxTotalSedimentHeightDifference < rockTypeSedimentHeight)
 			{
 				sedimentVolumeToBeMoved = maxTotalSedimentHeightDifference * thermalErosionConfiguration.ErosionRate;
 			}
 			else
 			{
-				sedimentVolumeToBeMoved = layerSedimentHeight * thermalErosionConfiguration.ErosionRate;
+				sedimentVolumeToBeMoved = rockTypeSedimentHeight * thermalErosionConfiguration.ErosionRate;
 			}
 		}
 	
@@ -136,7 +136,7 @@ void main()
 		float sedimentTangensAngleDown = totalSedimentHeightDifferenceDown * mapGenerationConfiguration.HeightMultiplier / 1.0;
 	
 		float flowLeft = 0;
-		float sedimentTangensAngleOfRepose = layersConfiguration[layer].TangensAngleOfRepose;
+		float sedimentTangensAngleOfRepose = rockTypesConfiguration[rockType].TangensAngleOfRepose;
 		if (sedimentTangensAngleLeft > sedimentTangensAngleOfRepose)
 		{
 			flowLeft = totalSedimentHeightDifferenceLeft;

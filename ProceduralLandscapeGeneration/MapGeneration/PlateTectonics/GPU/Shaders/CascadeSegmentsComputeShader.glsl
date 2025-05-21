@@ -10,7 +10,7 @@ layout(std430, binding = 0) readonly restrict buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    uint LayerCount;
+    uint RockTypeCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -63,7 +63,7 @@ PlateTectonicsSegment Buoyancy(PlateTectonicsSegment segment)
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount;
     if(id >= heightMapLength)
     {
         return;

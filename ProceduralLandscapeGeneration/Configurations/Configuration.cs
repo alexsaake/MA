@@ -11,7 +11,7 @@ internal class Configuration : IConfiguration
 {
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
-    private readonly ILayersConfiguration myLayersConfiguration;
+    private readonly IRockTypesConfiguration myRockTypesConfiguration;
     private readonly IGridErosionConfiguration myGridErosionConfiguration;
     private readonly IParticleHydraulicErosionConfiguration myParticleHydraulicErosionConfiguration;
     private readonly IThermalErosionConfiguration myThermalErosionConfiguration;
@@ -24,11 +24,11 @@ internal class Configuration : IConfiguration
     public int ParallelExecutions { get; set; }
     public int ShadowMapResolution { get; set; }
 
-    public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, ILayersConfiguration layersConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
+    public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IRockTypesConfiguration rockTypesConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
-        myLayersConfiguration = layersConfiguration;
+        myRockTypesConfiguration = rockTypesConfiguration;
         myGridErosionConfiguration = gridErosionConfiguration;
         myParticleHydraulicErosionConfiguration = particleHydraulicErosionConfiguration;
         myThermalErosionConfiguration = thermalErosionConfiguration;
@@ -44,7 +44,7 @@ internal class Configuration : IConfiguration
     {
         myMapGenerationConfiguration.Initialize();
         myErosionConfiguration.Initialize();
-        myLayersConfiguration.Initialize();
+        myRockTypesConfiguration.Initialize();
         myGridErosionConfiguration.Initialize();
         myParticleHydraulicErosionConfiguration.Initialize();
         myThermalErosionConfiguration.Initialize();
@@ -62,7 +62,7 @@ internal class Configuration : IConfiguration
 
         myMapGenerationConfiguration.Dispose();
         myErosionConfiguration.Dispose();
-        myLayersConfiguration.Dispose();
+        myRockTypesConfiguration.Dispose();
         myGridErosionConfiguration.Dispose();
         myParticleHydraulicErosionConfiguration.Dispose();
         myThermalErosionConfiguration.Dispose();

@@ -1,6 +1,6 @@
 ﻿namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 
-internal struct LayersConfigurationShaderBuffer
+internal struct RockTypeConfigurationShaderBuffer
 {
     public float Hardness;
     public float TangensAngleOfRepose;

@@ -16,7 +16,7 @@ internal class ErosionSimulationModule : Module
         base.Load(containerBuilder);
 
         containerBuilder.RegisterType<ErosionSimulator>().As<IErosionSimulator>().SingleInstance();
-        containerBuilder.RegisterType<LayersConfiguration>().As<ILayersConfiguration>().SingleInstance();
+        containerBuilder.RegisterType<RockTypesConfiguration>().As<IRockTypesConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ParticleHydraulicErosion>().As<IParticleHydraulicErosion>();
         containerBuilder.RegisterType<GridHydraulicErosion>().As<IGridHydraulicErosion>();
         containerBuilder.RegisterType<GridThermalErosion>().As<IGridThermalErosion>();

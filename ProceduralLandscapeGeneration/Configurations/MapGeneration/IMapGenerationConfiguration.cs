@@ -6,7 +6,7 @@ namespace ProceduralLandscapeGeneration.Configurations.MapGeneration;
 internal interface IMapGenerationConfiguration : IDisposable
 {
     MapTypes MapType { get; set; }
-    uint LayerCount { get; }
+    uint RockTypeCount { get; }
     MapGenerationTypes MapGeneration { get; set; }
     ProcessorTypes MeshCreation { get; set; }
     ProcessorTypes HeightMapGeneration { get; set; }

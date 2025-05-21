@@ -25,7 +25,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
-    public uint LayerCount => MapType == MapTypes.HeightMap ? 1u : 3u;
+    public uint RockTypeCount => MapType == MapTypes.HeightMap ? 1u : 3u;
 
     private MapGenerationTypes myMapGeneration;
     public MapGenerationTypes MapGeneration
@@ -286,7 +286,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         MapGenerationConfigurationShaderBuffer mapGenerationConfigurationShaderBuffer = new MapGenerationConfigurationShaderBuffer()
         {
             HeightMultiplier = HeightMultiplier,
-            LayerCount = LayerCount,
+            RockTypeCount = RockTypeCount,
             AreTerrainColorsEnabled = AreTerrainColorsEnabled,
             ArePlateTectonicsPlateColorsEnabled = ArePlateTectonicsPlateColorsEnabled
         };

@@ -1,6 +1,6 @@
 ﻿namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation
 {
-    internal interface ILayersConfiguration : IDisposable
+    internal interface IRockTypesConfiguration : IDisposable
     {
         float BedrockHardness { get; set; }
         uint BedrockAngleOfRepose { get; set; }

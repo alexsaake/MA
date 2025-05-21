@@ -10,7 +10,7 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
-    uint LayerCount;
+    uint RockTypeCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -42,15 +42,15 @@ layout(std430, binding = 10) readonly restrict buffer thermalErosionConfiguratio
     ThermalErosionConfiguration thermalErosionConfiguration;
 };
 
-struct LayersConfiguration
+struct RockTypeConfiguration
 {
     float Hardness;
     float TangensAngleOfRepose;
 };
 
-layout(std430, binding = 18) buffer layersConfigurationShaderBuffer
+layout(std430, binding = 18) buffer rockTypesConfigurationShaderBuffer
 {
-    LayersConfiguration[] layersConfiguration;
+    RockTypeConfiguration[] rockTypesConfiguration;
 };
 
 uint myHeightMapSideLength;
@@ -58,21 +58,21 @@ uint myHeightMapLength;
 
 float TangensAngleOfRepose(uint index)
 {
-	for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+	for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
 	{
-		if(heightMap[index + layer * myHeightMapLength] > 0)
+		if(heightMap[index + rockType * myHeightMapLength] > 0)
 		{
-			return layersConfiguration[layer].TangensAngleOfRepose;
+			return rockTypesConfiguration[rockType].TangensAngleOfRepose;
 		}
 	}
-	return layersConfiguration[0].TangensAngleOfRepose;
+	return rockTypesConfiguration[0].TangensAngleOfRepose;
 }
 
 void RemoveFromTop(uint index, float sediment)
 {
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
     {
-        uint offsetIndex = index + layer * myHeightMapLength;
+        uint offsetIndex = index + rockType * myHeightMapLength;
         float height = heightMap[offsetIndex];
         if(height > 0)
         {
@@ -90,15 +90,15 @@ void RemoveFromTop(uint index, float sediment)
 
 void DepositeOnTop(uint index, float sediment)
 {
-    heightMap[index + (mapGenerationConfiguration.LayerCount - 1) * myHeightMapLength] += sediment;
+    heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength] += sediment;
 }
 
 float TotalHeight(uint index)
 {
     float height = 0;
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + layer * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapLength];
     }
     return height;
 }
@@ -119,7 +119,7 @@ bool IsOutOfBounds(ivec2 position)
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
-    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.LayerCount;
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount;
     if(index >= myHeightMapLength)
     {
         return;
