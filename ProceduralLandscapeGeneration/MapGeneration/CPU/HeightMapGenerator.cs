@@ -28,7 +28,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     public unsafe void GenerateNoiseHeightMap()
     {
-        float[] heightMap = GenerateNoiseMap(myMapGenerationConfiguration.RockTypeCount);
+        float[] heightMap = GenerateNoiseMap(myMapGenerationConfiguration.RockTypeCount, myMapGenerationConfiguration.LayerCount);
 
         uint heightMapShaderBufferSize = (uint)heightMap.Length * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapShaderBufferSize);
@@ -40,7 +40,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     public unsafe void GenerateNoiseHeatMap()
     {
-        float[] heatMap = GenerateNoiseMap(1);
+        float[] heatMap = GenerateNoiseMap(1, 1);
 
         uint heatMapShaderBufferSize = (uint)heatMap.Length * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeatMap, heatMapShaderBufferSize);
@@ -50,9 +50,9 @@ internal class HeightMapGenerator : IHeightMapGenerator
         }
     }
 
-    private float[] GenerateNoiseMap(uint rockTypes)
+    private float[] GenerateNoiseMap(uint rockTypes, uint layerCount)
     {
-        float[] noiseMap = new float[myMapGenerationConfiguration.MapSize * rockTypes];
+        float[] noiseMap = new float[myMapGenerationConfiguration.MapSize * rockTypes * layerCount];
 
         Vector2[] octaveOffsets = new Vector2[myMapGenerationConfiguration.NoiseOctaves];
         for (int octave = 0; octave < myMapGenerationConfiguration.NoiseOctaves; octave++)
@@ -126,7 +126,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateCubeMap()
     {
-        float[] map = new float[myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.RockTypeCount];
+        float[] map = new float[myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount];
 
         uint cubeSideLength = (uint)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
 

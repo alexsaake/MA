@@ -4,6 +4,7 @@ internal struct MapGenerationConfigurationShaderBuffer
 {
     public float HeightMultiplier;
     public uint RockTypeCount;
+    public uint LayerCount;
     public bool AreTerrainColorsEnabled;
     private readonly bool padding1;
     private readonly bool padding2;

@@ -47,6 +47,7 @@ struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     uint RockTypeCount;
+    uint LayerCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -79,7 +80,7 @@ float TotalHeight(uint index)
 void main()
 {
     uint index = gl_VertexID;
-    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount;
+    myHeightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount / mapGenerationConfiguration.LayerCount;
     if(index >= myHeightMapLength)
     {
         return;

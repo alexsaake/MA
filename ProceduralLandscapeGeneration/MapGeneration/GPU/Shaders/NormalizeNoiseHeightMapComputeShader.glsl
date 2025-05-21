@@ -11,6 +11,7 @@ struct MapGenerationConfiguration
 {
     float HeightMultiplier;
     uint RockTypeCount;
+    uint LayerCount;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
 };
@@ -44,7 +45,7 @@ float inverseLerp(float lower, float upper, float value)
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount;
+    uint heightMapLength = heightMap.length() / mapGenerationConfiguration.RockTypeCount / mapGenerationConfiguration.LayerCount;
     if(index >= heightMapLength)
     {
         return;

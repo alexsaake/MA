@@ -10,22 +10,35 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
 
     private bool myIsDisposed;
 
-    private MapTypes myMapType;
-    public MapTypes MapType
+    private uint myRockTypeCount;
+    public uint RockTypeCount
     {
-        get => myMapType;
+        get => myRockTypeCount;
         set
         {
-            if (myMapType == value)
+            if (myRockTypeCount == value)
             {
                 return;
             }
-            myMapType = value;
+            myRockTypeCount = value;
             ResetRequired?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    public uint RockTypeCount => MapType == MapTypes.HeightMap ? 1u : 3u;
+    private uint myLayerCount;
+    public uint LayerCount
+    {
+        get => myLayerCount;
+        set
+        {
+            if (myLayerCount == value)
+            {
+                return;
+            }
+            myLayerCount = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
 
     private MapGenerationTypes myMapGeneration;
     public MapGenerationTypes MapGeneration
@@ -249,7 +262,9 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
     {
         myShaderBuffers = shaderBuffers;
 
-        myMapType = MapTypes.MultiLayeredHeightMap;
+        myRockTypeCount = 3;
+        myLayerCount = 2;
+
         myMapGeneration = MapGenerationTypes.Noise;
         myMeshCreation = ProcessorTypes.CPU;
         myHeightMapGeneration = ProcessorTypes.GPU;
@@ -287,6 +302,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         {
             HeightMultiplier = HeightMultiplier,
             RockTypeCount = RockTypeCount,
+            LayerCount = LayerCount,
             AreTerrainColorsEnabled = AreTerrainColorsEnabled,
             ArePlateTectonicsPlateColorsEnabled = ArePlateTectonicsPlateColorsEnabled
         };
