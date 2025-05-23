@@ -40,5 +40,17 @@ void main()
     {
         bedrockHeight = 1.0;
     }
-    heightMap[index] = bedrockHeight;
+    if(mapGenerationConfiguration.LayerCount > 1
+        && mapGenerationConfiguration.SeaLevel > 0
+        && bedrockHeight >= mapGenerationConfiguration.SeaLevel)
+    {
+        heightMap[index] = mapGenerationConfiguration.SeaLevel;
+        bedrockHeight -= mapGenerationConfiguration.SeaLevel;
+        heightMap[index + mapGenerationConfiguration.RockTypeCount * heightMapLength] = mapGenerationConfiguration.SeaLevel;
+        heightMap[index + (mapGenerationConfiguration.RockTypeCount + mapGenerationConfiguration.LayerCount - 1) * heightMapLength] = bedrockHeight;
+    }
+    else
+    {
+        heightMap[index] = bedrockHeight;
+    }
 }

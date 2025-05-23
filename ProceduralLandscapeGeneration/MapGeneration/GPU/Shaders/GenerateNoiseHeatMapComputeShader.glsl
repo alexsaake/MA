@@ -110,16 +110,16 @@ layout(std430, binding = 12) buffer heightMapParametersShaderBuffer
 
 void main()
 {
-    uint id = gl_GlobalInvocationID.x;
+    uint index = gl_GlobalInvocationID.x;
     uint heatMapLength = heatMap.length();
-    if(id >= heatMapLength)
+    if(index >= heatMapLength)
     {
         return;
     }
     uint heightMapSideLength = uint(sqrt(heatMapLength));
 
-    uint x = id % heightMapSideLength;
-    uint y = id / heightMapSideLength;
+    uint x = index % heightMapSideLength;
+    uint y = index / heightMapSideLength;
     
     float amplitude = 1;
     float frequency = 1;
@@ -139,7 +139,7 @@ void main()
         frequency *= heightMapParameters.Lacunarity;
     }
 
-    heatMap[id] = noiseHeight;
+    heatMap[index] = noiseHeight;
     int val = int(noiseHeight * 100000);
     atomicMin(heightMapParameters.Min, val);
     atomicMax(heightMapParameters.Max, val);

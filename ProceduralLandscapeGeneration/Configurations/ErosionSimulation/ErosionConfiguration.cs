@@ -72,11 +72,10 @@ internal class ErosionConfiguration : IErosionConfiguration
         IsSimulationRunning = false;
         IterationsPerStep = 1;
         IsWaterAdded = false;
+
         IsWaterDisplayed = false;
         IsSedimentDisplayed = false;
-
         IsSeaLevelDisplayed = true;
-        mySeaLevel = 0.2f;
 
         myIsWaterKeptInBoundaries = false;
 
@@ -98,7 +97,6 @@ internal class ErosionConfiguration : IErosionConfiguration
         }
         ErosionConfigurationShaderBuffer erosionConfigurationShaderBuffer = new ErosionConfigurationShaderBuffer()
         {
-            SeaLevel = SeaLevel,
             TimeDelta = TimeDelta,
             IsWaterKeptInBoundaries = IsWaterKeptInBoundaries
         };

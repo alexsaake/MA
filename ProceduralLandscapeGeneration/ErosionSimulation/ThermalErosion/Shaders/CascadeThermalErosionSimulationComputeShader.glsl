@@ -94,12 +94,12 @@ void DepositeOnTop(uint index, float sediment)
     heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength] += sediment;
 }
 
-float TotalHeight(uint index)
+float TotalHeight(uint index, uint layer)
 {
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
     }
     return height;
 }
@@ -150,56 +150,59 @@ void main()
         ivec2(1, 1)
     };
 
-    struct Point
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
-        uint Index;
-        float TotalHeight;
-        float Distance;
-    } neighborCells[8];
-
-    int neighbors = 0;
-    for(int neighbor = 0; neighbor < neighboringPositions.length(); neighbor++)
-    {
-        ivec2 neighboringPosition = neighboringPositions[neighbor];
-        ivec2 neighborPosition = position + neighboringPosition;
-
-        if(IsOutOfBounds(neighborPosition))
+        struct Point
         {
-            continue;
-        }
-
-        uint neightborIndex = GetIndexVector(neighborPosition);
-        neighborCells[neighbors].Index = neightborIndex;
-        neighborCells[neighbors].TotalHeight = TotalHeight(neightborIndex);
-        neighborCells[neighbors].Distance = length(neighboringPosition);
-        neighbors++;
-    }
-
-    // Local Matrix, Target Height
-    float heightAverage = TotalHeight(index);
-    for(int neighbor = 0; neighbor < neighbors; neighbor++)
-    {
-        heightAverage += neighborCells[neighbor].TotalHeight;
-    }
-    heightAverage /= float(neighbors + 1);
-
-    float tangensAngleOfRepose = TangensAngleOfRepose(index);
-    for (int neighbor = 0; neighbor < neighbors; neighbor++)
-    {
-        // Full Height-Different Between Positions!
-        float heightDifference = heightAverage - neighborCells[neighbor].TotalHeight;
-	    float tangensAngle = heightDifference * mapGenerationConfiguration.HeightMultiplier / 1.0 / neighborCells[neighbor].Distance;
-        if (heightDifference < 0
-            || tangensAngle < tangensAngleOfRepose)
-        {
-            continue;
-        }
-
-        // Actual Amount Transferred
-        float transfer = heightDifference * thermalErosionConfiguration.ErosionRate * erosionConfiguration.TimeDelta;
+            uint Index;
+            float TotalHeight;
+            float Distance;
+        } neighborCells[8];
         
-        RemoveFromTop(index, transfer);
-        DepositeOnTop(neighborCells[neighbor].Index, transfer);
+        int neighbors = 0;
+        for(int neighbor = 0; neighbor < neighboringPositions.length(); neighbor++)
+        {
+            ivec2 neighboringPosition = neighboringPositions[neighbor];
+            ivec2 neighborPosition = position + neighboringPosition;
+
+            if(IsOutOfBounds(neighborPosition))
+            {
+                continue;
+            }
+
+            uint neightborIndex = GetIndexVector(neighborPosition);
+            neighborCells[neighbors].Index = neightborIndex;
+            neighborCells[neighbors].TotalHeight = TotalHeight(neightborIndex, layer);
+            neighborCells[neighbors].Distance = length(neighboringPosition);
+            neighbors++;
+        }
+
+        // Local Matrix, Target Height
+        float heightAverage = TotalHeight(index, layer);
+        for(int neighbor = 0; neighbor < neighbors; neighbor++)
+        {
+            heightAverage += neighborCells[neighbor].TotalHeight;
+        }
+        heightAverage /= float(neighbors + 1);
+
+        float tangensAngleOfRepose = TangensAngleOfRepose(index);
+        for (int neighbor = 0; neighbor < neighbors; neighbor++)
+        {
+            // Full Height-Different Between Positions!
+            float heightDifference = heightAverage - neighborCells[neighbor].TotalHeight;
+	        float tangensAngle = heightDifference * mapGenerationConfiguration.HeightMultiplier / 1.0 / neighborCells[neighbor].Distance;
+            if (heightDifference < 0
+                || tangensAngle < tangensAngleOfRepose)
+            {
+                continue;
+            }
+
+            // Actual Amount Transferred
+            float transfer = heightDifference * thermalErosionConfiguration.ErosionRate * erosionConfiguration.TimeDelta;
+        
+            RemoveFromTop(index, transfer);
+            DepositeOnTop(neighborCells[neighbor].Index, transfer);
+        }
     }
     
     memoryBarrier();

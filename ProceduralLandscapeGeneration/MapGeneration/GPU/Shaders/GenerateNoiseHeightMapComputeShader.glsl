@@ -125,16 +125,16 @@ layout(std430, binding = 12) buffer heightMapParametersShaderBuffer
 
 void main()
 {
-    uint id = gl_GlobalInvocationID.x;
+    uint index = gl_GlobalInvocationID.x;
     uint heightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(id >= heightMapLength)
+    if(index >= heightMapLength)
     {
         return;
     }
     uint heightMapSideLength = uint(sqrt(heightMapLength));
 
-    uint x = id % heightMapSideLength;
-    uint y = id / heightMapSideLength;
+    uint x = index % heightMapSideLength;
+    uint y = index / heightMapSideLength;
     
     float amplitude = 1;
     float frequency = 1;
@@ -153,8 +153,8 @@ void main()
         amplitude *= heightMapParameters.Persistence;
         frequency *= heightMapParameters.Lacunarity;
     }
-
-    heightMap[id] = noiseHeight;
+    
+    heightMap[index] = noiseHeight;
     int val = int(noiseHeight * 100000);
     atomicMin(heightMapParameters.Min, val);
     atomicMax(heightMapParameters.Max, val);

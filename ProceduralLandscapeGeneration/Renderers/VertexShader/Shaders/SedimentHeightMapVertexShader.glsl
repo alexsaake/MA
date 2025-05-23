@@ -81,12 +81,23 @@ vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
 
 uint myHeightMapLength;
 
-float totalHeight(uint index)
+float TotalHeightAllLayers(uint index)
 {
     float height = 0;
-    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        height += heightMap[index + rockType * myHeightMapLength];
+        if(layer > 0)
+        {
+            height += heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapLength];
+        }
+        for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+        {
+            height += heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
+        }
+        if(height > 0)
+        {
+            return height;
+        }
     }
     return height;
 }
@@ -123,6 +134,6 @@ void main()
     
     fragColor = sedimentColor;
     float zOffset = 0.00004;
-    float height = totalHeight(index);
+    float height = TotalHeightAllLayers(index);
     gl_Position =  mvp * vec4(vertexPosition.xy, (height - zOffset + suspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 }

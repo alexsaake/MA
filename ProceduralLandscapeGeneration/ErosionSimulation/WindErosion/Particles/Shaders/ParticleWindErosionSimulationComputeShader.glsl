@@ -98,12 +98,12 @@ void DepositeOnTop(uint index, float sediment)
     heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength] += sediment;
 }
 
-float TotalHeight(uint index)
+float TotalHeight(uint index, uint layer)
 {
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
     }
     return height;
 }

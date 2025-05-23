@@ -68,12 +68,23 @@ vec4 waterColor = vec4(0.0, 0.0, 1.0, 0.25);
 
 uint myHeightMapLength;
 
-float TotalHeight(uint index)
+float TotalHeightAllLayers(uint index)
 {
     float height = 0;
-    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        height += heightMap[index + rockType * myHeightMapLength];
+        if(layer > 0)
+        {
+            height += heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapLength];
+        }
+        for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+        {
+            height += heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
+        }
+        if(height > 0)
+        {
+            return height;
+        }
     }
     return height;
 }
@@ -102,6 +113,6 @@ void main()
 
     fragColor = waterColor;
     float zOffset = 0.00004;
-    float height = TotalHeight(index);
+    float height = TotalHeightAllLayers(index);
     gl_Position =  mvp * vec4(vertexPosition.xy, (height - zOffset + waterHeight) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 }

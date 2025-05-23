@@ -24,7 +24,7 @@
 	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\0RainComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\1FlowComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\1VerticalFlowComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\2WaterSedimentMoveVelocityMapEvaporateComputeShader.glsl">

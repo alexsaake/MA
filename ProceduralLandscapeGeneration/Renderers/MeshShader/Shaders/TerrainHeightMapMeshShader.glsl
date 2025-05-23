@@ -139,7 +139,7 @@ void addVertex(uint vertex, uint x, uint y)
     uint index = GetIndex(x, y);
     float height = TotalHeight(index);
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
-    float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
+    float seaLevelHeight = mapGenerationConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     vec3 normal = GetScaledNormal(x, y);
     vec4 position = mvp * vec4(x, y, terrainHeight, 1.0);
 

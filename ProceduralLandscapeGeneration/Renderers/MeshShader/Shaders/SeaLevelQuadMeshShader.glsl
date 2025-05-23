@@ -52,21 +52,9 @@ uniform mat4 mvp;
 
 vec4 oceanColor = vec4(0, 0.4, 0.8, 0.5);
 
-uint myHeightMapLength;
-
-float totalHeight(uint index)
+void AddVertex(uint vertex, uint x, uint y)
 {
-    float height = 0;
-    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
-    {
-        height += heightMap[index + rockType * myHeightMapLength];
-    }
-    return height;
-}
-
-void addVertex(uint vertex, uint x, uint y)
-{
-    float seaLevelHeight = erosionConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
+    float seaLevelHeight = mapGenerationConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     vec4 position = mvp * vec4(x, y, seaLevelHeight, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
@@ -75,13 +63,13 @@ void addVertex(uint vertex, uint x, uint y)
 
 void main()
 {
-    myHeightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    uint mapSize = uint(sqrt(myHeightMapLength));
+    uint heightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    uint mapSize = uint(sqrt(heightMapLength));
 
-    addVertex(0, 0, 0);
-    addVertex(1, mapSize, 0);
-    addVertex(2, mapSize, mapSize);
-    addVertex(3, 0, mapSize);
+    AddVertex(0, 0, 0);
+    AddVertex(1, mapSize, 0);
+    AddVertex(2, mapSize, mapSize);
+    AddVertex(3, 0, mapSize);
             
     gl_PrimitiveIndicesNV[0] = 0;
     gl_PrimitiveIndicesNV[1] = 1;

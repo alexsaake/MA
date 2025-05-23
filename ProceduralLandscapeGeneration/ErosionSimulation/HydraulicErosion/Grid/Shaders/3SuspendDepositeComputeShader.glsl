@@ -118,12 +118,12 @@ void DepositeOnTop(uint index, float sediment)
     heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength] += sediment;
 }
 
-float totalHeight(uint index)
+float TotalHeight(uint index, uint layer)
 {
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
     }
     return height;
 }
@@ -146,82 +146,86 @@ uint GetIndexVector(vec2 position)
 //https://github.com/patiltanma/15618-FinalProject/blob/master/Renderer/Renderer/erosion_kernel.cu
 void main()
 {
-    uint id = gl_GlobalInvocationID.x;
+    uint index = gl_GlobalInvocationID.x;
     myHeightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(id >= myHeightMapLength)
+    if(index >= myHeightMapLength)
     {
         return;
     }
     myHeightMapSideLength = uint(sqrt(myHeightMapLength));
 
-    uint x = id % myHeightMapSideLength;
-    uint y = id / myHeightMapSideLength;
+    uint x = index % myHeightMapSideLength;
+    uint y = index / myHeightMapSideLength;
     
-    GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[id];
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        uint gridHydraulicErosionCellIndexOffset = layer * myHeightMapLength;
+        GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[index + gridHydraulicErosionCellIndexOffset];
 
-    float height = totalHeight(id);
-    float heightLeft;
-    float heightRight;
-    float heightDown;
-    float heightUp;
-    if(x > 0)
-    {
-        heightLeft = totalHeight(GetIndex(x - 1, y));
-    }
-    else
-    {
-        heightLeft = height;
-    }
-    if(x < myHeightMapSideLength - 1)
-    {
-        heightRight = totalHeight(GetIndex(x + 1, y));
-    }
-    else
-    {
-        heightRight = height;
-    }
-    if(y > 0)
-    {
-        heightDown = totalHeight(GetIndex(x, y - 1));
-    }
-    else
-    {
-        heightDown = height;
-    }
-    if(y < myHeightMapSideLength - 1)
-    {
-        heightUp = totalHeight(GetIndex(x, y + 1));
-    }
-    else
-    {
-        heightUp = height;
-    }
+        float height = TotalHeight(index, layer);
+        float heightLeft;
+        float heightRight;
+        float heightDown;
+        float heightUp;
+        if(x > 0)
+        {
+            heightLeft = TotalHeight(GetIndex(x - 1, y), layer);
+        }
+        else
+        {
+            heightLeft = height;
+        }
+        if(x < myHeightMapSideLength - 1)
+        {
+            heightRight = TotalHeight(GetIndex(x + 1, y), layer);
+        }
+        else
+        {
+            heightRight = height;
+        }
+        if(y > 0)
+        {
+            heightDown = TotalHeight(GetIndex(x, y - 1), layer);
+        }
+        else
+        {
+            heightDown = height;
+        }
+        if(y < myHeightMapSideLength - 1)
+        {
+            heightUp = TotalHeight(GetIndex(x, y + 1), layer);
+        }
+        else
+        {
+            heightUp = height;
+        }
 
-	vec3 dhdx = vec3(1.0, 0.0, (heightRight - heightLeft) / 2.0 * mapGenerationConfiguration.HeightMultiplier);
-	vec3 dhdy = vec3(0.0, 1.0, (heightUp - heightDown) / 2.0 * mapGenerationConfiguration.HeightMultiplier);
-	vec3 normal = normalize(cross(dhdx, dhdy));
+	    vec3 dhdx = vec3(1.0, 0.0, (heightRight - heightLeft) / 2.0 * mapGenerationConfiguration.HeightMultiplier);
+	    vec3 dhdy = vec3(0.0, 1.0, (heightUp - heightDown) / 2.0 * mapGenerationConfiguration.HeightMultiplier);
+	    vec3 normal = normalize(cross(dhdx, dhdy));
     
-    float dotProd = dot(normal, vec3(0.0, 0.0, 1.0));
-    float alpha = acos(dotProd);
-    float tiltAngle = sin(alpha);
+        float dotProd = dot(normal, vec3(0.0, 0.0, 1.0));
+        float alpha = acos(dotProd);
+        float tiltAngle = sin(alpha);
 	
-	float erosionDepthLimit = (gridErosionConfiguration.MaximalErosionDepth - min(gridErosionConfiguration.MaximalErosionDepth, gridHydraulicErosionCell.WaterHeight)) / gridErosionConfiguration.MaximalErosionDepth;
-	float sedimentCapacity = gridErosionConfiguration.SedimentCapacity * tiltAngle * length(gridHydraulicErosionCell.WaterVelocity) * erosionDepthLimit;
+	    float erosionDepthLimit = (gridErosionConfiguration.MaximalErosionDepth - min(gridErosionConfiguration.MaximalErosionDepth, gridHydraulicErosionCell.WaterHeight)) / gridErosionConfiguration.MaximalErosionDepth;
+	    float sedimentCapacity = gridErosionConfiguration.SedimentCapacity * tiltAngle * length(gridHydraulicErosionCell.WaterVelocity) * erosionDepthLimit;
 
-	if (sedimentCapacity > gridHydraulicErosionCell.SuspendedSediment)
-	{
-		float soilSuspended = max(gridErosionConfiguration.SuspensionRate * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
-		float suspendedSediment = SuspendFromTop(id, soilSuspended);
-		gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
-	}
-	else if (sedimentCapacity < gridHydraulicErosionCell.SuspendedSediment)
-	{
-		float soilDeposited = min(gridErosionConfiguration.DepositionRate * (gridHydraulicErosionCell.SuspendedSediment - sedimentCapacity) * erosionConfiguration.TimeDelta, gridHydraulicErosionCell.SuspendedSediment);
-		DepositeOnTop(id, soilDeposited);
-		gridHydraulicErosionCell.SuspendedSediment -= soilDeposited;
-	}
+	    if (sedimentCapacity > gridHydraulicErosionCell.SuspendedSediment)
+	    {
+		    float soilSuspended = max(gridErosionConfiguration.SuspensionRate * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
+		    float suspendedSediment = SuspendFromTop(index, soilSuspended);
+		    gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
+	    }
+	    else if (sedimentCapacity < gridHydraulicErosionCell.SuspendedSediment)
+	    {
+		    float soilDeposited = min(gridErosionConfiguration.DepositionRate * (gridHydraulicErosionCell.SuspendedSediment - sedimentCapacity) * erosionConfiguration.TimeDelta, gridHydraulicErosionCell.SuspendedSediment);
+		    DepositeOnTop(index, soilDeposited);
+		    gridHydraulicErosionCell.SuspendedSediment -= soilDeposited;
+	    }
 	
-    gridHydraulicErosionCells[id] = gridHydraulicErosionCell;
+        gridHydraulicErosionCells[index + gridHydraulicErosionCellIndexOffset] = gridHydraulicErosionCell;
+    }
     
     memoryBarrier();
 }

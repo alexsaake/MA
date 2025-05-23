@@ -53,4 +53,15 @@ void main()
     }
 
     heightMap[index] = inverseLerp(float(heightMapParameters.Min) / 100000, float(heightMapParameters.Max) / 100000, heightMap[index]);
+    float noiseHeight = heightMap[index];
+
+    if(mapGenerationConfiguration.LayerCount > 1
+        && mapGenerationConfiguration.SeaLevel > 0
+        && noiseHeight >= mapGenerationConfiguration.SeaLevel)
+    {
+        heightMap[index] = mapGenerationConfiguration.SeaLevel;
+        noiseHeight -= mapGenerationConfiguration.SeaLevel;
+        heightMap[index + mapGenerationConfiguration.RockTypeCount * heightMapLength] = mapGenerationConfiguration.SeaLevel;
+        heightMap[index + (mapGenerationConfiguration.RockTypeCount + mapGenerationConfiguration.LayerCount - 1) * heightMapLength] = noiseHeight;
+    }
 }

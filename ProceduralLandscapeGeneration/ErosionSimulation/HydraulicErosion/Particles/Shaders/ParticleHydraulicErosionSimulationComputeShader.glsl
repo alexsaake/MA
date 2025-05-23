@@ -133,12 +133,12 @@ void DepositeOnTop(uint index, float sediment)
     heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength] += sediment;
 }
 
-float totalHeight(uint index)
+float TotalHeight(uint index, uint layer)
 {
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
     }
     return height;
 }
@@ -151,14 +151,14 @@ vec3 GetScaledNormal(uint x, uint y)
         return vec3(0.0, 0.0, 1.0);
     }
     
-    float rb = totalHeight(GetIndex(x + 1, y - 1));
-    float lb = totalHeight(GetIndex(x - 1, y - 1));
-    float r = totalHeight(GetIndex(x + 1, y));
-    float l = totalHeight(GetIndex(x - 1, y));
-    float rt = totalHeight(GetIndex(x + 1, y + 1));
-    float lt = totalHeight(GetIndex(x - 1, y + 1));
-    float t = totalHeight(GetIndex(x, y + 1));
-    float b = totalHeight(GetIndex(x, y - 1));
+    float rb = TotalHeight(GetIndex(x + 1, y - 1));
+    float lb = TotalHeight(GetIndex(x - 1, y - 1));
+    float r = TotalHeight(GetIndex(x + 1, y));
+    float l = TotalHeight(GetIndex(x - 1, y));
+    float rt = TotalHeight(GetIndex(x + 1, y + 1));
+    float lt = TotalHeight(GetIndex(x - 1, y + 1));
+    float t = TotalHeight(GetIndex(x, y + 1));
+    float b = TotalHeight(GetIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -181,7 +181,7 @@ bool Move()
 
     if(myParticleHydraulicErosion.Age > particleHydraulicErosionConfiguration.MaxAge
     || myParticleHydraulicErosion.Volume < particleHydraulicErosionConfiguration.MinimumVolume
-    || totalHeight(GetIndexVector(position)) <= erosionConfiguration.SeaLevel - particleHydraulicErosionConfiguration.MaximalErosionDepth)
+    || TotalHeight(GetIndexVector(position)) <= mapGenerationConfiguration.SeaLevel - particleHydraulicErosionConfiguration.MaximalErosionDepth)
     {
         DepositeOnTop(GetIndexVector(position), myParticleHydraulicErosion.Sediment);
         myParticleHydraulicErosion.Sediment = 0;
@@ -216,15 +216,15 @@ bool Interact()
     float currentHeight;
     if(IsOutOfBounds(ivec2(myParticleHydraulicErosion.Position)))
     {
-        currentHeight = 0.99 * totalHeight(GetIndexVector(originalPosition));
+        currentHeight = 0.99 * TotalHeight(GetIndexVector(originalPosition));
     }
     else
     {
         ivec2 currentPosition = ivec2(myParticleHydraulicErosion.Position);
-        currentHeight = totalHeight(GetIndexVector(currentPosition));
+        currentHeight = TotalHeight(GetIndexVector(currentPosition));
     }
 
-    float heightDifference = totalHeight(GetIndexVector(originalPosition)) - currentHeight;
+    float heightDifference = TotalHeight(GetIndexVector(originalPosition)) - currentHeight;
     if(heightDifference < 0)
     {
         heightDifference = 0;
