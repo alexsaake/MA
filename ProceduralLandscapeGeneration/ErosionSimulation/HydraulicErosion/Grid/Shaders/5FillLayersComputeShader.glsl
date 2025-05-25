@@ -57,7 +57,7 @@ layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderB
     ErosionConfiguration erosionConfiguration;
 };
 
-struct GridErosionConfiguration
+struct GridHydraulicErosionConfiguration
 {
     float WaterIncrease;
     float Gravity;
@@ -69,16 +69,16 @@ struct GridErosionConfiguration
     float EvaporationRate;
 };
 
-layout(std430, binding = 9) buffer gridErosionConfigurationShaderBuffer
+layout(std430, binding = 9) buffer gridHydraulicErosionConfigurationShaderBuffer
 {
-    GridErosionConfiguration gridErosionConfiguration;
+    GridHydraulicErosionConfiguration gridHydraulicErosionConfiguration;
 };
 
-uint myHeightMapLength;
+uint myHeightMapPlaneSize;
 
 float LayerFloorHeight(uint index, uint layer)
 {
-    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapLength];
+    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
 float TotalHeightMapLayerHeight(uint index, uint layer)
@@ -91,14 +91,14 @@ float TotalHeightMapLayerHeight(uint index, uint layer)
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
     }
     return height;
 }
 
 void SetLayerFloorHeight(uint index, uint layer, float value)
 {
-    heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapLength] = value;
+    heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = value;
 }
 
 //horizontal flow
@@ -107,8 +107,8 @@ void SetLayerFloorHeight(uint index, uint layer, float value)
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
-    myHeightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(index >= myHeightMapLength)
+    myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(index >= myHeightMapPlaneSize)
     {
         return;
     }
@@ -124,8 +124,8 @@ void main()
         {
             SetLayerFloorHeight(index, layer, mapGenerationConfiguration.SeaLevel);
 
-            uint currentLayerGridHydraulicErosionCellsIndex = index + layer * myHeightMapLength;
-            uint aboveLayerGridHydraulicErosionCellsIndex = index + (layer + 1) * myHeightMapLength;
+            uint currentLayerGridHydraulicErosionCellsIndex = index + layer * myHeightMapPlaneSize;
+            uint aboveLayerGridHydraulicErosionCellsIndex = index + (layer + 1) * myHeightMapPlaneSize;
             gridHydraulicErosionCells[aboveLayerGridHydraulicErosionCellsIndex].WaterHeight += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].WaterHeight;
             gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].WaterHeight = 0;
             gridHydraulicErosionCells[aboveLayerGridHydraulicErosionCellsIndex].SuspendedSediment += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].SuspendedSediment;
@@ -134,8 +134,8 @@ void main()
             float sedimentToFill = mapGenerationConfiguration.SeaLevel;
             for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
             {
-                uint currentLayerRockTypeHeightMapIndex = index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength;
-                uint aboveLayerRockTypeHeightMapIndex = index + rockType * myHeightMapLength + ((layer + 1) * mapGenerationConfiguration.RockTypeCount + (layer + 1)) * myHeightMapLength;
+                uint currentLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+                uint aboveLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + ((layer + 1) * mapGenerationConfiguration.RockTypeCount + (layer + 1)) * myHeightMapPlaneSize;
                 float currentLayerRockTypeHeight = heightMap[currentLayerRockTypeHeightMapIndex];
                 sedimentToFill -= currentLayerRockTypeHeight;
                 if(sedimentToFill < 0)

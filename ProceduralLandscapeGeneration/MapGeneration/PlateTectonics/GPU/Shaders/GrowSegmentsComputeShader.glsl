@@ -69,12 +69,12 @@ float Langmuir(float k, float x)
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(id >= heightMapLength)
+    uint heightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(id >= heightMapPlaneSize)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(heightMapLength));
+    myHeightMapSideLength = uint(sqrt(heightMapPlaneSize));
 
     PlateTectonicsSegment plateTectonicsSegment = plateTectonicsSegments[id];
 

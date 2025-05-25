@@ -79,7 +79,7 @@ out vec4 fragColor;
 
 vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
 
-uint myHeightMapLength;
+uint myHeightMapPlaneSize;
 
 float TotalHeightAllLayers(uint index)
 {
@@ -88,11 +88,11 @@ float TotalHeightAllLayers(uint index)
     {
         if(layer > 0)
         {
-            height += heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapLength];
+            height += heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
         }
         for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
         {
-            height += heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
+            height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
         }
         if(height > 0)
         {
@@ -107,7 +107,7 @@ float TotalSuspendedSediment(uint index)
     float suspendedSediment = 0;
     for(int layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
-        suspendedSediment += gridHydraulicErosionCells[index + layer * myHeightMapLength].SuspendedSediment;
+        suspendedSediment += gridHydraulicErosionCells[index + layer * myHeightMapPlaneSize].SuspendedSediment;
     }
     return suspendedSediment;
 }
@@ -115,12 +115,12 @@ float TotalSuspendedSediment(uint index)
 void main()
 {
     uint index = gl_VertexID;
-    myHeightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(index >= myHeightMapLength)
+    myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(index >= myHeightMapPlaneSize)
     {
         return;
     }
-    uint sideLength = uint(sqrt(myHeightMapLength));    
+    uint sideLength = uint(sqrt(myHeightMapPlaneSize));    
     uint x = index % sideLength;
     uint y = index / sideLength;
 

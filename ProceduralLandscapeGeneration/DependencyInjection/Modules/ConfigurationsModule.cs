@@ -18,7 +18,7 @@ internal class ConfigurationsModule : Module
         containerBuilder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
         containerBuilder.RegisterType<MapGenerationConfiguration>().As<IMapGenerationConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ErosionConfiguration>().As<IErosionConfiguration>().SingleInstance();
-        containerBuilder.RegisterType<GridErosionConfiguration>().As<IGridErosionConfiguration>().SingleInstance();
+        containerBuilder.RegisterType<GridHydraulicErosionConfiguration>().As<IGridHydraulicErosionConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ParticleHydraulicErosionConfiguration>().As<IParticleHydraulicErosionConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ParticleWindErosionConfiguration>().As<IParticleWindErosionConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ThermalErosionConfiguration>().As<IThermalErosionConfiguration>().SingleInstance();

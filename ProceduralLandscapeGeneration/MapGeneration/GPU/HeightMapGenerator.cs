@@ -37,18 +37,18 @@ internal class HeightMapGenerator : IHeightMapGenerator
         myShaderBuffers.Add(ShaderBufferTypes.HeightMapParameters, heightMapParametersShaderBufferSize);
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMapParameters], &heightMapParametersShaderBuffer, heightMapParametersShaderBufferSize, 0);
 
-        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * (myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount + myMapGenerationConfiguration.LayerCount - 1) * sizeof(float);
+        uint heightMapBufferSize = myMapGenerationConfiguration.HeightMapPlaneSize * (myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount + myMapGenerationConfiguration.LayerCount - 1) * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
         ComputeShaderProgram generateNoiseHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateNoiseHeightMapComputeShader.glsl");
         Rlgl.EnableShader(generateNoiseHeightMapComputeShaderProgram.Id);
-        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
+        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.HeightMapPlaneSize, 1, 1);
         Rlgl.DisableShader();
         generateNoiseHeightMapComputeShaderProgram.Dispose();
 
         ComputeShaderProgram normalizeNoiseHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}NormalizeNoiseHeightMapComputeShader.glsl");
         Rlgl.EnableShader(normalizeNoiseHeightMapComputeShaderProgram.Id);
-        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
+        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.HeightMapPlaneSize, 1, 1);
         Rlgl.DisableShader();
         normalizeNoiseHeightMapComputeShaderProgram.Dispose();
 
@@ -71,18 +71,18 @@ internal class HeightMapGenerator : IHeightMapGenerator
         myShaderBuffers.Add(ShaderBufferTypes.HeightMapParameters, heatMapParametersBufferSize);
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMapParameters], &heatMapParametersShaderBuffer, heatMapParametersBufferSize, 0);
 
-        uint heatMapBufferSize = myMapGenerationConfiguration.MapSize * sizeof(float);
+        uint heatMapBufferSize = myMapGenerationConfiguration.HeightMapPlaneSize * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeatMap, heatMapBufferSize);
 
         ComputeShaderProgram generateNoiseHeatMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateNoiseHeatMapComputeShader.glsl");
         Rlgl.EnableShader(generateNoiseHeatMapComputeShaderProgram.Id);
-        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
+        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.HeightMapPlaneSize, 1, 1);
         Rlgl.DisableShader();
         generateNoiseHeatMapComputeShaderProgram.Dispose();
 
         ComputeShaderProgram normalizeNoiseHeatMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}NormalizeNoiseHeatMapComputeShader.glsl");
         Rlgl.EnableShader(normalizeNoiseHeatMapComputeShaderProgram.Id);
-        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
+        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.HeightMapPlaneSize, 1, 1);
         Rlgl.DisableShader();
         normalizeNoiseHeatMapComputeShaderProgram.Dispose();
 
@@ -105,7 +105,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateCubeMap()
     {
-        float[] map = new float[myMapGenerationConfiguration.MapSize * (myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount + myMapGenerationConfiguration.LayerCount - 1)];
+        float[] map = new float[myMapGenerationConfiguration.HeightMapPlaneSize * (myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount + myMapGenerationConfiguration.LayerCount - 1)];
 
         uint cubeSideLength = (uint)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
 
@@ -134,19 +134,19 @@ internal class HeightMapGenerator : IHeightMapGenerator
             for (uint i = 0; i < size; i++)
             {
                 uint index = myMapGenerationConfiguration.GetIndex(x + i, y + j);
-                map[index + rockTypes * myMapGenerationConfiguration.MapSize] = 1;
+                map[index + rockTypes * myMapGenerationConfiguration.HeightMapPlaneSize] = 1;
             }
         }
     }
 
     public unsafe void GenerateSlopedCanyonHeightMap()
     {
-        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * (myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount + myMapGenerationConfiguration.LayerCount - 1) * sizeof(float);
+        uint heightMapBufferSize = myMapGenerationConfiguration.HeightMapPlaneSize * (myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount + myMapGenerationConfiguration.LayerCount - 1) * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
         ComputeShaderProgram generateSlopedCanyonHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateSlopedCanyonHeightMapComputeShader.glsl");
         Rlgl.EnableShader(generateSlopedCanyonHeightMapComputeShaderProgram.Id);
-        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
+        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.HeightMapPlaneSize, 1, 1);
         Rlgl.DisableShader();
         generateSlopedCanyonHeightMapComputeShaderProgram.Dispose();
 
@@ -155,12 +155,12 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     public unsafe void GenerateCoastlineCliffHeightMap()
     {
-        uint heightMapBufferSize = myMapGenerationConfiguration.MapSize * (myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount + myMapGenerationConfiguration.LayerCount - 1) * sizeof(float);
+        uint heightMapBufferSize = myMapGenerationConfiguration.HeightMapPlaneSize * (myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount + myMapGenerationConfiguration.LayerCount - 1) * sizeof(float);
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
 
         ComputeShaderProgram generateCoastlineCliffHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateCoastlineCliffHeightMapComputeShader.glsl");
         Rlgl.EnableShader(generateCoastlineCliffHeightMapComputeShaderProgram.Id);
-        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.MapSize, 1, 1);
+        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.HeightMapPlaneSize, 1, 1);
         Rlgl.DisableShader();
         generateCoastlineCliffHeightMapComputeShaderProgram.Dispose();
 

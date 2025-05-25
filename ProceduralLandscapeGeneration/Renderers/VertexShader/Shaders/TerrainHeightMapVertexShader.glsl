@@ -50,13 +50,13 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
 };
 
 uint myHeightMapSideLength;
-uint myHeightMapLength;
+uint myHeightMapPlaneSize;
 
 float FineSedimentHeight(uint index)
 {
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        float height = heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
+        float height = heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
         if(height > 0)
         {
             return height;
@@ -69,7 +69,7 @@ float CoarseSedimentHeight(uint index)
 {
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        float height = heightMap[index + 1 * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
+        float height = heightMap[index + 1 * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
         if(height > 0)
         {
             return height;
@@ -85,11 +85,11 @@ float TotalHeightAllLayers(uint index)
     {
         if(layer > 0)
         {
-            height += heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapLength];
+            height += heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
         }
         for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
         {
-            height += heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
+            height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
         }
         if(height > 0)
         {
@@ -152,12 +152,12 @@ vec3 fineSedimentColor = beachColor;
 void main()
 {
     uint index = gl_VertexID;
-    myHeightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(index >= myHeightMapLength)
+    myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(index >= myHeightMapPlaneSize)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapPlaneSize));
 
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;

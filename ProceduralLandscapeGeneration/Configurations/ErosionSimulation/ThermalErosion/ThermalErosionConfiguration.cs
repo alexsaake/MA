@@ -1,4 +1,5 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
+using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 
@@ -7,6 +8,7 @@ namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation.Thermal
 internal class ThermalErosionConfiguration : IThermalErosionConfiguration
 {
     private readonly IShaderBuffers myShaderBuffers;
+    private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
 
     private bool myIsDisposed;
 
@@ -25,24 +27,12 @@ internal class ThermalErosionConfiguration : IThermalErosionConfiguration
         }
     }
 
-    private float myDampening;
-    public float Dampening
-    {
-        get => myDampening;
-        set
-        {
-            if (myDampening == value)
-            {
-                return;
-            }
-            myDampening = value;
-            UpdateShaderBuffer();
-        }
-    }
+    public uint GridThermalErosionCellsSize => myMapGenerationConfiguration.HeightMapPlaneSize * myMapGenerationConfiguration.LayerCount;
 
-    public ThermalErosionConfiguration(IShaderBuffers shaderBuffers)
+    public ThermalErosionConfiguration(IShaderBuffers shaderBuffers, IMapGenerationConfiguration mapGenerationConfiguration)
     {
         myShaderBuffers = shaderBuffers;
+        myMapGenerationConfiguration = mapGenerationConfiguration;
 
         myErosionRate = 0.2f;
     }

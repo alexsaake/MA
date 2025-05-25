@@ -74,14 +74,14 @@ uint GetIndex(uint x, uint y)
 
 vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
 
-uint myHeightMapLength;
+uint myHeightMapPlaneSize;
 
 float totalHeight(uint index)
 {
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapPlaneSize];
     }
     return height;
 }
@@ -101,12 +101,12 @@ void addVertex(uint vertex, uint x, uint y)
 void main()
 {
     uint threadNumber = gl_GlobalInvocationID.x;
-    myHeightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(threadNumber >= myHeightMapLength)
+    myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(threadNumber >= myHeightMapPlaneSize)
     {
         return;
     }
-    myMapSize = uint(sqrt(myHeightMapLength));
+    myMapSize = uint(sqrt(myHeightMapPlaneSize));
     uint meshletSize = uint(sqrt(VERTICES));
     uint yMeshletCount = uint(ceil(float(myMapSize) / (meshletSize - 1)));
     uint xOffset = uint(floor(threadNumber / yMeshletCount)) * (meshletSize - 1);

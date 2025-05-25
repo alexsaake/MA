@@ -101,7 +101,7 @@ internal class ParticleHydraulicErosion : IParticleHydraulicErosion
         uint[] randomParticleIndices = new uint[myParticleHydraulicErosionConfiguration.Particles];
         for (uint particle = 0; particle < myParticleHydraulicErosionConfiguration.Particles; particle++)
         {
-            randomParticleIndices[particle] = (uint)myRandom.Next((int)myMapGenerationConfiguration.MapSize);
+            randomParticleIndices[particle] = (uint)myRandom.Next((int)myMapGenerationConfiguration.HeightMapPlaneSize);
         }
         fixed (uint* randomHeightMapIndicesPointer = randomParticleIndices)
         {

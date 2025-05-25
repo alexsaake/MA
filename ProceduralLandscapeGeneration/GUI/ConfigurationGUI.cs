@@ -47,7 +47,7 @@ internal class ConfigurationGUI : IConfigurationGUI
     public event EventHandler? ErosionResetRequired;
     public event EventHandler? ErosionModeChanged;
 
-    public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IRockTypesConfiguration rockTypesConfiguration)
+    public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IRockTypesConfiguration rockTypesConfiguration)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
@@ -89,15 +89,15 @@ internal class ConfigurationGUI : IConfigurationGUI
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => erosionConfiguration.TimeDelta = value, erosionConfiguration.TimeDelta));
 
         myGridErosionPanel = new PanelWithElements("Grid Hydraulic Erosion");
-        myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridErosionConfiguration.RainDrops = (uint)value, (int)gridErosionConfiguration.RainDrops, 1, 100000));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Water Increase", (value) => gridErosionConfiguration.WaterIncrease = value, gridErosionConfiguration.WaterIncrease));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => gridErosionConfiguration.Gravity = value, gridErosionConfiguration.Gravity));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Dampening", (value) => gridErosionConfiguration.Dampening = value, gridErosionConfiguration.Dampening));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Maximal Erosion Depth", (value) => gridErosionConfiguration.MaximalErosionDepth = value, gridErosionConfiguration.MaximalErosionDepth));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Sediment Capacity", (value) => gridErosionConfiguration.SedimentCapacity = value, gridErosionConfiguration.SedimentCapacity));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Suspension Rate", (value) => gridErosionConfiguration.SuspensionRate = value, gridErosionConfiguration.SuspensionRate));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Deposition Rate", (value) => gridErosionConfiguration.DepositionRate = value, gridErosionConfiguration.DepositionRate));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => gridErosionConfiguration.EvaporationRate = value, gridErosionConfiguration.EvaporationRate));
+        myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridHydraulicErosionConfiguration.RainDrops = (uint)value, (int)gridHydraulicErosionConfiguration.RainDrops, 1, 100000));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Water Increase", (value) => gridHydraulicErosionConfiguration.WaterIncrease = value, gridHydraulicErosionConfiguration.WaterIncrease));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => gridHydraulicErosionConfiguration.Gravity = value, gridHydraulicErosionConfiguration.Gravity));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Dampening", (value) => gridHydraulicErosionConfiguration.Dampening = value, gridHydraulicErosionConfiguration.Dampening));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Maximal Erosion Depth", (value) => gridHydraulicErosionConfiguration.MaximalErosionDepth = value, gridHydraulicErosionConfiguration.MaximalErosionDepth));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Sediment Capacity", (value) => gridHydraulicErosionConfiguration.SedimentCapacity = value, gridHydraulicErosionConfiguration.SedimentCapacity));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Suspension Rate", (value) => gridHydraulicErosionConfiguration.SuspensionRate = value, gridHydraulicErosionConfiguration.SuspensionRate));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Deposition Rate", (value) => gridHydraulicErosionConfiguration.DepositionRate = value, gridHydraulicErosionConfiguration.DepositionRate));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => gridHydraulicErosionConfiguration.EvaporationRate = value, gridHydraulicErosionConfiguration.EvaporationRate));
 
         myParticleHydraulicErosionPanel = new PanelWithElements("Particle Hydraulic Erosion");
         myParticleHydraulicErosionPanel.Add(new ValueBoxIntWithLabel("Particles", (value) => particleHydraulicErosionConfiguration.Particles = (uint)value, (int)particleHydraulicErosionConfiguration.Particles, 1, 1000000));

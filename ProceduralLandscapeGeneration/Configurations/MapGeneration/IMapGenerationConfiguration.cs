@@ -23,8 +23,9 @@ internal interface IMapGenerationConfiguration : IDisposable
     bool ArePlateTectonicsPlateColorsEnabled { get; set; }
     int PlateCount { get; set; }
 
-    uint MapSize { get; }
     uint HeightMapSideLength { get; set; }
+    uint HeightMapPlaneSize { get; }
+    uint HeightMapSize { get; }
     CameraMode CameraMode { get; set; }
     bool AreTerrainColorsEnabled { get; set; }
 

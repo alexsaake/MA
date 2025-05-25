@@ -3,6 +3,7 @@
 internal interface IThermalErosionConfiguration : IDisposable
 {
     float ErosionRate { get; set; }
+    uint GridThermalErosionCellsSize { get; }
 
     void Initialize();
 }

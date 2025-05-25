@@ -76,8 +76,8 @@ uint GetIndexVector(ivec2 position)
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(id >= heightMapLength)
+    uint heightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(id >= heightMapPlaneSize)
     {
         return;
     }
@@ -87,7 +87,7 @@ void main()
     {
         return;
     }
-    uint heightMapSideLength = uint(sqrt(heightMapLength));
+    uint heightMapSideLength = uint(sqrt(heightMapPlaneSize));
 
     uint x = id % heightMapSideLength;
     uint y = id / heightMapSideLength;
@@ -101,7 +101,7 @@ void main()
     deadSegment.IsAlive = true;
     deadSegment.IsColliding = false;
     
-    float distance = float(heightMapLength);
+    float distance = float(heightMapPlaneSize);
     int nearestPlate = -1;
     for(int plate = 0; plate < plateTectonicsPlates.length(); plate++)
     {

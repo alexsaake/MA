@@ -1,6 +1,6 @@
 ﻿namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
 
-internal interface IGridErosionConfiguration : IDisposable
+internal interface IGridHydraulicErosionConfiguration : IDisposable
 {
     uint RainDrops { get; set; }
     float WaterIncrease { get; set; }

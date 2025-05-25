@@ -55,7 +55,7 @@ internal class Application : IApplication
 
         InitializeModules();
 
-        Rlgl.SetClipPlanes(5, myMapGenerationConfiguration.MapSize);
+        Rlgl.SetClipPlanes(5, myMapGenerationConfiguration.HeightMapPlaneSize);
         Raylib.SetTargetFPS(60);
 
         while (!Raylib.WindowShouldClose())

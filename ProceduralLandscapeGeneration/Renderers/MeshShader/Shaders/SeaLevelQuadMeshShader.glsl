@@ -63,8 +63,8 @@ void AddVertex(uint vertex, uint x, uint y)
 
 void main()
 {
-    uint heightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    uint mapSize = uint(sqrt(heightMapLength));
+    uint heightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    uint mapSize = uint(sqrt(heightMapPlaneSize));
 
     AddVertex(0, 0, 0);
     AddVertex(1, mapSize, 0);

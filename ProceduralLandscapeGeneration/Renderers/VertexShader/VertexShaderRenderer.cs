@@ -17,7 +17,7 @@ internal class VertexShaderRenderer : IRenderer
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
-    private readonly IGridErosionConfiguration myGridErosionConfiguration;
+    private readonly IGridHydraulicErosionConfiguration myGridHydraulicErosionConfiguration;
     private readonly IConfigurationGUI myConfigurationGUI;
     private readonly IErosionSimulator myErosionSimulator;
     private readonly IVertexMeshCreator myVertexMeshCreator;
@@ -41,12 +41,12 @@ internal class VertexShaderRenderer : IRenderer
     private bool myIsUpdateAvailable;
     private bool myIsDisposed;
 
-    public VertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridErosionConfiguration gridErosionConfiguration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBuffers)
+    public VertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
-        myGridErosionConfiguration = gridErosionConfiguration;
+        myGridHydraulicErosionConfiguration = gridHydraulicErosionConfiguration;
         myConfigurationGUI = configurationGUI;
         myErosionSimulator = erosionSimulator;
         myVertexMeshCreator = vertexMeshCreator;

@@ -66,14 +66,14 @@ layout(std430, binding = 18) buffer rockTypesConfigurationShaderBuffer
 };
 
 uint myHeightMapSideLength;
-uint myHeightMapLength;
+uint myHeightMapPlaneSize;
 
 float SuspendFromTop(uint index, float requiredSediment)
 {
     float suspendedSediment = 0;
     for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
     {
-        uint offsetIndex = index + rockType * myHeightMapLength;
+        uint offsetIndex = index + rockType * myHeightMapPlaneSize;
         float height = heightMap[offsetIndex];
         float hardness = (1.0 - rockTypesConfiguration[rockType].Hardness);
         float toBeSuspendedSediment = requiredSediment * hardness;
@@ -95,7 +95,7 @@ float SuspendFromTop(uint index, float requiredSediment)
 
 void DepositeOnTop(uint index, float sediment)
 {
-    heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength] += sediment;
+    heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize] += sediment;
 }
 
 float TotalHeight(uint index, uint layer)
@@ -103,7 +103,7 @@ float TotalHeight(uint index, uint layer)
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
     }
     return height;
 }
@@ -295,12 +295,12 @@ bool Interact()
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    myHeightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
     if(id >= particlesWindErosion.length())
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapPlaneSize));
 
     myParticleWindErosion = particlesWindErosion[id];
     

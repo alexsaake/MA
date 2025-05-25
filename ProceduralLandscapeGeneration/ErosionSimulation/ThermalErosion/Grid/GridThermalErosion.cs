@@ -1,6 +1,7 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Common.GPU.ComputeShaders;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalErosion;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
@@ -13,6 +14,7 @@ internal class GridThermalErosion : IGridThermalErosion
 
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
+    private readonly IThermalErosionConfiguration myThermalErosionConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
     private readonly IShaderBuffers myShaderBuffers;
 
@@ -23,10 +25,11 @@ internal class GridThermalErosion : IGridThermalErosion
 
     private bool myIsDisposed;
 
-    public GridThermalErosion(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
+    public GridThermalErosion(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
+        myThermalErosionConfiguration = thermalErosionConfiguration;
         myComputeShaderProgramFactory = computeShaderProgramFactory;
         myShaderBuffers = shaderBuffers;
     }
@@ -45,7 +48,7 @@ internal class GridThermalErosion : IGridThermalErosion
 
     private unsafe void AddGridThermalErosionCellShaderBuffer()
     {
-        myShaderBuffers.Add(ShaderBufferTypes.GridThermalErosionCell, (uint)(myMapGenerationConfiguration.MapSize * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount * sizeof(GridThermalErosionCellShaderBuffer)));
+        myShaderBuffers.Add(ShaderBufferTypes.GridThermalErosionCells, (uint)(myThermalErosionConfiguration.GridThermalErosionCellsSize * sizeof(GridThermalErosionCellShaderBuffer)));
     }
 
     public void ResetShaderBuffers()
@@ -68,7 +71,7 @@ internal class GridThermalErosion : IGridThermalErosion
     internal void Flow()
     {
         Rlgl.EnableShader(myFlowComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -76,7 +79,7 @@ internal class GridThermalErosion : IGridThermalErosion
     internal void Deposite()
     {
         Rlgl.EnableShader(myDepositeComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -84,7 +87,7 @@ internal class GridThermalErosion : IGridThermalErosion
     internal void HorizontalFlow()
     {
         Rlgl.EnableShader(myHorizontalFlowComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -92,7 +95,7 @@ internal class GridThermalErosion : IGridThermalErosion
     internal void FillLayers()
     {
         Rlgl.EnableShader(myFillLayersComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -116,6 +119,6 @@ internal class GridThermalErosion : IGridThermalErosion
 
     private void RemoveGridThermalErosionCellShaderBuffer()
     {
-        myShaderBuffers.Remove(ShaderBufferTypes.GridThermalErosionCell);
+        myShaderBuffers.Remove(ShaderBufferTypes.GridThermalErosionCells);
     }
 }

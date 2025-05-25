@@ -223,8 +223,6 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
-    public uint MapSize => HeightMapSideLength * HeightMapSideLength;
-
     private uint myHeightMapSideLength;
     public uint HeightMapSideLength
     {
@@ -239,6 +237,10 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
             ResetRequired?.Invoke(this, EventArgs.Empty);
         }
     }
+
+    public uint HeightMapPlaneSize => HeightMapSideLength * HeightMapSideLength;
+
+    public uint HeightMapSize => (LayerCount * RockTypeCount + LayerCount - 1) * HeightMapPlaneSize;
 
     private bool myAreTerrainColorsEnabled;
     public bool AreTerrainColorsEnabled

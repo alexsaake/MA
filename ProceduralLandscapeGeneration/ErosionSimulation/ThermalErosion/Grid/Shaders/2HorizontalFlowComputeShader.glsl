@@ -7,30 +7,6 @@ layout(std430, binding = 0) buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
-struct GridHydraulicErosionCell
-{
-    float WaterHeight;
-
-    float WaterFlowLeft;
-    float WaterFlowRight;
-    float WaterFlowUp;
-    float WaterFlowDown;
-
-    float SuspendedSediment;
-
-    float SedimentFlowLeft;
-    float SedimentFlowRight;
-    float SedimentFlowUp;
-    float SedimentFlowDown;
-
-    vec2 Velocity;
-};
-
-layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
-{
-    GridHydraulicErosionCell[] gridHydraulicErosionCells;
-};
-
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
@@ -46,39 +22,11 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
     MapGenerationConfiguration mapGenerationConfiguration;
 };
 
-struct ErosionConfiguration
-{
-    float TimeDelta;
-	bool IsWaterKeptInBoundaries;
-};
-
-layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
-{
-    ErosionConfiguration erosionConfiguration;
-};
-
-struct GridErosionConfiguration
-{
-    float WaterIncrease;
-    float Gravity;
-    float Dampening;
-    float MaximalErosionDepth;
-    float SedimentCapacity;
-    float SuspensionRate;
-    float DepositionRate;
-    float EvaporationRate;
-};
-
-layout(std430, binding = 9) buffer gridErosionConfigurationShaderBuffer
-{
-    GridErosionConfiguration gridErosionConfiguration;
-};
-
-uint myHeightMapLength;
+uint myHeightMapPlaneSize;
 
 float LayerFloorHeight(uint index, uint layer)
 {
-    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapLength];
+    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
 //horizontal flow
@@ -87,8 +35,8 @@ float LayerFloorHeight(uint index, uint layer)
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
-    myHeightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(index >= myHeightMapLength)
+    myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(index >= myHeightMapPlaneSize)
     {
         return;
     }
@@ -101,8 +49,8 @@ void main()
         }
         for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
         {
-            uint currentLayerRockTypeHeightMapIndex = index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength;
-            uint belowLayerRockTypeHeightMapIndex = index + rockType * myHeightMapLength + ((layer - 1) * mapGenerationConfiguration.RockTypeCount + (layer - 1)) * myHeightMapLength;
+            uint currentLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+            uint belowLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + ((layer - 1) * mapGenerationConfiguration.RockTypeCount + (layer - 1)) * myHeightMapPlaneSize;
             heightMap[belowLayerRockTypeHeightMapIndex] += heightMap[currentLayerRockTypeHeightMapIndex];
             heightMap[currentLayerRockTypeHeightMapIndex] = 0;
         }

@@ -71,16 +71,16 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
 uniform mat4 mvp;
 
 uint myHeightMapSideLength;
-uint myHeightMapLength;
+uint myHeightMapPlaneSize;
 
 float FineSedimentHeight(uint index)
 {
-    return heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength];
+    return heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize];
 }
 
 float CoarseSedimentHeight(uint index)
 {
-    return heightMap[index + 1 * myHeightMapLength];
+    return heightMap[index + 1 * myHeightMapPlaneSize];
 }
 
 float TotalHeight(uint index)
@@ -88,7 +88,7 @@ float TotalHeight(uint index)
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapPlaneSize];
     }
     return height;
 }
@@ -270,12 +270,12 @@ void addVertex(uint vertex, uint x, uint y)
 void main()
 {
     uint threadNumber = gl_GlobalInvocationID.x;
-    myHeightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(threadNumber >= myHeightMapLength)
+    myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(threadNumber >= myHeightMapPlaneSize)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapPlaneSize));
     uint meshletSize = uint(sqrt(VERTICES));
     uint yMeshletCount = uint(ceil(float(myHeightMapSideLength) / (meshletSize - 1)));
     uint xOffset = uint(floor(threadNumber / yMeshletCount)) * (meshletSize - 1);

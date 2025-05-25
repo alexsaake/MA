@@ -63,12 +63,12 @@ layout(std430, binding = 16) readonly restrict buffer plateTectonicsPlatesShader
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(id >= heightMapLength)
+    uint heightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(id >= heightMapPlaneSize)
     {
         return;
     }
-    uint heightMapSideLength = uint(sqrt(heightMapLength));
+    uint heightMapSideLength = uint(sqrt(heightMapPlaneSize));
 
     uint x = id % heightMapSideLength;
     uint y = id / heightMapSideLength;
@@ -77,7 +77,7 @@ void main()
     plateTectonicsSegment.Position = vec2(x, y);
     plateTectonicsSegment.IsAlive = true;
     
-    float distance = float(heightMapLength);
+    float distance = float(heightMapPlaneSize);
     int nearestPlate = -1;
     for(int plate = 0; plate < plateTectonicsPlates.length(); plate++)
     {

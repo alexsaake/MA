@@ -44,8 +44,8 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(id >= heightMapLength)
+    uint heightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(id >= heightMapPlaneSize)
     {
         return;
     }

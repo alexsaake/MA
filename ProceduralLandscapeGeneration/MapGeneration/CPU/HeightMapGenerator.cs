@@ -52,7 +52,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateNoiseMap(uint rockTypes, uint layerCount)
     {
-        float[] noiseMap = new float[myMapGenerationConfiguration.MapSize * rockTypes * layerCount];
+        float[] noiseMap = new float[myMapGenerationConfiguration.HeightMapPlaneSize * rockTypes * layerCount];
 
         Vector2[] octaveOffsets = new Vector2[myMapGenerationConfiguration.NoiseOctaves];
         for (int octave = 0; octave < myMapGenerationConfiguration.NoiseOctaves; octave++)
@@ -66,7 +66,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
         uint indexOffset = 0;
         if(rockTypes > 2)
         {
-            indexOffset = myMapGenerationConfiguration.MapSize;
+            indexOffset = myMapGenerationConfiguration.HeightMapPlaneSize;
         }
 
         for (int y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
@@ -126,7 +126,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateCubeMap()
     {
-        float[] map = new float[myMapGenerationConfiguration.MapSize * (myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount + myMapGenerationConfiguration.LayerCount - 1)];
+        float[] map = new float[myMapGenerationConfiguration.HeightMapPlaneSize * (myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount + myMapGenerationConfiguration.LayerCount - 1)];
 
         uint cubeSideLength = (uint)MathF.Sqrt(myMapGenerationConfiguration.HeightMapSideLength);
 
@@ -165,7 +165,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
             for (uint i = 0; i < size; i++)
             {
                 uint index = myMapGenerationConfiguration.GetIndex(x + i, y + j);
-                map[index + rockTypes * myMapGenerationConfiguration.MapSize] = 1;
+                map[index + rockTypes * myMapGenerationConfiguration.HeightMapPlaneSize] = 1;
             }
         }
     }

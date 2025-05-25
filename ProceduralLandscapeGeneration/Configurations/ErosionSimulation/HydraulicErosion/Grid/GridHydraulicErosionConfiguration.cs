@@ -4,7 +4,7 @@ using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
 
-internal class GridErosionConfiguration : IGridErosionConfiguration
+internal class GridHydraulicErosionConfiguration : IGridHydraulicErosionConfiguration
 {
     private readonly IShaderBuffers myShaderBuffers;
 
@@ -147,7 +147,7 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
 
     public event EventHandler<EventArgs>? RainDropsChanged;
 
-    public GridErosionConfiguration(IShaderBuffers shaderBuffers)
+    public GridHydraulicErosionConfiguration(IShaderBuffers shaderBuffers)
     {
         myShaderBuffers = shaderBuffers;
 
@@ -172,11 +172,11 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
 
     private unsafe void UpdateShaderBuffer()
     {
-        if (!myShaderBuffers.ContainsKey(ShaderBufferTypes.GridErosionConfiguration))
+        if (!myShaderBuffers.ContainsKey(ShaderBufferTypes.GridHydraulicErosionConfiguration))
         {
-            myShaderBuffers.Add(ShaderBufferTypes.GridErosionConfiguration, (uint)sizeof(GridErosionConfigurationShaderBuffer));
+            myShaderBuffers.Add(ShaderBufferTypes.GridHydraulicErosionConfiguration, (uint)sizeof(GridHydraulicErosionConfigurationShaderBuffer));
         }
-        GridErosionConfigurationShaderBuffer gridErosionConfigurationShaderBuffer = new GridErosionConfigurationShaderBuffer()
+        GridHydraulicErosionConfigurationShaderBuffer gridThermalErosionConfigurationShaderBuffer = new GridHydraulicErosionConfigurationShaderBuffer()
         {
             WaterIncrease = WaterIncrease,
             Gravity = Gravity,
@@ -187,7 +187,7 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
             DepositionRate = DepositionRate,
             EvaporationRate = EvaporationRate
         };
-        Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridErosionConfiguration], &gridErosionConfigurationShaderBuffer, (uint)sizeof(GridErosionConfigurationShaderBuffer), 0);
+        Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.GridHydraulicErosionConfiguration], &gridThermalErosionConfigurationShaderBuffer, (uint)sizeof(GridHydraulicErosionConfigurationShaderBuffer), 0);
     }
 
     public void Dispose()
@@ -197,7 +197,7 @@ internal class GridErosionConfiguration : IGridErosionConfiguration
             return;
         }
 
-        myShaderBuffers.Remove(ShaderBufferTypes.GridErosionConfiguration);
+        myShaderBuffers.Remove(ShaderBufferTypes.GridHydraulicErosionConfiguration);
 
         myIsDisposed = true;
     }

@@ -1,6 +1,6 @@
 ﻿namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
 
-public struct GridErosionConfigurationShaderBuffer
+public struct GridHydraulicErosionConfigurationShaderBuffer
 {
     public float WaterIncrease;
     public float Gravity;

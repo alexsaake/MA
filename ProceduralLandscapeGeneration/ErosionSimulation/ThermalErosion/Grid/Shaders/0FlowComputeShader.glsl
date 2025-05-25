@@ -68,11 +68,11 @@ layout(std430, binding = 18) buffer rockTypesConfigurationShaderBuffer
 };
 
 uint myHeightMapSideLength;
-uint myHeightMapLength;
+uint myHeightMapPlaneSize;
 
 float RockTypeSedimentHeight(uint index, uint layer, uint rockType)
 {
-    return heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
+    return heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
 }
 
 float TotalSedimentHeight(uint index, uint stopRockType, uint layer)
@@ -80,7 +80,7 @@ float TotalSedimentHeight(uint index, uint stopRockType, uint layer)
     float height = 0;
     for(uint rockType = 0; rockType <= stopRockType; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
     }
     return height;
 }
@@ -92,7 +92,7 @@ uint GetIndex(uint x, uint y)
 
 float HeightMapLayerFloorHeight(uint index, uint layer)
 {
-    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapLength];
+    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
 float TotalHeightMapLayerHeight(uint index, uint layer)
@@ -105,7 +105,7 @@ float TotalHeightMapLayerHeight(uint index, uint layer)
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
     }
     return height;
 }
@@ -131,12 +131,12 @@ float RemainingLayerHeight(uint index, uint layer)
 void main()
 {	
     uint index = gl_GlobalInvocationID.x;
-    myHeightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(index >= myHeightMapLength)
+    myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(index >= myHeightMapPlaneSize)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapPlaneSize));
 
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
@@ -149,7 +149,7 @@ void main()
 	{
 		for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
 		{
-			uint indexOffset = rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength;
+			uint indexOffset = rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 			GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[index + indexOffset];
 
 			float totalSedimentHeight = TotalSedimentHeight(index, rockType, layer);

@@ -77,7 +77,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     private unsafe void AddPlateTectonicsSegmentsShaderBuffer()
     {
-        uint plateTectonicsSegmentsSize = (uint)(myMapGenerationConfiguration.MapSize * sizeof(PlateTectonicsSegmentShaderBuffer));
+        uint plateTectonicsSegmentsSize = (uint)(myMapGenerationConfiguration.HeightMapPlaneSize * sizeof(PlateTectonicsSegmentShaderBuffer));
         myShaderBuffers.Add(ShaderBufferTypes.PlateTectonicsSegments, plateTectonicsSegmentsSize);
     }
 
@@ -99,20 +99,20 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     private void AddHeightMapShaderBuffer()
     {
-        uint heightMapSize = myMapGenerationConfiguration.MapSize * sizeof(float) * myMapGenerationConfiguration.RockTypeCount;
+        uint heightMapSize = myMapGenerationConfiguration.HeightMapPlaneSize * sizeof(float) * myMapGenerationConfiguration.RockTypeCount;
         myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapSize);
     }
 
     private unsafe void AddPlateTectonicsTempSegmentsShaderBuffer()
     {
-        uint plateTectonicsTempSegmentsSize = (uint)(myMapGenerationConfiguration.MapSize * sizeof(PlateTectonicsSegmentShaderBuffer));
+        uint plateTectonicsTempSegmentsSize = (uint)(myMapGenerationConfiguration.HeightMapPlaneSize * sizeof(PlateTectonicsSegmentShaderBuffer));
         myShaderBuffers.Add(ShaderBufferTypes.PlateTectonicsTempSegments, plateTectonicsTempSegmentsSize);
     }
 
     private void AddSegmentsToNearesPlate()
     {
         Rlgl.EnableShader(myAddSegmentsToNearestPlateComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
 
@@ -137,7 +137,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private void AddPlateSegments()
     {
         Rlgl.EnableShader(myAddPlateSegmentsComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -179,7 +179,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private void CollideSegments()
     {
         Rlgl.EnableShader(myCollideSegmentsComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
 
@@ -189,7 +189,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private void CascadeSegments()
     {
         Rlgl.EnableShader(myCascadeSegmentsComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -197,7 +197,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private void GrowSegments()
     {
         Rlgl.EnableShader(myGrowSegmentsComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -212,7 +212,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private void UpdatePlatesAccelerationAndTorque()
     {
         Rlgl.EnableShader(myUpdatePlatesAccelerationAndTorqueComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -234,7 +234,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private void UpdateTempSegmentsPosition()
     {
         Rlgl.EnableShader(myUpdateTempSegmentsPositionComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -242,7 +242,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private void CopyTempSegmentsToSegments()
     {
         Rlgl.EnableShader(myCopyTempSegmentsToSegmentsComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -250,7 +250,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private void FloatSegments()
     {
         Rlgl.EnableShader(myFloatSegmentsComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -258,7 +258,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private void FillSegmentsGap()
     {
         Rlgl.EnableShader(myFillSegmentsGapComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
 
@@ -268,7 +268,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private void UpdateHeightMap()
     {
         Rlgl.EnableShader(myUpdateHeightMapComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }

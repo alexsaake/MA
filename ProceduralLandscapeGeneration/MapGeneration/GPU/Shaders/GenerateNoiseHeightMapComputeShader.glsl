@@ -126,12 +126,12 @@ layout(std430, binding = 12) buffer heightMapParametersShaderBuffer
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
-    uint heightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(index >= heightMapLength)
+    uint heightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(index >= heightMapPlaneSize)
     {
         return;
     }
-    uint heightMapSideLength = uint(sqrt(heightMapLength));
+    uint heightMapSideLength = uint(sqrt(heightMapPlaneSize));
 
     uint x = index % heightMapSideLength;
     uint y = index / heightMapSideLength;

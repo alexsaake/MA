@@ -62,13 +62,13 @@ uint GetIndex(uint x, uint y)
 }
 
 //https://aparis69.github.io/public_html/posts/terrain_erosion.html
-uint myHeightMapLength;
+uint myHeightMapPlaneSize;
 
 float TangensAngleOfRepose(uint index)
 {
 	for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
 	{
-		if(heightMap[index + rockType * myHeightMapLength] > 0)
+		if(heightMap[index + rockType * myHeightMapPlaneSize] > 0)
 		{
 			return rockTypesConfiguration[rockType].TangensAngleOfRepose;
 		}
@@ -80,7 +80,7 @@ void RemoveFromTop(uint index, float sediment)
 {
     for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
     {
-        uint offsetIndex = index + rockType * myHeightMapLength;
+        uint offsetIndex = index + rockType * myHeightMapPlaneSize;
         float height = heightMap[offsetIndex];
         if(height > 0)
         {
@@ -98,7 +98,7 @@ void RemoveFromTop(uint index, float sediment)
 
 void DepositeOnTop(uint index, float sediment)
 {
-    heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength] += sediment;
+    heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize] += sediment;
 }
 
 float TotalHeight(uint index)
@@ -106,7 +106,7 @@ float TotalHeight(uint index)
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapLength];
+        height += heightMap[index + rockType * myHeightMapPlaneSize];
     }
     return height;
 }
@@ -139,12 +139,12 @@ vec3 GetScaledNormal(uint x, uint y)
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
-    myHeightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(index >= myHeightMapLength)
+    myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(index >= myHeightMapPlaneSize)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapPlaneSize));
 
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
@@ -199,7 +199,7 @@ void main()
     float distance = length(normal);
     if(index == neighborIndex
         || neighborIndex < 0
-        || neighborIndex > myHeightMapLength)
+        || neighborIndex > myHeightMapPlaneSize)
     {
         return;
     }

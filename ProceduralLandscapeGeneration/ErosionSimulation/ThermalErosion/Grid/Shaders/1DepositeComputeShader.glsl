@@ -47,7 +47,7 @@ layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
 };
 
 uint myHeightMapSideLength;
-uint myHeightMapLength;
+uint myHeightMapPlaneSize;
 
 uint GetIndex(uint x, uint y)
 {
@@ -56,13 +56,13 @@ uint GetIndex(uint x, uint y)
 
 void RemoveFrom(uint index, uint rockType, uint layer, float sediment)
 {
-    uint offsetIndex = index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength;
+    uint offsetIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
     heightMap[offsetIndex] = max(heightMap[offsetIndex] - sediment, 0.0);
 }
 
 void DepositeOn(uint index, uint rockType, uint layer, float sediment)
 {
-    heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength] += sediment;
+    heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize] += sediment;
 }
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
@@ -70,12 +70,12 @@ void DepositeOn(uint index, uint rockType, uint layer, float sediment)
 void main()
 {    
     uint index = gl_GlobalInvocationID.x;
-    myHeightMapLength = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(index >= myHeightMapLength)
+    myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(index >= myHeightMapPlaneSize)
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(myHeightMapLength));
+    myHeightMapSideLength = uint(sqrt(myHeightMapPlaneSize));
 
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
@@ -84,7 +84,7 @@ void main()
 	{
         for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
         {
-			uint indexOffset = rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength;
+			uint indexOffset = rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
             GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[index + indexOffset];
     
             float flowIn = gridThermalErosionCells[GetIndex(x - 1, y) + indexOffset].SedimentFlowRight + gridThermalErosionCells[GetIndex(x + 1, y) + indexOffset].SedimentFlowLeft + gridThermalErosionCells[GetIndex(x, y - 1) + indexOffset].SedimentFlowUp + gridThermalErosionCells[GetIndex(x, y + 1) + indexOffset].SedimentFlowDown;
