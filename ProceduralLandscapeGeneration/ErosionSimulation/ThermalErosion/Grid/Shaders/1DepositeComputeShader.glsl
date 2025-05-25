@@ -56,8 +56,8 @@ uint GetIndex(uint x, uint y)
 
 void RemoveFrom(uint index, uint rockType, uint layer, float sediment)
 {
-    uint offsetIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
-    heightMap[offsetIndex] = max(heightMap[offsetIndex] - sediment, 0.0);
+    uint heightMapOffsetIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+    heightMap[heightMapOffsetIndex] = max(heightMap[heightMapOffsetIndex] - sediment, 0.0);
 }
 
 void DepositeOn(uint index, uint rockType, uint layer, float sediment)
@@ -84,10 +84,10 @@ void main()
 	{
         for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
         {
-			uint indexOffset = rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
-            GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[index + indexOffset];
+			uint gridThermalErosionCellsIndexOffset = rockType * myHeightMapPlaneSize + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize;
+            GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[index + gridThermalErosionCellsIndexOffset];
     
-            float flowIn = gridThermalErosionCells[GetIndex(x - 1, y) + indexOffset].SedimentFlowRight + gridThermalErosionCells[GetIndex(x + 1, y) + indexOffset].SedimentFlowLeft + gridThermalErosionCells[GetIndex(x, y - 1) + indexOffset].SedimentFlowUp + gridThermalErosionCells[GetIndex(x, y + 1) + indexOffset].SedimentFlowDown;
+            float flowIn = gridThermalErosionCells[GetIndex(x - 1, y) + gridThermalErosionCellsIndexOffset].SedimentFlowRight + gridThermalErosionCells[GetIndex(x + 1, y) + gridThermalErosionCellsIndexOffset].SedimentFlowLeft + gridThermalErosionCells[GetIndex(x, y - 1) + gridThermalErosionCellsIndexOffset].SedimentFlowUp + gridThermalErosionCells[GetIndex(x, y + 1) + gridThermalErosionCellsIndexOffset].SedimentFlowDown;
             float flowOut = gridThermalErosionCell.SedimentFlowRight + gridThermalErosionCell.SedimentFlowLeft + gridThermalErosionCell.SedimentFlowUp + gridThermalErosionCell.SedimentFlowDown;
     
 	        float volumeDelta = (flowIn - flowOut) * erosionConfiguration.TimeDelta;

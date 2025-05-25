@@ -48,7 +48,7 @@ internal class GridThermalErosion : IGridThermalErosion
 
     private unsafe void AddGridThermalErosionCellShaderBuffer()
     {
-        myShaderBuffers.Add(ShaderBufferTypes.GridThermalErosionCells, (uint)(myThermalErosionConfiguration.GridThermalErosionCellsSize * sizeof(GridThermalErosionCellShaderBuffer)));
+        myShaderBuffers.Add(ShaderBufferTypes.GridThermalErosionCells, (uint)(myThermalErosionConfiguration.GridCellsSize * sizeof(GridThermalErosionCellShaderBuffer)));
     }
 
     public void ResetShaderBuffers()

@@ -11,6 +11,7 @@ internal interface IGridHydraulicErosionConfiguration : IDisposable
     float SuspensionRate { get; set; }
     float DepositionRate { get; set; }
     float EvaporationRate { get; set; }
+    uint CellsSize { get; }
 
     event EventHandler<EventArgs>? RainDropsChanged;
 

@@ -1,4 +1,5 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
+using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 
@@ -7,6 +8,7 @@ namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation.Hydraul
 internal class GridHydraulicErosionConfiguration : IGridHydraulicErosionConfiguration
 {
     private readonly IShaderBuffers myShaderBuffers;
+    private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
 
     private bool myIsDisposed;
 
@@ -145,11 +147,14 @@ internal class GridHydraulicErosionConfiguration : IGridHydraulicErosionConfigur
         }
     }
 
+    public uint CellsSize => myMapGenerationConfiguration.HeightMapPlaneSize * myMapGenerationConfiguration.LayerCount;
+
     public event EventHandler<EventArgs>? RainDropsChanged;
 
-    public GridHydraulicErosionConfiguration(IShaderBuffers shaderBuffers)
+    public GridHydraulicErosionConfiguration(IShaderBuffers shaderBuffers, IMapGenerationConfiguration mapGenerationConfiguration)
     {
         myShaderBuffers = shaderBuffers;
+        myMapGenerationConfiguration = mapGenerationConfiguration;
 
         myRainDrops = 100;
 

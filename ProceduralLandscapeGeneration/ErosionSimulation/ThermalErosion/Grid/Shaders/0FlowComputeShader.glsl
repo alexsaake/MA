@@ -149,8 +149,8 @@ void main()
 	{
 		for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
 		{
-			uint indexOffset = rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
-			GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[index + indexOffset];
+			uint gridThermalErosionCellsIndexOffset = rockType * myHeightMapPlaneSize + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize;
+			GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[index + gridThermalErosionCellsIndexOffset];
 
 			float totalSedimentHeight = TotalSedimentHeight(index, rockType, layer);
 			float totalSedimentHeightDifferenceLeft = max(totalSedimentHeight - TotalSedimentHeight(leftIndex, rockType, layer), 0.0);
@@ -245,7 +245,7 @@ void main()
 				gridThermalErosionCell.SedimentFlowUp = 0;
 			}
 
-			gridThermalErosionCells[index + indexOffset] = gridThermalErosionCell;
+			gridThermalErosionCells[index + gridThermalErosionCellsIndexOffset] = gridThermalErosionCell;
 		}
 	}
 	

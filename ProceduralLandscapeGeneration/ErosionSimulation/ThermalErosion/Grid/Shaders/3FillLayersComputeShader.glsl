@@ -31,11 +31,6 @@ float LayerFloorHeight(uint index, uint layer)
 
 float TotalHeightMapLayerHeight(uint index, uint layer)
 {
-    if(layer > 0
-        && LayerFloorHeight(index, layer) == 0)
-    {
-        return 0;
-    }
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
@@ -63,15 +58,13 @@ void main()
 
     for(int layer = 0; layer < mapGenerationConfiguration.LayerCount - 1; layer ++)
     {
-        if(LayerFloorHeight(index, layer) > 0)
+        if(LayerFloorHeight(index, layer + 1) > 0)
         {
             continue;
         }
         
         if(TotalHeightMapLayerHeight(index, layer) >= mapGenerationConfiguration.SeaLevel)
         {
-            SetLayerFloorHeight(index, layer, mapGenerationConfiguration.SeaLevel);
-
             float sedimentToFill = mapGenerationConfiguration.SeaLevel;
             for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
             {
@@ -86,6 +79,8 @@ void main()
                     sedimentToFill = 0;
                 }
             }
+
+            SetLayerFloorHeight(index, layer + 1, mapGenerationConfiguration.SeaLevel);
         }
     }
     
