@@ -102,6 +102,16 @@ float TotalHeightAllLayers(uint index)
     return height;
 }
 
+float TotalSuspendedSediment(uint index)
+{
+    float suspendedSediment = 0;
+    for(int layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        suspendedSediment += gridHydraulicErosionCells[index + layer * myHeightMapLength].SuspendedSediment;
+    }
+    return suspendedSediment;
+}
+
 void main()
 {
     uint index = gl_VertexID;
@@ -114,12 +124,12 @@ void main()
     uint x = index % sideLength;
     uint y = index / sideLength;
 
-    float suspendedSediment = gridHydraulicErosionCells[index].SuspendedSediment;
+    float suspendedSediment = TotalSuspendedSediment(index);
     for(int particle = 0; particle < particlesHydraulicErosion.length(); particle++)
     {        
         if(ivec2(particlesHydraulicErosion[particle].Position) == ivec2(x, y))
         {
-            suspendedSediment = particlesHydraulicErosion[particle].Sediment;
+            suspendedSediment += particlesHydraulicErosion[particle].Sediment;
             continue;
         }
     }
@@ -127,7 +137,7 @@ void main()
     {        
         if(ivec2(particlesWindErosion[particle].Position) == ivec2(x, y))
         {
-            suspendedSediment = particlesWindErosion[particle].Sediment;
+            suspendedSediment += particlesWindErosion[particle].Sediment;
             continue;
         }
     }

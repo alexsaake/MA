@@ -18,6 +18,8 @@ internal class GridThermalErosion : IGridThermalErosion
 
     private ComputeShaderProgram? myFlowComputeShaderProgram;
     private ComputeShaderProgram? myDepositeComputeShaderProgram;
+    private ComputeShaderProgram? myHorizontalFlowComputeShaderProgram;
+    private ComputeShaderProgram? myFillLayersComputeShaderProgram;
 
     private bool myIsDisposed;
 
@@ -33,6 +35,8 @@ internal class GridThermalErosion : IGridThermalErosion
     {
         myFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}0FlowComputeShader.glsl");
         myDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}1DepositeComputeShader.glsl");
+        myHorizontalFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}2HorizontalFlowComputeShader.glsl");
+        myFillLayersComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}3FillLayersComputeShader.glsl");
 
         AddGridThermalErosionCellShaderBuffer();
 
@@ -56,6 +60,8 @@ internal class GridThermalErosion : IGridThermalErosion
         {
             Flow();
             Deposite();
+            HorizontalFlow();
+            FillLayers();
         }
     }
 
@@ -75,6 +81,22 @@ internal class GridThermalErosion : IGridThermalErosion
         Rlgl.MemoryBarrier();
     }
 
+    internal void HorizontalFlow()
+    {
+        Rlgl.EnableShader(myHorizontalFlowComputeShaderProgram!.Id);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.DisableShader();
+        Rlgl.MemoryBarrier();
+    }
+    
+    internal void FillLayers()
+    {
+        Rlgl.EnableShader(myFillLayersComputeShaderProgram!.Id);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.MapSize / 64.0f), 1, 1);
+        Rlgl.DisableShader();
+        Rlgl.MemoryBarrier();
+    }
+
     public void Dispose()
     {
         if (myIsDisposed)
@@ -84,6 +106,8 @@ internal class GridThermalErosion : IGridThermalErosion
 
         myFlowComputeShaderProgram?.Dispose();
         myDepositeComputeShaderProgram?.Dispose();
+        myHorizontalFlowComputeShaderProgram?.Dispose();
+        myFillLayersComputeShaderProgram?.Dispose();
 
         RemoveGridThermalErosionCellShaderBuffer();
 

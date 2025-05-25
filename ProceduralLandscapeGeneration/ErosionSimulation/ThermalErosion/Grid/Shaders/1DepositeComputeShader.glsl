@@ -49,6 +49,11 @@ layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
 uint myHeightMapSideLength;
 uint myHeightMapLength;
 
+uint GetIndex(uint x, uint y)
+{
+    return uint((y * myHeightMapSideLength) + x);
+}
+
 void RemoveFrom(uint index, uint rockType, uint layer, float sediment)
 {
     uint offsetIndex = index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength;
@@ -58,11 +63,6 @@ void RemoveFrom(uint index, uint rockType, uint layer, float sediment)
 void DepositeOn(uint index, uint rockType, uint layer, float sediment)
 {
     heightMap[index + rockType * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength] += sediment;
-}
-
-uint GetIndex(uint x, uint y)
-{
-    return uint((y * myHeightMapSideLength) + x);
 }
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute

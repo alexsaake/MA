@@ -54,12 +54,28 @@ uint myHeightMapLength;
 
 float FineSedimentHeight(uint index)
 {
-    return heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength];
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    {
+        float height = heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
+        if(height > 0)
+        {
+            return height;
+        }
+    }
+    return 0;
 }
 
 float CoarseSedimentHeight(uint index)
 {
-    return heightMap[index + 1 * myHeightMapLength];
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    {
+        float height = heightMap[index + 1 * myHeightMapLength + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapLength];
+        if(height > 0)
+        {
+            return height;
+        }
+    }
+    return 0;
 }
 
 float TotalHeightAllLayers(uint index)

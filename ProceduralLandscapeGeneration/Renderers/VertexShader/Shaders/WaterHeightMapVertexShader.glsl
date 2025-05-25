@@ -89,6 +89,16 @@ float TotalHeightAllLayers(uint index)
     return height;
 }
 
+float TotalWaterHeight(uint index)
+{
+    float waterHeight = 0;
+    for(int layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        waterHeight += gridHydraulicErosionCells[index + layer * myHeightMapLength].WaterHeight;
+    }
+    return waterHeight;
+}
+
 void main()
 {
     uint index = gl_VertexID;
@@ -101,12 +111,12 @@ void main()
     uint x = index % sideLength;
     uint y = index / sideLength;
 
-    float waterHeight = gridHydraulicErosionCells[index].WaterHeight;
+    float waterHeight = TotalWaterHeight(index);
     for(int particle = 0; particle < particlesHydraulicErosion.length(); particle++)
     {        
         if(ivec2(particlesHydraulicErosion[particle].Position) == ivec2(x, y))
         {
-            waterHeight = particlesHydraulicErosion[particle].Volume;
+            waterHeight += particlesHydraulicErosion[particle].Volume;
             continue;
         }
     }
