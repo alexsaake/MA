@@ -58,12 +58,15 @@ void main()
 
     for(int layer = 0; layer < mapGenerationConfiguration.LayerCount - 1; layer ++)
     {
-        if(LayerFloorHeight(index, layer + 1) > 0)
+        float totalHeightMapLayerHeight = TotalHeightMapLayerHeight(index, layer);
+        if(mapGenerationConfiguration.SeaLevel > 0
+            && LayerFloorHeight(index, layer + 1) == mapGenerationConfiguration.SeaLevel
+            && totalHeightMapLayerHeight == mapGenerationConfiguration.SeaLevel)
         {
             continue;
         }
         
-        if(TotalHeightMapLayerHeight(index, layer) >= mapGenerationConfiguration.SeaLevel)
+        if(totalHeightMapLayerHeight >= mapGenerationConfiguration.SeaLevel)
         {
             float sedimentToFill = mapGenerationConfiguration.SeaLevel;
             for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)

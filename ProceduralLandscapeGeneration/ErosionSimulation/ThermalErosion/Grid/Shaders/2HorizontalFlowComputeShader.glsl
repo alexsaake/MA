@@ -29,6 +29,16 @@ float LayerFloorHeight(uint index, uint layer)
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
+float TotalHeightMapLayerHeight(uint index, uint layer)
+{
+    float height = 0;
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    {
+        height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+    }
+    return height;
+}
+
 //horizontal flow
 //https://github.com/Clocktown/CUDA-3D-Hydraulic-Erosion-Simulation-with-Layered-Stacks/blob/main/core/geo/device/transport.cu
 
@@ -43,7 +53,9 @@ void main()
 
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer > 0; layer--)
     {
-        if(LayerFloorHeight(index, layer) > 0)
+        if(mapGenerationConfiguration.SeaLevel > 0
+            && LayerFloorHeight(index, layer) == mapGenerationConfiguration.SeaLevel
+            && TotalHeightMapLayerHeight(index, layer - 1) == mapGenerationConfiguration.SeaLevel)
         {
             continue;
         }

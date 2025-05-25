@@ -10,7 +10,6 @@ using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.DependencyInjection;
 using ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion.Grid;
 using Raylib_cs;
-using System.Reflection.Emit;
 
 namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.HydraulicErosion.Grid;
 
@@ -36,8 +35,13 @@ public class GridThermalErosionTests
         Raylib.InitWindow(1, 1, nameof(GridThermalErosionTests));
         SetUpMapGenerationConfiguration();
         SetUpRockTypesConfiguration();
-        SetUpErosionConfiguration();
         SetUpThermalErosionConfiguration();
+    }
+
+    [SetUp]
+    public void SetUp()
+    {
+        SetUpErosionConfiguration(1);
     }
 
     [OneTimeTearDown]
@@ -78,7 +82,7 @@ public class GridThermalErosionTests
     [Test]
     [TestCase(0u)]
     [TestCase(1u)]
-    public void Flow_3x3HeightMapWithSandInMiddle_FlowIsEqualToAllFourNeighbors(uint layer)
+    public void Flow_3x3HeightMapWithBedrockInMiddle_FlowIsEqualToAllFourNeighbors(uint layer)
     {
         SetUpMapGenerationConfiguration(2u);
         InitializeConfiguration();
@@ -114,7 +118,7 @@ public class GridThermalErosionTests
     }
 
     [Test]
-    public void Flow_3x3HeightMapWithSandInMiddle_AllFlowIsZero()
+    public void Flow_3x3HeightMapWithBedrockInMiddle_AllFlowIsZero()
     {
         SetUpMapGenerationConfiguration(2u);
         InitializeConfiguration();
@@ -135,11 +139,11 @@ public class GridThermalErosionTests
     }
 
     [Test]
-    public void HorizontalFlow_3x3HeightMapWithSandInMiddle_AllFlowIsZero()
+    public void HorizontalFlow_3x3HeightMapWithThreeSedimentsInMiddleOnLayerTwoWithoutFloor_AllSedimentsMovedToLayerOne()
     {
         SetUpMapGenerationConfiguration(2u, 3u, 0f);
         InitializeConfiguration();
-        SetUpHeightMapWithThreeSedimentsInMiddleOnLayerTwo();
+        SetUpHeightMapWithThreeSedimentsInMiddle(1u);
         GridThermalErosion testee = (GridThermalErosion)myContainer!.Resolve<IGridThermalErosion>();
         testee.Initialize();
 
@@ -164,11 +168,35 @@ public class GridThermalErosionTests
     }
 
     [Test]
-    public void FillLayers_3x3HeightMapWithSandInMiddle_AllFlowIsZero()
+    public void FillLayers_3x3HeightMapWithBedrockInMiddle_LayerOneFilledAndExcessMovedToLayerTwo()
     {
         SetUpMapGenerationConfiguration(2u, 0.5f);
         InitializeConfiguration();
         SetUpHeightMapWithBedrockInMiddle(0u);
+        GridThermalErosion testee = (GridThermalErosion)myContainer!.Resolve<IGridThermalErosion>();
+        testee.Initialize();
+
+        testee.FillLayers();
+
+        uint layer = 1;
+        float expectedHeight = 1.0f - myMapGenerationConfiguration!.SeaLevel;
+        float[] heightMap = ReadHeightMapShaderBuffer();
+        float centerBedrockLayerTwoHeight = heightMap[CenterIndex + 0 * myMapGenerationConfiguration!.HeightMapPlaneSize + (layer * myMapGenerationConfiguration!.RockTypeCount + layer) * myMapGenerationConfiguration!.HeightMapPlaneSize];
+        Assert.That(centerBedrockLayerTwoHeight, Is.EqualTo(expectedHeight));
+
+        float centerFloorLayerTwoHeight = heightMap[CenterIndex + 0 * myMapGenerationConfiguration!.HeightMapPlaneSize + (layer * myMapGenerationConfiguration!.RockTypeCount) * myMapGenerationConfiguration!.HeightMapPlaneSize];
+        Assert.That(centerFloorLayerTwoHeight, Is.EqualTo(expectedHeight));
+
+        float centerBedrockLayerOneHeight = heightMap[CenterIndex + 0 * myMapGenerationConfiguration!.HeightMapPlaneSize];
+        Assert.That(centerBedrockLayerOneHeight, Is.EqualTo(expectedHeight));
+    }
+
+    [Test]
+    public void FillLayers_3x3HeightMapWithThreeSedimentsInMiddleOnLayerOne_LayerOneFilledAndExcessMovedToLayerTwo()
+    {
+        SetUpMapGenerationConfiguration(2u, 3u, 0.5f);
+        InitializeConfiguration();
+        SetUpHeightMapWithThreeSedimentsInMiddle(0u);
         GridThermalErosion testee = (GridThermalErosion)myContainer!.Resolve<IGridThermalErosion>();
         testee.Initialize();
 
@@ -218,10 +246,10 @@ public class GridThermalErosionTests
         myMapGenerationConfiguration!.SeaLevel = seaLevel;
     }
 
-    private void SetUpErosionConfiguration()
+    private void SetUpErosionConfiguration(uint iterationsPerStep)
     {
         IErosionConfiguration erosionConfiguration = myContainer!.Resolve<IErosionConfiguration>();
-        erosionConfiguration.IterationsPerStep = 100;
+        erosionConfiguration.IterationsPerStep = iterationsPerStep;
     }
 
     private void SetUpThermalErosionConfiguration()
@@ -277,13 +305,12 @@ public class GridThermalErosionTests
         Rlgl.MemoryBarrier();
     }
 
-    private unsafe void SetUpHeightMapWithThreeSedimentsInMiddleOnLayerTwo()
+    private unsafe void SetUpHeightMapWithThreeSedimentsInMiddle(uint layer)
     {
         IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
         float[] heightMap = new float[myMapGenerationConfiguration!.HeightMapSize];
         shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
-        uint layer = 1;
-        for(uint rockType = 0; rockType < myMapGenerationConfiguration!.RockTypeCount; rockType++)
+        for (uint rockType = 0; rockType < myMapGenerationConfiguration!.RockTypeCount; rockType++)
         {
             heightMap[CenterIndex + rockType * myMapGenerationConfiguration!.HeightMapPlaneSize + (layer * myMapGenerationConfiguration!.RockTypeCount + layer) * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
         }
