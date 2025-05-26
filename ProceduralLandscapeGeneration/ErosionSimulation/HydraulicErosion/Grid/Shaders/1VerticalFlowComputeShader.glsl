@@ -166,7 +166,7 @@ void main()
         if(totalHeightMapHeight > -1
             && totalHeightMapHeight < mapGenerationConfiguration.SeaLevel)
         {
-            //gridHydraulicErosionCell.WaterHeight = mapGenerationConfiguration.SeaLevel - totalHeightMapHeight;
+            gridHydraulicErosionCell.WaterHeight = mapGenerationConfiguration.SeaLevel - totalHeightMapHeight;
         }
         float heightMapLayerHeight = TotalHeightMapLayerHeight(index, layer);
         float totalHeight = heightMapLayerHeight + gridHydraulicErosionCell.WaterHeight;

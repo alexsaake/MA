@@ -115,7 +115,10 @@ void main()
 
     for(int layer = 0; layer < mapGenerationConfiguration.LayerCount - 1; layer ++)
     {
-        if(LayerFloorHeight(index, layer) > 0)
+        float totalHeightMapLayerHeight = TotalHeightMapLayerHeight(index, layer);
+        if(mapGenerationConfiguration.SeaLevel > 0
+            && LayerFloorHeight(index, layer + 1) == mapGenerationConfiguration.SeaLevel
+            && totalHeightMapLayerHeight == mapGenerationConfiguration.SeaLevel)
         {
             continue;
         }
