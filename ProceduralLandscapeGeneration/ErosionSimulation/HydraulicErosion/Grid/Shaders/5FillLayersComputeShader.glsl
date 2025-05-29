@@ -125,15 +125,13 @@ void main()
         
         if(TotalHeightMapLayerHeight(index, layer) >= mapGenerationConfiguration.SeaLevel)
         {
-            SetLayerFloorHeight(index, layer, mapGenerationConfiguration.SeaLevel);
-
             uint currentLayerGridHydraulicErosionCellsIndex = index + layer * myHeightMapPlaneSize;
             uint aboveLayerGridHydraulicErosionCellsIndex = index + (layer + 1) * myHeightMapPlaneSize;
             gridHydraulicErosionCells[aboveLayerGridHydraulicErosionCellsIndex].WaterHeight += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].WaterHeight;
             gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].WaterHeight = 0;
             gridHydraulicErosionCells[aboveLayerGridHydraulicErosionCellsIndex].SuspendedSediment += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].SuspendedSediment;
             gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].SuspendedSediment = 0;
-
+            
             float sedimentToFill = mapGenerationConfiguration.SeaLevel;
             for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
             {
@@ -148,6 +146,8 @@ void main()
                     sedimentToFill = 0;
                 }
             }
+
+            SetLayerFloorHeight(index, layer + 1, mapGenerationConfiguration.SeaLevel);
         }
     }
     

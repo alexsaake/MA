@@ -128,7 +128,12 @@ float RemainingLayerHeight(uint index, uint layer)
     }
     float heightMapLayerCeilingHeight = HeightMapLayerFloorHeight(index, layer + 1);
     float totalHeightMapLayerHeight = TotalHeightMapLayerHeight(index, layer);
-    return heightMapLayerCeilingHeight - totalHeightMapLayerHeight;
+    float remainingLayerHeight = heightMapLayerCeilingHeight - totalHeightMapLayerHeight;
+    if(heightMapLayerCeilingHeight == 0)
+    {
+        return 1.0;
+    }
+    return remainingLayerHeight;
 }
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute

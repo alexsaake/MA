@@ -118,7 +118,7 @@ public class GridThermalErosionTests
     }
 
     [Test]
-    public void Flow_3x3HeightMapWithBedrockInMiddle_AllFlowIsZero()
+    public void Flow_3x3HeightMapWithBedrockInMiddleAndRemainingLayerHeightAtZero_AllFlowIsZero()
     {
         SetUpMapGenerationConfiguration(2u);
         InitializeConfiguration();

@@ -147,7 +147,7 @@ internal class GridHydraulicErosionConfiguration : IGridHydraulicErosionConfigur
         }
     }
 
-    public uint CellsSize => myMapGenerationConfiguration.HeightMapPlaneSize * myMapGenerationConfiguration.LayerCount;
+    public uint GridCellsSize => myMapGenerationConfiguration.HeightMapPlaneSize * myMapGenerationConfiguration.LayerCount;
 
     public event EventHandler<EventArgs>? RainDropsChanged;
 
