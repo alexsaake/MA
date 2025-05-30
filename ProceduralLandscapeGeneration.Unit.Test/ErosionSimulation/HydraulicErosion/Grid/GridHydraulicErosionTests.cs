@@ -142,7 +142,7 @@ public class GridHydraulicErosionTests
         testee.Initialize();
         SetUpHydraulicErosionCellsWithWaterAndSuspendedSedimentInMiddle(1u);
 
-        testee.HorizontalFlow();
+        testee.HorizontalMoveWaterAndSediment();
 
         uint layer = 1;
         float[] heightMap = ReadHeightMapShaderBuffer();

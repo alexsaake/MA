@@ -78,6 +78,7 @@ struct RockTypeConfiguration
 {
     float Hardness;
     float TangensAngleOfRepose;
+    float CollapseThreshold;
 };
 
 layout(std430, binding = 18) buffer rockTypesConfigurationShaderBuffer
@@ -241,6 +242,33 @@ void main()
 		    float soilSuspended = max(gridHydraulicErosionConfiguration.SuspensionRate * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
 		    float suspendedSediment = SuspendFromTop(index, layer, soilSuspended);
 		    gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
+
+            //erode to sides
+            float waterHeight = gridHydraulicErosionCell.WaterHeight;
+            if(layer > 0
+                && waterHeight > 0)
+            {
+                if(height + waterHeight < heightLeft)
+                {
+		            float suspendedSediment = SuspendFromTop(leftIndex, layer - 1, soilSuspended);
+		            gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
+                }
+                if(height + waterHeight < heightRight)
+                {
+		            float suspendedSediment = SuspendFromTop(rightIndex, layer - 1, soilSuspended);
+		            gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
+                }
+                if(height + waterHeight < heightDown)
+                {
+		            float suspendedSediment = SuspendFromTop(downIndex, layer - 1, soilSuspended);
+		            gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
+                }
+                if(height + waterHeight < heightUp)
+                {
+		            float suspendedSediment = SuspendFromTop(upIndex, layer - 1, soilSuspended);
+		            gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
+                }
+            }
 	    }
 	    else if (sedimentCapacity < gridHydraulicErosionCell.SuspendedSediment)
 	    {

@@ -4,4 +4,5 @@ internal struct RockTypeConfigurationShaderBuffer
 {
     public float Hardness;
     public float TangensAngleOfRepose;
+    public float CollapseThreshold;
 }

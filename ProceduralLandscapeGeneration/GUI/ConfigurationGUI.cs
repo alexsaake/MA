@@ -126,6 +126,7 @@ internal class ConfigurationGUI : IConfigurationGUI
         myBedrockRockTypePanel = new PanelWithElements("Bedrock Rock Type");
         myBedrockRockTypePanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => rockTypesConfiguration.BedrockHardness = value, rockTypesConfiguration.BedrockHardness));
         myBedrockRockTypePanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => rockTypesConfiguration.BedrockAngleOfRepose = (uint)value, (int)rockTypesConfiguration.BedrockAngleOfRepose, 1, 89));
+        myBedrockRockTypePanel.Add(new ValueBoxFloatWithLabel("Collapse Threshold", (value) => rockTypesConfiguration.BedrockCollapseThreshold = value, rockTypesConfiguration.BedrockCollapseThreshold));
 
         myCoarseSedimentRockTypePanel = new PanelWithElements("Coarse Sediment Rock Type");
         myCoarseSedimentRockTypePanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => rockTypesConfiguration.CoarseSedimentHardness = value, rockTypesConfiguration.CoarseSedimentHardness));

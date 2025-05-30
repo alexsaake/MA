@@ -47,6 +47,7 @@ struct RockTypeConfiguration
 {
     float Hardness;
     float TangensAngleOfRepose;
+    float CollapseThreshold;
 };
 
 layout(std430, binding = 18) buffer rockTypesConfigurationShaderBuffer

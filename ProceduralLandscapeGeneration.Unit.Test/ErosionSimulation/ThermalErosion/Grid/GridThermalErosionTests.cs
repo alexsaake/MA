@@ -67,7 +67,7 @@ public class GridThermalErosionTests
         GridThermalErosion testee = (GridThermalErosion)myContainer!.Resolve<IGridThermalErosion>();
         testee.Initialize();
 
-        testee.Flow();
+        testee.VerticalFlow();
 
         GridThermalErosionCellShaderBuffer[] gridThermalErosionCells = ReadGridThermalErosionCellShaderBuffer();
         foreach (GridThermalErosionCellShaderBuffer cell in gridThermalErosionCells)
@@ -90,7 +90,7 @@ public class GridThermalErosionTests
         GridThermalErosion testee = (GridThermalErosion)myContainer!.Resolve<IGridThermalErosion>();
         testee.Initialize();
 
-        testee.Flow();
+        testee.VerticalFlow();
 
         float expectedFlow = 0.05f;
         GridThermalErosionCellShaderBuffer[] gridThermalErosionCells = ReadGridThermalErosionCellShaderBuffer();
@@ -126,7 +126,7 @@ public class GridThermalErosionTests
         GridThermalErosion testee = (GridThermalErosion)myContainer!.Resolve<IGridThermalErosion>();
         testee.Initialize();
 
-        testee.Flow();
+        testee.VerticalFlow();
 
         GridThermalErosionCellShaderBuffer[] gridThermalErosionCells = ReadGridThermalErosionCellShaderBuffer();
         foreach (GridThermalErosionCellShaderBuffer cell in gridThermalErosionCells)
@@ -147,7 +147,7 @@ public class GridThermalErosionTests
         GridThermalErosion testee = (GridThermalErosion)myContainer!.Resolve<IGridThermalErosion>();
         testee.Initialize();
 
-        testee.HorizontalFlow();
+        testee.HorizontalMoveSediment();
 
         uint layer = 1;
         float[] heightMap = ReadHeightMapShaderBuffer();
