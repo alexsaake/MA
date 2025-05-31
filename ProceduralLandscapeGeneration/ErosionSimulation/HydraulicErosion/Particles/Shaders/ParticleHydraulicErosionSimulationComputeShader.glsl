@@ -144,7 +144,7 @@ float TotalHeight(uint index, uint layer)
     return height;
 }
 
-vec3 GetScaledNormal(uint x, uint y)
+vec3 GetScaledNormal(uint x, uint y, uint layer)
 {
     if (x < 1 || x > myHeightMapSideLength - 2
         || y < 1 || y > myHeightMapSideLength - 2)
@@ -152,14 +152,14 @@ vec3 GetScaledNormal(uint x, uint y)
         return vec3(0.0, 0.0, 1.0);
     }
     
-    float rb = TotalHeight(GetIndex(x + 1, y - 1));
-    float lb = TotalHeight(GetIndex(x - 1, y - 1));
-    float r = TotalHeight(GetIndex(x + 1, y));
-    float l = TotalHeight(GetIndex(x - 1, y));
-    float rt = TotalHeight(GetIndex(x + 1, y + 1));
-    float lt = TotalHeight(GetIndex(x - 1, y + 1));
-    float t = TotalHeight(GetIndex(x, y + 1));
-    float b = TotalHeight(GetIndex(x, y - 1));
+    float rb = TotalHeight(GetIndex(x + 1, y - 1), layer);
+    float lb = TotalHeight(GetIndex(x - 1, y - 1), layer);
+    float r = TotalHeight(GetIndex(x + 1, y), layer);
+    float l = TotalHeight(GetIndex(x - 1, y), layer);
+    float rt = TotalHeight(GetIndex(x + 1, y + 1), layer);
+    float lt = TotalHeight(GetIndex(x - 1, y + 1), layer);
+    float t = TotalHeight(GetIndex(x, y + 1), layer);
+    float b = TotalHeight(GetIndex(x, y - 1), layer);
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -182,7 +182,7 @@ bool Move()
 
     if(myParticleHydraulicErosion.Age > particleHydraulicErosionConfiguration.MaxAge
     || myParticleHydraulicErosion.Volume < particleHydraulicErosionConfiguration.MinimumVolume
-    || TotalHeight(GetIndexVector(position)) <= mapGenerationConfiguration.SeaLevel - particleHydraulicErosionConfiguration.MaximalErosionDepth)
+    || TotalHeight(GetIndexVector(position), 0) <= mapGenerationConfiguration.SeaLevel - particleHydraulicErosionConfiguration.MaximalErosionDepth)
     {
         DepositeOnTop(GetIndexVector(position), myParticleHydraulicErosion.Sediment);
         myParticleHydraulicErosion.Sediment = 0;
@@ -190,7 +190,7 @@ bool Move()
         return false;
     }
 
-    const vec3 normal = GetScaledNormal(position.x, position.y);
+    const vec3 normal = GetScaledNormal(position.x, position.y, 0);
 
     myParticleHydraulicErosion.Speed += particleHydraulicErosionConfiguration.Gravity * normal.xy / myParticleHydraulicErosion.Volume;
 
@@ -217,15 +217,15 @@ bool Interact()
     float currentHeight;
     if(IsOutOfBounds(ivec2(myParticleHydraulicErosion.Position)))
     {
-        currentHeight = 0.99 * TotalHeight(GetIndexVector(originalPosition));
+        currentHeight = 0.99 * TotalHeight(GetIndexVector(originalPosition), 0);
     }
     else
     {
         ivec2 currentPosition = ivec2(myParticleHydraulicErosion.Position);
-        currentHeight = TotalHeight(GetIndexVector(currentPosition));
+        currentHeight = TotalHeight(GetIndexVector(currentPosition), 0);
     }
 
-    float heightDifference = TotalHeight(GetIndexVector(originalPosition)) - currentHeight;
+    float heightDifference = TotalHeight(GetIndexVector(originalPosition), 0) - currentHeight;
     if(heightDifference < 0)
     {
         heightDifference = 0;
