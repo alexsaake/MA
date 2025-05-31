@@ -24,24 +24,9 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 uint myHeightMapPlaneSize;
 
-float BedrockHeightMapLayerHeight(uint index, uint layer)
-{
-    return heightMap[index + 0 * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
-}
-
 float LayerFloorHeight(uint index, uint layer)
 {
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
-}
-
-float TotalHeightMapLayerHeight(uint index, uint layer)
-{
-    float height = 0;
-    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
-    {
-        height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
-    }
-    return height;
 }
 
 //horizontal flow
@@ -58,10 +43,7 @@ void main()
 
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer > 0; layer--)
     {
-        if(BedrockHeightMapLayerHeight(index, layer) > 0
-            || (mapGenerationConfiguration.SeaLevel > 0
-            && LayerFloorHeight(index, layer) == mapGenerationConfiguration.SeaLevel
-            && TotalHeightMapLayerHeight(index, layer - 1) == mapGenerationConfiguration.SeaLevel))
+        if(LayerFloorHeight(index, layer) > 0)
         {
             continue;
         }

@@ -21,7 +21,6 @@ internal class GridThermalErosion : IGridThermalErosion
     private ComputeShaderProgram? myVerticalFlowComputeShaderProgram;
     private ComputeShaderProgram? myDepositeComputeShaderProgram;
     private ComputeShaderProgram? myHorizontalMoveSedimentComputeShaderProgram;
-    private ComputeShaderProgram? myFillLayersComputeShaderProgram;
 
     private bool myIsDisposed;
 
@@ -39,7 +38,6 @@ internal class GridThermalErosion : IGridThermalErosion
         myVerticalFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}0VerticalFlowComputeShader.glsl");
         myDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}1DepositeComputeShader.glsl");
         myHorizontalMoveSedimentComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}2HorizontalMoveSedimentComputeShader.glsl");
-        myFillLayersComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}3FillLayersComputeShader.glsl");
 
         AddGridThermalErosionCellShaderBuffer();
 
@@ -64,7 +62,6 @@ internal class GridThermalErosion : IGridThermalErosion
             VerticalFlow();
             Deposite();
             HorizontalMoveSediment();
-            FillLayers();
         }
     }
 
@@ -91,14 +88,6 @@ internal class GridThermalErosion : IGridThermalErosion
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
-    
-    internal void FillLayers()
-    {
-        Rlgl.EnableShader(myFillLayersComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
-        Rlgl.DisableShader();
-        Rlgl.MemoryBarrier();
-    }
 
     public void Dispose()
     {
@@ -110,7 +99,6 @@ internal class GridThermalErosion : IGridThermalErosion
         myVerticalFlowComputeShaderProgram?.Dispose();
         myDepositeComputeShaderProgram?.Dispose();
         myHorizontalMoveSedimentComputeShaderProgram?.Dispose();
-        myFillLayersComputeShaderProgram?.Dispose();
 
         RemoveGridThermalErosionCellShaderBuffer();
 
