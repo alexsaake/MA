@@ -42,23 +42,11 @@ void main()
             bedrockHeight = 0.5 + 0.3 * (((abs(x - (heightMapSideLength / 2.0)) / heightMapSideLength) * 2) + ((heightMapSideLength - y) / float(heightMapSideLength)));
     }
 
-    if(mapGenerationConfiguration.LayerCount > 1
-        && mapGenerationConfiguration.SeaLevel > 0
-        && bedrockHeight >= mapGenerationConfiguration.SeaLevel)
+    if(mapGenerationConfiguration.RockTypeCount > 1)
     {
-        heightMap[index] = mapGenerationConfiguration.SeaLevel;
-        bedrockHeight -= mapGenerationConfiguration.SeaLevel;
-        heightMap[index + mapGenerationConfiguration.RockTypeCount * heightMapPlaneSize] = mapGenerationConfiguration.SeaLevel;
-        heightMap[index + (mapGenerationConfiguration.RockTypeCount + mapGenerationConfiguration.LayerCount - 1) * heightMapPlaneSize] = bedrockHeight;
+        float sedimentHeight = 0.4;
+        bedrockHeight -= sedimentHeight;
+        heightMap[index + 1 * heightMapPlaneSize] = sedimentHeight;
     }
-    else
-    {
-        if(mapGenerationConfiguration.RockTypeCount > 1)
-        {
-            float sedimentHeight = 0.4;
-            bedrockHeight -= sedimentHeight;
-            heightMap[index + 1 * heightMapPlaneSize] = sedimentHeight;
-        }
-        heightMap[index] = bedrockHeight;
-    }
+    heightMap[index] = bedrockHeight;
 }
