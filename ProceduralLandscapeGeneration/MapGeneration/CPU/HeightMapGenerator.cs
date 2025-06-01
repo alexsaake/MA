@@ -52,7 +52,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     private float[] GenerateNoiseMap(uint rockTypes, uint layerCount)
     {
-        float[] noiseMap = new float[myMapGenerationConfiguration.HeightMapPlaneSize * rockTypes * layerCount];
+        float[] noiseMap = new float[myMapGenerationConfiguration.HeightMapPlaneSize * (rockTypes * layerCount + layerCount - 1)];
 
         Vector2[] octaveOffsets = new Vector2[myMapGenerationConfiguration.NoiseOctaves];
         for (int octave = 0; octave < myMapGenerationConfiguration.NoiseOctaves; octave++)
@@ -62,12 +62,6 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
         float maxNoiseHeight = float.MinValue;
         float minNoiseHeight = float.MaxValue;
-
-        uint indexOffset = 0;
-        if(rockTypes > 2)
-        {
-            indexOffset = myMapGenerationConfiguration.HeightMapPlaneSize;
-        }
 
         for (int y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
         {
@@ -97,7 +91,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
                 {
                     minNoiseHeight = noiseHeight;
                 }
-                noiseMap[indexOffset + x + y * myMapGenerationConfiguration.HeightMapSideLength] = noiseHeight;
+                noiseMap[x + y * myMapGenerationConfiguration.HeightMapSideLength] = noiseHeight;
             }
         }
 
@@ -105,7 +99,7 @@ internal class HeightMapGenerator : IHeightMapGenerator
         {
             for (int x = 0; x < myMapGenerationConfiguration.HeightMapSideLength; x++)
             {
-                noiseMap[indexOffset + x + y * myMapGenerationConfiguration.HeightMapSideLength] = Math.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[indexOffset + x + y * myMapGenerationConfiguration.HeightMapSideLength]);
+                noiseMap[x + y * myMapGenerationConfiguration.HeightMapSideLength] = Math.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x + y * myMapGenerationConfiguration.HeightMapSideLength]);
             }
         }
 
