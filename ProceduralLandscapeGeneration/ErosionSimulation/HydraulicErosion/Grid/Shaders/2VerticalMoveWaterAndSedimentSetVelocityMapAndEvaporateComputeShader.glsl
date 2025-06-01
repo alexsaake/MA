@@ -83,22 +83,12 @@ layout(std430, binding = 9) buffer gridHydraulicErosionConfigurationShaderBuffer
 uint myHeightMapSideLength;
 uint myHeightMapPlaneSize;
 
-float LayerFloorHeight(uint index, uint layer)
+float TotalHeightMapLayerHeight(uint index)
 {
-    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
-}
-
-float TotalHeightMapLayerHeight(uint index, uint layer)
-{
-    if(layer > 0
-        && LayerFloorHeight(index, layer) == 0)
-    {
-        return 0;
-    }
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+        height += heightMap[index + rockType * myHeightMapPlaneSize];
     }
     return height;
 }
@@ -121,41 +111,37 @@ void main()
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
     
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
-    {
-        uint gridHydraulicErosionCellIndexOffset = layer * myHeightMapPlaneSize;
-        GridHydraulicErosionCell gridHydraulicErosionCell  = gridHydraulicErosionCells[index + gridHydraulicErosionCellIndexOffset];
+    GridHydraulicErosionCell gridHydraulicErosionCell  = gridHydraulicErosionCells[index];
         
-        uint leftIndex = GetIndex(x - 1, y) + gridHydraulicErosionCellIndexOffset;
-        uint rightIndex = GetIndex(x + 1, y) + gridHydraulicErosionCellIndexOffset;
-        uint downIndex = GetIndex(x, y - 1) + gridHydraulicErosionCellIndexOffset;
-        uint upIndex = GetIndex(x, y + 1) + gridHydraulicErosionCellIndexOffset;
+    uint indexLeft = GetIndex(x - 1, y);
+    uint indexRight = GetIndex(x + 1, y);
+    uint indexDown = GetIndex(x, y - 1);
+    uint indexUp = GetIndex(x, y + 1);
 
-        float waterFlowIn = gridHydraulicErosionCells[leftIndex].WaterFlowRight + gridHydraulicErosionCells[rightIndex].WaterFlowLeft + gridHydraulicErosionCells[downIndex].WaterFlowUp + gridHydraulicErosionCells[upIndex].WaterFlowDown;
-        float waterFlowOut = gridHydraulicErosionCell.WaterFlowRight + gridHydraulicErosionCell.WaterFlowLeft + gridHydraulicErosionCell.WaterFlowUp + gridHydraulicErosionCell.WaterFlowDown;
-	    float waterVolumeDelta = (waterFlowIn - waterFlowOut) * erosionConfiguration.TimeDelta;
-	    gridHydraulicErosionCell.WaterHeight = max(gridHydraulicErosionCell.WaterHeight + waterVolumeDelta, 0.0);
+    float waterFlowIn = gridHydraulicErosionCells[indexLeft].WaterFlowRight + gridHydraulicErosionCells[indexRight].WaterFlowLeft + gridHydraulicErosionCells[indexDown].WaterFlowUp + gridHydraulicErosionCells[indexUp].WaterFlowDown;
+    float waterFlowOut = gridHydraulicErosionCell.WaterFlowRight + gridHydraulicErosionCell.WaterFlowLeft + gridHydraulicErosionCell.WaterFlowUp + gridHydraulicErosionCell.WaterFlowDown;
+	float waterVolumeDelta = (waterFlowIn - waterFlowOut) * erosionConfiguration.TimeDelta;
+	gridHydraulicErosionCell.WaterHeight = max(gridHydraulicErosionCell.WaterHeight + waterVolumeDelta, 0.0);
     
-        float sedimentFlowIn = gridHydraulicErosionCells[leftIndex].SedimentFlowRight + gridHydraulicErosionCells[rightIndex].SedimentFlowLeft + gridHydraulicErosionCells[downIndex].SedimentFlowUp + gridHydraulicErosionCells[upIndex].SedimentFlowDown;
-        float sedimentFlowOut = gridHydraulicErosionCell.SedimentFlowRight + gridHydraulicErosionCell.SedimentFlowLeft + gridHydraulicErosionCell.SedimentFlowUp + gridHydraulicErosionCell.SedimentFlowDown;
-	    float sedimentVolumeDelta = (sedimentFlowIn - sedimentFlowOut) * erosionConfiguration.TimeDelta;
-	    gridHydraulicErosionCell.SuspendedSediment = max(gridHydraulicErosionCell.SuspendedSediment + sedimentVolumeDelta, 0.0);
+    float sedimentFlowIn = gridHydraulicErosionCells[indexLeft].SedimentFlowRight + gridHydraulicErosionCells[indexRight].SedimentFlowLeft + gridHydraulicErosionCells[indexDown].SedimentFlowUp + gridHydraulicErosionCells[indexUp].SedimentFlowDown;
+    float sedimentFlowOut = gridHydraulicErosionCell.SedimentFlowRight + gridHydraulicErosionCell.SedimentFlowLeft + gridHydraulicErosionCell.SedimentFlowUp + gridHydraulicErosionCell.SedimentFlowDown;
+	float sedimentVolumeDelta = (sedimentFlowIn - sedimentFlowOut) * erosionConfiguration.TimeDelta;
+	gridHydraulicErosionCell.SuspendedSediment = max(gridHydraulicErosionCell.SuspendedSediment + sedimentVolumeDelta, 0.0);
 
-        if(gridHydraulicErosionCell.WaterHeight > 0.0
-            && x > 0 && x < myHeightMapSideLength - 1
-            && y > 0 && y < myHeightMapSideLength - 1)
-        {
-            gridHydraulicErosionCell.WaterVelocity = 0.5 * vec2(((gridHydraulicErosionCell.WaterFlowRight - gridHydraulicErosionCells[GetIndex(x + 1, y)].WaterFlowLeft) - (gridHydraulicErosionCell.WaterFlowLeft - gridHydraulicErosionCells[GetIndex(x - 1, y)].WaterFlowRight)) * mapGenerationConfiguration.HeightMultiplier,
-                                                           ((gridHydraulicErosionCell.WaterFlowUp - gridHydraulicErosionCells[GetIndex(x, y + 1)].WaterFlowDown) - (gridHydraulicErosionCell.WaterFlowDown - gridHydraulicErosionCells[GetIndex(x, y - 1)].WaterFlowUp)) * mapGenerationConfiguration.HeightMultiplier);
-        }
-        else
-        {
-            gridHydraulicErosionCell.WaterVelocity = vec2(0);
-        }
-        gridHydraulicErosionCell.WaterHeight = max(gridHydraulicErosionCell.WaterHeight * (1.0 - gridHydraulicErosionConfiguration.EvaporationRate * erosionConfiguration.TimeDelta), 0.0);
-    
-        gridHydraulicErosionCells[index + gridHydraulicErosionCellIndexOffset] = gridHydraulicErosionCell;
+    if(gridHydraulicErosionCell.WaterHeight > 0.0
+        && x > 0 && x < myHeightMapSideLength - 1
+        && y > 0 && y < myHeightMapSideLength - 1)
+    {
+        gridHydraulicErosionCell.WaterVelocity = 0.5 * vec2(((gridHydraulicErosionCell.WaterFlowRight - gridHydraulicErosionCells[GetIndex(x + 1, y)].WaterFlowLeft) - (gridHydraulicErosionCell.WaterFlowLeft - gridHydraulicErosionCells[GetIndex(x - 1, y)].WaterFlowRight)) * mapGenerationConfiguration.HeightMultiplier,
+                                                        ((gridHydraulicErosionCell.WaterFlowUp - gridHydraulicErosionCells[GetIndex(x, y + 1)].WaterFlowDown) - (gridHydraulicErosionCell.WaterFlowDown - gridHydraulicErosionCells[GetIndex(x, y - 1)].WaterFlowUp)) * mapGenerationConfiguration.HeightMultiplier);
     }
+    else
+    {
+        gridHydraulicErosionCell.WaterVelocity = vec2(0);
+    }
+    gridHydraulicErosionCell.WaterHeight = max(gridHydraulicErosionCell.WaterHeight * (1.0 - gridHydraulicErosionConfiguration.EvaporationRate * erosionConfiguration.TimeDelta), 0.0);
+    
+    gridHydraulicErosionCells[index] = gridHydraulicErosionCell;
 
     memoryBarrier();
 }

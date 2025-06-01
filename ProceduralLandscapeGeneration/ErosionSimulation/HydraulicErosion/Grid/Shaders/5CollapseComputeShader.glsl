@@ -93,19 +93,19 @@ float LayerFloorHeight(uint index, uint layer)
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-float TotalHeightMapLayerHeight(uint index, uint layer)
+float TotalHeightMapLayerHeight(uint index)
 {
-    if(layer > 0
-        && LayerFloorHeight(index, layer) == 0)
-    {
-        return 0;
-    }
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+        height += heightMap[index + rockType * myHeightMapPlaneSize];
     }
     return height;
+}
+
+void SetLayerFloorHeight(uint index, uint layer, float value)
+{
+    heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = value;
 }
 
 //horizontal flow
@@ -120,32 +120,36 @@ void main()
         return;
     }
 
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer > 0; layer--)
+    float totalHeightMapBellowLayerHeight = TotalHeightMapLayerHeight(index);
+    float layerFloorHeight = LayerFloorHeight(index, 1);
+    if(layerFloorHeight == 0
+        || layerFloorHeight - totalHeightMapBellowLayerHeight < rockTypesConfiguration[0].CollapseThreshold)
     {
-        float totalHeightMapBellowLayerHeight = TotalHeightMapLayerHeight(index, layer - 1);
-        float layerFloorHeight = LayerFloorHeight(index, layer);
-        if(layerFloorHeight == 0
-            || layerFloorHeight - totalHeightMapBellowLayerHeight < rockTypesConfiguration[0].CollapseThreshold)
-        {
-            continue;
-        }
-
-        for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
-        {
-            uint currentLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
-            uint bellowLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + ((layer - 1) * mapGenerationConfiguration.RockTypeCount + (layer - 1)) * myHeightMapPlaneSize;
-            uint currentLayerFloorHeightMapIndex = index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize;
-            if(mapGenerationConfiguration.RockTypeCount > 0
-                && rockType == 0)
-            {
-                //bedrock becomes coarse sediment
-                bellowLayerRockTypeHeightMapIndex = index + rockType + 1 * myHeightMapPlaneSize + ((layer - 1) * mapGenerationConfiguration.RockTypeCount + (layer - 1)) * myHeightMapPlaneSize;
-            }
-            heightMap[bellowLayerRockTypeHeightMapIndex] += heightMap[currentLayerRockTypeHeightMapIndex];
-            heightMap[currentLayerRockTypeHeightMapIndex] = 0;
-            heightMap[currentLayerFloorHeightMapIndex] = 0;
-        }
+        return;
     }
+
+    uint currentLayerGridHydraulicErosionCellsIndex = index + myHeightMapPlaneSize;
+    uint belowLayerGridHydraulicErosionCellsIndex = index + (-1) * myHeightMapPlaneSize;
+    gridHydraulicErosionCells[belowLayerGridHydraulicErosionCellsIndex].WaterHeight += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].WaterHeight;
+    gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].WaterHeight = 0;
+    gridHydraulicErosionCells[belowLayerGridHydraulicErosionCellsIndex].SuspendedSediment += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].SuspendedSediment;
+    gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].SuspendedSediment = 0;
+
+    for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    {
+        uint currentLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + (mapGenerationConfiguration.RockTypeCount) * myHeightMapPlaneSize;
+        uint bellowLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + ((-1) * mapGenerationConfiguration.RockTypeCount + (-1)) * myHeightMapPlaneSize;
+        if(mapGenerationConfiguration.RockTypeCount > 1
+            && rockType == 0)
+        {
+            //bedrock becomes coarse sediment
+            bellowLayerRockTypeHeightMapIndex = index + (rockType + 1) * myHeightMapPlaneSize + ((-1) * mapGenerationConfiguration.RockTypeCount + (-1)) * myHeightMapPlaneSize;
+        }
+        heightMap[bellowLayerRockTypeHeightMapIndex] += heightMap[currentLayerRockTypeHeightMapIndex];
+        heightMap[currentLayerRockTypeHeightMapIndex] = 0;
+    }
+        
+    SetLayerFloorHeight(index, 1, 0);
     
     memoryBarrier();
 }
