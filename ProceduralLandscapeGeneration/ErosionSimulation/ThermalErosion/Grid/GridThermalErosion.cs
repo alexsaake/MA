@@ -20,7 +20,6 @@ internal class GridThermalErosion : IGridThermalErosion
 
     private ComputeShaderProgram? myVerticalFlowComputeShaderProgram;
     private ComputeShaderProgram? myDepositeComputeShaderProgram;
-    private ComputeShaderProgram? myHorizontalMoveSedimentComputeShaderProgram;
 
     private bool myIsDisposed;
 
@@ -37,7 +36,6 @@ internal class GridThermalErosion : IGridThermalErosion
     {
         myVerticalFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}0VerticalFlowComputeShader.glsl");
         myDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}1DepositeComputeShader.glsl");
-        myHorizontalMoveSedimentComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}2HorizontalMoveSedimentComputeShader.glsl");
 
         AddGridThermalErosionCellShaderBuffer();
 
@@ -61,7 +59,6 @@ internal class GridThermalErosion : IGridThermalErosion
         {
             VerticalFlow();
             Deposite();
-            HorizontalMoveSediment();
         }
     }
 
@@ -81,14 +78,6 @@ internal class GridThermalErosion : IGridThermalErosion
         Rlgl.MemoryBarrier();
     }
 
-    internal void HorizontalMoveSediment()
-    {
-        Rlgl.EnableShader(myHorizontalMoveSedimentComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
-        Rlgl.DisableShader();
-        Rlgl.MemoryBarrier();
-    }
-
     public void Dispose()
     {
         if (myIsDisposed)
@@ -98,7 +87,6 @@ internal class GridThermalErosion : IGridThermalErosion
 
         myVerticalFlowComputeShaderProgram?.Dispose();
         myDepositeComputeShaderProgram?.Dispose();
-        myHorizontalMoveSedimentComputeShaderProgram?.Dispose();
 
         RemoveGridThermalErosionCellShaderBuffer();
 

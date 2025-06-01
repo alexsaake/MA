@@ -54,15 +54,15 @@ uint GetIndex(uint x, uint y)
     return uint((y * myHeightMapSideLength) + x);
 }
 
-void RemoveFrom(uint index, uint rockType, uint layer, float sediment)
+void RemoveFrom(uint index, uint rockType, float sediment)
 {
-    uint heightMapOffsetIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+    uint heightMapOffsetIndex = index + rockType * myHeightMapPlaneSize;
     heightMap[heightMapOffsetIndex] = max(heightMap[heightMapOffsetIndex] - sediment, 0.0);
 }
 
-void DepositeOn(uint index, uint rockType, uint layer, float sediment)
+void DepositeOn(uint index, uint rockType, float sediment)
 {
-    heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize] += sediment;
+    heightMap[index + rockType * myHeightMapPlaneSize] += sediment;
 }
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
@@ -80,31 +80,28 @@ void main()
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
     
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
-	{
-        for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    {
+		uint gridThermalErosionCellsIndexOffset = rockType * myHeightMapPlaneSize;
+        GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[index + gridThermalErosionCellsIndexOffset];
+    
+        float flowIn = gridThermalErosionCells[GetIndex(x - 1, y) + gridThermalErosionCellsIndexOffset].SedimentFlowRight + gridThermalErosionCells[GetIndex(x + 1, y) + gridThermalErosionCellsIndexOffset].SedimentFlowLeft + gridThermalErosionCells[GetIndex(x, y - 1) + gridThermalErosionCellsIndexOffset].SedimentFlowUp + gridThermalErosionCells[GetIndex(x, y + 1) + gridThermalErosionCellsIndexOffset].SedimentFlowDown;
+        float flowOut = gridThermalErosionCell.SedimentFlowRight + gridThermalErosionCell.SedimentFlowLeft + gridThermalErosionCell.SedimentFlowUp + gridThermalErosionCell.SedimentFlowDown;
+    
+	    float volumeDelta = (flowIn - flowOut) * erosionConfiguration.TimeDelta;
+        if(volumeDelta < 0)
         {
-			uint gridThermalErosionCellsIndexOffset = rockType * myHeightMapPlaneSize + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize;
-            GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[index + gridThermalErosionCellsIndexOffset];
-    
-            float flowIn = gridThermalErosionCells[GetIndex(x - 1, y) + gridThermalErosionCellsIndexOffset].SedimentFlowRight + gridThermalErosionCells[GetIndex(x + 1, y) + gridThermalErosionCellsIndexOffset].SedimentFlowLeft + gridThermalErosionCells[GetIndex(x, y - 1) + gridThermalErosionCellsIndexOffset].SedimentFlowUp + gridThermalErosionCells[GetIndex(x, y + 1) + gridThermalErosionCellsIndexOffset].SedimentFlowDown;
-            float flowOut = gridThermalErosionCell.SedimentFlowRight + gridThermalErosionCell.SedimentFlowLeft + gridThermalErosionCell.SedimentFlowUp + gridThermalErosionCell.SedimentFlowDown;
-    
-	        float volumeDelta = (flowIn - flowOut) * erosionConfiguration.TimeDelta;
-            if(volumeDelta < 0)
+            RemoveFrom(index, rockType, abs(volumeDelta));
+        }
+        else
+        {
+            if(rockType == mapGenerationConfiguration.RockTypeCount - 1)
             {
-                RemoveFrom(index, rockType, layer, abs(volumeDelta));
+                DepositeOn(index, rockType, volumeDelta);                
             }
             else
             {
-                if(rockType == mapGenerationConfiguration.RockTypeCount - 1)
-                {
-                    DepositeOn(index, rockType, layer, volumeDelta);                
-                }
-                else
-                {
-                    DepositeOn(index, rockType + 1, layer, volumeDelta);
-                }
+                DepositeOn(index, rockType + 1, volumeDelta);
             }
         }
     }

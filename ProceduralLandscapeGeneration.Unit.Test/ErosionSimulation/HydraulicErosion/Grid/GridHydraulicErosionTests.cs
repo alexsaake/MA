@@ -173,10 +173,10 @@ public class GridHydraulicErosionTests
     {
         SetUpMapGenerationConfiguration(2u);
         InitializeConfiguration();
-        SetUpHeightMapWithFilledLayerOneAndSlopedChannelLayerTwo();
-        SetUpHydraulicErosionCellsWithWaterInMiddle(1u);
+        SetUpHeightMapWithSlopedChannelLayerOne();
         GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
+        SetUpHydraulicErosionCellsWithWaterInMiddle(0u);
         testee.VerticalFlow();
         testee.VerticalMoveWaterAndSedimentSetVelocityMapAndEvaporate();
 
@@ -226,6 +226,7 @@ public class GridHydraulicErosionTests
     private void SetUpHydraulicErosionConfiguration()
     {
         IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration = myContainer!.Resolve<IGridHydraulicErosionConfiguration>();
+        gridHydraulicErosionConfiguration.MaximalErosionDepth = 1.0f;
     }
 
     private void SetUpRockTypesConfiguration()
@@ -291,27 +292,22 @@ public class GridHydraulicErosionTests
         Rlgl.MemoryBarrier();
     }
 
-    private unsafe void SetUpHeightMapWithFilledLayerOneAndSlopedChannelLayerTwo()
+    private unsafe void SetUpHeightMapWithSlopedChannelLayerOne()
     {
         IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
         float[] heightMap = new float[myMapGenerationConfiguration!.HeightMapSize];
         shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
-        for (int cell = 0; cell < myMapGenerationConfiguration!.HeightMapPlaneSize; cell++)
-        {
-            heightMap[cell] = 1.0f;
-        }
-        uint layerOffset = 1 * myMapGenerationConfiguration!.HeightMapPlaneSize;
         for (uint y = 0; y < myMapGenerationConfiguration!.HeightMapSideLength; y++)
         {
             for (uint x = 0; x < myMapGenerationConfiguration!.HeightMapSideLength; x++)
             {
                 if(y == 1)
                 {
-                    heightMap[myMapGenerationConfiguration.GetIndex(x, y) + layerOffset] = 1.0f / myMapGenerationConfiguration!.HeightMapSideLength * x;
+                    heightMap[myMapGenerationConfiguration.GetIndex(x, y)] = x;
                 }
                 else
                 {
-                    heightMap[myMapGenerationConfiguration.GetIndex(x, y) + layerOffset] = 1.0f;
+                    heightMap[myMapGenerationConfiguration.GetIndex(x, y)] = myMapGenerationConfiguration!.HeightMapSideLength;
                 }
             }
         }

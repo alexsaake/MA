@@ -134,6 +134,7 @@ void main()
         {
             uint currentLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
             uint bellowLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + ((layer - 1) * mapGenerationConfiguration.RockTypeCount + (layer - 1)) * myHeightMapPlaneSize;
+            uint currentLayerFloorHeightMapIndex = index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize;
             if(mapGenerationConfiguration.RockTypeCount > 0
                 && rockType == 0)
             {
@@ -142,6 +143,7 @@ void main()
             }
             heightMap[bellowLayerRockTypeHeightMapIndex] += heightMap[currentLayerRockTypeHeightMapIndex];
             heightMap[currentLayerRockTypeHeightMapIndex] = 0;
+            heightMap[currentLayerFloorHeightMapIndex] = 0;
         }
     }
     

@@ -114,19 +114,18 @@ uint GetIndex(uint x, uint y)
     return uint((y * myHeightMapSideLength) + x);
 }
 
-void SplitAt(uint index, uint layer, float relativeHeight)
+void SplitAt(uint index, uint layer, float splitHeight)
 {
     uint aboveLayerFloorIndex = index + (layer + 1) * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize;
     if(heightMap[aboveLayerFloorIndex] > 0)
     {
         return;
     }
-    float splitHeight = relativeHeight;
     if(layer > 0)
     {
     }
     heightMap[aboveLayerFloorIndex] = splitHeight;
-    float sedimentToFill = relativeHeight;
+    float sedimentToFill = splitHeight;
     for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
         uint currentLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
@@ -135,8 +134,8 @@ void SplitAt(uint index, uint layer, float relativeHeight)
         sedimentToFill -= currentLayerRockTypeHeight;
         if(sedimentToFill < 0)
         {
-            heightMap[aboveLayerRockTypeHeightMapIndex] -= sedimentToFill;
             heightMap[currentLayerRockTypeHeightMapIndex] += sedimentToFill;
+            heightMap[aboveLayerRockTypeHeightMapIndex] -= sedimentToFill;
             sedimentToFill = 0;
         }
     }
@@ -167,6 +166,31 @@ float SuspendFromTop(uint index, uint layer, float requiredSediment)
     return suspendedSediment;
 }
 
+bool TrySplit(uint index, uint layer, GridHydraulicErosionCell neighborCell, float height, float neighborHeight)
+{
+    float sedimentCapacity = gridHydraulicErosionConfiguration.SedimentCapacity * length(neighborCell.WaterVelocity);
+
+	if (sedimentCapacity > neighborCell.SuspendedSediment)
+	{
+		float soilSuspendedLeft = max(gridHydraulicErosionConfiguration.SuspensionRate * (sedimentCapacity - neighborCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
+
+        if(neighborCell.WaterHeight > 0)
+        {
+            float neighborHeightAndWaterHeight = neighborHeight + neighborCell.WaterHeight;
+            if(neighborHeightAndWaterHeight < height)
+            {
+		        SplitAt(index, layer, neighborHeightAndWaterHeight);
+		        float suspendedSedimentLeft = SuspendFromTop(index, layer, soilSuspendedLeft);
+		        neighborCell.SuspendedSediment += suspendedSedimentLeft;
+
+                return true;
+            }
+        }
+	}
+
+    return false;
+}
+
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
 //https://github.com/GuilBlack/Erosion/blob/master/Assets/Resources/Shaders/ComputeErosion.compute
 //https://github.com/keepitwiel/hydraulic-erosion-simulator/blob/main/src/algorithm.py
@@ -193,7 +217,6 @@ void main()
     for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount - 1; layer++)
     {
         uint gridHydraulicErosionCellIndexOffset = layer * myHeightMapPlaneSize;
-        GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[index + gridHydraulicErosionCellIndexOffset];
 
         float height = TotalHeightMapLayerHeight(index, layer);
         float heightLeft;
@@ -233,46 +256,34 @@ void main()
             heightUp = height;
         }
 	
-	    float erosionDepthLimit = (gridHydraulicErosionConfiguration.MaximalErosionDepth - min(gridHydraulicErosionConfiguration.MaximalErosionDepth, gridHydraulicErosionCell.WaterHeight)) / gridHydraulicErosionConfiguration.MaximalErosionDepth;
-	    float sedimentCapacity = gridHydraulicErosionConfiguration.SedimentCapacity * length(gridHydraulicErosionCell.WaterVelocity) * erosionDepthLimit;
-
-	    if (sedimentCapacity > gridHydraulicErosionCell.SuspendedSediment)
-	    {
-		    float soilSuspended = max(gridHydraulicErosionConfiguration.SuspensionRate * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
-
-            //erode to sides
-            float waterHeight = gridHydraulicErosionCell.WaterHeight;
-            if(waterHeight > 0)
-            {
-                float heightAndWaterHeight = height + waterHeight;
-                if(heightAndWaterHeight < heightLeft)
-                {
-		            SplitAt(leftIndex, layer, heightAndWaterHeight);
-		            float suspendedSediment = SuspendFromTop(leftIndex, layer, soilSuspended);
-		            gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
-                }
-                if(heightAndWaterHeight < heightRight)
-                {
-		            SplitAt(rightIndex, layer, heightAndWaterHeight);
-		            float suspendedSediment = SuspendFromTop(rightIndex, layer, soilSuspended);
-		            gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
-                }
-                if(heightAndWaterHeight < heightDown)
-                {
-		            SplitAt(downIndex, layer, heightAndWaterHeight);
-		            float suspendedSediment = SuspendFromTop(downIndex, layer, soilSuspended);
-		            gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
-                }
-                if(heightAndWaterHeight < heightUp)
-                {
-		            SplitAt(upIndex, layer, heightAndWaterHeight);
-		            float suspendedSediment = SuspendFromTop(upIndex, layer, soilSuspended);
-		            gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
-                }
-            }
-	    }
-	
-        gridHydraulicErosionCells[index + gridHydraulicErosionCellIndexOffset] = gridHydraulicErosionCell;
+        GridHydraulicErosionCell gridHydraulicErosionCellLeft = gridHydraulicErosionCells[leftIndex + gridHydraulicErosionCellIndexOffset];
+        if(TrySplit(index, layer, gridHydraulicErosionCellLeft, height, heightLeft))
+        {
+            gridHydraulicErosionCells[leftIndex + gridHydraulicErosionCellIndexOffset] = gridHydraulicErosionCellLeft;
+            memoryBarrier();
+            return;            
+        }
+        GridHydraulicErosionCell gridHydraulicErosionCellRight = gridHydraulicErosionCells[rightIndex + gridHydraulicErosionCellIndexOffset];
+        if(TrySplit(index, layer, gridHydraulicErosionCellLeft, height, heightRight))
+        {
+            gridHydraulicErosionCells[rightIndex + gridHydraulicErosionCellIndexOffset] = gridHydraulicErosionCellRight;
+            memoryBarrier();
+            return;            
+        }
+        GridHydraulicErosionCell gridHydraulicErosionCellDown = gridHydraulicErosionCells[downIndex + gridHydraulicErosionCellIndexOffset];
+        if(TrySplit(index, layer, gridHydraulicErosionCellLeft, height, heightDown))
+        {
+            gridHydraulicErosionCells[downIndex + gridHydraulicErosionCellIndexOffset] = gridHydraulicErosionCellDown;
+            memoryBarrier();
+            return;            
+        }
+        GridHydraulicErosionCell gridHydraulicErosionCellUp = gridHydraulicErosionCells[upIndex + gridHydraulicErosionCellIndexOffset];
+        if(TrySplit(index, layer, gridHydraulicErosionCellLeft, height, heightUp))
+        {
+            gridHydraulicErosionCells[upIndex + gridHydraulicErosionCellIndexOffset] = gridHydraulicErosionCellUp;
+            memoryBarrier();
+            return;            
+        }	
     }
     
     memoryBarrier();
