@@ -65,11 +65,11 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 uniform mat4 mvp;
 
-uint myMapSize;
+uint myHeightMapSideLength;
 
 uint GetIndex(uint x, uint y)
 {
-    return (y * myMapSize) + x;
+    return (y * myHeightMapSideLength) + x;
 }
 
 vec4 waterColor = vec4(0.0, 0.0, 1.0, 0.25);
@@ -106,13 +106,13 @@ void main()
     {
         return;
     }
-    myMapSize = uint(sqrt(myHeightMapPlaneSize));
+    myHeightMapSideLength = uint(sqrt(myHeightMapPlaneSize));
     uint meshletSize = uint(sqrt(VERTICES));
-    uint yMeshletCount = uint(ceil(float(myMapSize) / (meshletSize - 1)));
+    uint yMeshletCount = uint(ceil(float(myHeightMapSideLength) / (meshletSize - 1)));
     uint xOffset = uint(floor(threadNumber / yMeshletCount)) * (meshletSize - 1);
     uint yOffset = (threadNumber % yMeshletCount) * (meshletSize - 1);
 
-    if(xOffset + (meshletSize - 1) > myMapSize || yOffset + (meshletSize - 1) > myMapSize)
+    if(xOffset + (meshletSize - 1) > myHeightMapSideLength || yOffset + (meshletSize - 1) > myHeightMapSideLength)
     {
         return;
     }

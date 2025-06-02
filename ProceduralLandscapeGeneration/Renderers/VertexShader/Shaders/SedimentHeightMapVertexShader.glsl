@@ -81,14 +81,24 @@ vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
 
 uint myHeightMapPlaneSize;
 
-float TotalHeightAllLayers(uint index)
+float HeightMapFloorHeight(uint index, uint layer)
+{
+    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
+}
+
+float TotalHeightMapHeight(uint index)
 {
     float height = 0;
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
         if(layer > 0)
         {
-            height += heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
+            float heightMapFloorHeight = HeightMapFloorHeight(index, layer);
+            if(heightMapFloorHeight == 0)
+            {
+                continue;
+            }
+            height += heightMapFloorHeight;
         }
         for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
         {
@@ -100,16 +110,6 @@ float TotalHeightAllLayers(uint index)
         }
     }
     return height;
-}
-
-float TotalSuspendedSediment(uint index)
-{
-    float suspendedSediment = 0;
-    for(int layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
-    {
-        suspendedSediment += gridHydraulicErosionCells[index + layer * myHeightMapPlaneSize].SuspendedSediment;
-    }
-    return suspendedSediment;
 }
 
 void main()
@@ -124,7 +124,7 @@ void main()
     uint x = index % sideLength;
     uint y = index / sideLength;
 
-    float suspendedSediment = TotalSuspendedSediment(index);
+    float suspendedSediment = gridHydraulicErosionCells[index].SuspendedSediment;
     for(int particle = 0; particle < particlesHydraulicErosion.length(); particle++)
     {        
         if(ivec2(particlesHydraulicErosion[particle].Position) == ivec2(x, y))
@@ -144,6 +144,6 @@ void main()
     
     fragColor = sedimentColor;
     float zOffset = 0.00004;
-    float height = TotalHeightAllLayers(index);
+    float height = TotalHeightMapHeight(index);
     gl_Position =  mvp * vec4(vertexPosition.xy, (height - zOffset + suspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 }

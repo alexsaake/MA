@@ -39,7 +39,7 @@ internal class MeshShaderRenderer : IRenderer
         myWaterParticleMeshShader = Raylib.LoadMeshShader($"{ShaderDirectory}Particle/WaterParticleMeshShader.glsl", $"{ShaderDirectory}TerrainHeightMapMeshFragmentShader.glsl");
         mySedimentHeightMapMeshShader = Raylib.LoadMeshShader($"{ShaderDirectory}Grid/SedimentHeightMapMeshShader.glsl", $"{ShaderDirectory}TerrainHeightMapMeshFragmentShader.glsl");
         mySedimentParticleMeshShader = Raylib.LoadMeshShader($"{ShaderDirectory}Particle/SedimentParticleMeshShader.glsl", $"{ShaderDirectory}TerrainHeightMapMeshFragmentShader.glsl");
-        mySeaLevelQuadMeshShader = Raylib.LoadMeshShader($"{ShaderDirectory}SeaLevelQuadMeshShader.glsl", $"{ShaderDirectory}SeaLevelQuadMeshFragmentShader.glsl");
+        mySeaLevelQuadMeshShader = Raylib.LoadMeshShader($"{ShaderDirectory}SeaLevelQuadMeshShader.glsl", $"{ShaderDirectory}TerrainHeightMapMeshFragmentShader.glsl");
 
         Vector3 heightMapCenter = new Vector3(myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 2, 0);
         Vector3 lightDirection = new Vector3(-myMapGenerationConfiguration.HeightMapSideLength, -myMapGenerationConfiguration.HeightMapSideLength, -myMapGenerationConfiguration.HeightMapSideLength / 2);

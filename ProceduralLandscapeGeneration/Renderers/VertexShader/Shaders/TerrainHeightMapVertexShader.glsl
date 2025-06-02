@@ -78,14 +78,24 @@ float CoarseSedimentHeight(uint index)
     return 0;
 }
 
-float TotalHeightAllLayers(uint index)
+float HeightMapFloorHeight(uint index, uint layer)
+{
+    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
+}
+
+float TotalHeightMapHeight(uint index)
 {
     float height = 0;
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
         if(layer > 0)
         {
-            height += heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
+            float heightMapFloorHeight = HeightMapFloorHeight(index, layer);
+            if(heightMapFloorHeight == 0)
+            {
+                continue;
+            }
+            height += heightMapFloorHeight;
         }
         for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
         {
@@ -112,14 +122,14 @@ vec3 GetScaledNormal(uint x, uint y)
         return vec3(0.0, 0.0, 1.0);
     }
 
-    float rb = TotalHeightAllLayers(GetIndex(x + 1, y - 1));
-    float lb = TotalHeightAllLayers(GetIndex(x - 1, y - 1));
-    float r = TotalHeightAllLayers(GetIndex(x + 1, y));
-    float l = TotalHeightAllLayers(GetIndex(x - 1, y));
-    float rt = TotalHeightAllLayers(GetIndex(x + 1, y + 1));
-    float lt = TotalHeightAllLayers(GetIndex(x - 1, y + 1));
-    float t = TotalHeightAllLayers(GetIndex(x, y + 1));
-    float b = TotalHeightAllLayers(GetIndex(x, y - 1));
+    float rb = TotalHeightMapHeight(GetIndex(x + 1, y - 1));
+    float lb = TotalHeightMapHeight(GetIndex(x - 1, y - 1));
+    float r = TotalHeightMapHeight(GetIndex(x + 1, y));
+    float l = TotalHeightMapHeight(GetIndex(x - 1, y));
+    float rt = TotalHeightMapHeight(GetIndex(x + 1, y + 1));
+    float lt = TotalHeightMapHeight(GetIndex(x - 1, y + 1));
+    float t = TotalHeightMapHeight(GetIndex(x, y + 1));
+    float b = TotalHeightMapHeight(GetIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -162,7 +172,7 @@ void main()
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
     
-    float height = TotalHeightAllLayers(index);
+    float height = TotalHeightMapHeight(index);
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
     float seaLevelHeight = mapGenerationConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     fragPosition = vec3(matModel * vec4(vertexPosition.xy, terrainHeight, 1.0));

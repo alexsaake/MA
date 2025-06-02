@@ -14,7 +14,9 @@ layout(triangles) out;
 
 out PerVertexData
 {
+	vec4 position;
 	vec4 color;
+	vec4 normal;
 } v_out[];
 
 layout(std430, binding = 0) readonly restrict buffer heightMapShaderBuffer
@@ -32,7 +34,7 @@ struct MapGenerationConfiguration
     bool ArePlateTectonicsPlateColorsEnabled;
 };
 
-layout(std430, binding = 5) readonly restrict buffer MapGenerationConfigurationShaderBuffer
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
 {
     MapGenerationConfiguration mapGenerationConfiguration;
 };
@@ -58,7 +60,9 @@ void AddVertex(uint vertex, uint x, uint y)
     vec4 position = mvp * vec4(x, y, seaLevelHeight, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
+    v_out[vertex].position = position;
     v_out[vertex].color = oceanColor;
+    v_out[vertex].normal = vec4(0.0, 0.0, 1.0, 1.0);
 }
 
 void main()

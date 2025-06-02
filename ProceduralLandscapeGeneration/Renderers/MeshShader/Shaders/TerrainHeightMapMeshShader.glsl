@@ -75,20 +75,57 @@ uint myHeightMapPlaneSize;
 
 float FineSedimentHeight(uint index)
 {
-    return heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize];
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    {
+        float height = heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+        if(height > 0)
+        {
+            return height;
+        }
+    }
+    return 0;
 }
 
 float CoarseSedimentHeight(uint index)
 {
-    return heightMap[index + 1 * myHeightMapPlaneSize];
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    {
+        float height = heightMap[index + 1 * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+        if(height > 0)
+        {
+            return height;
+        }
+    }
+    return 0;
 }
 
-float TotalHeight(uint index)
+float HeightMapFloorHeight(uint index, uint layer)
+{
+    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
+}
+
+float TotalHeightMapHeight(uint index)
 {
     float height = 0;
-    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        height += heightMap[index + rockType * myHeightMapPlaneSize];
+        if(layer > 0)
+        {
+            float heightMapFloorHeight = HeightMapFloorHeight(index, layer);
+            if(heightMapFloorHeight == 0)
+            {
+                continue;
+            }
+            height += heightMapFloorHeight;
+        }
+        for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+        {
+            height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+        }
+        if(height > 0)
+        {
+            return height;
+        }
     }
     return height;
 }
@@ -105,15 +142,15 @@ vec3 GetScaledNormal(uint x, uint y)
     {
         return vec3(0.0, 0.0, 1.0);
     }
-    
-    float rb = TotalHeight(GetIndex(x + 1, y - 1));
-    float lb = TotalHeight(GetIndex(x - 1, y - 1));
-    float r = TotalHeight(GetIndex(x + 1, y));
-    float l = TotalHeight(GetIndex(x - 1, y));
-    float rt = TotalHeight(GetIndex(x + 1, y + 1));
-    float lt = TotalHeight(GetIndex(x - 1, y + 1));
-    float t = TotalHeight(GetIndex(x, y + 1));
-    float b = TotalHeight(GetIndex(x, y - 1));
+
+    float rb = TotalHeightMapHeight(GetIndex(x + 1, y - 1));
+    float lb = TotalHeightMapHeight(GetIndex(x - 1, y - 1));
+    float r = TotalHeightMapHeight(GetIndex(x + 1, y));
+    float l = TotalHeightMapHeight(GetIndex(x - 1, y));
+    float rt = TotalHeightMapHeight(GetIndex(x + 1, y + 1));
+    float lt = TotalHeightMapHeight(GetIndex(x - 1, y + 1));
+    float t = TotalHeightMapHeight(GetIndex(x, y + 1));
+    float b = TotalHeightMapHeight(GetIndex(x, y - 1));
 
     vec3 normal = vec3(
     mapGenerationConfiguration.HeightMultiplier * -(rb - lb + 2 * (r - l) + rt - lt),
@@ -137,7 +174,7 @@ vec3 fineSedimentColor = beachColor;
 void addVertex(uint vertex, uint x, uint y)
 {
     uint index = GetIndex(x, y);
-    float height = TotalHeight(index);
+    float height = TotalHeightMapHeight(index);
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
     float seaLevelHeight = mapGenerationConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
     vec3 normal = GetScaledNormal(x, y);

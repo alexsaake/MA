@@ -24,6 +24,33 @@ layout(std430, binding = 0) readonly restrict buffer heightMapShaderBuffer
     float[] heightMap;
 };
 
+struct ParticleHydraulicErosion
+{
+    int Age;
+    float Volume;
+    float Sediment;
+    vec2 Position;
+    vec2 Speed;
+};
+
+layout(std430, binding = 2) buffer particleHydraulicErosionShaderBuffer
+{
+    ParticleHydraulicErosion[] particlesHydraulicErosion;
+};
+
+struct ParticleWindErosion
+{
+    int Age;
+    float Sediment;
+    vec3 Position;
+    vec3 Speed;
+};
+
+layout(std430, binding = 3) buffer particleWindErosionShaderBuffer
+{
+    ParticleWindErosion[] particlesWindErosion;
+};
+
 struct GridHydraulicErosionCell
 {
     float WaterHeight;
@@ -65,22 +92,43 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 uniform mat4 mvp;
 
-uint myMapSize;
+uint myHeightMapSideLength;
 uint myHeightMapPlaneSize;
 
-float totalHeight(uint index)
+float HeightMapFloorHeight(uint index, uint layer)
+{
+    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
+}
+
+float TotalHeightMapHeight(uint index)
 {
     float height = 0;
-    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        height += heightMap[index + rockType * myHeightMapPlaneSize];
+        if(layer > 0)
+        {
+            float heightMapFloorHeight = HeightMapFloorHeight(index, layer);
+            if(heightMapFloorHeight == 0)
+            {
+                continue;
+            }
+            height += heightMapFloorHeight;
+        }
+        for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+        {
+            height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+        }
+        if(height > 0)
+        {
+            return height;
+        }
     }
     return height;
 }
 
 uint GetIndex(uint x, uint y)
 {
-    return (y * myMapSize) + x;
+    return (y * myHeightMapSideLength) + x;
 }
 
 vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
@@ -88,9 +136,27 @@ vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
 void addVertex(uint vertex, uint x, uint y)
 {
     uint index = GetIndex(x, y);
+    float suspendedSediment = gridHydraulicErosionCells[index].SuspendedSediment;
+    for(int particle = 0; particle < particlesHydraulicErosion.length(); particle++)
+    {        
+        if(ivec2(particlesHydraulicErosion[particle].Position) == ivec2(x, y))
+        {
+            suspendedSediment += particlesHydraulicErosion[particle].Sediment;
+            continue;
+        }
+    }
+    for(int particle = 0; particle < particlesWindErosion.length(); particle++)
+    {        
+        if(ivec2(particlesWindErosion[particle].Position) == ivec2(x, y))
+        {
+            suspendedSediment += particlesWindErosion[particle].Sediment;
+            continue;
+        }
+    }
+
     float zOffset = 0.00004;
-    float height = totalHeight(index);
-    vec4 position = mvp * vec4(x, y, (height - zOffset + gridHydraulicErosionCells[index].SuspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
+    float height = TotalHeightMapHeight(index);
+    vec4 position = mvp * vec4(x, y, (height - zOffset + suspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
     v_out[vertex].position = position;
@@ -106,13 +172,13 @@ void main()
     {
         return;
     }
-    myMapSize = uint(sqrt(myHeightMapPlaneSize));
+    myHeightMapSideLength = uint(sqrt(myHeightMapPlaneSize));
     uint meshletSize = uint(sqrt(VERTICES));
-    uint yMeshletCount = uint(ceil(float(myMapSize) / (meshletSize - 1)));
+    uint yMeshletCount = uint(ceil(float(myHeightMapSideLength) / (meshletSize - 1)));
     uint xOffset = uint(floor(threadNumber / yMeshletCount)) * (meshletSize - 1);
     uint yOffset = (threadNumber % yMeshletCount) * (meshletSize - 1);
 
-    if(xOffset + (meshletSize - 1) > myMapSize || yOffset + (meshletSize - 1) > myMapSize)
+    if(xOffset + (meshletSize - 1) > myHeightMapSideLength || yOffset + (meshletSize - 1) > myHeightMapSideLength)
     {
         return;
     }
