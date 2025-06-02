@@ -71,55 +71,45 @@ layout(std430, binding = 18) buffer rockTypesConfigurationShaderBuffer
 uint myHeightMapSideLength;
 uint myHeightMapPlaneSize;
 
-float RockTypeSedimentHeight(uint index, uint rockType)
-{
-    return heightMap[index + rockType * myHeightMapPlaneSize];
-}
-
-float TotalSedimentHeight(uint index, uint stopRockType)
-{
-    float height = 0;
-    for(uint rockType = 0; rockType <= stopRockType; rockType++)
-    {
-        height += heightMap[index + rockType * myHeightMapPlaneSize];
-    }
-    return height;
-}
-
 uint GetIndex(uint x, uint y)
 {
     return uint((y * myHeightMapSideLength) + x);
 }
 
-float TotalHeightMapHeight(uint index)
-{
-    float height = 0;
-    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
-    {
-        height += heightMap[index + rockType * myHeightMapPlaneSize];
-    }
-    return height;
-}
-
-float HeightMapLayerFloorHeight(uint index, uint layer)
+float HeightMapFloorHeight(uint index, uint layer)
 {
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-float RemainingLayerHeight(uint index)
+float TotalSedimentHeightMapHeight(uint index, uint stopRockType)
 {
-    if(mapGenerationConfiguration.LayerCount == 1)
+    float height = 0;
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        return 1;
+        if(layer > 0)
+        {
+            float heightMapFloorHeight = HeightMapFloorHeight(index, layer);
+            if(heightMapFloorHeight == 0)
+            {
+                continue;
+            }
+            height += heightMapFloorHeight;
+        }
+        for(uint rockType = 0; rockType <= stopRockType; rockType++)
+        {
+            height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+        }
+        if(height > 0)
+        {
+            return height;
+        }
     }
-    float heightMapLayerCeilingHeight = HeightMapLayerFloorHeight(index, 1);
-    if(heightMapLayerCeilingHeight == 0)
-    {
-        return 1;
-    }
-    float totalHeightMapHeight = TotalHeightMapHeight(index);
-    float remainingLayerHeight = heightMapLayerCeilingHeight - totalHeightMapHeight;
-    return remainingLayerHeight;
+    return height;
+}
+
+float RockTypeSedimentHeight(uint index, uint rockType)
+{
+    return heightMap[index + rockType * myHeightMapPlaneSize];
 }
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
@@ -147,11 +137,11 @@ void main()
 		uint gridThermalErosionCellsIndexOffset = rockType * myHeightMapPlaneSize;
 		GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[index + gridThermalErosionCellsIndexOffset];
 
-		float totalSedimentHeight = TotalSedimentHeight(index, rockType);
-		float totalSedimentHeightDifferenceLeft = max(totalSedimentHeight - TotalSedimentHeight(indexLeft, rockType), 0.0);
-		float totalSedimentHeightDifferenceRight = max(totalSedimentHeight - TotalSedimentHeight(indexRight, rockType), 0.0);
-		float totalSedimentHeightDifferenceDown = max(totalSedimentHeight - TotalSedimentHeight(indexDown, rockType), 0.0);
-		float totalSedimentHeightDifferenceUp = max(totalSedimentHeight - TotalSedimentHeight(indexUp, rockType), 0.0);
+		float totalSedimentHeight = TotalSedimentHeightMapHeight(index, rockType);
+		float totalSedimentHeightDifferenceLeft = max(totalSedimentHeight - TotalSedimentHeightMapHeight(indexLeft, rockType), 0.0);
+		float totalSedimentHeightDifferenceRight = max(totalSedimentHeight - TotalSedimentHeightMapHeight(indexRight, rockType), 0.0);
+		float totalSedimentHeightDifferenceDown = max(totalSedimentHeight - TotalSedimentHeightMapHeight(indexDown, rockType), 0.0);
+		float totalSedimentHeightDifferenceUp = max(totalSedimentHeight - TotalSedimentHeightMapHeight(indexUp, rockType), 0.0);
 		float maxTotalSedimentHeightDifference = max(max(totalSedimentHeightDifferenceLeft, totalSedimentHeightDifferenceRight), max(totalSedimentHeightDifferenceDown, totalSedimentHeightDifferenceUp));
 		
 		float rockTypeSedimentHeight = RockTypeSedimentHeight(index, rockType);
@@ -202,8 +192,7 @@ void main()
 		float totalTotalSedimentHeightDifference = totalSedimentHeightDifferenceLeft + totalSedimentHeightDifferenceRight + totalSedimentHeightDifferenceDown + totalSedimentHeightDifferenceUp;
 		if(x > 0)
 		{
-			float remainingLayerHeightLeft = RemainingLayerHeight(indexLeft);
-			gridThermalErosionCell.SedimentFlowLeft = min(max(sedimentVolumeToBeMoved * flowLeft / totalTotalSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0), remainingLayerHeightLeft);
+			gridThermalErosionCell.SedimentFlowLeft = max(sedimentVolumeToBeMoved * flowLeft / totalTotalSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
@@ -212,8 +201,7 @@ void main()
 		
 		if(x < myHeightMapSideLength - 1)
 		{
-			float remainingLayerHeightRight = RemainingLayerHeight(indexRight);
-			gridThermalErosionCell.SedimentFlowRight = min(max(sedimentVolumeToBeMoved * flowRight / totalTotalSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0), remainingLayerHeightRight);
+			gridThermalErosionCell.SedimentFlowRight = max(sedimentVolumeToBeMoved * flowRight / totalTotalSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
@@ -222,8 +210,7 @@ void main()
 
 		if(y > 0)
 		{
-			float remainingLayerHeightDown = RemainingLayerHeight(indexDown);
-			gridThermalErosionCell.SedimentFlowDown = min(max(sedimentVolumeToBeMoved * flowDown / totalTotalSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0), remainingLayerHeightDown);
+			gridThermalErosionCell.SedimentFlowDown = max(sedimentVolumeToBeMoved * flowDown / totalTotalSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
@@ -232,8 +219,7 @@ void main()
 		
 		if(y < myHeightMapSideLength - 1)
 		{
-			float remainingLayerHeightUp = RemainingLayerHeight(indexUp);
-			gridThermalErosionCell.SedimentFlowUp = min(max(sedimentVolumeToBeMoved * flowUp / totalTotalSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0), remainingLayerHeightUp);
+			gridThermalErosionCell.SedimentFlowUp = max(sedimentVolumeToBeMoved * flowUp / totalTotalSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
 		}
 		else
 		{
