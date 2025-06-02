@@ -80,7 +80,7 @@ public class GridThermalErosionTests
     }
 
     [Test]
-    public void Flow_3x3HeightMapWithBedrockInMiddle_FlowIsEqualToAllFourNeighbors()
+    public void VerticalFlow_3x3HeightMapWithBedrockInMiddle_FlowIsEqualToAllFourNeighbors()
     {
         SetUpMapGenerationConfiguration();
         InitializeConfiguration();
