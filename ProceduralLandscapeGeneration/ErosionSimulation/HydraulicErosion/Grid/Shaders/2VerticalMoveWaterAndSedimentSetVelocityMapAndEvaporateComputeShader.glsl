@@ -83,16 +83,6 @@ layout(std430, binding = 9) buffer gridHydraulicErosionConfigurationShaderBuffer
 uint myHeightMapSideLength;
 uint myHeightMapPlaneSize;
 
-float TotalHeightMapLayerHeight(uint index)
-{
-    float height = 0;
-    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
-    {
-        height += heightMap[index + rockType * myHeightMapPlaneSize];
-    }
-    return height;
-}
-
 uint GetIndex(uint x, uint y)
 {
     return (y * myHeightMapSideLength) + x;

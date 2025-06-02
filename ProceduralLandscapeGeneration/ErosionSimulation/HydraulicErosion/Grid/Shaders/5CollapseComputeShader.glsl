@@ -46,34 +46,6 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
     MapGenerationConfiguration mapGenerationConfiguration;
 };
 
-struct ErosionConfiguration
-{
-    float TimeDelta;
-	bool IsWaterKeptInBoundaries;
-};
-
-layout(std430, binding = 6) readonly restrict buffer erosionConfigurationShaderBuffer
-{
-    ErosionConfiguration erosionConfiguration;
-};
-
-struct GridHydraulicErosionConfiguration
-{
-    float WaterIncrease;
-    float Gravity;
-    float Dampening;
-    float MaximalErosionDepth;
-    float SedimentCapacity;
-    float SuspensionRate;
-    float DepositionRate;
-    float EvaporationRate;
-};
-
-layout(std430, binding = 9) buffer gridHydraulicErosionConfigurationShaderBuffer
-{
-    GridHydraulicErosionConfiguration gridHydraulicErosionConfiguration;
-};
-
 struct RockTypeConfiguration
 {
     float Hardness;
@@ -88,12 +60,12 @@ layout(std430, binding = 18) buffer rockTypesConfigurationShaderBuffer
 
 uint myHeightMapPlaneSize;
 
-float LayerFloorHeight(uint index, uint layer)
+float HeightMapFloorHeight(uint index, uint layer)
 {
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-float TotalHeightMapLayerHeight(uint index)
+float TotalLayerZeroHeightMapHeight(uint index)
 {
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
@@ -103,7 +75,7 @@ float TotalHeightMapLayerHeight(uint index)
     return height;
 }
 
-void SetLayerFloorHeight(uint index, uint layer, float value)
+void SetHeightMapFloorHeight(uint index, uint layer, float value)
 {
     heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = value;
 }
@@ -120,10 +92,10 @@ void main()
         return;
     }
 
-    float totalHeightMapBellowLayerHeight = TotalHeightMapLayerHeight(index);
-    float layerFloorHeight = LayerFloorHeight(index, 1);
-    if(layerFloorHeight == 0
-        || layerFloorHeight - totalHeightMapBellowLayerHeight < rockTypesConfiguration[0].CollapseThreshold)
+    float totalLayerZeroHeightMapHeight = TotalLayerZeroHeightMapHeight(index);
+    float layerOneFloorHeight = HeightMapFloorHeight(index, 1);
+    if(layerOneFloorHeight == 0
+        || layerOneFloorHeight - totalLayerZeroHeightMapHeight < rockTypesConfiguration[0].CollapseThreshold)
     {
         return;
     }
@@ -149,7 +121,7 @@ void main()
         heightMap[currentLayerRockTypeHeightMapIndex] = 0;
     }
         
-    SetLayerFloorHeight(index, 1, 0);
+    SetHeightMapFloorHeight(index, 1, 0);
     
     memoryBarrier();
 }

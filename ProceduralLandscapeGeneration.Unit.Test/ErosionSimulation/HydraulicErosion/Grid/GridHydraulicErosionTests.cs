@@ -110,28 +110,6 @@ public class GridHydraulicErosionTests
     }
 
     [Test]
-    public void VerticalFlow_3x3HeightMapWithWaterAndBedrockInMiddleAndRemainingLayerHeightAtZero_AllFlowIsZero()
-    {
-        SetUpMapGenerationConfiguration(2u);
-        InitializeConfiguration();
-        SetUpHeightMapWithBedrockInMiddleAndRemainingLayerHeightAtZero();
-        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
-        testee.Initialize();
-        SetUpHydraulicErosionCellsWithWaterAndSuspendedSedimentInMiddle();
-
-        testee.VerticalFlow();
-
-        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
-        foreach (GridHydraulicErosionCellShaderBuffer cell in gridHydraulicErosionCellsShaderBuffers)
-        {
-            Assert.That(cell.WaterFlowLeft, Is.Zero);
-            Assert.That(cell.WaterFlowRight, Is.Zero);
-            Assert.That(cell.WaterFlowUp, Is.Zero);
-            Assert.That(cell.WaterFlowDown, Is.Zero);
-        }
-    }
-
-    [Test]
     public void HorizontalSuspend__()
     {
         SetUpMapGenerationConfiguration(2u);
@@ -163,11 +141,6 @@ public class GridHydraulicErosionTests
     private void SetUpMapGenerationConfiguration(uint layerCount)
     {
         SetUpMapGenerationConfiguration(layerCount, 1u, 0f);
-    }
-
-    private void SetUpMapGenerationConfiguration(uint layerCount, float seaLevel)
-    {
-        SetUpMapGenerationConfiguration(layerCount, 1u, seaLevel);
     }
 
     private void SetUpMapGenerationConfiguration(uint layerCount, uint rockTypeCount, float seaLevel)
@@ -211,43 +184,6 @@ public class GridHydraulicErosionTests
         shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
         heightMap[CenterIndex + layer * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
         heightMap[CenterIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
-        fixed (void* heightMapPointer = heightMap)
-        {
-            Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);
-        }
-        Rlgl.MemoryBarrier();
-    }
-
-    private unsafe void SetUpHeightMapWithBedrockInMiddleAndRemainingLayerHeightAtZero()
-    {
-        IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
-        float[] heightMap = new float[myMapGenerationConfiguration!.HeightMapSize];
-        shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
-        heightMap[CenterIndex] = 1.0f;
-        heightMap[LeftIndex] = 0.1f;
-        heightMap[LeftIndex + myMapGenerationConfiguration!.HeightMapPlaneSize] = 0.1f;
-        heightMap[RightIndex] = 0.1f;
-        heightMap[RightIndex + myMapGenerationConfiguration!.HeightMapPlaneSize] = 0.1f;
-        heightMap[DownIndex] = 0.1f;
-        heightMap[DownIndex + myMapGenerationConfiguration!.HeightMapPlaneSize] = 0.1f;
-        heightMap[UpIndex] = 0.1f;
-        heightMap[UpIndex + myMapGenerationConfiguration!.HeightMapPlaneSize] = 0.1f;
-        fixed (void* heightMapPointer = heightMap)
-        {
-            Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);
-        }
-        Rlgl.MemoryBarrier();
-    }
-
-    private unsafe void SetUpHeightMapWithThreeSedimentsInMiddle(uint layer)
-    {
-        IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
-        float[] heightMap = new float[myMapGenerationConfiguration!.HeightMapSize];
-        shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
-        for (uint rockType = 0; rockType < myMapGenerationConfiguration!.RockTypeCount; rockType++)
-        {
-            heightMap[CenterIndex + rockType * myMapGenerationConfiguration!.HeightMapPlaneSize + (layer * myMapGenerationConfiguration!.RockTypeCount + layer) * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
-        }
         fixed (void* heightMapPointer = heightMap)
         {
             Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);

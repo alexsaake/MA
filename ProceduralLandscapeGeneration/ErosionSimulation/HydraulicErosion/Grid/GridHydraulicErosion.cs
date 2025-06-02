@@ -102,8 +102,11 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
             VerticalFlow();
             VerticalMoveWaterAndSedimentSetVelocityMapAndEvaporate();
             VerticalSuspendDeposite();
-            //HorizontalSuspend();
-            Collapse();
+            if(myMapGenerationConfiguration.LayerCount > 0)
+            {
+                HorizontalSuspend();
+                Collapse();
+            }
         }
     }
 

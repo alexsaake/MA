@@ -129,9 +129,6 @@
 	  <None Update="Renderers\VertexShader\Shaders\WaterHeightMapVertexShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\MeshShader\Shaders\SeaLevelQuadMeshFragmentShader.glsl">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
 	  <None Update="Renderers\VertexShader\Shaders\SeaLevelQuadFragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>

@@ -27,7 +27,7 @@ internal class ThermalErosionConfiguration : IThermalErosionConfiguration
         }
     }
 
-    public uint GridCellsSize => myMapGenerationConfiguration.HeightMapPlaneSize *myMapGenerationConfiguration.RockTypeCount;
+    public uint GridCellsSize => myMapGenerationConfiguration.HeightMapPlaneSize * myMapGenerationConfiguration.RockTypeCount;
 
     public ThermalErosionConfiguration(IShaderBuffers shaderBuffers, IMapGenerationConfiguration mapGenerationConfiguration)
     {
