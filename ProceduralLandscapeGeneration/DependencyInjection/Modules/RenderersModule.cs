@@ -12,7 +12,7 @@ internal class RenderersModule : Module
     {
         base.Load(containerBuilder);
 
-        containerBuilder.RegisterType<MeshShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorTypes.GPU);
+        containerBuilder.RegisterType<HeightMapMeshShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorTypes.GPU);
         containerBuilder.RegisterType<VertexShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorTypes.CPU);
         containerBuilder.RegisterType<VertexMeshCreator>().As<IVertexMeshCreator>();
     }

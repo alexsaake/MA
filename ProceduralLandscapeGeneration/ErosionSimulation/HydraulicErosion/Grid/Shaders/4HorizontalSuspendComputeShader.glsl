@@ -220,6 +220,7 @@ bool TrySplit(uint index, float height, uint neighborIndex, float neighborHeight
 //https://github.com/karhu/terrain-erosion/blob/master/Simulation/FluidSimulation.cpp
 //depth limit
 //https://github.com/patiltanma/15618-FinalProject/blob/master/Renderer/Renderer/erosion_kernel.cu
+//https://github.com/Clocktown/CUDA-3D-Hydraulic-Erosion-Simulation-with-Layered-Stacks/blob/main/core/geo/device/erosion.cu
 void main()
 {
     uint index = gl_GlobalInvocationID.x;

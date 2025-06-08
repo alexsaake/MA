@@ -7,9 +7,9 @@ using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Renderers.MeshShader;
 
-internal class MeshShaderRenderer : IRenderer
+internal class HeightMapMeshShaderRenderer : IRenderer
 {
-    private const string ShaderDirectory = "Renderers/MeshShader/Shaders/";
+    private const string ShaderDirectory = "Renderers/MeshShader/HeightMap/Shaders/";
 
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
@@ -26,7 +26,7 @@ internal class MeshShaderRenderer : IRenderer
     private uint myMeshletCount;
     private bool myIsDisposed;
 
-    public MeshShaderRenderer(IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration)
+    public HeightMapMeshShaderRenderer(IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;

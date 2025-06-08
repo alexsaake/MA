@@ -117,10 +117,10 @@
 	  <None Update="raylib.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\MeshShader\Shaders\Particle\SedimentParticleMeshShader.glsl">
+	  <None Update="Renderers\MeshShader\HeightMap\Shaders\Particle\SedimentParticleMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\MeshShader\Shaders\Particle\WaterParticleMeshShader.glsl">
+	  <None Update="Renderers\MeshShader\HeightMap\Shaders\Particle\WaterParticleMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Renderers\VertexShader\Shaders\SedimentHeightMapVertexShader.glsl">
@@ -132,16 +132,16 @@
 	  <None Update="Renderers\VertexShader\Shaders\SeaLevelQuadFragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\MeshShader\Shaders\SeaLevelQuadMeshShader.glsl">
+	  <None Update="Renderers\MeshShader\HeightMap\Shaders\SeaLevelQuadMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Renderers\VertexShader\Shaders\SeaLevelQuadVertexShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\MeshShader\Shaders\Grid\SedimentHeightMapMeshShader.glsl">
+	  <None Update="Renderers\MeshShader\HeightMap\Shaders\Grid\SedimentHeightMapMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\MeshShader\Shaders\Grid\WaterHeightMapMeshShader.glsl">
+	  <None Update="Renderers\MeshShader\HeightMap\Shaders\Grid\WaterHeightMapMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Simulation\Grid\Shaders\HydraulicErosionSimulationGridPassSixComputeShader.glsl">
@@ -180,10 +180,10 @@
 	  <None Update="MapGeneration\GPU\Shaders\GenerateNoiseHeightMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\MeshShader\Shaders\TerrainHeightMapMeshShader.glsl">
+	  <None Update="Renderers\MeshShader\HeightMap\Shaders\TerrainHeightMapMeshShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Renderers\MeshShader\Shaders\TerrainHeightMapMeshFragmentShader.glsl">
+	  <None Update="Renderers\MeshShader\HeightMap\Shaders\TerrainHeightMapMeshFragmentShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Renderers\VertexShader\Shaders\TerrainHeightMapFragmentShader.glsl">
