@@ -136,6 +136,7 @@ internal class CubesVertexShaderRenderer : IRenderer
 
     private unsafe void UpdateModel()
     {
+        Raylib.UnloadModel(myTerrainCubes);
         myTerrainCubes = Raylib.LoadModelFromMesh(myCubesVertexMeshCreator.CreateCubesMesh());
         myTerrainCubes.Materials[0].Shader = myTerrainCubesShader;
     }

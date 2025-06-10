@@ -85,13 +85,13 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
         float rockTypeBottom = 0.0f;
         if (layer > 0)
         {
-            rockTypeBottom = heightMap[index + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.HeightMapPlaneSize] * myMapGenerationConfiguration.HeightMultiplier;
+            rockTypeBottom = HeightMapFloorHeight(heightMap, index, layer);
         }
         float totalTop = rockTypeBottom;
         float totalBottom = rockTypeBottom;
         for (int rockType = 0; rockType < myMapGenerationConfiguration.RockTypeCount; rockType++)
         {
-            float rockTypeTop = heightMap[index + rockType * myMapGenerationConfiguration.HeightMapPlaneSize + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.HeightMapPlaneSize] * myMapGenerationConfiguration.HeightMultiplier;
+            float rockTypeTop = heightMap[index + rockType * myMapGenerationConfiguration.HeightMapPlaneSize + (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration.HeightMapPlaneSize] * myMapGenerationConfiguration.HeightMultiplier;
             if (rockTypeTop == 0.0f)
             {
                 continue;
@@ -104,6 +104,10 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
             Color color = myRockTypeColors![rockType];
             AddCube(mesh, ref vertexIndex, ref indexIndex, x, y, totalBottom, totalTop, color);
         }
+    }
+    private float HeightMapFloorHeight(float[] heightMap, uint index, int layer)
+    {
+        return heightMap[index + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.HeightMapPlaneSize];
     }
 
     private void AddCube(Mesh mesh, ref int vertexIndex, ref int indexIndex, uint x, uint y, float bottom, float top, Color color)
