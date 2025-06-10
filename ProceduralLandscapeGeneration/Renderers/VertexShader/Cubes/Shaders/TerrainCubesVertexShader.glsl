@@ -22,28 +22,22 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 uint myHeightMapPlaneSize;
 
-float FineSedimentHeight(uint index)
+float FineSedimentHeight(uint index, uint layer)
 {
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    float height = heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+    if(height > 0)
     {
-        float height = heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
-        if(height > 0)
-        {
-            return height;
-        }
+        return height;
     }
     return 0;
 }
 
-float CoarseSedimentHeight(uint index)
+float CoarseSedimentHeight(uint index, uint layer)
 {
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    float height = heightMap[index + 1 * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+    if(height > 0)
     {
-        float height = heightMap[index + 1 * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
-        if(height > 0)
-        {
-            return height;
-        }
+        return height;
     }
     return 0;
 }
@@ -128,12 +122,12 @@ void main()
         {
             if(cubeFace == 1)
             {
-                if(FineSedimentHeight(index) > 0.00001)
+                if(FineSedimentHeight(index, layer) > 0.00001)
                 {
                     terrainColor = fineSedimentColor;
                 }
                 else if(mapGenerationConfiguration.RockTypeCount > 2
-                    && CoarseSedimentHeight(index) > 0.00001)
+                    && CoarseSedimentHeight(index, layer) > 0.00001)
                 {
                     terrainColor = coarseSedimentColor;
                 }
