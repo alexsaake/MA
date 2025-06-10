@@ -298,7 +298,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         myLayerCount = 1;
         mySeaLevel = 0.2f;
 
-        myRenderType = RenderTypes.Cubes;
+        myRenderType = RenderTypes.HeightMap;
         myMapGeneration = MapGenerationTypes.Noise;
         myMeshCreation = ProcessorTypes.CPU;
         myHeightMapGeneration = ProcessorTypes.GPU;

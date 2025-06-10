@@ -59,7 +59,7 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
             {
                 for (uint x = 0; x < myMapGenerationConfiguration.HeightMapSideLength; x++)
                 {
-                    AddCubes(mesh, ref vertexIndex, ref indexIndex, heightMap, x, y, layer);
+                    AddLayerCubes(mesh, ref vertexIndex, ref indexIndex, heightMap, x, y, layer);
                 }
             }
         }
@@ -79,7 +79,7 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
         return heightMap;
     }
 
-    private void AddCubes(Mesh mesh, ref int vertexIndex, ref int indexIndex, float[] heightMap, uint x, uint y, int layer)
+    private void AddLayerCubes(Mesh mesh, ref int vertexIndex, ref int indexIndex, float[] heightMap, uint x, uint y, int layer)
     {
         uint index = myMapGenerationConfiguration.GetIndex(x, y);
         float rockTypeBottom = 0.0f;
@@ -96,12 +96,11 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
             {
                 continue;
             }
-            totalTop += rockTypeTop;
             if (rockType > 0)
             {
-                rockTypeBottom = heightMap[index + (rockType - 1) * myMapGenerationConfiguration.HeightMapPlaneSize + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.HeightMapPlaneSize] * myMapGenerationConfiguration.HeightMultiplier;
+                totalBottom = totalTop;
             }
-            totalBottom += rockTypeBottom;
+            totalTop += rockTypeTop;
             Color color = myRockTypeColors![rockType];
             AddCube(mesh, ref vertexIndex, ref indexIndex, x, y, totalBottom, totalTop, color);
         }
