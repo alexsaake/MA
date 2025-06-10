@@ -21,7 +21,6 @@ internal class Configuration : IConfiguration
 
     public int ScreenWidth { get; set; }
     public int ScreenHeight { get; set; }
-    public int ParallelExecutions { get; set; }
     public int ShadowMapResolution { get; set; }
 
     public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IRockTypesConfiguration rockTypesConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
@@ -36,7 +35,6 @@ internal class Configuration : IConfiguration
 
         ScreenWidth = 1920;
         ScreenHeight = 1080;
-        ParallelExecutions = 10;
         ShadowMapResolution = 1028;
     }
 

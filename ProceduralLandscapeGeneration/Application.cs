@@ -2,6 +2,7 @@
 using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
+using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.ErosionSimulation;
 using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.MapGeneration;
@@ -41,7 +42,7 @@ internal class Application : IApplication
 
     private void ResolveModules()
     {
-        myRenderer = myLifetimeScope.ResolveKeyed<IRenderer>(myMapGenerationConfiguration.MeshCreation);
+        myRenderer = myLifetimeScope.ResolveNamed<IRenderer>($"{myMapGenerationConfiguration.MeshCreation}{myMapGenerationConfiguration.RenderType}");
     }
 
     public void Run()

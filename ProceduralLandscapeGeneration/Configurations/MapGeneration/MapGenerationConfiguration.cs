@@ -71,6 +71,21 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
+    private RenderTypes myRenderType;
+    public RenderTypes RenderType
+    {
+        get => myRenderType;
+        set
+        {
+            if (myRenderType == value)
+            {
+                return;
+            }
+            myRenderType = value;
+            ResetRequired?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     private MapGenerationTypes myMapGeneration;
     public MapGenerationTypes MapGeneration
     {
@@ -283,6 +298,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         myLayerCount = 1;
         mySeaLevel = 0.2f;
 
+        myRenderType = RenderTypes.Cubes;
         myMapGeneration = MapGenerationTypes.Noise;
         myMeshCreation = ProcessorTypes.CPU;
         myHeightMapGeneration = ProcessorTypes.GPU;

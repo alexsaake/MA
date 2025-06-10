@@ -8,11 +8,12 @@ using ProceduralLandscapeGeneration.GUI;
 using Raylib_cs;
 using System.Numerics;
 
-namespace ProceduralLandscapeGeneration.Renderers.VertexShader;
+namespace ProceduralLandscapeGeneration.Renderers.VertexShader.HeightMap;
 
-internal class VertexShaderRenderer : IRenderer
+internal class HeightMapVertexShaderRenderer : IRenderer
 {
-    private const string ShaderDirectory = "Renderers/VertexShader/Shaders/";
+    private const string ShaderDirectory = "Renderers/VertexShader/HeightMap/Shaders/";
+    private const string CommonShaderDirectory = "Renderers/VertexShader/Shaders/";
 
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
@@ -20,7 +21,7 @@ internal class VertexShaderRenderer : IRenderer
     private readonly IGridHydraulicErosionConfiguration myGridHydraulicErosionConfiguration;
     private readonly IConfigurationGUI myConfigurationGUI;
     private readonly IErosionSimulator myErosionSimulator;
-    private readonly IVertexMeshCreator myVertexMeshCreator;
+    private readonly IHeightMapVertexMeshCreator myHeightMapVertexMeshCreator;
     private readonly IShaderBuffers myShaderBuffers;
 
     private RenderTexture2D myShadowMap;
@@ -41,7 +42,7 @@ internal class VertexShaderRenderer : IRenderer
     private bool myIsUpdateAvailable;
     private bool myIsDisposed;
 
-    public VertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, IVertexMeshCreator vertexMeshCreator, IShaderBuffers shaderBuffers)
+    public HeightMapVertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, IHeightMapVertexMeshCreator heightMapVertexMeshCreator, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
@@ -49,7 +50,7 @@ internal class VertexShaderRenderer : IRenderer
         myGridHydraulicErosionConfiguration = gridHydraulicErosionConfiguration;
         myConfigurationGUI = configurationGUI;
         myErosionSimulator = erosionSimulator;
-        myVertexMeshCreator = vertexMeshCreator;
+        myHeightMapVertexMeshCreator = heightMapVertexMeshCreator;
         myShaderBuffers = shaderBuffers;
     }
 
@@ -93,9 +94,9 @@ internal class VertexShaderRenderer : IRenderer
     private void LoadShaders()
     {
         myTerrainHeightMapShader = Raylib.LoadShader($"{ShaderDirectory}TerrainHeightMapVertexShader.glsl", $"{ShaderDirectory}TerrainHeightMapFragmentShader.glsl");
-        myWaterHeightMapShader = Raylib.LoadShader($"{ShaderDirectory}WaterHeightMapVertexShader.glsl", $"{ShaderDirectory}SeaLevelQuadFragmentShader.glsl");
-        mySedimentHeightMapShader = Raylib.LoadShader($"{ShaderDirectory}SedimentHeightMapVertexShader.glsl", $"{ShaderDirectory}SeaLevelQuadFragmentShader.glsl");
-        mySeaLevelQuadShader = Raylib.LoadShader($"{ShaderDirectory}SeaLevelQuadVertexShader.glsl", $"{ShaderDirectory}SeaLevelQuadFragmentShader.glsl");
+        myWaterHeightMapShader = Raylib.LoadShader($"{CommonShaderDirectory}WaterHeightMapVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
+        mySedimentHeightMapShader = Raylib.LoadShader($"{CommonShaderDirectory}SedimentHeightMapVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
+        mySeaLevelQuadShader = Raylib.LoadShader($"{CommonShaderDirectory}SeaLevelQuadVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
     }
 
     private unsafe void SetHeightMapShaderValues(Vector3 heightMapCenter, Vector3 lightDirection)
@@ -154,13 +155,13 @@ internal class VertexShaderRenderer : IRenderer
 
     private unsafe void InitiateModel()
     {
-        myTerrainHeightMap = Raylib.LoadModelFromMesh(myVertexMeshCreator.CreateHeightMapMesh());
+        myTerrainHeightMap = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateHeightMapMesh());
         myTerrainHeightMap.Materials[0].Shader = myTerrainHeightMapShader;
-        myWaterHeightMap = Raylib.LoadModelFromMesh(myVertexMeshCreator.CreateHeightMapMesh());
+        myWaterHeightMap = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateHeightMapMesh());
         myWaterHeightMap.Materials[0].Shader = myWaterHeightMapShader;
-        mySedimentHeightMap = Raylib.LoadModelFromMesh(myVertexMeshCreator.CreateHeightMapMesh());
+        mySedimentHeightMap = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateHeightMapMesh());
         mySedimentHeightMap.Materials[0].Shader = mySedimentHeightMapShader;
-        mySeaLevelQuad = Raylib.LoadModelFromMesh(myVertexMeshCreator.CreateSeaLevelMesh());
+        mySeaLevelQuad = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateSeaLevelMesh());
         mySeaLevelQuad.Materials[0].Shader = mySeaLevelQuadShader;
     }
 

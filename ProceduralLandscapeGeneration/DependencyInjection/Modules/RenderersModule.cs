@@ -2,7 +2,8 @@
 using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.Renderers;
 using ProceduralLandscapeGeneration.Renderers.MeshShader;
-using ProceduralLandscapeGeneration.Renderers.VertexShader;
+using ProceduralLandscapeGeneration.Renderers.VertexShader.Cubes;
+using ProceduralLandscapeGeneration.Renderers.VertexShader.HeightMap;
 
 namespace ProceduralLandscapeGeneration.DependencyInjection.Modules;
 
@@ -12,8 +13,10 @@ internal class RenderersModule : Module
     {
         base.Load(containerBuilder);
 
-        containerBuilder.RegisterType<HeightMapMeshShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorTypes.GPU);
-        containerBuilder.RegisterType<VertexShaderRenderer>().As<IRenderer>().Keyed<IRenderer>(ProcessorTypes.CPU);
-        containerBuilder.RegisterType<VertexMeshCreator>().As<IVertexMeshCreator>();
+        containerBuilder.RegisterType<MeshShaderRenderer>().Keyed<IRenderer>($"{ProcessorTypes.GPU}{RenderTypes.HeightMap}");
+        containerBuilder.RegisterType<HeightMapVertexShaderRenderer>().Keyed<IRenderer>($"{ProcessorTypes.CPU}{RenderTypes.HeightMap}");
+        containerBuilder.RegisterType<HeightMapVertexMeshCreator>().As<IHeightMapVertexMeshCreator>();
+        containerBuilder.RegisterType<CubesVertexShaderRenderer>().Keyed<IRenderer>($"{ProcessorTypes.CPU}{RenderTypes.Cubes}");
+        containerBuilder.RegisterType<CubesVertexMeshCreator>().As<ICubesVertexMeshCreator>();
     }
 }
