@@ -45,10 +45,12 @@ internal class ConfigurationGUI : IConfigurationGUI
 
     private Vector2 myRightPanel2Position;
     private readonly PanelWithElements myDisplayPanel;
+    private readonly PanelWithElements mySceneRendererPanel;
 
     public event EventHandler? MapResetRequired;
     public event EventHandler? ErosionResetRequired;
     public event EventHandler? ErosionModeChanged;
+    public event EventHandler? RenderSceneTriggered;
 
     public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IRockTypesConfiguration rockTypesConfiguration)
     {
@@ -179,6 +181,9 @@ internal class ConfigurationGUI : IConfigurationGUI
         myDisplayPanel.Add(new ToggleSliderWithLabel("Sea Level Displayed", "Off;On", (value) => erosionConfiguration.IsSeaLevelDisplayed = value == 1, erosionConfiguration.IsSeaLevelDisplayed ? 1 : 0));
         myDisplayPanel.Add(new ToggleSliderWithLabel("Camera Mode", "Still;Orbital", (value) => mapGenerationConfiguration.CameraMode = value == 0 ? CameraMode.Custom : CameraMode.Orbital, (int)mapGenerationConfiguration.CameraMode));
         myDisplayPanel.Add(new ToggleSliderWithLabel("Terrain Colors", "Off;On", (value) => mapGenerationConfiguration.AreTerrainColorsEnabled = value == 1, mapGenerationConfiguration.AreTerrainColorsEnabled ? 1 : 0));
+
+        mySceneRendererPanel = new PanelWithElements("Scene Renderer");
+        mySceneRendererPanel.Add(new Button("Render", () => RenderSceneTriggered?.Invoke(this, EventArgs.Empty)));
     }
 
     public void Draw()
@@ -234,17 +239,14 @@ internal class ConfigurationGUI : IConfigurationGUI
     private void DrawRockTypesPanels()
     {
         myBedrockRockTypePanel.Draw(myLeftPanel2Position);
-        Vector2 rockTypesOffset = myBedrockRockTypePanel.BottomLeft;
         switch (myMapGenerationConfiguration.RockTypeCount)
         {
             case 2:
                 myFineSedimentRockTypePanel.Draw(myBedrockRockTypePanel.BottomLeft);
-                rockTypesOffset = myFineSedimentRockTypePanel.BottomLeft;
                 break;
             case 3:
                 myCoarseSedimentRockTypePanel.Draw(myBedrockRockTypePanel.BottomLeft);
                 myFineSedimentRockTypePanel.Draw(myCoarseSedimentRockTypePanel.BottomLeft);
-                rockTypesOffset = myFineSedimentRockTypePanel.BottomLeft;
                 break;
         }
     }
@@ -267,5 +269,11 @@ internal class ConfigurationGUI : IConfigurationGUI
     private void DrawDisplayPanels()
     {
         myDisplayPanel.Draw(myRightPanel2Position);
+        switch (myMapGenerationConfiguration.RenderType)
+        {
+            case RenderTypes.Cubes:
+                mySceneRendererPanel.Draw(myDisplayPanel.BottomLeft);
+                break;
+        }
     }
 }

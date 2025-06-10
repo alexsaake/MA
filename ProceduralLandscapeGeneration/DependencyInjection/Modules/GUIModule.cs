@@ -9,6 +9,6 @@ internal class GUIModule : Module
     {
         base.Load(containerBuilder);
 
-        containerBuilder.RegisterType<ConfigurationGUI>().As<IConfigurationGUI>();
+        containerBuilder.RegisterType<ConfigurationGUI>().As<IConfigurationGUI>().SingleInstance();
     }
 }

@@ -56,8 +56,8 @@ internal class CubesVertexShaderRenderer : IRenderer
 
     public void Initialize()
     {
-        myErosionSimulator.IterationFinished += OnErosionIterationFinished;
         myMapGenerationConfiguration.HeightMultiplierChanged += OnHeightMultiplierChanged;
+        myConfigurationGUI.RenderSceneTriggered += OnRenderSceneTriggered;
 
         LoadShaders();
 
@@ -73,12 +73,12 @@ internal class CubesVertexShaderRenderer : IRenderer
         myIsDisposed = false;
     }
 
-    private void OnErosionIterationFinished(object? sender, EventArgs e)
+    private void OnHeightMultiplierChanged(object? sender, EventArgs e)
     {
         myIsUpdateAvailable = true;
     }
 
-    private void OnHeightMultiplierChanged(object? sender, EventArgs e)
+    private void OnRenderSceneTriggered(object? sender, EventArgs e)
     {
         myIsUpdateAvailable = true;
     }
@@ -169,8 +169,8 @@ internal class CubesVertexShaderRenderer : IRenderer
             return;
         }
 
-        myErosionSimulator.IterationFinished -= OnErosionIterationFinished;
         myMapGenerationConfiguration.HeightMultiplierChanged -= OnHeightMultiplierChanged;
+        myConfigurationGUI.RenderSceneTriggered -= OnRenderSceneTriggered;
 
         Raylib.UnloadModel(myTerrainCubes);
         Raylib.UnloadModel(myWaterHeightMap);
