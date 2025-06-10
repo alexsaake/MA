@@ -45,10 +45,10 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
         }
         float[] heightMap = LoadHeightMap();
 
-        Mesh mesh = new();
+        Mesh mesh = new Mesh();
         int cubes = (int)(myMapGenerationConfiguration.HeightMapPlaneSize * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount);
-        int vertexCount = cubes * 24;
-        int triangleCount = cubes * 12;
+        int vertexCount = cubes * 20;
+        int triangleCount = cubes * 10;
         AllocateMeshData(&mesh, vertexCount, triangleCount);
 
         int indexIndex = 0;
@@ -82,65 +82,57 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
     private void AddLayerCubes(Mesh mesh, ref int vertexIndex, ref int indexIndex, float[] heightMap, uint x, uint y, int layer)
     {
         uint index = myMapGenerationConfiguration.GetIndex(x, y);
-        float rockTypeBottom = 0.0f;
-        if (layer > 0)
-        {
-            rockTypeBottom = HeightMapFloorHeight(heightMap, index, layer);
-        }
-        float totalTop = rockTypeBottom;
-        float totalBottom = rockTypeBottom;
         for (int rockType = 0; rockType < myMapGenerationConfiguration.RockTypeCount; rockType++)
         {
-            float rockTypeTop = heightMap[index + rockType * myMapGenerationConfiguration.HeightMapPlaneSize + (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration.HeightMapPlaneSize] * myMapGenerationConfiguration.HeightMultiplier;
-            if (rockTypeTop == 0.0f)
-            {
-                continue;
-            }
+            int topIndex = (int)(index + rockType * myMapGenerationConfiguration.HeightMapPlaneSize + (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration.HeightMapPlaneSize);
+            int bottomIndex = -1;
             if (rockType > 0)
             {
-                totalBottom = totalTop;
+                bottomIndex = (int)(index + (rockType - 1) * myMapGenerationConfiguration.HeightMapPlaneSize + (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration.HeightMapPlaneSize);
             }
-            totalTop += rockTypeTop;
             Color color = myRockTypeColors![rockType];
-            AddCube(mesh, ref vertexIndex, ref indexIndex, x, y, totalBottom, totalTop, color);
+            AddCubeSides(mesh, ref vertexIndex, ref indexIndex, x, y, color, topIndex, bottomIndex);
+            if(rockType == myMapGenerationConfiguration.RockTypeCount - 1)
+            {
+                AddCubeTop(mesh, ref vertexIndex, ref indexIndex, x, y, color, topIndex, bottomIndex);
+            }
         }
     }
-    private float HeightMapFloorHeight(float[] heightMap, uint index, int layer)
+
+    private void AddCubeSides(Mesh mesh, ref int vertexIndex, ref int indexIndex, uint x, uint y, Color color, int topIndex, int bottomIndex)
     {
-        return heightMap[index + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.HeightMapPlaneSize];
+        AddQuadIndices(mesh, ref indexIndex, vertexIndex);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y + Offset, 0), color, myLeftNormal, bottomIndex, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y - Offset, 0), color, myLeftNormal, bottomIndex, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y + Offset, 0), color, myLeftNormal, topIndex, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y - Offset, 0), color, myLeftNormal, topIndex, 0);
+
+        AddQuadIndices(mesh, ref indexIndex, vertexIndex);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y - Offset, 0), color, myRightNormal, bottomIndex, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y + Offset, 0), color, myRightNormal, bottomIndex, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y - Offset, 0), color, myRightNormal, topIndex, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y + Offset, 0), color, myRightNormal, topIndex, 0);
+
+        AddQuadIndices(mesh, ref indexIndex, vertexIndex);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y - Offset, 0), color, myFrontNormal, bottomIndex, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y - Offset, 0), color, myFrontNormal, bottomIndex, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y - Offset, 0), color, myFrontNormal, topIndex, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y - Offset, 0), color, myFrontNormal, topIndex, 0);
+
+        AddQuadIndices(mesh, ref indexIndex, vertexIndex);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y + Offset, 0), color, myBackNormal, bottomIndex, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y + Offset, 0), color, myBackNormal, bottomIndex, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y + Offset, 0), color, myBackNormal, topIndex, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y + Offset, 0), color, myBackNormal, topIndex, 0);
     }
 
-    private void AddCube(Mesh mesh, ref int vertexIndex, ref int indexIndex, uint x, uint y, float bottom, float top, Color color)
+    private void AddCubeTop(Mesh mesh, ref int vertexIndex, ref int indexIndex, uint x, uint y, Color color, int topIndex, int bottomIndex)
     {
         AddQuadIndices(mesh, ref indexIndex, vertexIndex);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y - Offset, top), color, myUpNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y - Offset, top), color, myUpNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y + Offset, top), color, myUpNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y + Offset, top), color, myUpNormal);
-
-        AddQuadIndices(mesh, ref indexIndex, vertexIndex);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y + Offset, bottom), color, myLeftNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y - Offset, bottom), color, myLeftNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y + Offset, top), color, myLeftNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y - Offset, top), color, myLeftNormal);
-
-        AddQuadIndices(mesh, ref indexIndex, vertexIndex);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y - Offset, bottom), color, myRightNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y + Offset, bottom), color, myRightNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y - Offset, top), color, myRightNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y + Offset, top), color, myRightNormal);
-
-        AddQuadIndices(mesh, ref indexIndex, vertexIndex);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y - Offset, bottom), color, myFrontNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y - Offset, bottom), color, myFrontNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y - Offset, top), color, myFrontNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y - Offset, top), color, myFrontNormal);
-
-        AddQuadIndices(mesh, ref indexIndex, vertexIndex);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y + Offset, bottom), color, myBackNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y + Offset, bottom), color, myBackNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y + Offset, top), color, myBackNormal);
-        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y + Offset, top), color, myBackNormal);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y - Offset, 0), color, myUpNormal, topIndex, 1);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y - Offset, 0), color, myUpNormal, topIndex, 1);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x - Offset, y + Offset, 0), color, myUpNormal, topIndex, 1);
+        AddVertex(mesh, ref vertexIndex, new Vector3(x + Offset, y + Offset, 0), color, myUpNormal, topIndex, 1);
     }
 
     public unsafe Mesh CreateSeaLevelMesh()
@@ -151,10 +143,10 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
         int indexIndex = 0;
         int vertexIndex = 0;
         AddQuadIndices(mesh, ref indexIndex, vertexIndex);
-        AddVertex(mesh, ref vertexIndex, new Vector3(0, 0, 0), Color.White, Vector3.UnitZ);
-        AddVertex(mesh, ref vertexIndex, new Vector3((int)myMapGenerationConfiguration.HeightMapSideLength, 0, 0), Color.White, Vector3.UnitZ);
-        AddVertex(mesh, ref vertexIndex, new Vector3(0, (int)myMapGenerationConfiguration.HeightMapSideLength, 0), Color.White, Vector3.UnitZ);
-        AddVertex(mesh, ref vertexIndex, new Vector3((int)myMapGenerationConfiguration.HeightMapSideLength, (int)myMapGenerationConfiguration.HeightMapSideLength, 0), Color.White, Vector3.UnitZ);
+        AddVertex(mesh, ref vertexIndex, new Vector3(0, 0, 0), Color.White, Vector3.UnitZ, 0, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3((int)myMapGenerationConfiguration.HeightMapSideLength, 0, 0), Color.White, Vector3.UnitZ, 0, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3(0, (int)myMapGenerationConfiguration.HeightMapSideLength, 0), Color.White, Vector3.UnitZ, 0, 0);
+        AddVertex(mesh, ref vertexIndex, new Vector3((int)myMapGenerationConfiguration.HeightMapSideLength, (int)myMapGenerationConfiguration.HeightMapSideLength, 0), Color.White, Vector3.UnitZ, 0, 0);
 
         Raylib.UploadMesh(&mesh, false);
 
@@ -169,7 +161,9 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
         mesh->AllocVertices();
         mesh->AllocColors();
         mesh->AllocNormals();
+        mesh->AllocTexCoords();
         mesh->AllocIndices();
+
     }
 
     private unsafe void AddQuadIndices(Mesh mesh, ref int indexIndex, int vertexIndex)
@@ -184,7 +178,7 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
         indexIndex++;
     }
 
-    private unsafe void AddVertex(Mesh mesh, ref int vertexIndex, Vector3 position, Color color, Vector3 normal)
+    private unsafe void AddVertex(Mesh mesh, ref int vertexIndex, Vector3 position, Color color, Vector3 normal, float heightMapIndex, float cubeFace)
     {
         mesh.Vertices[vertexIndex * 3 + 0] = position.X;
         mesh.Vertices[vertexIndex * 3 + 1] = position.Y;
@@ -198,6 +192,9 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
         mesh.Normals[vertexIndex * 3 + 0] = normal.X;
         mesh.Normals[vertexIndex * 3 + 1] = normal.Y;
         mesh.Normals[vertexIndex * 3 + 2] = normal.Z;
+
+        mesh.TexCoords[vertexIndex * 2 + 0] = heightMapIndex;
+        mesh.TexCoords[vertexIndex * 2 + 1] = cubeFace;
 
         vertexIndex++;
     }

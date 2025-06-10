@@ -1,5 +1,10 @@
 #version 430
 
+layout(std430, binding = 0) buffer heightMapShaderBuffer
+{
+    float[] heightMap;
+};
+
 struct MapGenerationConfiguration
 {
     float HeightMultiplier;
@@ -15,9 +20,67 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
     MapGenerationConfiguration mapGenerationConfiguration;
 };
 
+uint myHeightMapPlaneSize;
+
+float FineSedimentHeight(uint index)
+{
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    {
+        float height = heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+        if(height > 0)
+        {
+            return height;
+        }
+    }
+    return 0;
+}
+
+float CoarseSedimentHeight(uint index)
+{
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    {
+        float height = heightMap[index + 1 * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+        if(height > 0)
+        {
+            return height;
+        }
+    }
+    return 0;
+}
+
+float HeightMapFloorHeight(uint index, uint layer)
+{
+    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
+}
+
+float TotalHeightMapHeight(uint index, uint totalIndex, uint layer)
+{
+    float height = 0;
+    if(layer > 0)
+    {
+        float heightMapFloorHeight = HeightMapFloorHeight(index, layer);
+        if(heightMapFloorHeight == 0)
+        {
+            return 0.0;
+        }
+        height += heightMapFloorHeight;
+    }
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    {
+        uint currentRockTypeIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+        if(totalIndex < currentRockTypeIndex)
+        {
+            return height;
+        }
+        height += heightMap[currentRockTypeIndex];
+    }
+    return height;
+}
+
 in vec3 vertexPosition;
 in vec4 vertexColor;
 in vec3 vertexNormal;
+in vec2 vertexTexCoords;
 
 uniform mat4 mvp;
 uniform mat4 matModel;
@@ -26,10 +89,116 @@ out vec3 fragPosition;
 out vec4 fragColor;
 out vec3 fragNormal;
 
+vec3 oceanCliff = vec3(0.2, 0.2, 0.1);
+vec3 beachColor = vec3(1.0, 0.9, 0.6);
+vec3 pastureColor = vec3(0.5, 0.6, 0.4);
+vec3 woodsColor = vec3(0.2, 0.3, 0.2);
+vec3 mountainColor = vec3(0.6, 0.6, 0.6);
+vec3 snowColor = vec3(1.0, 0.9, 0.9);
+
+vec3 bedrockColor = mountainColor;
+vec3 coarseSedimentColor = vec3(0.5, 0.3, 0.3);
+vec3 fineSedimentColor = beachColor;
+
 void main()
 {
-    fragPosition = vec3(matModel * vec4(vertexPosition, 1.0));
-    fragColor = vertexColor;
+    myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+
+    uint heightMapIndex = uint(vertexTexCoords.x);
+    uint cubeFace = uint(vertexTexCoords.y);
+    uint layerOffset = (mapGenerationConfiguration.RockTypeCount + 1) * myHeightMapPlaneSize;
+    uint layer = uint(heightMapIndex / layerOffset * 1.0);
+    uint layerIndex = heightMapIndex - layer * layerOffset;
+    uint currentRockType = uint(layerIndex / myHeightMapPlaneSize);
+    uint index = layerIndex - currentRockType * myHeightMapPlaneSize;
+    float height = 0.0;
+    if(heightMapIndex > 0)
+    {
+        height = TotalHeightMapHeight(index, heightMapIndex, layer);
+    }
+    float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
+    float seaLevelHeight = mapGenerationConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
+    fragPosition = vec3(matModel * vec4(vertexPosition.xy, terrainHeight, 1.0));
     fragNormal = transpose(inverse(mat3(matModel))) * vertexNormal;
-    gl_Position = mvp * vec4(vertexPosition, 1.0);
+    vec3 normal = vertexNormal;
+    vec3 terrainColor = vec3(1.0);
+    if(mapGenerationConfiguration.AreTerrainColorsEnabled)
+    {
+        if(mapGenerationConfiguration.RockTypeCount > 1)
+        {
+            if(cubeFace == 1)
+            {
+                if(FineSedimentHeight(index) > 0.00001)
+                {
+                    terrainColor = fineSedimentColor;
+                }
+                else if(mapGenerationConfiguration.RockTypeCount > 2
+                    && CoarseSedimentHeight(index) > 0.00001)
+                {
+                    terrainColor = coarseSedimentColor;
+                }
+                else
+                {
+                    terrainColor = bedrockColor;
+                }
+            }
+            else
+            {
+                terrainColor = vertexColor.rgb;
+            }
+        }
+        else
+        {
+            if(terrainHeight < seaLevelHeight + 0.3)
+            {
+                if(normal.z > 0.3)
+                {
+                    terrainColor = beachColor;
+                }
+                else
+                {
+                    terrainColor = oceanCliff;
+                }
+            }
+            else
+            {
+                if(normal.z > 0.4)
+                {
+                    if(height > 0.9)
+                    {
+                        terrainColor = snowColor;
+                    }
+                    else if(height > 0.7)
+                    {
+                        terrainColor = mountainColor;
+                    }
+                    else
+                    {
+                        terrainColor = woodsColor;
+                    }
+                }
+                else if(normal.z > 0.3)
+                {
+                    if(height > 0.9)
+                    {
+                        terrainColor = snowColor;
+                    }
+                    else if(height > 0.8)
+                    {
+                        terrainColor = mountainColor;
+                    }
+                    else
+                    {
+                        terrainColor = pastureColor;
+                    }
+                }
+                else
+                {
+                    terrainColor = mountainColor;
+                }
+            }
+        }
+    }
+    fragColor = vec4(terrainColor, 1.0);
+    gl_Position = mvp * vec4(vertexPosition.xy, terrainHeight, 1.0);
 }

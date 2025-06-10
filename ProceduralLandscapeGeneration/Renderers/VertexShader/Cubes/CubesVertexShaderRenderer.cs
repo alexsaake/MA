@@ -38,7 +38,6 @@ internal class CubesVertexShaderRenderer : IRenderer
     private Camera3D myCamera;
     private Camera3D myLightCamera;
 
-    private bool myIsUpdateAvailable;
     private bool myIsDisposed;
 
     public CubesVertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, ICubesVertexMeshCreator cubesVertexMeshCreator, IHeightMapVertexMeshCreator heightMapVertexMeshCreator, IShaderBuffers shaderBuffers)
@@ -56,9 +55,6 @@ internal class CubesVertexShaderRenderer : IRenderer
 
     public void Initialize()
     {
-        myMapGenerationConfiguration.HeightMultiplierChanged += OnHeightMultiplierChanged;
-        myConfigurationGUI.RenderSceneTriggered += OnRenderSceneTriggered;
-
         LoadShaders();
 
         Vector3 heightMapCenter = new Vector3(myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 2, 0);
@@ -71,16 +67,6 @@ internal class CubesVertexShaderRenderer : IRenderer
         InitiateModel();
 
         myIsDisposed = false;
-    }
-
-    private void OnHeightMultiplierChanged(object? sender, EventArgs e)
-    {
-        myIsUpdateAvailable = true;
-    }
-
-    private void OnRenderSceneTriggered(object? sender, EventArgs e)
-    {
-        myIsUpdateAvailable = true;
     }
 
     private void LoadShaders()
@@ -108,7 +94,8 @@ internal class CubesVertexShaderRenderer : IRenderer
 
     private unsafe void InitiateModel()
     {
-        UpdateModel();
+        myTerrainCubes = Raylib.LoadModelFromMesh(myCubesVertexMeshCreator.CreateCubesMesh());
+        myTerrainCubes.Materials[0].Shader = myTerrainCubesShader;
         myWaterHeightMap = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateHeightMapMesh());
         myWaterHeightMap.Materials[0].Shader = myWaterHeightMapShader;
         mySedimentHeightMap = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateHeightMapMesh());
@@ -120,11 +107,6 @@ internal class CubesVertexShaderRenderer : IRenderer
     public void Update()
     {
         UpdateCamera();
-        if (myIsUpdateAvailable)
-        {
-            UpdateModel();
-            myIsUpdateAvailable = false;
-        }
     }
 
     private unsafe void UpdateCamera()
@@ -132,13 +114,6 @@ internal class CubesVertexShaderRenderer : IRenderer
         Vector3 viewPosition = myCamera.Position;
         Raylib.SetShaderValue(myTerrainCubesShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
         Raylib.UpdateCamera(ref myCamera, myMapGenerationConfiguration.CameraMode);
-    }
-
-    private unsafe void UpdateModel()
-    {
-        Raylib.UnloadModel(myTerrainCubes);
-        myTerrainCubes = Raylib.LoadModelFromMesh(myCubesVertexMeshCreator.CreateCubesMesh());
-        myTerrainCubes.Materials[0].Shader = myTerrainCubesShader;
     }
 
     public void Draw()
@@ -169,9 +144,6 @@ internal class CubesVertexShaderRenderer : IRenderer
         {
             return;
         }
-
-        myMapGenerationConfiguration.HeightMultiplierChanged -= OnHeightMultiplierChanged;
-        myConfigurationGUI.RenderSceneTriggered -= OnRenderSceneTriggered;
 
         Raylib.UnloadModel(myTerrainCubes);
         Raylib.UnloadModel(myWaterHeightMap);
