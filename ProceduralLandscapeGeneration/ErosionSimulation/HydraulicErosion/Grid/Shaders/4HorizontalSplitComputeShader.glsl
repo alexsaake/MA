@@ -153,34 +153,26 @@ void SetHeightMapFloorHeight(uint index, uint layer, float value)
     heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = value;
 }
 
-float SuspendFromTop(uint index, float requiredSediment)
+float SuspendFromLayerZeroTop(uint index, float requiredSediment)
 {
     float suspendedSediment = 0;
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
     {
-        if(HeightMapFloorHeight(index, layer) == 0
-            && layer > 0)
+        uint offsetIndex = index + rockType * myHeightMapPlaneSize;
+        float height = heightMap[offsetIndex];
+        float hardness = (1.0 - rockTypesConfiguration[rockType].Hardness);
+        float toBeSuspendedSediment = requiredSediment * hardness;
+        if(height >= toBeSuspendedSediment)
         {
-            continue;
+            heightMap[offsetIndex] -= toBeSuspendedSediment;
+            suspendedSediment += toBeSuspendedSediment;
+            break;
         }
-        for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
+        else
         {
-            uint offsetIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
-            float height = heightMap[offsetIndex];
-            float hardness = (1.0 - rockTypesConfiguration[rockType].Hardness);
-            float toBeSuspendedSediment = requiredSediment * hardness;
-            if(height >= toBeSuspendedSediment)
-            {
-                heightMap[offsetIndex] -= toBeSuspendedSediment;
-                suspendedSediment += toBeSuspendedSediment;
-                break;
-            }
-            else
-            {
-                heightMap[offsetIndex] = 0;
-                requiredSediment -= height * hardness;
-                suspendedSediment += height * hardness;
-            }
+            heightMap[offsetIndex] = 0;
+            requiredSediment -= height * hardness;
+            suspendedSediment += height * hardness;
         }
     }
     return suspendedSediment;
@@ -196,35 +188,34 @@ void SplitAt(uint index, float splitHeight)
     MoveRockToAboveLayer(index, splitHeight);
 }
 
-bool TrySplit(uint index, float height, uint neighborIndex, float neighborHeight)
+bool TrySplit(uint index, uint neighborIndex, vec2 direction)
 {
-    if(HeightMapFloorHeight(index, 1) > 0)
-    {
-        return false;
-    }
     GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[neighborIndex];
+    
+    if(gridHydraulicErosionCell.WaterHeight > 0)
+    {
+        float sedimentCapacity = gridHydraulicErosionConfiguration.SedimentCapacity * length(gridHydraulicErosionCell.WaterVelocity);
 
-    float sedimentCapacity = gridHydraulicErosionConfiguration.SedimentCapacity * length(gridHydraulicErosionCell.WaterVelocity);
+	    if(ceil(gridHydraulicErosionCell.WaterVelocity) - direction != 0
+            && sedimentCapacity > gridHydraulicErosionCell.SuspendedSediment)
+	    {
+		    float soilSuspended = max(gridHydraulicErosionConfiguration.SuspensionRate * 0.1 * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
 
-	if (sedimentCapacity > gridHydraulicErosionCell.SuspendedSediment)
-	{
-		float soilSuspended = max(gridHydraulicErosionConfiguration.SuspensionRate * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
-
-        if(gridHydraulicErosionCell.WaterHeight > 0)
-        {
+            float neighborHeight = TotalHeightMapHeight(neighborIndex);
             float neighborTotalHeight = neighborHeight + gridHydraulicErosionCell.WaterHeight;
+            float height = TotalHeightMapHeight(index);
             if(neighborTotalHeight < height)
             {
 		        SplitAt(index, neighborTotalHeight);
-		        float suspendedSediment = SuspendFromTop(index, soilSuspended);
+		        float suspendedSediment = SuspendFromLayerZeroTop(index, soilSuspended);
 		        gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
                 
                 gridHydraulicErosionCells[neighborIndex] = gridHydraulicErosionCell;
 
                 return true;
             }
-        }
-	}
+	    }
+    }
     
     return false;
 }
@@ -254,55 +245,17 @@ void main()
     uint indexRight = GetIndex(x + 1, y);
     uint indexDown = GetIndex(x, y - 1);
     uint indexUp = GetIndex(x, y + 1);
-
-    float height = TotalHeightMapHeight(index);
-    float heightLeft;
-    float heightRight;
-    float heightDown;
-    float heightUp;
-    if(x > 0)
-    {
-        heightLeft = TotalHeightMapHeight(indexLeft);
-    }
-    else
-    {
-        heightLeft = height;
-    }
-    if(x < myHeightMapSideLength - 1)
-    {
-        heightRight = TotalHeightMapHeight(indexRight);
-    }
-    else
-    {
-        heightRight = height;
-    }
-    if(y > 0)
-    {
-        heightDown = TotalHeightMapHeight(indexDown);
-    }
-    else
-    {
-        heightDown = height;
-    }
-    if(y < myHeightMapSideLength - 1)
-    {
-        heightUp = TotalHeightMapHeight(indexUp);
-    }
-    else
-    {
-        heightUp = height;
-    }
 	
-    if(TrySplit(index, height, indexLeft, heightLeft))
+    if(TrySplit(index, indexLeft, vec2(-1, 0)))
     {
     }
-    else if(TrySplit(index, height, indexRight, heightRight))
+    else if(TrySplit(index, indexRight, vec2(1, 0)))
     {
     }
-    else if(TrySplit(index, height, indexDown, heightDown))
+    else if(TrySplit(index, indexDown, vec2(0, -1)))
     {
     }
-    else if(TrySplit(index, height, indexUp, heightUp))
+    else if(TrySplit(index, indexUp, vec2(0, 1)))
     {
     }
     
