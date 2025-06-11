@@ -90,6 +90,10 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
             {
                 bottomIndex = (int)(index + (rockType - 1) * myMapGenerationConfiguration.HeightMapPlaneSize + (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration.HeightMapPlaneSize);
             }
+            else if(layer > 0)
+            {
+                bottomIndex = (int)(index + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.HeightMapPlaneSize);
+            }
             Color color = myRockTypeColors![rockType];
             AddCubeSides(mesh, ref vertexIndex, ref indexIndex, x, y, color, topIndex, bottomIndex);
             if(rockType == myMapGenerationConfiguration.RockTypeCount - 1)

@@ -22,6 +22,12 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 uint myHeightMapPlaneSize;
 
+bool IsFloorIndex(uint index)
+{
+    uint tempIndex = index - mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize;
+    return tempIndex >= 0 && tempIndex < myHeightMapPlaneSize;
+}
+
 float FineSedimentHeight(uint index, uint layer)
 {
     float height = heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
@@ -104,15 +110,21 @@ void main()
 
     uint heightMapIndex = uint(vertexTexCoords.x);
     uint layerOffset = (mapGenerationConfiguration.RockTypeCount + 1) * myHeightMapPlaneSize;
-    uint layer = uint(heightMapIndex / layerOffset * 1.0);
-    uint layerIndex = heightMapIndex - layer * layerOffset;
-    uint currentRockType = uint(layerIndex / myHeightMapPlaneSize * 1.0);
-    uint baseIndex = layerIndex - currentRockType * myHeightMapPlaneSize;
-    uint index = baseIndex + layer * layerOffset;
+    uint layer = uint(heightMapIndex * 1.0 / layerOffset);
+    uint rockTypeIndex = heightMapIndex - (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+    uint rockType = uint(rockTypeIndex * 1.0 / myHeightMapPlaneSize);
+    uint baseIndex = rockTypeIndex - rockType * myHeightMapPlaneSize;
     float height = 0.0;
     if(heightMapIndex > 0)
     {
-        height = LayerHeightMapHeight(index, heightMapIndex, layer);
+        if(IsFloorIndex(heightMapIndex))
+        {
+            height = heightMap[heightMapIndex];
+        }
+        else
+        {
+            height = LayerHeightMapHeight(baseIndex, heightMapIndex, layer);
+        }
     }
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
     float seaLevelHeight = mapGenerationConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
@@ -127,12 +139,12 @@ void main()
             uint cubeFace = uint(vertexTexCoords.y);
             if(cubeFace == 1)
             {
-                if(FineSedimentHeight(index, layer) > 0.00001)
+                if(FineSedimentHeight(baseIndex, layer) > 0.00001)
                 {
                     terrainColor = fineSedimentColor;
                 }
                 else if(mapGenerationConfiguration.RockTypeCount > 2
-                    && CoarseSedimentHeight(index, layer) > 0.00001)
+                    && CoarseSedimentHeight(baseIndex, layer) > 0.00001)
                 {
                     terrainColor = coarseSedimentColor;
                 }
