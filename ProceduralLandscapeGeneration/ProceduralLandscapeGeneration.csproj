@@ -24,10 +24,10 @@
 	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\0RainComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\4HorizontalSuspendComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\4HorizontalSplitComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\5CollapseComputeShader.glsl">
+	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\5CollapseOrCloseSplitComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\1VerticalFlowComputeShader.glsl">
@@ -37,6 +37,9 @@
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="ErosionSimulation\HydraulicErosion\Grid\Shaders\3VerticalSuspendDepositeComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="ErosionSimulation\ThermalErosion\Grid\Shaders\2CollapseComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="ErosionSimulation\ThermalErosion\Grid\Shaders\1DepositeComputeShader.glsl">

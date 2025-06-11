@@ -39,14 +39,8 @@ void main()
     if(x > heightMapSideLength / 2 - heightMapSideLength / 100
         && x < heightMapSideLength / 2 + heightMapSideLength / 100)
     {
-            bedrockHeight = 0.5 + 0.3 * (((abs(x - (heightMapSideLength / 2.0)) / heightMapSideLength) * 2) + ((heightMapSideLength - y) / float(heightMapSideLength)));
+            bedrockHeight = 0.4 + 0.4 * (((abs(x - (heightMapSideLength / 2.0)) / heightMapSideLength) * 2) + ((heightMapSideLength - y) / float(heightMapSideLength)));
     }
 
-    if(mapGenerationConfiguration.RockTypeCount > 1)
-    {
-        float sedimentHeight = 0.4;
-        bedrockHeight -= sedimentHeight;
-        heightMap[index + 1 * heightMapPlaneSize] = sedimentHeight;
-    }
     heightMap[index] = bedrockHeight;
 }

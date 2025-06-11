@@ -94,30 +94,49 @@ uint GetIndex(uint x, uint y)
     return uint((y * myHeightMapSideLength) + x);
 }
 
-float TotalLayerZeroHeightMapHeight(uint index)
+float HeightMapFloorHeight(uint index, uint layer)
 {
-    float height = 0;
-    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    if(layer < 1)
     {
-        height += heightMap[index + rockType * myHeightMapPlaneSize];
+        return 0.0;
     }
-    return height;
+    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-void MoveSedimentToLayerOne(uint index, float splitHeight)
-{    
-    uint currentLayerGridHydraulicErosionCellsIndex = index + myHeightMapPlaneSize;
-    uint aboveLayerGridHydraulicErosionCellsIndex = index + (1) * myHeightMapPlaneSize;
-    gridHydraulicErosionCells[aboveLayerGridHydraulicErosionCellsIndex].WaterHeight += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].WaterHeight;
-    gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].WaterHeight = 0;
-    gridHydraulicErosionCells[aboveLayerGridHydraulicErosionCellsIndex].SuspendedSediment += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].SuspendedSediment;
-    gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].SuspendedSediment = 0;
+float TotalHeightMapHeight(uint index)
+{
+    float heightMapFloorHeight = 0.0;
+    float rockTypeHeight = 0.0;
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    {
+		heightMapFloorHeight = 0.0;
+        if(layer > 0)
+        {
+            heightMapFloorHeight = HeightMapFloorHeight(index, layer);
+            if(heightMapFloorHeight == 0)
+            {
+                continue;
+            }
+        }
+        for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+        {
+            rockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+        }
+        if(rockTypeHeight > 0)
+        {
+            return heightMapFloorHeight + rockTypeHeight;
+        }
+    }
+    return heightMapFloorHeight + rockTypeHeight;
+}
 
+void MoveRockToAboveLayer(uint index, float splitHeight)
+{
     float sedimentToFill = splitHeight;
     for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        uint currentLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + (mapGenerationConfiguration.RockTypeCount) * myHeightMapPlaneSize;
-        uint aboveLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + ((1) * mapGenerationConfiguration.RockTypeCount + (1)) * myHeightMapPlaneSize;
+        uint currentLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize;
+        uint aboveLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + (mapGenerationConfiguration.RockTypeCount + 1) * myHeightMapPlaneSize;
         float currentLayerRockTypeHeight = heightMap[currentLayerRockTypeHeightMapIndex];
         sedimentToFill -= currentLayerRockTypeHeight;
         if(sedimentToFill < 0)
@@ -127,11 +146,6 @@ void MoveSedimentToLayerOne(uint index, float splitHeight)
             sedimentToFill = 0;
         }
     }
-}
-
-float HeightMapFloorHeight(uint index, uint layer)
-{
-    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
 void SetHeightMapFloorHeight(uint index, uint layer, float value)
@@ -144,7 +158,8 @@ float SuspendFromTop(uint index, float requiredSediment)
     float suspendedSediment = 0;
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        if(HeightMapFloorHeight(index, layer) == 0)
+        if(HeightMapFloorHeight(index, layer) == 0
+            && layer > 0)
         {
             continue;
         }
@@ -178,7 +193,7 @@ void SplitAt(uint index, float splitHeight)
         return;
     }
     SetHeightMapFloorHeight(index, 1, splitHeight);
-    MoveSedimentToLayerOne(index, splitHeight);
+    MoveRockToAboveLayer(index, splitHeight);
 }
 
 bool TrySplit(uint index, float height, uint neighborIndex, float neighborHeight)
@@ -225,7 +240,8 @@ void main()
 {
     uint index = gl_GlobalInvocationID.x;
     myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(index >= myHeightMapPlaneSize)
+    if(index >= myHeightMapPlaneSize
+        || mapGenerationConfiguration.LayerCount < 2)
     {
         return;
     }
@@ -239,14 +255,14 @@ void main()
     uint indexDown = GetIndex(x, y - 1);
     uint indexUp = GetIndex(x, y + 1);
 
-    float height = TotalLayerZeroHeightMapHeight(index);
+    float height = TotalHeightMapHeight(index);
     float heightLeft;
     float heightRight;
     float heightDown;
     float heightUp;
     if(x > 0)
     {
-        heightLeft = TotalLayerZeroHeightMapHeight(indexLeft);
+        heightLeft = TotalHeightMapHeight(indexLeft);
     }
     else
     {
@@ -254,7 +270,7 @@ void main()
     }
     if(x < myHeightMapSideLength - 1)
     {
-        heightRight = TotalLayerZeroHeightMapHeight(indexRight);
+        heightRight = TotalHeightMapHeight(indexRight);
     }
     else
     {
@@ -262,7 +278,7 @@ void main()
     }
     if(y > 0)
     {
-        heightDown = TotalLayerZeroHeightMapHeight(indexDown);
+        heightDown = TotalHeightMapHeight(indexDown);
     }
     else
     {
@@ -270,7 +286,7 @@ void main()
     }
     if(y < myHeightMapSideLength - 1)
     {
-        heightUp = TotalLayerZeroHeightMapHeight(indexUp);
+        heightUp = TotalHeightMapHeight(indexUp);
     }
     else
     {

@@ -153,7 +153,7 @@ internal class RockTypesConfiguration : IRockTypesConfiguration
         myMapGenerationConfiguration = mapGenerationConfiguration;
 
         myBedrockHardness = 0.9f;
-        myBedrockAngleOfRepose = 80;
+        myBedrockAngleOfRepose = 85;
         myBedrockCollapseThreshold = 0.1f;
 
         myCoarseSedimentHardness = 0.4f;

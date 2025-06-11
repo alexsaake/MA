@@ -121,7 +121,7 @@ public class GridHydraulicErosionTests
         testee.VerticalFlow();
         testee.VerticalMoveWaterAndSedimentSetVelocityMapAndEvaporate();
 
-        testee.HorizontalSuspend();
+        testee.HorizontalSplit();
 
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
         float[] heightMap = ReadHeightMapShaderBuffer();

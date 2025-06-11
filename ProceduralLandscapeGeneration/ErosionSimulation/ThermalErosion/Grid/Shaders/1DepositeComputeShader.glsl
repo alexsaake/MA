@@ -54,10 +54,24 @@ uint GetIndex(uint x, uint y)
     return uint((y * myHeightMapSideLength) + x);
 }
 
-void RemoveFrom(uint index, uint rockType, float sediment)
+void RemoveFromTop(uint index, uint rockType, float sediment)
 {
-    uint heightMapOffsetIndex = index + rockType * myHeightMapPlaneSize;
-    heightMap[heightMapOffsetIndex] = max(heightMap[heightMapOffsetIndex] - sediment, 0.0);
+    float sedimentToRemove = sediment;
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    {
+        uint heightMapOffsetIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+        float height = heightMap[heightMapOffsetIndex];
+        if(sedimentToRemove <= height)
+        {
+            heightMap[heightMapOffsetIndex] -= sedimentToRemove;
+            return;
+        }
+        else if(sedimentToRemove > 0)
+        {
+            heightMap[heightMapOffsetIndex] = 0.0;
+            sedimentToRemove = max(sedimentToRemove - height, 0.0);
+        }
+    }
 }
 
 void DepositeOn(uint index, uint rockType, float sediment)
@@ -91,7 +105,7 @@ void main()
 	    float volumeDelta = (flowIn - flowOut) * erosionConfiguration.TimeDelta;
         if(volumeDelta < 0)
         {
-            RemoveFrom(index, rockType, abs(volumeDelta));
+            RemoveFromTop(index, rockType, abs(volumeDelta));
         }
         else
         {

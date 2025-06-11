@@ -22,8 +22,8 @@ struct GridHydraulicErosionCell
     float SedimentFlowRight;
     float SedimentFlowUp;
     float SedimentFlowDown;
-
-    vec2 Velocity;
+    
+    vec2 WaterVelocity;
 };
 
 layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
@@ -62,15 +62,19 @@ uint myHeightMapPlaneSize;
 
 float HeightMapFloorHeight(uint index, uint layer)
 {
+    if(layer < 1)
+    {
+        return 0.0;
+    }
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-float TotalLayerZeroHeightMapHeight(uint index)
+float LayerHeightMapHeight(uint index, uint layer)
 {
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapPlaneSize];
+        height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
     }
     return height;
 }
@@ -87,38 +91,35 @@ void main()
 {
     uint index = gl_GlobalInvocationID.x;
     myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
-    if(index >= myHeightMapPlaneSize)
+    if(index >= myHeightMapPlaneSize
+        || mapGenerationConfiguration.LayerCount < 2)
     {
         return;
     }
 
-    float totalLayerZeroHeightMapHeight = TotalLayerZeroHeightMapHeight(index);
+    float layerZeroHeightMapHeight = LayerHeightMapHeight(index, 0);
     float layerOneFloorHeight = HeightMapFloorHeight(index, 1);
+    bool isSplitOpen = layerOneFloorHeight > layerZeroHeightMapHeight;
     if(layerOneFloorHeight == 0
-        || layerOneFloorHeight - totalLayerZeroHeightMapHeight < rockTypesConfiguration[0].CollapseThreshold)
+        || (isSplitOpen
+            && layerOneFloorHeight - layerZeroHeightMapHeight < rockTypesConfiguration[0].CollapseThreshold))
     {
         return;
     }
-
-    uint currentLayerGridHydraulicErosionCellsIndex = index + myHeightMapPlaneSize;
-    uint belowLayerGridHydraulicErosionCellsIndex = index + (-1) * myHeightMapPlaneSize;
-    gridHydraulicErosionCells[belowLayerGridHydraulicErosionCellsIndex].WaterHeight += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].WaterHeight;
-    gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].WaterHeight = 0;
-    gridHydraulicErosionCells[belowLayerGridHydraulicErosionCellsIndex].SuspendedSediment += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].SuspendedSediment;
-    gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellsIndex].SuspendedSediment = 0;
 
     for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        uint currentLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + (mapGenerationConfiguration.RockTypeCount) * myHeightMapPlaneSize;
-        uint bellowLayerRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + ((-1) * mapGenerationConfiguration.RockTypeCount + (-1)) * myHeightMapPlaneSize;
-        if(mapGenerationConfiguration.RockTypeCount > 1
+        uint layerOneRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + (mapGenerationConfiguration.RockTypeCount + 1) * myHeightMapPlaneSize;
+        uint layerZeroRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize;
+        if(isSplitOpen
+            && mapGenerationConfiguration.RockTypeCount > 1
             && rockType == 0)
         {
             //bedrock becomes coarse sediment
-            bellowLayerRockTypeHeightMapIndex = index + (rockType + 1) * myHeightMapPlaneSize + ((-1) * mapGenerationConfiguration.RockTypeCount + (-1)) * myHeightMapPlaneSize;
+            layerZeroRockTypeHeightMapIndex = index + (rockType + 1) * myHeightMapPlaneSize;
         }
-        heightMap[bellowLayerRockTypeHeightMapIndex] += heightMap[currentLayerRockTypeHeightMapIndex];
-        heightMap[currentLayerRockTypeHeightMapIndex] = 0;
+        heightMap[layerZeroRockTypeHeightMapIndex] += heightMap[layerOneRockTypeHeightMapIndex];
+        heightMap[layerOneRockTypeHeightMapIndex] = 0;
     }
         
     SetHeightMapFloorHeight(index, 1, 0);

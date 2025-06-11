@@ -44,31 +44,35 @@ float CoarseSedimentHeight(uint index, uint layer)
 
 float HeightMapFloorHeight(uint index, uint layer)
 {
+    if(layer < 1)
+    {
+        return 0.0;
+    }
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-float TotalHeightMapHeight(uint index, uint totalIndex, uint layer)
+float LayerHeightMapHeight(uint index, uint totalIndex, uint layer)
 {
-    float height = 0;
+    float height = 0.0;
+    float heightMapFloorHeight = 0.0;
     if(layer > 0)
     {
-        float heightMapFloorHeight = HeightMapFloorHeight(index, layer);
-        if(heightMapFloorHeight == 0)
-        {
-            return 0.0;
-        }
-        height += heightMapFloorHeight;
+        heightMapFloorHeight = HeightMapFloorHeight(index, layer);
+            if(heightMapFloorHeight == 0)
+            {
+                return 0.0;
+            }
     }
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
         uint currentRockTypeIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
         if(totalIndex < currentRockTypeIndex)
         {
-            return height;
+            return heightMapFloorHeight + height;
         }
         height += heightMap[currentRockTypeIndex];
     }
-    return height;
+    return heightMapFloorHeight + height;
 }
 
 in vec3 vertexPosition;
@@ -99,16 +103,16 @@ void main()
     myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
 
     uint heightMapIndex = uint(vertexTexCoords.x);
-    uint cubeFace = uint(vertexTexCoords.y);
     uint layerOffset = (mapGenerationConfiguration.RockTypeCount + 1) * myHeightMapPlaneSize;
     uint layer = uint(heightMapIndex / layerOffset * 1.0);
     uint layerIndex = heightMapIndex - layer * layerOffset;
-    uint currentRockType = uint(layerIndex / myHeightMapPlaneSize);
-    uint index = layerIndex - currentRockType * myHeightMapPlaneSize;
+    uint currentRockType = uint(layerIndex / myHeightMapPlaneSize * 1.0);
+    uint baseIndex = layerIndex - currentRockType * myHeightMapPlaneSize;
+    uint index = baseIndex + layer * layerOffset;
     float height = 0.0;
     if(heightMapIndex > 0)
     {
-        height = TotalHeightMapHeight(index, heightMapIndex, layer);
+        height = LayerHeightMapHeight(index, heightMapIndex, layer);
     }
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;
     float seaLevelHeight = mapGenerationConfiguration.SeaLevel * mapGenerationConfiguration.HeightMultiplier;
@@ -120,6 +124,7 @@ void main()
     {
         if(mapGenerationConfiguration.RockTypeCount > 1)
         {
+            uint cubeFace = uint(vertexTexCoords.y);
             if(cubeFace == 1)
             {
                 if(FineSedimentHeight(index, layer) > 0.00001)

@@ -84,33 +84,38 @@ uint GetIndex(uint x, uint y)
 
 float HeightMapFloorHeight(uint index, uint layer)
 {
+    if(layer < 1)
+    {
+        return 0.0;
+    }
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
 float TotalHeightMapHeight(uint index)
 {
-    float height = 0;
+    float heightMapFloorHeight = 0.0;
+    float rockTypeHeight = 0.0;
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
+		heightMapFloorHeight = 0.0;
         if(layer > 0)
         {
-            float heightMapFloorHeight = HeightMapFloorHeight(index, layer);
+            heightMapFloorHeight = HeightMapFloorHeight(index, layer);
             if(heightMapFloorHeight == 0)
             {
                 continue;
             }
-            height += heightMapFloorHeight;
         }
         for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
         {
-            height += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+            rockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
         }
-        if(height > 0)
+        if(rockTypeHeight > 0)
         {
-            return height;
+            return heightMapFloorHeight + rockTypeHeight;
         }
     }
-    return height;
+    return heightMapFloorHeight + rockTypeHeight;
 }
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute

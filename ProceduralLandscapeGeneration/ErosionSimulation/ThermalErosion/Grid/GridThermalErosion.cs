@@ -20,6 +20,7 @@ internal class GridThermalErosion : IGridThermalErosion
 
     private ComputeShaderProgram? myVerticalFlowComputeShaderProgram;
     private ComputeShaderProgram? myDepositeComputeShaderProgram;
+    private ComputeShaderProgram? myCollapseComputeShaderProgram;
 
     private bool myIsDisposed;
 
@@ -36,6 +37,7 @@ internal class GridThermalErosion : IGridThermalErosion
     {
         myVerticalFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}0VerticalFlowComputeShader.glsl");
         myDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}1DepositeComputeShader.glsl");
+        myCollapseComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}2CollapseComputeShader.glsl");
 
         AddGridThermalErosionCellShaderBuffer();
 
@@ -59,6 +61,10 @@ internal class GridThermalErosion : IGridThermalErosion
         {
             VerticalFlow();
             Deposite();
+            if (myMapGenerationConfiguration.LayerCount > 1)
+            {
+                Collapse();
+            }
         }
     }
 
@@ -78,6 +84,14 @@ internal class GridThermalErosion : IGridThermalErosion
         Rlgl.MemoryBarrier();
     }
 
+    internal void Collapse()
+    {
+        Rlgl.EnableShader(myCollapseComputeShaderProgram!.Id);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
+        Rlgl.DisableShader();
+        Rlgl.MemoryBarrier();
+    }
+
     public void Dispose()
     {
         if (myIsDisposed)
@@ -87,6 +101,7 @@ internal class GridThermalErosion : IGridThermalErosion
 
         myVerticalFlowComputeShaderProgram?.Dispose();
         myDepositeComputeShaderProgram?.Dispose();
+        myCollapseComputeShaderProgram?.Dispose();
 
         RemoveGridThermalErosionCellShaderBuffer();
 
