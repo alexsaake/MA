@@ -112,24 +112,14 @@ float TotalSedimentHeightMapHeight(uint index, uint stopRockType)
     return heightMapFloorHeight + rockTypeHeight;
 }
 
-float RockTypeSedimentHeight(uint index, uint rockType)
+float RockTypeSedimentAmount(uint index, uint rockType)
 {
-    float heightMapFloorHeight = 0.0;
 	float rockTypeHeight = 0.0;
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
-		heightMapFloorHeight = 0.0;
-        if(layer > 0)
-        {
-            heightMapFloorHeight = HeightMapFloorHeight(index, layer);
-        }
         rockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
-        if(rockTypeHeight > 0)
-        {
-            return heightMapFloorHeight + rockTypeHeight;
-        }
     }
-    return heightMapFloorHeight + rockTypeHeight;
+    return rockTypeHeight;
 }
 
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
@@ -164,17 +154,17 @@ void main()
 		float totalSedimentHeightDifferenceUp = max(totalSedimentHeight - TotalSedimentHeightMapHeight(indexUp, rockType), 0.0);
 		float maxTotalSedimentHeightDifference = max(max(totalSedimentHeightDifferenceLeft, totalSedimentHeightDifferenceRight), max(totalSedimentHeightDifferenceDown, totalSedimentHeightDifferenceUp));
 		
-		float rockTypeSedimentHeight = RockTypeSedimentHeight(index, rockType);
+		float rockTypeSedimentAmount = RockTypeSedimentAmount(index, rockType);
 		float sedimentVolumeToBeMoved = 0;
 		if(maxTotalSedimentHeightDifference > 0)
 		{
-			if(maxTotalSedimentHeightDifference < rockTypeSedimentHeight)
+			if(maxTotalSedimentHeightDifference < rockTypeSedimentAmount)
 			{
 				sedimentVolumeToBeMoved = maxTotalSedimentHeightDifference * thermalErosionConfiguration.ErosionRate;
 			}
 			else
 			{
-				sedimentVolumeToBeMoved = rockTypeSedimentHeight * thermalErosionConfiguration.ErosionRate;
+				sedimentVolumeToBeMoved = rockTypeSedimentAmount * thermalErosionConfiguration.ErosionRate;
 			}
 		}
 	
