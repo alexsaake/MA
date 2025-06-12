@@ -13,6 +13,7 @@ internal class MeshShaderRenderer : IRenderer
 
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
+    private readonly ICamera myCamera;
 
     private Shader myTerrainHeightMapMeshShader;
     private Shader myWaterHeightMapMeshShader;
@@ -21,15 +22,15 @@ internal class MeshShaderRenderer : IRenderer
     private Shader mySedimentParticleMeshShader;
     private Shader mySeaLevelQuadMeshShader;
     private int myViewPositionLocation;
-    private Camera3D myCamera;
 
     private uint myMeshletCount;
     private bool myIsDisposed;
 
-    public MeshShaderRenderer(IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration)
+    public MeshShaderRenderer(IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, ICamera camera)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
+        myCamera = camera;
     }
 
     public unsafe void Initialize()
@@ -51,10 +52,6 @@ internal class MeshShaderRenderer : IRenderer
 
         myViewPositionLocation = Raylib.GetShaderLocation(myTerrainHeightMapMeshShader, "viewPosition");
 
-        Vector3 cameraPosition = heightMapCenter + new Vector3(myMapGenerationConfiguration.HeightMapSideLength / 2, -myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 2);
-        myCamera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
-        Raylib.UpdateCamera(ref myCamera, myMapGenerationConfiguration.CameraMode);
-
         myMeshletCount = CalculateMeshletCount();
 
         myIsDisposed = false;
@@ -69,7 +66,6 @@ internal class MeshShaderRenderer : IRenderer
 
     public unsafe void Update()
     {
-        Raylib.UpdateCamera(ref myCamera, myMapGenerationConfiguration.CameraMode);
         Vector3 viewPosition = myCamera.Position;
         Raylib.SetShaderValue(myTerrainHeightMapMeshShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
         Raylib.SetShaderValue(myWaterHeightMapMeshShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
@@ -78,7 +74,7 @@ internal class MeshShaderRenderer : IRenderer
 
     public void Draw()
     {
-        Raylib.BeginMode3D(myCamera);
+        Raylib.BeginMode3D(myCamera.Instance);
         Rlgl.EnableShader(myTerrainHeightMapMeshShader.Id);
         Raylib.DrawMeshTasks(0, myMeshletCount);
         Rlgl.DisableShader();

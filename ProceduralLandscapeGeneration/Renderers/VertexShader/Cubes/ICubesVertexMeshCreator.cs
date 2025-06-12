@@ -1,10 +1,9 @@
 ﻿using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Renderers.VertexShader.Cubes
+namespace ProceduralLandscapeGeneration.Renderers.VertexShader.Cubes;
+
+internal interface ICubesVertexMeshCreator
 {
-    internal interface ICubesVertexMeshCreator
-    {
-        Mesh CreateCubesMesh();
-        Mesh CreateSeaLevelMesh();
-    }
+    Mesh CreateCubesMesh();
+    Mesh CreateSeaLevelMesh();
 }

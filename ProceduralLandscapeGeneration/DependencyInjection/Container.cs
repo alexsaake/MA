@@ -15,6 +15,8 @@ internal class Container
 
         containerBuilder.RegisterModule<GUIModule>();
 
+        containerBuilder.RegisterModule<CameraModule>();
+
         containerBuilder.RegisterModule<HeightMapGenerationModule>();
 
         containerBuilder.RegisterModule<RenderersModule>();

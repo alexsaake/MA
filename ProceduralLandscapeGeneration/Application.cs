@@ -2,7 +2,6 @@
 using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
-using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.ErosionSimulation;
 using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.MapGeneration;
@@ -19,6 +18,7 @@ internal class Application : IApplication
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IConfigurationGUI myConfigurationGUI;
+    private readonly ICamera myCamera;
     private readonly IHeightMap myHeightMap;
     private readonly IErosionSimulator myErosionSimulator;
     private readonly ILifetimeScope myLifetimeScope;
@@ -28,12 +28,13 @@ internal class Application : IApplication
     private bool myIsErosionResetRequired;
     private bool myShowUI = true;
 
-    public Application(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IConfigurationGUI configurationGUI, IHeightMap heightMap, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
+    public Application(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IConfigurationGUI configurationGUI, ICamera camera, IHeightMap heightMap, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
         myConfigurationGUI = configurationGUI;
+        myCamera = camera;
         myHeightMap = heightMap;
         myErosionSimulator = erosionSimulator;
         myLifetimeScope = lifetimeScope;
@@ -55,6 +56,7 @@ internal class Application : IApplication
         myConfigurationGUI.ErosionModeChanged += OnErosionModeChanged;
 
         InitializeModules();
+        myCamera.Initialize();
 
         Rlgl.SetClipPlanes(5, myMapGenerationConfiguration.HeightMapPlaneSize);
         Raylib.SetTargetFPS(60);
@@ -89,6 +91,7 @@ internal class Application : IApplication
             }
 
             Raylib.BeginDrawing();
+                myCamera!.Update();
                 myRenderer!.Update();
                 Raylib.ClearBackground(Color.SkyBlue);
                 myRenderer!.Draw();

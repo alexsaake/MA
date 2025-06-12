@@ -20,6 +20,7 @@ internal class HeightMapVertexShaderRenderer : IRenderer
     private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IGridHydraulicErosionConfiguration myGridHydraulicErosionConfiguration;
     private readonly IConfigurationGUI myConfigurationGUI;
+    private readonly ICamera myCamera;
     private readonly IErosionSimulator myErosionSimulator;
     private readonly IHeightMapVertexMeshCreator myHeightMapVertexMeshCreator;
     private readonly IShaderBuffers myShaderBuffers;
@@ -36,19 +37,19 @@ internal class HeightMapVertexShaderRenderer : IRenderer
     private int myLightSpaceMatrixLocation;
     private int myShadowMapLocation;
     private int myViewPositionLocation;
-    private Camera3D myCamera;
     private Camera3D myLightCamera;
 
     private bool myIsUpdateAvailable;
     private bool myIsDisposed;
 
-    public HeightMapVertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, IHeightMapVertexMeshCreator heightMapVertexMeshCreator, IShaderBuffers shaderBuffers)
+    public HeightMapVertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IConfigurationGUI configurationGUI, ICamera camera, IErosionSimulator erosionSimulator, IHeightMapVertexMeshCreator heightMapVertexMeshCreator, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
         myGridHydraulicErosionConfiguration = gridHydraulicErosionConfiguration;
         myConfigurationGUI = configurationGUI;
+        myCamera = camera;
         myErosionSimulator = erosionSimulator;
         myHeightMapVertexMeshCreator = heightMapVertexMeshCreator;
         myShaderBuffers = shaderBuffers;
@@ -67,8 +68,7 @@ internal class HeightMapVertexShaderRenderer : IRenderer
         lightDirection = Vector3.Normalize(lightDirection);
 
         SetShadowMapShaderValues(heightMapCenter, lightDirection);
-        SetHeightMapShaderValues(heightMapCenter, lightDirection);
-        SetCamera(heightMapCenter);
+        SetHeightMapShaderValues(lightDirection);
 
         InitiateModel();
         UpdateShadowMap();
@@ -99,7 +99,7 @@ internal class HeightMapVertexShaderRenderer : IRenderer
         mySeaLevelQuadShader = Raylib.LoadShader($"{CommonShaderDirectory}SeaLevelQuadVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
     }
 
-    private unsafe void SetHeightMapShaderValues(Vector3 heightMapCenter, Vector3 lightDirection)
+    private unsafe void SetHeightMapShaderValues(Vector3 lightDirection)
     {
         myLightSpaceMatrixLocation = Raylib.GetShaderLocation(myTerrainHeightMapShader, "lightSpaceMatrix");
         myShadowMapLocation = Raylib.GetShaderLocation(myTerrainHeightMapShader, "shadowMap");
@@ -144,13 +144,6 @@ internal class HeightMapVertexShaderRenderer : IRenderer
         }
 
         return target;
-    }
-
-    private void SetCamera(Vector3 heightMapCenter)
-    {
-        Vector3 cameraPosition = heightMapCenter + new Vector3(myMapGenerationConfiguration.HeightMapSideLength / 2, -myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 2);
-        myCamera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
-        Raylib.UpdateCamera(ref myCamera, myMapGenerationConfiguration.CameraMode);
     }
 
     private unsafe void InitiateModel()
@@ -200,12 +193,11 @@ internal class HeightMapVertexShaderRenderer : IRenderer
     {
         Vector3 viewPosition = myCamera.Position;
         Raylib.SetShaderValue(myTerrainHeightMapShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
-        Raylib.UpdateCamera(ref myCamera, myMapGenerationConfiguration.CameraMode);
     }
 
     public void Draw()
     {
-        Raylib.BeginMode3D(myCamera);
+        Raylib.BeginMode3D(myCamera.Instance);
             DrawTerrainHeightMap();
             if ((myErosionConfiguration.IsHydraulicErosionEnabled
                 || myErosionConfiguration.IsWindErosionEnabled)

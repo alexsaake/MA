@@ -21,6 +21,7 @@ internal class CubesVertexShaderRenderer : IRenderer
     private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IGridHydraulicErosionConfiguration myGridHydraulicErosionConfiguration;
     private readonly IConfigurationGUI myConfigurationGUI;
+    private readonly ICamera myCamera;
     private readonly IErosionSimulator myErosionSimulator;
     private readonly ICubesVertexMeshCreator myCubesVertexMeshCreator;
     private readonly IHeightMapVertexMeshCreator myHeightMapVertexMeshCreator;
@@ -35,18 +36,17 @@ internal class CubesVertexShaderRenderer : IRenderer
     private Shader mySedimentHeightMapShader;
     private Shader mySeaLevelQuadShader;
     private int myViewPositionLocation;
-    private Camera3D myCamera;
-    private Camera3D myLightCamera;
 
     private bool myIsDisposed;
 
-    public CubesVertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IConfigurationGUI configurationGUI, IErosionSimulator erosionSimulator, ICubesVertexMeshCreator cubesVertexMeshCreator, IHeightMapVertexMeshCreator heightMapVertexMeshCreator, IShaderBuffers shaderBuffers)
+    public CubesVertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IConfigurationGUI configurationGUI, ICamera camera, IErosionSimulator erosionSimulator, ICubesVertexMeshCreator cubesVertexMeshCreator, IHeightMapVertexMeshCreator heightMapVertexMeshCreator, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
         myGridHydraulicErosionConfiguration = gridHydraulicErosionConfiguration;
         myConfigurationGUI = configurationGUI;
+        myCamera = camera;
         myErosionSimulator = erosionSimulator;
         myCubesVertexMeshCreator = cubesVertexMeshCreator;
         myHeightMapVertexMeshCreator = heightMapVertexMeshCreator;
@@ -57,12 +57,7 @@ internal class CubesVertexShaderRenderer : IRenderer
     {
         LoadShaders();
 
-        Vector3 heightMapCenter = new Vector3(myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 2, 0);
-        Vector3 lightDirection = new Vector3(-myMapGenerationConfiguration.HeightMapSideLength, -myMapGenerationConfiguration.HeightMapSideLength, -myMapGenerationConfiguration.HeightMapSideLength / 2);
-        lightDirection = Vector3.Normalize(lightDirection);
-
-        SetHeightMapShaderValues(heightMapCenter, lightDirection);
-        SetCamera(heightMapCenter);
+        SetHeightMapShaderValues();
 
         InitiateModel();
 
@@ -77,19 +72,15 @@ internal class CubesVertexShaderRenderer : IRenderer
         mySeaLevelQuadShader = Raylib.LoadShader($"{CommonShaderDirectory}SeaLevelQuadVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
     }
 
-    private unsafe void SetHeightMapShaderValues(Vector3 heightMapCenter, Vector3 lightDirection)
+    private unsafe void SetHeightMapShaderValues()
     {
+        Vector3 lightDirection = new Vector3(-myMapGenerationConfiguration.HeightMapSideLength, -myMapGenerationConfiguration.HeightMapSideLength, -myMapGenerationConfiguration.HeightMapSideLength / 2);
+        lightDirection = Vector3.Normalize(lightDirection);
+
         myViewPositionLocation = Raylib.GetShaderLocation(myTerrainCubesShader, "viewPosition");
 
         int lightDirectionLocation = Raylib.GetShaderLocation(myTerrainCubesShader, "lightDirection");
         Raylib.SetShaderValue(myTerrainCubesShader, lightDirectionLocation, &lightDirection, ShaderUniformDataType.Vec3);
-    }
-
-    private void SetCamera(Vector3 heightMapCenter)
-    {
-        Vector3 cameraPosition = heightMapCenter + new Vector3(myMapGenerationConfiguration.HeightMapSideLength / 2, -myMapGenerationConfiguration.HeightMapSideLength / 2, myMapGenerationConfiguration.HeightMapSideLength / 2);
-        myCamera = new(cameraPosition, heightMapCenter, Vector3.UnitZ, 45.0f, CameraProjection.Perspective);
-        Raylib.UpdateCamera(ref myCamera, myMapGenerationConfiguration.CameraMode);
     }
 
     private unsafe void InitiateModel()
@@ -113,28 +104,27 @@ internal class CubesVertexShaderRenderer : IRenderer
     {
         Vector3 viewPosition = myCamera.Position;
         Raylib.SetShaderValue(myTerrainCubesShader, myViewPositionLocation, &viewPosition, ShaderUniformDataType.Vec3);
-        Raylib.UpdateCamera(ref myCamera, myMapGenerationConfiguration.CameraMode);
     }
 
     public void Draw()
     {
-        Raylib.BeginMode3D(myCamera);
-            Raylib.DrawModel(myTerrainCubes, Vector3.Zero, 1.0f, Color.White);
-            if ((myErosionConfiguration.IsHydraulicErosionEnabled
-                || myErosionConfiguration.IsWindErosionEnabled)
-                    && myErosionConfiguration.IsSedimentDisplayed)
-            {
-                Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
-            }
-            if (myErosionConfiguration.IsHydraulicErosionEnabled
-                && myErosionConfiguration.IsWaterDisplayed)
-            {
-                Raylib.DrawModel(myWaterHeightMap, Vector3.Zero, 1.0f, Color.White);
-            }
-            if (myErosionConfiguration.IsSeaLevelDisplayed)
-            {
-                Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
-            }
+        Raylib.BeginMode3D(myCamera.Instance);
+        Raylib.DrawModel(myTerrainCubes, Vector3.Zero, 1.0f, Color.White);
+        if ((myErosionConfiguration.IsHydraulicErosionEnabled
+            || myErosionConfiguration.IsWindErosionEnabled)
+                && myErosionConfiguration.IsSedimentDisplayed)
+        {
+            Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
+        }
+        if (myErosionConfiguration.IsHydraulicErosionEnabled
+            && myErosionConfiguration.IsWaterDisplayed)
+        {
+            Raylib.DrawModel(myWaterHeightMap, Vector3.Zero, 1.0f, Color.White);
+        }
+        if (myErosionConfiguration.IsSeaLevelDisplayed)
+        {
+            Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
+        }
         Raylib.EndMode3D();
     }
 
