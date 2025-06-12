@@ -108,7 +108,7 @@ float LayerFloorCollapseThreshold(uint index, uint layer)
     {
         if(heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize] > 0)
         {
-            return rockTypesConfiguration[rockType].CollapseThreshold
+            return rockTypesConfiguration[rockType].CollapseThreshold;
         }
     }
     return 0.0;
