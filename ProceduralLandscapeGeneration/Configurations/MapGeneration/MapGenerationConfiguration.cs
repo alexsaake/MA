@@ -82,7 +82,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
                 return;
             }
             myRenderType = value;
-            ResetRequired?.Invoke(this, EventArgs.Empty);
+            RendererChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -112,7 +112,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
                 return;
             }
             myMeshCreation = value;
-            ResetRequired?.Invoke(this, EventArgs.Empty);
+            RendererChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -288,6 +288,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
     }
 
     public event EventHandler? ResetRequired;
+    public event EventHandler? RendererChanged;
     public event EventHandler? HeightMultiplierChanged;
 
     public MapGenerationConfiguration(IShaderBuffers shaderBuffers)

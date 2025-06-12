@@ -25,6 +25,7 @@ internal class Application : IApplication
     private IRenderer? myRenderer;
 
     private bool myIsResetRequired;
+    private bool myIsRendererResetRequired;
     private bool myIsErosionResetRequired;
     private bool myShowUI = true;
 
@@ -38,10 +39,10 @@ internal class Application : IApplication
         myHeightMap = heightMap;
         myErosionSimulator = erosionSimulator;
         myLifetimeScope = lifetimeScope;
-        ResolveModules();
+        ResolveRenderer();
     }
 
-    private void ResolveModules()
+    private void ResolveRenderer()
     {
         myRenderer = myLifetimeScope.ResolveNamed<IRenderer>($"{myMapGenerationConfiguration.MeshCreation}{myMapGenerationConfiguration.RenderType}");
     }
@@ -51,6 +52,7 @@ internal class Application : IApplication
         Raylib.InitWindow(myConfiguration.ScreenWidth, myConfiguration.ScreenHeight, WindowTitle);
 
         myMapGenerationConfiguration.ResetRequired += OnResetRequired;
+        myMapGenerationConfiguration.RendererChanged += OnRendererChanged;
         myConfigurationGUI.MapResetRequired += OnResetRequired;
         myConfigurationGUI.ErosionResetRequired += OnErosionResetRequired;
         myConfigurationGUI.ErosionModeChanged += OnErosionModeChanged;
@@ -66,7 +68,7 @@ internal class Application : IApplication
             if (myIsResetRequired)
             {
                 DisposeModules();
-                ResolveModules();
+                ResolveRenderer();
                 InitializeModules();
                 myIsResetRequired = false;
             }
@@ -74,6 +76,13 @@ internal class Application : IApplication
             {
                 myErosionSimulator.ResetShaderBuffers();
                 myIsErosionResetRequired = false;
+            }
+            if (myIsRendererResetRequired)
+            {
+                myRenderer!.Dispose();
+                ResolveRenderer();
+                myRenderer!.Initialize();
+                myIsRendererResetRequired = false;
             }
 
             if (myMapGenerationConfiguration.IsPlateTectonicsRunning)
@@ -103,6 +112,7 @@ internal class Application : IApplication
         }
 
         myMapGenerationConfiguration.ResetRequired -= OnResetRequired;
+        myMapGenerationConfiguration.RendererChanged -= OnRendererChanged;
         myConfigurationGUI.MapResetRequired -= OnResetRequired;
         myConfigurationGUI.ErosionResetRequired -= OnErosionResetRequired;
         myConfigurationGUI.ErosionModeChanged -= OnErosionModeChanged;
@@ -115,6 +125,11 @@ internal class Application : IApplication
     private void OnResetRequired(object? sender, EventArgs e)
     {
         myIsResetRequired = true;
+    }
+
+    private void OnRendererChanged(object? sender, EventArgs e)
+    {
+        myIsRendererResetRequired = true;
     }
 
     private void OnErosionResetRequired(object? sender, EventArgs e)

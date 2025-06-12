@@ -31,6 +31,7 @@ internal interface IMapGenerationConfiguration : IDisposable
     bool AreTerrainColorsEnabled { get; set; }
 
     event EventHandler? ResetRequired;
+    event EventHandler? RendererChanged;
     event EventHandler? HeightMultiplierChanged;
 
     void Initialize();
