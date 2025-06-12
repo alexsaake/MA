@@ -41,6 +41,7 @@ internal class Camera : ICamera
             {
                 Raylib.CameraMoveToTarget(ref myCamera, cameraMoveSpeed);
             }
+            Raylib.CameraMoveToTarget(ref myCamera, -Raylib.GetMouseWheelMove() * cameraMoveSpeed);
             if (Raylib.IsKeyDown(KeyboardKey.A))
             {
                 Raylib.CameraYaw(ref myCamera, -cameraRotationSpeed, true);

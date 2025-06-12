@@ -255,7 +255,7 @@ bool TrySplit(uint index, uint neighborIndex, vec2 direction)
                 bool isEroded = false;
 
                 float layerZeroHeight = LayerHeightMapHeight(index, 0);
-                float layerZeroHeightBelowSeaLevel = max(mapGenerationConfiguration.SeaLevel - layerZeroHeight, 0.0);
+                float layerZeroHeightBelowSeaLevel = max(neighborTotalTerrainAndWaterHeight - layerZeroHeight, 0.0);
 	            float erosionDepthLimit = (gridHydraulicErosionConfiguration.MaximalErosionDepth - min(gridHydraulicErosionConfiguration.MaximalErosionDepth, layerZeroHeightBelowSeaLevel)) / gridHydraulicErosionConfiguration.MaximalErosionDepth;
                 float sedimentCapacityBottom = gridHydraulicErosionConfiguration.SedimentCapacity * length(gridHydraulicErosionCell.WaterVelocity) * erosionDepthLimit;
             
@@ -270,8 +270,8 @@ bool TrySplit(uint index, uint neighborIndex, vec2 direction)
                     isEroded = true;
 	            }
                 
-                float layerOneFloor = HeightMapFloorHeight(index, 1);
-                float layerOneHeightAboveSeaLevel = max(layerOneFloor - mapGenerationConfiguration.SeaLevel, 0.0);
+                float layerOneFloorHeight = HeightMapFloorHeight(index, 1);
+                float layerOneHeightAboveSeaLevel = max(layerOneFloorHeight - neighborTotalTerrainAndWaterHeight, 0.0);
 	            float erosionHeightLimit = (gridHydraulicErosionConfiguration.MaximalErosionHeight - min(gridHydraulicErosionConfiguration.MaximalErosionHeight, layerOneHeightAboveSeaLevel)) / gridHydraulicErosionConfiguration.MaximalErosionHeight;
                 float sedimentCapacityTop = gridHydraulicErosionConfiguration.SedimentCapacity * length(gridHydraulicErosionCell.WaterVelocity) * erosionHeightLimit;
 
