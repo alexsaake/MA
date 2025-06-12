@@ -30,22 +30,17 @@ bool IsFloorIndex(uint index)
 
 float FineSedimentHeight(uint index, uint layer)
 {
-    float height = heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
-    if(height > 0)
-    {
-        return height;
-    }
-    return 0;
+    return heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
 }
 
 float CoarseSedimentHeight(uint index, uint layer)
 {
-    float height = heightMap[index + 1 * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
-    if(height > 0)
-    {
-        return height;
-    }
-    return 0;
+    return heightMap[index + 1 * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+}
+
+float BedrockHeight(uint index, uint layer)
+{
+    return heightMap[index + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
 }
 
 float HeightMapFloorHeight(uint index, uint layer)
@@ -151,6 +146,22 @@ void main()
                 else
                 {
                     terrainColor = bedrockColor;
+                }
+            }
+            else if(cubeFace == 2)
+            {
+                if(BedrockHeight(baseIndex, layer) > 0)
+                {
+                    terrainColor = bedrockColor;
+                }
+                else if(mapGenerationConfiguration.RockTypeCount > 2
+                    && CoarseSedimentHeight(baseIndex, layer) > 0.00001)
+                {
+                    terrainColor = coarseSedimentColor;
+                }
+                else if(FineSedimentHeight(baseIndex, layer) > 0.00001)
+                {
+                    terrainColor = fineSedimentColor;
                 }
             }
             else
