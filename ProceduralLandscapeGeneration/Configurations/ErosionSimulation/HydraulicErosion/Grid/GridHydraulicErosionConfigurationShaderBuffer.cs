@@ -5,9 +5,11 @@ public struct GridHydraulicErosionConfigurationShaderBuffer
     public float WaterIncrease;
     public float Gravity;
     public float Dampening;
+    public float MaximalErosionHeight;
     public float MaximalErosionDepth;
     public float SedimentCapacity;
-    public float SuspensionRate;
+    public float VerticalSuspensionRate;
+    public float HorizontalSuspensionRate;
     public float DepositionRate;
     public float EvaporationRate;
 }

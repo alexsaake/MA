@@ -6,9 +6,11 @@ internal interface IGridHydraulicErosionConfiguration : IDisposable
     float WaterIncrease { get; set; }
     float Gravity { get; set; }
     float Dampening { get; set; }
+    float MaximalErosionHeight { get; set; }
     float MaximalErosionDepth { get; set; }
     float SedimentCapacity { get; set; }
-    float SuspensionRate { get; set; }
+    float VerticalSuspensionRate { get; set; }
+    float HorizontalSuspensionRate { get; set; }
     float DepositionRate { get; set; }
     float EvaporationRate { get; set; }
     uint GridCellsSize { get; }

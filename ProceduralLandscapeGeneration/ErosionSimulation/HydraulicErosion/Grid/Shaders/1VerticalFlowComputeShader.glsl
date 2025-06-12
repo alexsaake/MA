@@ -62,11 +62,27 @@ struct GridHydraulicErosionConfiguration
     float WaterIncrease;
     float Gravity;
     float Dampening;
+    float MaximalErosionHeight;
     float MaximalErosionDepth;
     float SedimentCapacity;
-    float SuspensionRate;
+    float VerticalSuspensionRate;
+    float HorizontalSuspensionRate;
     float DepositionRate;
     float EvaporationRate;
+};
+
+struct ParticleWindErosionConfiguration
+{
+    float SuspensionRate;
+    float Gravity;
+    uint MaxAge;
+    vec2 PersistentSpeed;
+    bool AreParticlesAdded;
+};
+
+layout(std430, binding = 8) readonly restrict buffer particleWindErosionConfigurationShaderBuffer
+{
+    ParticleWindErosionConfiguration particleWindErosionConfiguration;
 };
 
 layout(std430, binding = 9) buffer gridHydraulicErosionConfigurationShaderBuffer
@@ -151,7 +167,9 @@ void main()
     if(totalHeightMapHeight < mapGenerationConfiguration.SeaLevel)
     {
         gridHydraulicErosionCell.WaterHeight = mapGenerationConfiguration.SeaLevel - totalHeightMapHeight;
+        //particleWindErosionConfiguration.PersistentSpeed
     }
+
     float totalHeight = totalHeightMapHeight + gridHydraulicErosionCell.WaterHeight;
     float outOfBoundsHeight = totalHeight - 0.2;
     if(x > 0)

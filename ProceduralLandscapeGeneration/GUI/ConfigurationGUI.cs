@@ -94,9 +94,11 @@ internal class ConfigurationGUI : IConfigurationGUI
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Water Increase", (value) => gridHydraulicErosionConfiguration.WaterIncrease = value, gridHydraulicErosionConfiguration.WaterIncrease));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => gridHydraulicErosionConfiguration.Gravity = value, gridHydraulicErosionConfiguration.Gravity));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Dampening", (value) => gridHydraulicErosionConfiguration.Dampening = value, gridHydraulicErosionConfiguration.Dampening));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Maximal Erosion Height", (value) => gridHydraulicErosionConfiguration.MaximalErosionHeight = value, gridHydraulicErosionConfiguration.MaximalErosionHeight));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Maximal Erosion Depth", (value) => gridHydraulicErosionConfiguration.MaximalErosionDepth = value, gridHydraulicErosionConfiguration.MaximalErosionDepth));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Sediment Capacity", (value) => gridHydraulicErosionConfiguration.SedimentCapacity = value, gridHydraulicErosionConfiguration.SedimentCapacity));
-        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Suspension Rate", (value) => gridHydraulicErosionConfiguration.SuspensionRate = value, gridHydraulicErosionConfiguration.SuspensionRate));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Vertical Suspension Rate", (value) => gridHydraulicErosionConfiguration.VerticalSuspensionRate = value, gridHydraulicErosionConfiguration.VerticalSuspensionRate));
+        myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Horizontal Suspension Rate", (value) => gridHydraulicErosionConfiguration.HorizontalSuspensionRate = value, gridHydraulicErosionConfiguration.HorizontalSuspensionRate));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Deposition Rate", (value) => gridHydraulicErosionConfiguration.DepositionRate = value, gridHydraulicErosionConfiguration.DepositionRate));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => gridHydraulicErosionConfiguration.EvaporationRate = value, gridHydraulicErosionConfiguration.EvaporationRate));
 
@@ -132,10 +134,12 @@ internal class ConfigurationGUI : IConfigurationGUI
         myCoarseSedimentRockTypePanel = new PanelWithElements("Coarse Sediment Rock Type");
         myCoarseSedimentRockTypePanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => rockTypesConfiguration.CoarseSedimentHardness = value, rockTypesConfiguration.CoarseSedimentHardness));
         myCoarseSedimentRockTypePanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => rockTypesConfiguration.CoarseSedimentAngleOfRepose = (uint)value, (int)rockTypesConfiguration.CoarseSedimentAngleOfRepose, 1, 89));
+        myCoarseSedimentRockTypePanel.Add(new ValueBoxFloatWithLabel("Collapse Threshold", (value) => rockTypesConfiguration.CoarseSedimentCollapseThreshold = value, rockTypesConfiguration.CoarseSedimentCollapseThreshold));
 
         myFineSedimentRockTypePanel = new PanelWithElements("Fine Sediment Rock Type");
         myFineSedimentRockTypePanel.Add(new ValueBoxFloatWithLabel("Hardness", (value) => rockTypesConfiguration.FineSedimentHardness = value, rockTypesConfiguration.FineSedimentHardness));
         myFineSedimentRockTypePanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => rockTypesConfiguration.FineSedimentAngleOfRepose = (uint)value, (int)rockTypesConfiguration.FineSedimentAngleOfRepose, 1, 89));
+        myFineSedimentRockTypePanel.Add(new ValueBoxFloatWithLabel("Collapse Threshold", (value) => rockTypesConfiguration.FineSedimentCollapseThreshold = value, rockTypesConfiguration.FineSedimentCollapseThreshold));
 
 
         myRightPanelPosition = new Vector2(configuration.ScreenWidth - PanelSize.X, 0);

@@ -72,6 +72,21 @@ internal class GridHydraulicErosionConfiguration : IGridHydraulicErosionConfigur
         }
     }
 
+    private float myMaximalErosionHeight;
+    public float MaximalErosionHeight
+    {
+        get => myMaximalErosionHeight;
+        set
+        {
+            if (myMaximalErosionHeight == value)
+            {
+                return;
+            }
+            myMaximalErosionHeight = value;
+            UpdateShaderBuffer();
+        }
+    }
+
     private float myMaximalErosionDepth;
     public float MaximalErosionDepth
     {
@@ -102,17 +117,32 @@ internal class GridHydraulicErosionConfiguration : IGridHydraulicErosionConfigur
         }
     }
 
-    private float mySuspensionRate;
-    public float SuspensionRate
+    private float myVerticalSuspensionRate;
+    public float VerticalSuspensionRate
     {
-        get => mySuspensionRate;
+        get => myVerticalSuspensionRate;
         set
         {
-            if (mySuspensionRate == value)
+            if (myVerticalSuspensionRate == value)
             {
                 return;
             }
-            mySuspensionRate = value;
+            myVerticalSuspensionRate = value;
+            UpdateShaderBuffer();
+        }
+    }
+
+    private float myHorizontalSuspensionRate;
+    public float HorizontalSuspensionRate
+    {
+        get => myHorizontalSuspensionRate;
+        set
+        {
+            if (myHorizontalSuspensionRate == value)
+            {
+                return;
+            }
+            myHorizontalSuspensionRate = value;
             UpdateShaderBuffer();
         }
     }
@@ -160,10 +190,12 @@ internal class GridHydraulicErosionConfiguration : IGridHydraulicErosionConfigur
 
         myWaterIncrease = 0.001f;
         myGravity = 9.81f;
-        myDampening = 0.5f;
+        myDampening = 0.8f;
+        myMaximalErosionHeight = 0.001f;
         myMaximalErosionDepth = 0.001f;
         mySedimentCapacity = 0.1f;
-        mySuspensionRate = 0.05f;
+        myVerticalSuspensionRate = 0.05f;
+        myHorizontalSuspensionRate = 0.005f;
         myDepositionRate = 0.04f;
         myEvaporationRate = 0.002f;
     }
@@ -186,9 +218,11 @@ internal class GridHydraulicErosionConfiguration : IGridHydraulicErosionConfigur
             WaterIncrease = WaterIncrease,
             Gravity = Gravity,
             Dampening = Dampening,
+            MaximalErosionHeight = MaximalErosionHeight,
             MaximalErosionDepth = MaximalErosionDepth,
             SedimentCapacity = SedimentCapacity,
-            SuspensionRate = SuspensionRate,
+            VerticalSuspensionRate = VerticalSuspensionRate,
+            HorizontalSuspensionRate = HorizontalSuspensionRate,
             DepositionRate = DepositionRate,
             EvaporationRate = EvaporationRate
         };

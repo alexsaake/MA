@@ -62,9 +62,11 @@ struct GridHydraulicErosionConfiguration
     float WaterIncrease;
     float Gravity;
     float Dampening;
+    float MaximalErosionHeight;
     float MaximalErosionDepth;
     float SedimentCapacity;
-    float SuspensionRate;
+    float VerticalSuspensionRate;
+    float HorizontalSuspensionRate;
     float DepositionRate;
     float EvaporationRate;
 };
@@ -253,7 +255,7 @@ void main()
 
 	if (sedimentCapacity > gridHydraulicErosionCell.SuspendedSediment)
 	{
-		float soilSuspended = max(gridHydraulicErosionConfiguration.SuspensionRate * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
+		float soilSuspended = max(gridHydraulicErosionConfiguration.VerticalSuspensionRate * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
 		float suspendedSediment = SuspendFromTop(index, soilSuspended);
 		gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
 	}

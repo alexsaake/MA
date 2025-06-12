@@ -42,9 +42,11 @@ struct GridHydraulicErosionConfiguration
     float WaterIncrease;
     float Gravity;
     float Dampening;
+    float MaximalErosionHeight;
     float MaximalErosionDepth;
     float SedimentCapacity;
-    float SuspensionRate;
+    float VerticalSuspensionRate;
+    float HorizontalSuspensionRate;
     float DepositionRate;
     float EvaporationRate;
 };

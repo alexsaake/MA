@@ -106,6 +106,12 @@ void main()
     {
         return;
     }
+    float layerOneHeightMapHeight = LayerHeightMapHeight(index, 1);
+    if(layerOneHeightMapHeight == 0)
+    {
+        SetHeightMapFloorHeight(index, 1, 0);
+        return;
+    }
 
     for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
@@ -121,7 +127,7 @@ void main()
         heightMap[layerZeroRockTypeHeightMapIndex] += heightMap[layerOneRockTypeHeightMapIndex];
         heightMap[layerOneRockTypeHeightMapIndex] = 0;
     }
-        
+
     SetHeightMapFloorHeight(index, 1, 0);
     
     memoryBarrier();
