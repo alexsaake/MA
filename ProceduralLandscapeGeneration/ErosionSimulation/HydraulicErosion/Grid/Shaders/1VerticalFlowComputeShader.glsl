@@ -171,7 +171,7 @@ void main()
     }
 
     float totalHeight = totalHeightMapHeight + gridHydraulicErosionCell.WaterHeight;
-    float outOfBoundsHeight = totalHeight - 0.2;
+    float outOfBoundsHeight = 0.0;
     if(x > 0)
     {
         float totalHeightLeft = TotalHeightMapHeight(indexLeft) + gridHydraulicErosionCells[indexLeft].WaterHeight;

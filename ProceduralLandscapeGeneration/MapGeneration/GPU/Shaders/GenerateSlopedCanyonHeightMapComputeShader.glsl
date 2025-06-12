@@ -36,8 +36,8 @@ void main()
     uint y = index / heightMapSideLength;
     
     float bedrockHeight = 0.8 + 0.2 * ((abs(x - (heightMapSideLength / 2.0)) / heightMapSideLength) * 2);
-    if(x > heightMapSideLength / 2 - heightMapSideLength / 100
-        && x < heightMapSideLength / 2 + heightMapSideLength / 100)
+    if(x > heightMapSideLength / 2 - heightMapSideLength / 80
+        && x < heightMapSideLength / 2 + heightMapSideLength / 80)
     {
             bedrockHeight = 0.4 + 0.4 * (((abs(x - (heightMapSideLength / 2.0)) / heightMapSideLength) * 2) + ((heightMapSideLength - y) / float(heightMapSideLength)));
     }

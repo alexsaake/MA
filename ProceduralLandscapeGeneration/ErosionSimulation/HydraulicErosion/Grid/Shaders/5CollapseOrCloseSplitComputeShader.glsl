@@ -79,9 +79,39 @@ float LayerHeightMapHeight(uint index, uint layer)
     return height;
 }
 
+void MoveLayerOneRocksToLayerZero(uint index, bool isSplitOpen)
+{
+    for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    {
+        uint layerOneRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + (mapGenerationConfiguration.RockTypeCount + 1) * myHeightMapPlaneSize;
+        uint layerZeroRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize;
+        if(isSplitOpen
+            && mapGenerationConfiguration.RockTypeCount > 1
+            && rockType == 0)
+        {
+            //bedrock becomes coarse sediment
+            layerZeroRockTypeHeightMapIndex = index + (rockType + 1) * myHeightMapPlaneSize;
+        }
+        heightMap[layerZeroRockTypeHeightMapIndex] += heightMap[layerOneRockTypeHeightMapIndex];
+        heightMap[layerOneRockTypeHeightMapIndex] = 0;
+    }
+}
+
 void SetHeightMapFloorHeight(uint index, uint layer, float value)
 {
     heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = value;
+}
+
+float LayerFloorCollapseThreshold(uint index, uint layer)
+{
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    {
+        if(heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize] > 0)
+        {
+            return rockTypesConfiguration[rockType].CollapseThreshold
+        }
+    }
+    return 0.0;
 }
 
 //horizontal flow
@@ -101,33 +131,14 @@ void main()
     float layerOneFloorHeight = HeightMapFloorHeight(index, 1);
     bool isSplitOpen = layerOneFloorHeight > layerZeroHeightMapHeight;
     if(layerOneFloorHeight == 0
-        || (isSplitOpen
-            && layerOneFloorHeight - layerZeroHeightMapHeight < rockTypesConfiguration[0].CollapseThreshold))
+        || (layerOneFloorHeight > 0
+            && isSplitOpen
+            && max(layerOneFloorHeight - layerZeroHeightMapHeight, 0.0) < LayerFloorCollapseThreshold(index, 1)))
     {
         return;
     }
-    float layerOneHeightMapHeight = LayerHeightMapHeight(index, 1);
-    if(layerOneHeightMapHeight == 0)
-    {
-        SetHeightMapFloorHeight(index, 1, 0);
-        return;
-    }
 
-    for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
-    {
-        uint layerOneRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + (mapGenerationConfiguration.RockTypeCount + 1) * myHeightMapPlaneSize;
-        uint layerZeroRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize;
-        if(isSplitOpen
-            && mapGenerationConfiguration.RockTypeCount > 1
-            && rockType == 0)
-        {
-            //bedrock becomes coarse sediment
-            layerZeroRockTypeHeightMapIndex = index + (rockType + 1) * myHeightMapPlaneSize;
-        }
-        heightMap[layerZeroRockTypeHeightMapIndex] += heightMap[layerOneRockTypeHeightMapIndex];
-        heightMap[layerOneRockTypeHeightMapIndex] = 0;
-    }
-
+    MoveLayerOneRocksToLayerZero(index, isSplitOpen);
     SetHeightMapFloorHeight(index, 1, 0);
     
     memoryBarrier();

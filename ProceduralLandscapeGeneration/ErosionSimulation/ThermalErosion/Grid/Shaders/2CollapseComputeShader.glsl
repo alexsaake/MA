@@ -46,13 +46,7 @@ layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
     GridThermalErosionCell[] gridThermalErosionCells;
 };
 
-uint myHeightMapSideLength;
 uint myHeightMapPlaneSize;
-
-uint GetIndex(uint x, uint y)
-{
-    return uint((y * myHeightMapSideLength) + x);
-}
 
 float HeightMapFloorHeight(uint index, uint layer)
 {
@@ -78,6 +72,17 @@ void SetHeightMapFloorHeight(uint index, uint layer, float value)
     heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = value;
 }
 
+void MoveLayerOneRocksToLayerZero(uint index)
+{
+    for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    {
+        uint layerOneRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize + (mapGenerationConfiguration.RockTypeCount + 1) * myHeightMapPlaneSize;
+        uint layerZeroRockTypeHeightMapIndex = index + rockType * myHeightMapPlaneSize;
+        heightMap[layerZeroRockTypeHeightMapIndex] += heightMap[layerOneRockTypeHeightMapIndex];
+        heightMap[layerOneRockTypeHeightMapIndex] = 0;
+    }
+}
+
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
 
 void main()
@@ -89,13 +94,18 @@ void main()
     {
         return;
     }
-    myHeightMapSideLength = uint(sqrt(myHeightMapPlaneSize));
 
-    uint layer = 1;
-    if(LayerHeightMapHeight(index, layer) == 0
-        && HeightMapFloorHeight(index, layer) > 0)
+    float layerOneFloorHeight = HeightMapFloorHeight(index, 1);
+    if(LayerHeightMapHeight(index, 1) == 0
+        && layerOneFloorHeight > 0)
     {
-        SetHeightMapFloorHeight(index, layer, 0.0);
+        SetHeightMapFloorHeight(index, 1, 0.0);
+    }
+
+    if(LayerHeightMapHeight(index, 0) > layerOneFloorHeight)
+    {
+        MoveLayerOneRocksToLayerZero(index);
+        SetHeightMapFloorHeight(index, 1, 0.0);
     }
 
     memoryBarrier();
