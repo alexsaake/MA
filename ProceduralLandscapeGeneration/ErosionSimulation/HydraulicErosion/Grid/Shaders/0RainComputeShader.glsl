@@ -2,6 +2,11 @@
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
+layout(std430, binding = 0) buffer heightMapShaderBuffer
+{
+    float[] heightMap;
+};
+
 struct GridHydraulicErosionCell
 {
     float WaterHeight;
@@ -24,6 +29,21 @@ struct GridHydraulicErosionCell
 layout(std430, binding = 4) buffer gridHydraulicErosionCellShaderBuffer
 {
     GridHydraulicErosionCell[] gridHydraulicErosionCells;
+};
+
+struct MapGenerationConfiguration
+{
+    float HeightMultiplier;
+    uint RockTypeCount;
+    uint LayerCount;
+    float SeaLevel;
+    bool AreTerrainColorsEnabled;
+    bool ArePlateTectonicsPlateColorsEnabled;
+};
+
+layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
+{
+    MapGenerationConfiguration mapGenerationConfiguration;
 };
 
 struct ErosionConfiguration
@@ -66,8 +86,24 @@ layout(std430, binding = 11) buffer hydraulicErosionHeightMapIndicesShaderBuffer
 //https://lisyarus.github.io/blog/posts/simulating-water-over-terrain.html
 //https://github.com/karhu/terrain-erosion/blob/master/Simulation/FluidSimulation.cpp
 
+uint myHeightMapPlaneSize;
+
+float HeightMapFloorHeight(uint index, uint layer)
+{
+    if(layer < 1)
+    {
+        return 0.0;
+    }
+    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
+}
+
+uint LayerOffset(uint layer)
+{
+    return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+}
+
 void main()
-{    
+{
     uint id = gl_GlobalInvocationID.x;
     if(id >= hydraulicErosionHeightMapIndices.length())
     {
@@ -75,17 +111,28 @@ void main()
     }
 
     int index = hydraulicErosionHeightMapIndices[id];
-    if(index < 0)
+    myHeightMapPlaneSize = heightMap.length() / (mapGenerationConfiguration.RockTypeCount * mapGenerationConfiguration.LayerCount + mapGenerationConfiguration.LayerCount - 1);
+    if(index < 0
+        || index >= myHeightMapPlaneSize)
     {
         return;
     }
     hydraulicErosionHeightMapIndices[id] = -1;
 
-    GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[index];
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    {
+        if(layer == 0
+            || HeightMapFloorHeight(index, layer) > 0)
+        {
+            uint layerIndex = index + LayerOffset(layer);
+            GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[layerIndex];
 
-    gridHydraulicErosionCell.WaterHeight += gridHydraulicErosionConfiguration.WaterIncrease * erosionConfiguration.TimeDelta;
+            gridHydraulicErosionCell.WaterHeight += gridHydraulicErosionConfiguration.WaterIncrease * erosionConfiguration.TimeDelta;
 
-    gridHydraulicErosionCells[index] = gridHydraulicErosionCell;
+            gridHydraulicErosionCells[layerIndex] = gridHydraulicErosionCell;
+            return;
+        }
+    }
     
     memoryBarrier();
 }

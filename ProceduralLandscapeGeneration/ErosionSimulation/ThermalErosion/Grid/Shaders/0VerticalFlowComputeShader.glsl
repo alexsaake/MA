@@ -85,6 +85,11 @@ float HeightMapFloorHeight(uint index, uint layer)
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
+uint LayerOffset(uint layer)
+{
+    return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+}
+
 float TotalSedimentHeightMapHeight(uint index, uint stopRockType)
 {
     float heightMapFloorHeight = 0.0;
@@ -102,7 +107,7 @@ float TotalSedimentHeightMapHeight(uint index, uint stopRockType)
         }
         for(uint rockType = 0; rockType <= stopRockType; rockType++)
         {
-            rockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+            rockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + LayerOffset(layer)];
         }
         if(rockTypeHeight > 0)
         {
@@ -117,7 +122,7 @@ float RockTypeSedimentAmount(uint index, uint rockType)
 	float rockTypeHeight = 0.0;
     for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
-        rockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+        rockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + LayerOffset(layer)];
     }
     return rockTypeHeight;
 }

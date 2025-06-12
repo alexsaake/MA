@@ -54,12 +54,17 @@ uint GetIndex(uint x, uint y)
     return uint((y * myHeightMapSideLength) + x);
 }
 
+uint LayerOffset(uint layer)
+{
+    return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+}
+
 void RemoveFromTop(uint index, uint rockType, float sediment)
 {
     float sedimentToRemove = sediment;
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        uint heightMapOffsetIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+        uint heightMapOffsetIndex = index + rockType * myHeightMapPlaneSize + LayerOffset(layer);
         float height = heightMap[heightMapOffsetIndex];
         if(sedimentToRemove <= height)
         {

@@ -105,6 +105,11 @@ float HeightMapFloorHeight(uint index, uint layer)
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
+uint LayerOffset(uint layer)
+{
+    return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+}
+
 float TotalHeightMapHeight(uint index)
 {
     float heightMapFloorHeight = 0.0;
@@ -122,7 +127,7 @@ float TotalHeightMapHeight(uint index)
         }
         for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
         {
-            rockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize];
+            rockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + LayerOffset(layer)];
         }
         if(rockTypeHeight > 0)
         {
@@ -144,7 +149,7 @@ float SuspendFromTop(uint index, float requiredSediment)
         }
         for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
         {
-            uint offsetIndex = index + rockType * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+            uint offsetIndex = index + rockType * myHeightMapPlaneSize + LayerOffset(layer);
             float height = heightMap[offsetIndex];
             float hardness = (1.0 - rockTypesConfiguration[rockType].Hardness);
             float toBeSuspendedSediment = requiredSediment * hardness;
@@ -174,7 +179,7 @@ void DepositeOnTop(uint index, float sediment)
         {
             continue;
         }
-        heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize] += sediment;
+        heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + LayerOffset(layer)] += sediment;
     }
 }
 
