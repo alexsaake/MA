@@ -109,13 +109,15 @@ void main()
         }
         else
         {
-            if(rockType == mapGenerationConfiguration.RockTypeCount - 1)
+            //collapse bedrock to coarse sediment
+            if(mapGenerationConfiguration.RockTypeCount > 1
+                && rockType == 0)
             {
-                DepositeOn(index, rockType, volumeDelta);                
+                DepositeOn(index, rockType + 1, volumeDelta);                
             }
             else
             {
-                DepositeOn(index, rockType + 1, volumeDelta);
+                DepositeOn(index, rockType, volumeDelta);
             }
         }
     }
