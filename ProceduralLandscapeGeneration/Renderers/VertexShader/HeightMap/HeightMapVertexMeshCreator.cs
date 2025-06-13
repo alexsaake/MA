@@ -13,15 +13,15 @@ internal class HeightMapVertexMeshCreator : IHeightMapVertexMeshCreator
         myMapGenerationConfiguration = mapGenerationConfiguration;
     }
 
-    public unsafe Mesh CreateHeightMapMesh()
+    public unsafe Mesh CreateTerrainHeightMapMesh()
     {
         Mesh mesh = new();
         int vertexCount = (int)myMapGenerationConfiguration.HeightMapPlaneSize;
         int triangleCount = (int)((myMapGenerationConfiguration.HeightMapSideLength - 1) * (myMapGenerationConfiguration.HeightMapSideLength - 1) * 2);
         AllocateMeshData(&mesh, vertexCount, triangleCount);
 
-        int indexIndex = 0;
-        int vertexIndex = 0;
+        int indicesIndex = 0;
+        int verticesIndex = 0;
         for (int y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
         {
             for (int x = 0; x < myMapGenerationConfiguration.HeightMapSideLength; x++)
@@ -29,9 +29,9 @@ internal class HeightMapVertexMeshCreator : IHeightMapVertexMeshCreator
                 if (x < myMapGenerationConfiguration.HeightMapSideLength - 1
                     && y < myMapGenerationConfiguration.HeightMapSideLength - 1)
                 {
-                    AddQuadIndices(mesh, ref indexIndex, vertexIndex, myMapGenerationConfiguration.HeightMapSideLength);
+                    AddQuadIndices(mesh, ref indicesIndex, verticesIndex, myMapGenerationConfiguration.HeightMapSideLength);
                 }
-                AddVertex(mesh, ref vertexIndex, new Vector3(x, y, 0));
+                AddVertex(mesh, ref verticesIndex, new Vector3(x, y, 0));
             }
         }
 
@@ -45,13 +45,13 @@ internal class HeightMapVertexMeshCreator : IHeightMapVertexMeshCreator
         Mesh mesh = new();
         AllocateMeshData(&mesh, 4, 2);
 
-        int indexIndex = 0;
-        int vertexIndex = 0;
-        AddQuadIndices(mesh, ref indexIndex, vertexIndex, 2);
-        AddVertex(mesh, ref vertexIndex, new Vector3(0, 0, 0));
-        AddVertex(mesh, ref vertexIndex, new Vector3((int)myMapGenerationConfiguration.HeightMapSideLength, 0, 0));
-        AddVertex(mesh, ref vertexIndex, new Vector3(0, (int)myMapGenerationConfiguration.HeightMapSideLength, 0));
-        AddVertex(mesh, ref vertexIndex, new Vector3((int)myMapGenerationConfiguration.HeightMapSideLength, (int)myMapGenerationConfiguration.HeightMapSideLength, 0));
+        int indicesIndex = 0;
+        int verticesIndex = 0;
+        AddQuadIndices(mesh, ref indicesIndex, verticesIndex, 2);
+        AddVertex(mesh, ref verticesIndex, new Vector3(0, 0, 0));
+        AddVertex(mesh, ref verticesIndex, new Vector3((int)myMapGenerationConfiguration.HeightMapSideLength, 0, 0));
+        AddVertex(mesh, ref verticesIndex, new Vector3(0, (int)myMapGenerationConfiguration.HeightMapSideLength, 0));
+        AddVertex(mesh, ref verticesIndex, new Vector3((int)myMapGenerationConfiguration.HeightMapSideLength, (int)myMapGenerationConfiguration.HeightMapSideLength, 0));
 
         Raylib.UploadMesh(&mesh, false);
 
@@ -67,24 +67,24 @@ internal class HeightMapVertexMeshCreator : IHeightMapVertexMeshCreator
         mesh->AllocIndices();
     }
 
-    private unsafe void AddQuadIndices(Mesh mesh, ref int indexIndex, int vertexIndex, uint sideLength)
+    private unsafe void AddQuadIndices(Mesh mesh, ref int indicesIndex, int verticesIndex, uint sideLength)
     {
-        mesh.Indices[indexIndex * 6 + 0] = (uint)vertexIndex;
-        mesh.Indices[indexIndex * 6 + 1] = (uint)(vertexIndex + 1);
-        mesh.Indices[indexIndex * 6 + 2] = (uint)(vertexIndex + sideLength + 1);
-        mesh.Indices[indexIndex * 6 + 3] = (uint)vertexIndex;
-        mesh.Indices[indexIndex * 6 + 4] = (uint)(vertexIndex + sideLength + 1);
-        mesh.Indices[indexIndex * 6 + 5] = (uint)(vertexIndex + sideLength);
+        mesh.Indices[indicesIndex * 6 + 0] = (uint)verticesIndex;
+        mesh.Indices[indicesIndex * 6 + 1] = (uint)(verticesIndex + 1);
+        mesh.Indices[indicesIndex * 6 + 2] = (uint)(verticesIndex + sideLength + 1);
+        mesh.Indices[indicesIndex * 6 + 3] = (uint)verticesIndex;
+        mesh.Indices[indicesIndex * 6 + 4] = (uint)(verticesIndex + sideLength + 1);
+        mesh.Indices[indicesIndex * 6 + 5] = (uint)(verticesIndex + sideLength);
 
-        indexIndex++;
+        indicesIndex++;
     }
 
-    private unsafe void AddVertex(Mesh mesh, ref int vertexIndex, Vector3 position)
+    private unsafe void AddVertex(Mesh mesh, ref int verticesIndex, Vector3 position)
     {
-        mesh.Vertices[vertexIndex * 3 + 0] = position.X;
-        mesh.Vertices[vertexIndex * 3 + 1] = position.Y;
-        mesh.Vertices[vertexIndex * 3 + 2] = position.Z;
+        mesh.Vertices[verticesIndex * 3 + 0] = position.X;
+        mesh.Vertices[verticesIndex * 3 + 1] = position.Y;
+        mesh.Vertices[verticesIndex * 3 + 2] = position.Z;
 
-        vertexIndex++;
+        verticesIndex++;
     }
 }

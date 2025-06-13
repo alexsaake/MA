@@ -94,8 +94,8 @@ internal class HeightMapVertexShaderRenderer : IRenderer
     private void LoadShaders()
     {
         myTerrainHeightMapShader = Raylib.LoadShader($"{ShaderDirectory}TerrainHeightMapVertexShader.glsl", $"{ShaderDirectory}TerrainHeightMapFragmentShader.glsl");
-        myWaterHeightMapShader = Raylib.LoadShader($"{CommonShaderDirectory}WaterHeightMapVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
-        mySedimentHeightMapShader = Raylib.LoadShader($"{CommonShaderDirectory}SedimentHeightMapVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
+        myWaterHeightMapShader = Raylib.LoadShader($"{ShaderDirectory}WaterHeightMapVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
+        mySedimentHeightMapShader = Raylib.LoadShader($"{ShaderDirectory}SedimentHeightMapVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
         mySeaLevelQuadShader = Raylib.LoadShader($"{CommonShaderDirectory}SeaLevelQuadVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
     }
 
@@ -148,11 +148,11 @@ internal class HeightMapVertexShaderRenderer : IRenderer
 
     private unsafe void InitiateModel()
     {
-        myTerrainHeightMap = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateHeightMapMesh());
+        myTerrainHeightMap = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateTerrainHeightMapMesh());
         myTerrainHeightMap.Materials[0].Shader = myTerrainHeightMapShader;
-        myWaterHeightMap = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateHeightMapMesh());
+        myWaterHeightMap = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateTerrainHeightMapMesh());
         myWaterHeightMap.Materials[0].Shader = myWaterHeightMapShader;
-        mySedimentHeightMap = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateHeightMapMesh());
+        mySedimentHeightMap = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateTerrainHeightMapMesh());
         mySedimentHeightMap.Materials[0].Shader = mySedimentHeightMapShader;
         mySeaLevelQuad = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateSeaLevelMesh());
         mySeaLevelQuad.Materials[0].Shader = mySeaLevelQuadShader;

@@ -4,6 +4,7 @@ namespace ProceduralLandscapeGeneration.Renderers.VertexShader.Cubes;
 
 internal interface ICubesVertexMeshCreator
 {
-    Mesh CreateCubesMesh();
+    Mesh CreateTerrainCubesMesh();
+    Mesh CreateWaterCubesMesh();
     Mesh CreateSeaLevelMesh();
 }

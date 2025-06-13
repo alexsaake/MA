@@ -81,6 +81,21 @@ vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
 
 uint myHeightMapPlaneSize;
 
+uint LayerHydraulicErosionCellsOffset(uint layer)
+{
+    return layer * myHeightMapPlaneSize;
+}
+
+float TotalSuspendedSediment(uint index)
+{    
+    float suspendedSediment = 0.0;
+    for(int layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        suspendedSediment += gridHydraulicErosionCells[index + LayerHydraulicErosionCellsOffset(layer)].SuspendedSediment;
+    }
+    return suspendedSediment;
+}
+
 float LayerHeightMapFloorHeight(uint index, uint layer)
 {
     if(layer < 1)
@@ -134,12 +149,12 @@ void main()
     uint x = index % sideLength;
     uint y = index / sideLength;
 
-    float suspendedSediment = gridHydraulicErosionCells[index].SuspendedSediment;
+    float totalSuspendedSediment = TotalSuspendedSediment(index);
     for(int particle = 0; particle < particlesHydraulicErosion.length(); particle++)
     {        
         if(ivec2(particlesHydraulicErosion[particle].Position) == ivec2(x, y))
         {
-            suspendedSediment += particlesHydraulicErosion[particle].Sediment;
+            totalSuspendedSediment += particlesHydraulicErosion[particle].Sediment;
             continue;
         }
     }
@@ -147,7 +162,7 @@ void main()
     {        
         if(ivec2(particlesWindErosion[particle].Position) == ivec2(x, y))
         {
-            suspendedSediment += particlesWindErosion[particle].Sediment;
+            totalSuspendedSediment += particlesWindErosion[particle].Sediment;
             continue;
         }
     }
@@ -155,5 +170,5 @@ void main()
     fragColor = sedimentColor;
     float zOffset = 0.00004;
     float height = TotalHeightMapHeight(index);
-    gl_Position =  mvp * vec4(vertexPosition.xy, (height - zOffset + suspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
+    gl_Position =  mvp * vec4(vertexPosition.xy, (height - zOffset + totalSuspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 }

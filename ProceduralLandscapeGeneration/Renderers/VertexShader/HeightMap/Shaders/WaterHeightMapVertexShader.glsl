@@ -73,14 +73,14 @@ uint LayerHydraulicErosionCellsOffset(uint layer)
     return layer * myHeightMapPlaneSize;
 }
 
-float TotalGridHydraulicErosionCellWaterHeight(uint index)
+float TotalWaterHeight(uint index)
 {    
-    float totalGridHydraulicErosionCellWaterHeight = 0.0;
+    float totalWaterHeight = 0.0;
     for(int layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
-        totalGridHydraulicErosionCellWaterHeight += gridHydraulicErosionCells[index + LayerHydraulicErosionCellsOffset(layer)].WaterHeight;
+        totalWaterHeight += gridHydraulicErosionCells[index + LayerHydraulicErosionCellsOffset(layer)].WaterHeight;
     }
-    return totalGridHydraulicErosionCellWaterHeight;
+    return totalWaterHeight;
 }
 
 float LayerHeightMapFloorHeight(uint index, uint layer)
@@ -136,7 +136,7 @@ void main()
     uint x = index % sideLength;
     uint y = index / sideLength;
     
-    float totalWaterHeight = TotalGridHydraulicErosionCellWaterHeight(index);
+    float totalWaterHeight = TotalWaterHeight(index);
     for(int particle = 0; particle < particlesHydraulicErosion.length(); particle++)
     {        
         if(ivec2(particlesHydraulicErosion[particle].Position) == ivec2(x, y))

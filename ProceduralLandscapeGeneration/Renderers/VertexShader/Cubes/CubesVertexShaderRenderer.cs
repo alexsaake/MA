@@ -24,7 +24,6 @@ internal class CubesVertexShaderRenderer : IRenderer
     private readonly ICamera myCamera;
     private readonly IErosionSimulator myErosionSimulator;
     private readonly ICubesVertexMeshCreator myCubesVertexMeshCreator;
-    private readonly IHeightMapVertexMeshCreator myHeightMapVertexMeshCreator;
     private readonly IShaderBuffers myShaderBuffers;
 
     private Model myTerrainCubes;
@@ -39,7 +38,7 @@ internal class CubesVertexShaderRenderer : IRenderer
 
     private bool myIsDisposed;
 
-    public CubesVertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IConfigurationGUI configurationGUI, ICamera camera, IErosionSimulator erosionSimulator, ICubesVertexMeshCreator cubesVertexMeshCreator, IHeightMapVertexMeshCreator heightMapVertexMeshCreator, IShaderBuffers shaderBuffers)
+    public CubesVertexShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IConfigurationGUI configurationGUI, ICamera camera, IErosionSimulator erosionSimulator, ICubesVertexMeshCreator cubesVertexMeshCreator, IShaderBuffers shaderBuffers)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
@@ -49,7 +48,6 @@ internal class CubesVertexShaderRenderer : IRenderer
         myCamera = camera;
         myErosionSimulator = erosionSimulator;
         myCubesVertexMeshCreator = cubesVertexMeshCreator;
-        myHeightMapVertexMeshCreator = heightMapVertexMeshCreator;
         myShaderBuffers = shaderBuffers;
     }
 
@@ -67,8 +65,8 @@ internal class CubesVertexShaderRenderer : IRenderer
     private void LoadShaders()
     {
         myTerrainCubesShader = Raylib.LoadShader($"{ShaderDirectory}TerrainCubesVertexShader.glsl", $"{ShaderDirectory}TerrainCubesFragmentShader.glsl");
-        myWaterHeightMapShader = Raylib.LoadShader($"{CommonShaderDirectory}WaterHeightMapVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
-        mySedimentHeightMapShader = Raylib.LoadShader($"{CommonShaderDirectory}SedimentHeightMapVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
+        myWaterHeightMapShader = Raylib.LoadShader($"{ShaderDirectory}WaterCubesVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
+        mySedimentHeightMapShader = Raylib.LoadShader($"{ShaderDirectory}SedimentCubesVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
         mySeaLevelQuadShader = Raylib.LoadShader($"{CommonShaderDirectory}SeaLevelQuadVertexShader.glsl", $"{CommonShaderDirectory}SeaLevelQuadFragmentShader.glsl");
     }
 
@@ -85,13 +83,13 @@ internal class CubesVertexShaderRenderer : IRenderer
 
     private unsafe void InitiateModel()
     {
-        myTerrainCubes = Raylib.LoadModelFromMesh(myCubesVertexMeshCreator.CreateCubesMesh());
+        myTerrainCubes = Raylib.LoadModelFromMesh(myCubesVertexMeshCreator.CreateTerrainCubesMesh());
         myTerrainCubes.Materials[0].Shader = myTerrainCubesShader;
-        myWaterHeightMap = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateHeightMapMesh());
+        myWaterHeightMap = Raylib.LoadModelFromMesh(myCubesVertexMeshCreator.CreateWaterCubesMesh());
         myWaterHeightMap.Materials[0].Shader = myWaterHeightMapShader;
-        mySedimentHeightMap = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateHeightMapMesh());
+        mySedimentHeightMap = Raylib.LoadModelFromMesh(myCubesVertexMeshCreator.CreateWaterCubesMesh());
         mySedimentHeightMap.Materials[0].Shader = mySedimentHeightMapShader;
-        mySeaLevelQuad = Raylib.LoadModelFromMesh(myHeightMapVertexMeshCreator.CreateSeaLevelMesh());
+        mySeaLevelQuad = Raylib.LoadModelFromMesh(myCubesVertexMeshCreator.CreateSeaLevelMesh());
         mySeaLevelQuad.Materials[0].Shader = mySeaLevelQuadShader;
     }
 
