@@ -98,7 +98,8 @@ uint GetIndex(uint x, uint y)
 
 float LayerHeightMapFloorHeight(uint index, uint layer)
 {
-    if(layer < 1)
+    if(layer < 1
+        || layer >= mapGenerationConfiguration.LayerCount)
     {
         return 0.0;
     }

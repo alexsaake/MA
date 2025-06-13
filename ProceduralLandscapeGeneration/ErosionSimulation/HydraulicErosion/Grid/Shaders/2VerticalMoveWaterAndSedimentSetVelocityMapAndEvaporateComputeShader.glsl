@@ -98,7 +98,7 @@ uint LayerHydraulicErosionCellsOffset(uint layer)
 float LayerHeightMapFloorHeight(uint index, uint layer)
 {
     if(layer < 1
-        || layer >= mapGenerationConfiguration.LayerCount - 1)
+        || layer >= mapGenerationConfiguration.LayerCount)
     {
         return 0.0;
     }
