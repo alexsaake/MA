@@ -96,6 +96,21 @@ uint GetIndex(uint x, uint y)
     return uint((y * myHeightMapSideLength) + x);
 }
 
+uint LayerHydraulicErosionCellsOffset(uint layer)
+{
+    return layer * myHeightMapPlaneSize;
+}
+
+float LayerHeightMapFloorHeight(uint index, uint layer)
+{
+    if(layer < 1
+        || layer >= mapGenerationConfiguration.LayerCount - 1)
+    {
+        return 0.0;
+    }
+    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
+}
+
 float HeightMapFloorHeight(uint index, uint layer)
 {
     if(layer < 1)
@@ -207,7 +222,7 @@ void main()
     uint indexDown = GetIndex(x, y - 1);
     uint indexUp = GetIndex(x, y + 1);
     
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(int layer = 0; layer >= 0; layer--)
     {
         //TODO erode on current water layer, erode upwards.
         if(layer > 0

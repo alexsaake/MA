@@ -58,7 +58,6 @@ internal class Application : IApplication
         myConfigurationGUI.ErosionModeChanged += OnErosionModeChanged;
 
         InitializeModules();
-        myCamera.Initialize();
 
         Rlgl.SetClipPlanes(5, myMapGenerationConfiguration.HeightMapPlaneSize);
         Raylib.SetTargetFPS(60);
@@ -145,6 +144,7 @@ internal class Application : IApplication
     private void InitializeModules()
     {
         myConfiguration.Initialize();
+        myCamera!.Initialize();
         myHeightMap.Initialize();
         myErosionSimulator.Initialize();
         myRenderer!.Initialize();
