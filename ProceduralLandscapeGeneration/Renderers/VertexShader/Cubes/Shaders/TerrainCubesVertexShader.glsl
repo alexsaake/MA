@@ -48,7 +48,7 @@ float BedrockHeight(uint index, uint layer)
     return heightMap[index + LayerHeightMapOffset(layer)];
 }
 
-float HeightMapFloorHeight(uint index, uint layer)
+float LayerHeightMapFloorHeight(uint index, uint layer)
 {
     if(layer < 1)
     {
@@ -63,7 +63,7 @@ float LayerHeightMapHeight(uint index, uint totalIndex, uint layer)
     float heightMapFloorHeight = 0.0;
     if(layer > 0)
     {
-        heightMapFloorHeight = HeightMapFloorHeight(index, layer);
+        heightMapFloorHeight = LayerHeightMapFloorHeight(index, layer);
             if(heightMapFloorHeight == 0)
             {
                 return 0.0;

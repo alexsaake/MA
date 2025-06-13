@@ -76,7 +76,7 @@ uint GetIndex(uint x, uint y)
     return uint((y * myHeightMapSideLength) + x);
 }
 
-float HeightMapFloorHeight(uint index, uint layer)
+float LayerHeightMapFloorHeight(uint index, uint layer)
 {
     if(layer < 1)
     {
@@ -99,7 +99,7 @@ float TotalSedimentHeightMapHeight(uint index, uint stopRockType)
 		heightMapFloorHeight = 0.0;
         if(layer > 0)
         {
-            heightMapFloorHeight = HeightMapFloorHeight(index, layer);
+            heightMapFloorHeight = LayerHeightMapFloorHeight(index, layer);
             if(heightMapFloorHeight == 0)
             {
                 continue;

@@ -165,7 +165,6 @@ void main()
     
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        //TODO fix reduced flow? visualzation issue?
         if(layer > 0
             && LayerHeightMapFloorHeight(index, layer) == 0)
         {
@@ -182,42 +181,42 @@ void main()
         float sedimentFlowLeft = 0.0;
         float sedimentFlowUp = 0.0;
         float sedimentFlowDown = 0.0;
-        for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+        for(int layer2 = int(mapGenerationConfiguration.LayerCount) - 1; layer2 >= 0; layer2--)
         {
-            if(TotalLayerWaterHeight(indexLeft, layer) > 0
-                && TotalLayerHeightMapAndWaterHeight(indexLeft, layer) > totalLayerHeightMapAndWaterHeight
+            if(TotalLayerWaterHeight(indexLeft, layer2) > 0
+                && TotalLayerHeightMapAndWaterHeight(indexLeft, layer2) > totalLayerHeightMapAndWaterHeight
                 && (aboveLayerHeightMapFloorHeight == 0
-                    || TotalLayerHeightMapHeight(indexLeft, layer) < aboveLayerHeightMapFloorHeight))
+                    || TotalLayerHeightMapHeight(indexLeft, layer2) < aboveLayerHeightMapFloorHeight))
             {
-                waterFlowRight += gridHydraulicErosionCells[indexLeft + LayerHydraulicErosionCellsOffset(layer)].WaterFlowRight;
-                sedimentFlowRight += gridHydraulicErosionCells[indexLeft + LayerHydraulicErosionCellsOffset(layer)].SedimentFlowRight;
+                waterFlowRight += gridHydraulicErosionCells[indexLeft + LayerHydraulicErosionCellsOffset(layer2)].WaterFlowRight;
+                sedimentFlowRight += gridHydraulicErosionCells[indexLeft + LayerHydraulicErosionCellsOffset(layer2)].SedimentFlowRight;
             }
 
-            if(TotalLayerWaterHeight(indexRight, layer) > 0
-                && TotalLayerHeightMapAndWaterHeight(indexRight, layer) > totalLayerHeightMapAndWaterHeight
+            if(TotalLayerWaterHeight(indexRight, layer2) > 0
+                && TotalLayerHeightMapAndWaterHeight(indexRight, layer2) > totalLayerHeightMapAndWaterHeight
                 && (aboveLayerHeightMapFloorHeight == 0
-                    || TotalLayerHeightMapHeight(indexRight, layer) < aboveLayerHeightMapFloorHeight))
+                    || TotalLayerHeightMapHeight(indexRight, layer2) < aboveLayerHeightMapFloorHeight))
             {
-                waterFlowLeft += gridHydraulicErosionCells[indexRight + LayerHydraulicErosionCellsOffset(layer)].WaterFlowLeft;
-                sedimentFlowLeft += gridHydraulicErosionCells[indexRight + LayerHydraulicErosionCellsOffset(layer)].SedimentFlowLeft;
+                waterFlowLeft += gridHydraulicErosionCells[indexRight + LayerHydraulicErosionCellsOffset(layer2)].WaterFlowLeft;
+                sedimentFlowLeft += gridHydraulicErosionCells[indexRight + LayerHydraulicErosionCellsOffset(layer2)].SedimentFlowLeft;
             }
 
-            if(TotalLayerWaterHeight(indexDown, layer) > 0
-                && TotalLayerHeightMapAndWaterHeight(indexDown, layer) > totalLayerHeightMapAndWaterHeight
+            if(TotalLayerWaterHeight(indexDown, layer2) > 0
+                && TotalLayerHeightMapAndWaterHeight(indexDown, layer2) > totalLayerHeightMapAndWaterHeight
                 && (aboveLayerHeightMapFloorHeight == 0
-                    || TotalLayerHeightMapHeight(indexDown, layer) < aboveLayerHeightMapFloorHeight))
+                    || TotalLayerHeightMapHeight(indexDown, layer2) < aboveLayerHeightMapFloorHeight))
             {
-                waterFlowUp += gridHydraulicErosionCells[indexDown + LayerHydraulicErosionCellsOffset(layer)].WaterFlowUp;
-                sedimentFlowUp += gridHydraulicErosionCells[indexDown + LayerHydraulicErosionCellsOffset(layer)].SedimentFlowUp;
+                waterFlowUp += gridHydraulicErosionCells[indexDown + LayerHydraulicErosionCellsOffset(layer2)].WaterFlowUp;
+                sedimentFlowUp += gridHydraulicErosionCells[indexDown + LayerHydraulicErosionCellsOffset(layer2)].SedimentFlowUp;
             }
 
-            if(TotalLayerWaterHeight(indexUp, layer) > 0
-                && TotalLayerHeightMapAndWaterHeight(indexUp, layer) > totalLayerHeightMapAndWaterHeight
+            if(TotalLayerWaterHeight(indexUp, layer2) > 0
+                && TotalLayerHeightMapAndWaterHeight(indexUp, layer2) > totalLayerHeightMapAndWaterHeight
                 && (aboveLayerHeightMapFloorHeight == 0
-                    || TotalLayerHeightMapHeight(indexUp, layer) < aboveLayerHeightMapFloorHeight))
+                    || TotalLayerHeightMapHeight(indexUp, layer2) < aboveLayerHeightMapFloorHeight))
             {
-                waterFlowDown += gridHydraulicErosionCells[indexUp + LayerHydraulicErosionCellsOffset(layer)].WaterFlowDown;
-                sedimentFlowDown += gridHydraulicErosionCells[indexUp + LayerHydraulicErosionCellsOffset(layer)].SedimentFlowDown;
+                waterFlowDown += gridHydraulicErosionCells[indexUp + LayerHydraulicErosionCellsOffset(layer2)].WaterFlowDown;
+                sedimentFlowDown += gridHydraulicErosionCells[indexUp + LayerHydraulicErosionCellsOffset(layer2)].SedimentFlowDown;
             }
         }        
 

@@ -68,7 +68,22 @@ vec4 waterColor = vec4(0.0, 0.0, 1.0, 0.25);
 
 uint myHeightMapPlaneSize;
 
-float HeightMapFloorHeight(uint index, uint layer)
+uint LayerHydraulicErosionCellsOffset(uint layer)
+{
+    return layer * myHeightMapPlaneSize;
+}
+
+float TotalGridHydraulicErosionCellWaterHeight(uint index)
+{    
+    float totalGridHydraulicErosionCellWaterHeight = 0.0;
+    for(int layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        totalGridHydraulicErosionCellWaterHeight += gridHydraulicErosionCells[index + LayerHydraulicErosionCellsOffset(layer)].WaterHeight;
+    }
+    return totalGridHydraulicErosionCellWaterHeight;
+}
+
+float LayerHeightMapFloorHeight(uint index, uint layer)
 {
     if(layer < 1)
     {
@@ -84,15 +99,15 @@ uint LayerHeightMapOffset(uint layer)
 
 float TotalHeightMapHeight(uint index)
 {
-    float heightMapFloorHeight = 0.0;
+    float layerHeightMapFloorHeight = 0.0;
     float rockTypeHeight = 0.0;
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-		heightMapFloorHeight = 0.0;
+		layerHeightMapFloorHeight = 0.0;
         if(layer > 0)
         {
-            heightMapFloorHeight = HeightMapFloorHeight(index, layer);
-            if(heightMapFloorHeight == 0)
+            layerHeightMapFloorHeight = LayerHeightMapFloorHeight(index, layer);
+            if(layerHeightMapFloorHeight == 0)
             {
                 continue;
             }
@@ -103,10 +118,10 @@ float TotalHeightMapHeight(uint index)
         }
         if(rockTypeHeight > 0)
         {
-            return heightMapFloorHeight + rockTypeHeight;
+            return layerHeightMapFloorHeight + rockTypeHeight;
         }
     }
-    return heightMapFloorHeight + rockTypeHeight;
+    return layerHeightMapFloorHeight + rockTypeHeight;
 }
 
 void main()
@@ -121,12 +136,12 @@ void main()
     uint x = index % sideLength;
     uint y = index / sideLength;
     
-    float waterHeight = gridHydraulicErosionCells[index].WaterHeight;
+    float totalWaterHeight = TotalGridHydraulicErosionCellWaterHeight(index);
     for(int particle = 0; particle < particlesHydraulicErosion.length(); particle++)
     {        
         if(ivec2(particlesHydraulicErosion[particle].Position) == ivec2(x, y))
         {
-            waterHeight += particlesHydraulicErosion[particle].Volume;
+            totalWaterHeight += particlesHydraulicErosion[particle].Volume;
             continue;
         }
     }
@@ -134,5 +149,5 @@ void main()
     fragColor = waterColor;
     float zOffset = 0.00004;
     float height = TotalHeightMapHeight(index);
-    gl_Position =  mvp * vec4(vertexPosition.xy, (height - zOffset + waterHeight) * mapGenerationConfiguration.HeightMultiplier, 1.0);
+    gl_Position =  mvp * vec4(vertexPosition.xy, (height - zOffset + totalWaterHeight) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 }

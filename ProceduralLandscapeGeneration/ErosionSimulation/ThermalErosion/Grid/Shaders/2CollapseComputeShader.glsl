@@ -48,7 +48,7 @@ layout(std430, binding = 13) buffer gridThermalErosionCellShaderBuffer
 
 uint myHeightMapPlaneSize;
 
-float HeightMapFloorHeight(uint index, uint layer)
+float LayerHeightMapFloorHeight(uint index, uint layer)
 {
     if(layer < 1)
     {
@@ -72,7 +72,7 @@ float LayerHeightMapHeight(uint index, uint layer)
     return height;
 }
 
-void SetHeightMapFloorHeight(uint index, uint layer, float value)
+void SetLayerHeightMapFloorHeight(uint index, uint layer, float value)
 {
     heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = value;
 }
@@ -100,17 +100,17 @@ void main()
         return;
     }
 
-    float layerOneFloorHeight = HeightMapFloorHeight(index, 1);
+    float layerOneFloorHeight = LayerHeightMapFloorHeight(index, 1);
     if(LayerHeightMapHeight(index, 1) == 0
         && layerOneFloorHeight > 0)
     {
-        SetHeightMapFloorHeight(index, 1, 0.0);
+        SetLayerHeightMapFloorHeight(index, 1, 0.0);
     }
 
     if(LayerHeightMapHeight(index, 0) > layerOneFloorHeight)
     {
         MoveLayerOneRocksToLayerZero(index);
-        SetHeightMapFloorHeight(index, 1, 0.0);
+        SetLayerHeightMapFloorHeight(index, 1, 0.0);
     }
 
     memoryBarrier();

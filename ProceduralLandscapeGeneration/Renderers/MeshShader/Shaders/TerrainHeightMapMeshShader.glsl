@@ -104,7 +104,7 @@ float CoarseSedimentHeight(uint index)
     return 0;
 }
 
-float HeightMapFloorHeight(uint index, uint layer)
+float LayerHeightMapFloorHeight(uint index, uint layer)
 {
     if(layer < 1)
     {
@@ -122,7 +122,7 @@ float TotalHeightMapHeight(uint index)
 		heightMapFloorHeight = 0.0;
         if(layer > 0)
         {
-            heightMapFloorHeight = HeightMapFloorHeight(index, layer);
+            heightMapFloorHeight = LayerHeightMapFloorHeight(index, layer);
             if(heightMapFloorHeight == 0)
             {
                 continue;

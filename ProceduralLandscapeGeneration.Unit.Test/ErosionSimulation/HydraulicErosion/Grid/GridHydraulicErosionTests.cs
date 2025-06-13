@@ -89,24 +89,23 @@ public class GridHydraulicErosionTests
         SetUpHeightMapWithBedrockInMiddle(layer);
         GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
-        SetUpHydraulicErosionCellsWithWaterAndSuspendedSedimentInMiddle();
+        SetUpHydraulicErosionCellsWithWaterAndSuspendedSedimentInMiddle(layer);
 
         testee.VerticalFlow();
 
-        float expectedFlow = 0.125f;
+        float expectedFlow = 0.05f;
         float[] heightMap = ReadHeightMapShaderBuffer();
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
-        GridHydraulicErosionCellShaderBuffer centerCell = gridHydraulicErosionCellsShaderBuffers[CenterIndex];
-        Assert.That(expectedFlow,
-            Is.EqualTo(centerCell.WaterFlowLeft).Within(0.0001f)
-            .And.EqualTo(centerCell.WaterFlowRight).Within(0.0001f)
-            .And.EqualTo(centerCell.WaterFlowDown).Within(0.0001f)
-            .And.EqualTo(centerCell.WaterFlowUp).Within(0.0001f));
-        Assert.That(expectedFlow,
-            Is.EqualTo(centerCell.SedimentFlowLeft).Within(0.0001f)
-            .And.EqualTo(centerCell.SedimentFlowRight).Within(0.0001f)
-            .And.EqualTo(centerCell.SedimentFlowDown).Within(0.0001f)
-            .And.EqualTo(centerCell.SedimentFlowUp).Within(0.0001f));
+        uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
+        GridHydraulicErosionCellShaderBuffer centerCell = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
+        Assert.That(centerCell.WaterFlowLeft, Is.EqualTo(expectedFlow).Within(0.0001f));
+        Assert.That(centerCell.WaterFlowRight, Is.EqualTo(expectedFlow).Within(0.0001f));
+        Assert.That(centerCell.WaterFlowDown, Is.EqualTo(expectedFlow).Within(0.0001f));
+        Assert.That(centerCell.WaterFlowUp, Is.EqualTo(expectedFlow).Within(0.0001f));
+        Assert.That(centerCell.SedimentFlowLeft, Is.EqualTo(expectedFlow).Within(0.0001f));
+        Assert.That(centerCell.SedimentFlowRight, Is.EqualTo(expectedFlow).Within(0.0001f));
+        Assert.That(centerCell.SedimentFlowDown, Is.EqualTo(expectedFlow).Within(0.0001f));
+        Assert.That(centerCell.SedimentFlowUp, Is.EqualTo(expectedFlow).Within(0.0001f));
     }
 
     [Test]
@@ -117,7 +116,7 @@ public class GridHydraulicErosionTests
         SetUpHeightMapWithSlopedChannelLayerOne();
         GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
-        SetUpHydraulicErosionCellsWithWaterInMiddle();
+        SetUpHydraulicErosionCellsWithWaterInMiddle(0u);
         testee.VerticalFlow();
         testee.VerticalMoveWaterAndSedimentSetVelocityMapAndEvaporate();
 
@@ -217,14 +216,15 @@ public class GridHydraulicErosionTests
         Rlgl.MemoryBarrier();
     }
 
-    private unsafe void SetUpHydraulicErosionCellsWithWaterAndSuspendedSedimentInMiddle()
+    private unsafe void SetUpHydraulicErosionCellsWithWaterAndSuspendedSedimentInMiddle(uint layer)
     {
 
         IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
         IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration = myContainer!.Resolve<IGridHydraulicErosionConfiguration>();
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffer = new GridHydraulicErosionCellShaderBuffer[gridHydraulicErosionConfiguration.GridCellsSize];
-        gridHydraulicErosionCellsShaderBuffer[CenterIndex].WaterHeight = 1.0f;
-        gridHydraulicErosionCellsShaderBuffer[CenterIndex].SuspendedSediment = 1.0f;
+        uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
+        gridHydraulicErosionCellsShaderBuffer[CenterIndex + gridHydraulicErosionCellOffset].WaterHeight = 1.0f;
+        gridHydraulicErosionCellsShaderBuffer[CenterIndex + gridHydraulicErosionCellOffset].SuspendedSediment = 1.0f;
         fixed (void* gridHydraulicErosionCellsShaderBufferPointer = gridHydraulicErosionCellsShaderBuffer)
         {
             Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.GridHydraulicErosionCell], gridHydraulicErosionCellsShaderBufferPointer, (uint)(gridHydraulicErosionConfiguration.GridCellsSize * sizeof(GridHydraulicErosionCellShaderBuffer)), 0);
@@ -232,13 +232,14 @@ public class GridHydraulicErosionTests
         Rlgl.MemoryBarrier();
     }
 
-    private unsafe void SetUpHydraulicErosionCellsWithWaterInMiddle()
+    private unsafe void SetUpHydraulicErosionCellsWithWaterInMiddle(uint layer)
     {
 
         IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
         IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration = myContainer!.Resolve<IGridHydraulicErosionConfiguration>();
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffer = new GridHydraulicErosionCellShaderBuffer[gridHydraulicErosionConfiguration.GridCellsSize];
-        gridHydraulicErosionCellsShaderBuffer[CenterIndex].WaterHeight = 1.0f;
+        uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
+        gridHydraulicErosionCellsShaderBuffer[CenterIndex + gridHydraulicErosionCellOffset].WaterHeight = 1.0f;
         fixed (void* gridHydraulicErosionCellsShaderBufferPointer = gridHydraulicErosionCellsShaderBuffer)
         {
             Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.GridHydraulicErosionCell], gridHydraulicErosionCellsShaderBufferPointer, (uint)(gridHydraulicErosionConfiguration.GridCellsSize * sizeof(GridHydraulicErosionCellShaderBuffer)), 0);

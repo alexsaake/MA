@@ -133,6 +133,8 @@ void main()
         gridHydraulicErosionCell.WaterHeight += gridHydraulicErosionConfiguration.WaterIncrease * erosionConfiguration.TimeDelta;
 
         gridHydraulicErosionCells[layerIndex] = gridHydraulicErosionCell;
+
+        return;
     }
     
     memoryBarrier();

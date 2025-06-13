@@ -60,7 +60,7 @@ layout(std430, binding = 18) buffer rockTypesConfigurationShaderBuffer
 
 uint myHeightMapPlaneSize;
 
-float HeightMapFloorHeight(uint index, uint layer)
+float LayerHeightMapFloorHeight(uint index, uint layer)
 {
     if(layer < 1)
     {
@@ -84,7 +84,7 @@ float LayerHeightMapHeight(uint index, uint layer)
     return height;
 }
 
-void MoveLayerOneRocksToLayerZero(uint index, bool isSplitOpen)
+void MoveRockToBelowLayer(uint index, bool isSplitOpen)
 {
     for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
@@ -102,7 +102,26 @@ void MoveLayerOneRocksToLayerZero(uint index, bool isSplitOpen)
     }
 }
 
-void SetHeightMapFloorHeight(uint index, uint layer, float value)
+uint LayerHydraulicErosionCellsOffset(uint layer)
+{
+    return layer * myHeightMapPlaneSize;
+}
+
+void MoveWaterAndSuspendedSedimentToBelowLayer(uint index, uint layer)
+{
+    if(layer < 1)
+    {
+        return;
+    }
+    uint currentLayerGridHydraulicErosionCellIndex = index + LayerHydraulicErosionCellsOffset(layer);
+    uint belowLayerGridHydraulicErosionCellIndex = index + LayerHydraulicErosionCellsOffset(layer - 1);
+    gridHydraulicErosionCells[belowLayerGridHydraulicErosionCellIndex].WaterHeight += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellIndex].WaterHeight;
+    gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellIndex].WaterHeight = 0.0;
+    gridHydraulicErosionCells[belowLayerGridHydraulicErosionCellIndex].SuspendedSediment += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellIndex].SuspendedSediment;
+    gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellIndex].SuspendedSediment = 0.0;
+}
+
+void SetLayerHeightMapFloorHeight(uint index, uint layer, float value)
 {
     heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = value;
 }
@@ -133,7 +152,7 @@ void main()
     }
 
     float layerZeroHeightMapHeight = LayerHeightMapHeight(index, 0);
-    float layerOneFloorHeight = HeightMapFloorHeight(index, 1);
+    float layerOneFloorHeight = LayerHeightMapFloorHeight(index, 1);
     bool isSplitOpen = layerOneFloorHeight > layerZeroHeightMapHeight;
     if(layerOneFloorHeight == 0
         || (layerOneFloorHeight > 0
@@ -143,8 +162,9 @@ void main()
         return;
     }
 
-    MoveLayerOneRocksToLayerZero(index, isSplitOpen);
-    SetHeightMapFloorHeight(index, 1, 0);
+    MoveRockToBelowLayer(index, isSplitOpen);
+    MoveWaterAndSuspendedSedimentToBelowLayer(index, 1);
+    SetLayerHeightMapFloorHeight(index, 1, 0);
     
     memoryBarrier();
 }

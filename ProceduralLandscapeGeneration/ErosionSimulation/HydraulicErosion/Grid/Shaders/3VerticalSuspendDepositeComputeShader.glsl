@@ -111,7 +111,7 @@ float LayerHeightMapFloorHeight(uint index, uint layer)
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-float HeightMapFloorHeight(uint index, uint layer)
+float LayerHeightMapFloorHeight(uint index, uint layer)
 {
     if(layer < 1)
     {
@@ -134,7 +134,7 @@ float TotalHeightMapHeight(uint index)
 		heightMapFloorHeight = 0.0;
         if(layer > 0)
         {
-            heightMapFloorHeight = HeightMapFloorHeight(index, layer);
+            heightMapFloorHeight = LayerHeightMapFloorHeight(index, layer);
             if(heightMapFloorHeight == 0)
             {
                 continue;
@@ -157,7 +157,7 @@ float SuspendFromTop(uint index, float requiredSediment)
     float suspendedSediment = 0;
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        if(HeightMapFloorHeight(index, layer) == 0
+        if(LayerHeightMapFloorHeight(index, layer) == 0
             && layer > 0)
         {
             continue;
@@ -189,7 +189,7 @@ void DepositeOnTop(uint index, float sediment)
 {
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        if(HeightMapFloorHeight(index, layer) == 0
+        if(LayerHeightMapFloorHeight(index, layer) == 0
             && layer > 0)
         {
             continue;
