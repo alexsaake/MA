@@ -106,7 +106,7 @@ void main()
     uint baseIndex = gridHydraulicErosionCellIndex - layer * layerOffset;
     float height = 0.0;
     float totalLayerHeightMapHeight = TotalLayerHeightMapHeight(baseIndex, layer);
-    if(gridHydraulicErosionCells[gridHydraulicErosionCellIndex].WaterHeight > 0)
+    if(gridHydraulicErosionCells[gridHydraulicErosionCellIndex].WaterHeight > 0.00001)
     {
         if(topBottom == 0)
         {
