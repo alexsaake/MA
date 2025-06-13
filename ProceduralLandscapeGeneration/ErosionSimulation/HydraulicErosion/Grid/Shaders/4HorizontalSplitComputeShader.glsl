@@ -111,7 +111,7 @@ uint LayerHeightMapOffset(uint layer)
     return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 }
 
-float LayerHeightMapHeight(uint index, uint layer)
+float LayerHeightMapRockTypeHeight(uint index, uint layer)
 {
     float heightMapFloorHeight = 0.0;
     float rockTypeHeight = 0.0;
@@ -188,6 +188,7 @@ void MoveWaterAndSuspendedSedimentToAboveLayer(uint index, uint layer)
     }
     uint currentLayerGridHydraulicErosionCellIndex = index + LayerHydraulicErosionCellsOffset(layer);
     uint aboveLayerGridHydraulicErosionCellIndex = index + LayerHydraulicErosionCellsOffset(layer + 1);
+    
     gridHydraulicErosionCells[aboveLayerGridHydraulicErosionCellIndex].WaterHeight += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellIndex].WaterHeight;
     gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellIndex].WaterHeight = 0.0;
     gridHydraulicErosionCells[aboveLayerGridHydraulicErosionCellIndex].SuspendedSediment += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellIndex].SuspendedSediment;
@@ -280,7 +281,7 @@ bool TrySplit(uint index, uint neighborIndex, vec2 direction)
             {
                 bool isEroded = false;
 
-                float layerZeroHeight = LayerHeightMapHeight(index, 0);
+                float layerZeroHeight = LayerHeightMapRockTypeHeight(index, 0);
                 float layerZeroHeightBelowSeaLevel = max(neighborTotalTerrainAndWaterHeight - layerZeroHeight, 0.0);
 	            float erosionDepthLimit = (gridHydraulicErosionConfiguration.MaximalErosionDepth - min(gridHydraulicErosionConfiguration.MaximalErosionDepth, layerZeroHeightBelowSeaLevel)) / gridHydraulicErosionConfiguration.MaximalErosionDepth;
                 float sedimentCapacityBottom = gridHydraulicErosionConfiguration.SedimentCapacity * length(gridHydraulicErosionCell.WaterVelocity) * erosionDepthLimit;

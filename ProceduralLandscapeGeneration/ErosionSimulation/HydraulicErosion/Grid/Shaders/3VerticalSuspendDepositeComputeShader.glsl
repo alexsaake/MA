@@ -306,7 +306,8 @@ void main()
         float tiltAngle = sin(alpha);
 
 	    float sedimentCapacity = gridHydraulicErosionConfiguration.SedimentCapacity * tiltAngle * length(gridHydraulicErosionCell.WaterVelocity);
-
+        
+        bool isSuspended = false;
 	    if (sedimentCapacity > gridHydraulicErosionCell.SuspendedSediment)
 	    {
 	        float erosionDepthLimit = (gridHydraulicErosionConfiguration.MaximalErosionDepth - min(gridHydraulicErosionConfiguration.MaximalErosionDepth, gridHydraulicErosionCell.WaterHeight)) / gridHydraulicErosionConfiguration.MaximalErosionDepth;
@@ -317,6 +318,8 @@ void main()
 		        float soilSuspendedBottom = max(gridHydraulicErosionConfiguration.VerticalSuspensionRate * (sedimentCapacityBottom - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
                 float suspendedSedimentBottom = SuspendFromLayerTop(index, layer, soilSuspendedBottom);
 		        gridHydraulicErosionCell.SuspendedSediment += suspendedSedimentBottom;
+
+                isSuspended = true;
 	        }
             
             if(layer < mapGenerationConfiguration.LayerCount - 1)
@@ -333,10 +336,13 @@ void main()
 
                     float suspendedSedimentTop = SuspendFromLayerBottom(index, layer + 1, soilSuspendedTop);
 		            gridHydraulicErosionCell.SuspendedSediment += suspendedSedimentTop;
+
+                    isSuspended = true;
 	            }
             }
 	    }
-	    else if (sedimentCapacity < gridHydraulicErosionCell.SuspendedSediment)
+	    if (sedimentCapacity < gridHydraulicErosionCell.SuspendedSediment
+            && !isSuspended)
 	    {
 		    float soilDeposited = min(gridHydraulicErosionConfiguration.DepositionRate * (gridHydraulicErosionCell.SuspendedSediment - sedimentCapacity) * erosionConfiguration.TimeDelta, gridHydraulicErosionCell.SuspendedSediment);
 		    DepositeOnLayerTop(index, layer, soilDeposited);

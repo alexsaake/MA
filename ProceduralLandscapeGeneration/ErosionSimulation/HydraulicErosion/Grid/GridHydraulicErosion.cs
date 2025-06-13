@@ -104,7 +104,10 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
             VerticalSuspendDeposite();
             if(myMapGenerationConfiguration.LayerCount > 1)
             {
-                HorizontalSplit();
+                if (myGridHydraulicErosionConfiguration.IsHorizontalErosionEnabled)
+                {
+                    HorizontalSplit();
+                }
                 CollapseOrCloseSplit();
             }
         }

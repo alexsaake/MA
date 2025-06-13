@@ -101,6 +101,7 @@ internal class ConfigurationGUI : IConfigurationGUI
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Horizontal Suspension Rate", (value) => gridHydraulicErosionConfiguration.HorizontalSuspensionRate = value, gridHydraulicErosionConfiguration.HorizontalSuspensionRate));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Deposition Rate", (value) => gridHydraulicErosionConfiguration.DepositionRate = value, gridHydraulicErosionConfiguration.DepositionRate));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Evaporation Rate", (value) => gridHydraulicErosionConfiguration.EvaporationRate = value, gridHydraulicErosionConfiguration.EvaporationRate));
+        myGridErosionPanel.Add(new ToggleSliderWithLabel("Horizontal Erosion", "Off;On", (value) => gridHydraulicErosionConfiguration.IsHorizontalErosionEnabled = value == 1, gridHydraulicErosionConfiguration.IsHorizontalErosionEnabled ? 1 : 0));
 
         myParticleHydraulicErosionPanel = new PanelWithElements("Particle Hydraulic Erosion");
         myParticleHydraulicErosionPanel.Add(new ValueBoxIntWithLabel("Particles", (value) => particleHydraulicErosionConfiguration.Particles = (uint)value, (int)particleHydraulicErosionConfiguration.Particles, 1, 1000000));

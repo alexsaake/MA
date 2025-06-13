@@ -177,6 +177,8 @@ internal class GridHydraulicErosionConfiguration : IGridHydraulicErosionConfigur
         }
     }
 
+    public bool IsHorizontalErosionEnabled { get; set; }
+
     public uint GridCellsSize => myMapGenerationConfiguration.HeightMapPlaneSize * myMapGenerationConfiguration.LayerCount;
 
     public event EventHandler<EventArgs>? RainDropsChanged;
@@ -185,6 +187,8 @@ internal class GridHydraulicErosionConfiguration : IGridHydraulicErosionConfigur
     {
         myShaderBuffers = shaderBuffers;
         myMapGenerationConfiguration = mapGenerationConfiguration;
+
+        IsHorizontalErosionEnabled = false;
 
         myRainDrops = 100;
 

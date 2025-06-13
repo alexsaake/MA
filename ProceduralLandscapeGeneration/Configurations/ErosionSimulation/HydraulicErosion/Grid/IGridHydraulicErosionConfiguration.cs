@@ -14,6 +14,7 @@ internal interface IGridHydraulicErosionConfiguration : IDisposable
     float DepositionRate { get; set; }
     float EvaporationRate { get; set; }
     uint GridCellsSize { get; }
+    bool IsHorizontalErosionEnabled { get; set; }
 
     event EventHandler<EventArgs>? RainDropsChanged;
 

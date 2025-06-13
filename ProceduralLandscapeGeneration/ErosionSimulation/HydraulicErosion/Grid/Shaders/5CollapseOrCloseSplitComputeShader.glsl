@@ -58,6 +58,7 @@ layout(std430, binding = 18) buffer rockTypesConfigurationShaderBuffer
     RockTypeConfiguration[] rockTypesConfiguration;
 };
 
+uint myHeightMapSideLength;
 uint myHeightMapPlaneSize;
 
 float LayerHeightMapFloorHeight(uint index, uint layer)
@@ -69,19 +70,78 @@ float LayerHeightMapFloorHeight(uint index, uint layer)
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
+uint GetIndex(uint x, uint y)
+{
+    return (y * myHeightMapSideLength) + x;
+}
+
 uint LayerHeightMapOffset(uint layer)
 {
     return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 }
 
-float LayerHeightMapHeight(uint index, uint layer)
+float LayerHeightMapRockTypeHeight(uint index, uint layer)
 {
-    float height = 0;
+    float layerHeightMapRockTypeHeight = 0.0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
+        layerHeightMapRockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
     }
-    return height;
+    return layerHeightMapRockTypeHeight;
+}
+
+float TotalLayerHeightMapHeight(uint index, uint layer)
+{
+    float layerHeightMapFloorHeight = 0.0;
+    if(layer > 0)
+    {
+        layerHeightMapFloorHeight = LayerHeightMapFloorHeight(index, layer);
+        if(layerHeightMapFloorHeight == 0)
+        {
+            return 0.0;
+        }
+    }
+    return layerHeightMapFloorHeight + LayerHeightMapRockTypeHeight(index, layer);
+}
+
+bool IsFloating(uint index, float floorHeight)
+{
+    if(floorHeight == 0)
+    {
+        return false;
+    }
+    uint x = index % myHeightMapSideLength;
+    uint y = index / myHeightMapSideLength;
+
+    uint indexLeft = GetIndex(x - 1, y);
+    uint indexRight = GetIndex(x + 1, y);
+    uint indexDown = GetIndex(x, y - 1);
+    uint indexUp = GetIndex(x, y + 1);
+    
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    {
+        if(TotalLayerHeightMapHeight(indexLeft, layer) > floorHeight
+            || TotalLayerHeightMapHeight(indexRight, layer) > floorHeight
+            || TotalLayerHeightMapHeight(indexDown, layer) > floorHeight
+            || TotalLayerHeightMapHeight(indexUp, layer) > floorHeight)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+float LayerFloorCollapseThreshold(uint index, uint layer)
+{
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    {
+        if(heightMap[index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer)] > 0)
+        {
+            return rockTypesConfiguration[rockType].CollapseThreshold;
+        }
+    }
+    return 0.0;
 }
 
 void MoveRockToBelowLayer(uint index, bool isSplitOpen)
@@ -115,6 +175,7 @@ void MoveWaterAndSuspendedSedimentToBelowLayer(uint index, uint layer)
     }
     uint currentLayerGridHydraulicErosionCellIndex = index + LayerHydraulicErosionCellsOffset(layer);
     uint belowLayerGridHydraulicErosionCellIndex = index + LayerHydraulicErosionCellsOffset(layer - 1);
+
     gridHydraulicErosionCells[belowLayerGridHydraulicErosionCellIndex].WaterHeight += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellIndex].WaterHeight;
     gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellIndex].WaterHeight = 0.0;
     gridHydraulicErosionCells[belowLayerGridHydraulicErosionCellIndex].SuspendedSediment += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellIndex].SuspendedSediment;
@@ -124,18 +185,6 @@ void MoveWaterAndSuspendedSedimentToBelowLayer(uint index, uint layer)
 void SetLayerHeightMapFloorHeight(uint index, uint layer, float value)
 {
     heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = value;
-}
-
-float LayerFloorCollapseThreshold(uint index, uint layer)
-{
-    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
-    {
-        if(heightMap[index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer)] > 0)
-        {
-            return rockTypesConfiguration[rockType].CollapseThreshold;
-        }
-    }
-    return 0.0;
 }
 
 //horizontal flow
@@ -150,14 +199,14 @@ void main()
     {
         return;
     }
+    myHeightMapSideLength = uint(sqrt(myHeightMapPlaneSize));
 
-    float layerZeroHeightMapHeight = LayerHeightMapHeight(index, 0);
+    float layerZeroHeightMapHeight = LayerHeightMapRockTypeHeight(index, 0);
     float layerOneFloorHeight = LayerHeightMapFloorHeight(index, 1);
     bool isSplitOpen = layerOneFloorHeight > layerZeroHeightMapHeight;
-    if(layerOneFloorHeight == 0
-        || (layerOneFloorHeight > 0
-            && isSplitOpen
-            && max(layerOneFloorHeight - layerZeroHeightMapHeight, 0.0) < LayerFloorCollapseThreshold(index, 1)))
+    if(!IsFloating(index, layerOneFloorHeight)
+        && isSplitOpen
+        && max(layerOneFloorHeight - layerZeroHeightMapHeight, 0.0) < LayerFloorCollapseThreshold(index, 1))
     {
         return;
     }
