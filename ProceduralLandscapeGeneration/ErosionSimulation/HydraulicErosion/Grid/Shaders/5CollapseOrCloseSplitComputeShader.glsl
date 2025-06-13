@@ -69,7 +69,7 @@ float HeightMapFloorHeight(uint index, uint layer)
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-uint LayerOffset(uint layer)
+uint LayerHeightMapOffset(uint layer)
 {
     return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 }
@@ -79,7 +79,7 @@ float LayerHeightMapHeight(uint index, uint layer)
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapPlaneSize + LayerOffset(layer)];
+        height += heightMap[index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
     }
     return height;
 }
@@ -111,7 +111,7 @@ float LayerFloorCollapseThreshold(uint index, uint layer)
 {
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        if(heightMap[index + rockType * myHeightMapPlaneSize + LayerOffset(layer)] > 0)
+        if(heightMap[index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer)] > 0)
         {
             return rockTypesConfiguration[rockType].CollapseThreshold;
         }

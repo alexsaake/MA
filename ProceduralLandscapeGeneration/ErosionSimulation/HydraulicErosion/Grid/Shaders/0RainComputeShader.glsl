@@ -88,7 +88,7 @@ layout(std430, binding = 11) buffer hydraulicErosionHeightMapIndicesShaderBuffer
 
 uint myHeightMapPlaneSize;
 
-float HeightMapFloorHeight(uint index, uint layer)
+float LayerHeightMapFloorHeight(uint index, uint layer)
 {
     if(layer < 1)
     {
@@ -97,7 +97,7 @@ float HeightMapFloorHeight(uint index, uint layer)
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-uint LayerOffset(uint layer)
+uint LayerHeightMapOffset(uint layer)
 {
     return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 }
@@ -121,17 +121,18 @@ void main()
 
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        if(layer == 0
-            || HeightMapFloorHeight(index, layer) > 0)
+        if(layer > 0
+            && LayerHeightMapFloorHeight(index, layer) == 0)
         {
-            uint layerIndex = index + LayerOffset(layer);
-            GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[layerIndex];
-
-            gridHydraulicErosionCell.WaterHeight += gridHydraulicErosionConfiguration.WaterIncrease * erosionConfiguration.TimeDelta;
-
-            gridHydraulicErosionCells[layerIndex] = gridHydraulicErosionCell;
-            return;
+            continue;
         }
+
+        uint layerIndex = index + LayerHeightMapOffset(layer);
+        GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[layerIndex];
+
+        gridHydraulicErosionCell.WaterHeight += gridHydraulicErosionConfiguration.WaterIncrease * erosionConfiguration.TimeDelta;
+
+        gridHydraulicErosionCells[layerIndex] = gridHydraulicErosionCell;
     }
     
     memoryBarrier();

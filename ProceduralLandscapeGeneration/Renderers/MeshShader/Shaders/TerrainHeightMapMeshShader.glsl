@@ -73,7 +73,7 @@ uniform mat4 mvp;
 uint myHeightMapSideLength;
 uint myHeightMapPlaneSize;
 
-uint LayerOffset(uint layer)
+uint LayerHeightMapOffset(uint layer)
 {
     return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 }
@@ -82,7 +82,7 @@ float FineSedimentHeight(uint index)
 {
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        float height = heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + LayerOffset(layer)];
+        float height = heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
         if(height > 0)
         {
             return height;
@@ -95,7 +95,7 @@ float CoarseSedimentHeight(uint index)
 {
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        float height = heightMap[index + 1 * myHeightMapPlaneSize + LayerOffset(layer)];
+        float height = heightMap[index + 1 * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
         if(height > 0)
         {
             return height;
@@ -130,7 +130,7 @@ float TotalHeightMapHeight(uint index)
         }
         for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
         {
-            rockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + LayerOffset(layer)];
+            rockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
         }
         if(rockTypeHeight > 0)
         {

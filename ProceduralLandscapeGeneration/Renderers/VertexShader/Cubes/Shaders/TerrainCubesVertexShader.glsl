@@ -28,24 +28,24 @@ bool IsFloorIndex(uint index)
     return tempIndex >= 0 && tempIndex < myHeightMapPlaneSize;
 }
 
-uint LayerOffset(uint layer)
+uint LayerHeightMapOffset(uint layer)
 {
     return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 }
 
 float FineSedimentHeight(uint index, uint layer)
 {
-    return heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + LayerOffset(layer)];
+    return heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
 }
 
 float CoarseSedimentHeight(uint index, uint layer)
 {
-    return heightMap[index + 1 * myHeightMapPlaneSize + LayerOffset(layer)];
+    return heightMap[index + 1 * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
 }
 
 float BedrockHeight(uint index, uint layer)
 {
-    return heightMap[index + LayerOffset(layer)];
+    return heightMap[index + LayerHeightMapOffset(layer)];
 }
 
 float HeightMapFloorHeight(uint index, uint layer)
@@ -71,7 +71,7 @@ float LayerHeightMapHeight(uint index, uint totalIndex, uint layer)
     }
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        uint currentRockTypeIndex = index + rockType * myHeightMapPlaneSize + LayerOffset(layer);
+        uint currentRockTypeIndex = index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer);
         if(totalIndex < currentRockTypeIndex)
         {
             return heightMapFloorHeight + height;
@@ -111,7 +111,7 @@ void main()
     uint heightMapIndex = uint(vertexTexCoords.x);
     uint layerOffset = (mapGenerationConfiguration.RockTypeCount + 1) * myHeightMapPlaneSize;
     uint layer = uint(heightMapIndex * 1.0 / layerOffset);
-    uint rockTypeIndex = heightMapIndex - LayerOffset(layer);
+    uint rockTypeIndex = heightMapIndex - LayerHeightMapOffset(layer);
     uint rockType = uint(rockTypeIndex * 1.0 / myHeightMapPlaneSize);
     uint baseIndex = rockTypeIndex - rockType * myHeightMapPlaneSize;
     float height = 0.0;
