@@ -46,6 +46,7 @@ void main()
         bedrockHeight = 1.0;
     }
     if(mapGenerationConfiguration.LayerCount > 1
+        && mapGenerationConfiguration.RockTypeCount > 1
         && y >= heightMapSideLength / 4
         && y < heightMapSideLength / 8 * 3
         && x >= heightMapSideLength / 2
@@ -53,8 +54,8 @@ void main()
     {
         bedrockHeight = 0.0;
         coarseSedimentHeight = 1.0;
+        heightMap[index + 1 * heightMapPlaneSize] = coarseSedimentHeight;
     }
 
     heightMap[index] = bedrockHeight;
-    heightMap[index + 1 * heightMapPlaneSize] = coarseSedimentHeight;
 }

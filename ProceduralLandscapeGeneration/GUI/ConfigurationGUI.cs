@@ -27,6 +27,7 @@ internal class ConfigurationGUI : IConfigurationGUI
 
     private Vector2 myLeftPanel1Position;
     private readonly PanelWithElements myErosionPanel;
+    private readonly PanelWithElements mySpringPanel;
     private readonly PanelWithElements myGridErosionPanel;
     private readonly PanelWithElements myParticleHydraulicErosionPanel;
     private readonly PanelWithElements myThermalErosionPanel;
@@ -88,6 +89,12 @@ internal class ConfigurationGUI : IConfigurationGUI
         myErosionPanel.Add(new ToggleSliderWithLabel("Water Kept In Boundaries", "Off;On", (value) => erosionConfiguration.IsWaterKeptInBoundaries = value == 1, erosionConfiguration.IsWaterKeptInBoundaries ? 1 : 0));
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => erosionConfiguration.TimeDelta = value, erosionConfiguration.TimeDelta));
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => mapGenerationConfiguration.SeaLevel = value, mapGenerationConfiguration.SeaLevel));
+        myErosionPanel.Add(new ComboBox("Rain;Spring", (value) => erosionConfiguration.WaterSource = (WaterSourceTypes)value, (int)erosionConfiguration.WaterSource));
+
+        mySpringPanel = new PanelWithElements("Spring Parameters");
+        mySpringPanel.Add(new ValueBoxIntWithLabel("X Coordinate", (value) => erosionConfiguration.WaterSourceXCoordinate = (uint)value, (int)erosionConfiguration.WaterSourceXCoordinate, 0, (int)mapGenerationConfiguration.HeightMapSideLength));
+        mySpringPanel.Add(new ValueBoxIntWithLabel("Y Coordinate", (value) => erosionConfiguration.WaterSourceYCoordinate = (uint)value, (int)erosionConfiguration.WaterSourceYCoordinate, 0, (int)mapGenerationConfiguration.HeightMapSideLength));
+        mySpringPanel.Add(new ValueBoxIntWithLabel("Radius", (value) => erosionConfiguration.WaterSourceRadius = (uint)value, (int)erosionConfiguration.WaterSourceRadius, 0, 100));
 
         myGridErosionPanel = new PanelWithElements("Grid Hydraulic Erosion");
         myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridHydraulicErosionConfiguration.RainDrops = (uint)value, (int)gridHydraulicErosionConfiguration.RainDrops, 1, 100000));
@@ -197,17 +204,23 @@ internal class ConfigurationGUI : IConfigurationGUI
     private void DrawErosionPanels()
     {
         myErosionPanel.Draw(myLeftPanel1Position);
-        Vector2 hydraulicOffset = myErosionPanel.BottomLeft;
+        Vector2 springOffset = myErosionPanel.BottomLeft;
+        if(myErosionConfiguration.WaterSource == WaterSourceTypes.Spring)
+        {
+            mySpringPanel.Draw(myErosionPanel.BottomLeft);
+            springOffset = mySpringPanel.BottomLeft;
+        }
+        Vector2 hydraulicOffset = springOffset;
         if (myErosionConfiguration.IsHydraulicErosionEnabled)
         {
             switch (myErosionConfiguration.HydraulicErosionMode)
             {
                 case HydraulicErosionModeTypes.ParticleHydraulic:
-                    myParticleHydraulicErosionPanel.Draw(myErosionPanel.BottomLeft);
+                    myParticleHydraulicErosionPanel.Draw(springOffset);
                     hydraulicOffset = myParticleHydraulicErosionPanel.BottomLeft;
                     break;
                 case HydraulicErosionModeTypes.GridHydraulic:
-                    myGridErosionPanel.Draw(myErosionPanel.BottomLeft);
+                    myGridErosionPanel.Draw(springOffset);
                     hydraulicOffset = myGridErosionPanel.BottomLeft;
                     break;
             }

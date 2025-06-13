@@ -97,12 +97,12 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
         {
             if (myErosionConfiguration.IsWaterAdded)
             {
-                AddRain();
+                AddWater();
             }
             VerticalFlow();
             VerticalMoveWaterAndSedimentSetVelocityMapAndEvaporate();
             VerticalSuspendDeposite();
-            if(myMapGenerationConfiguration.LayerCount > 1)
+            if (myMapGenerationConfiguration.LayerCount > 1)
             {
                 if (myGridHydraulicErosionConfiguration.IsHorizontalErosionEnabled)
                 {
@@ -113,14 +113,22 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
         }
     }
 
-    internal void AddRain()
+    internal void AddWater()
     {
         if (myHasRainDropsChangedChanged)
         {
             ResetHeightMapIndicesShaderBuffers();
             myHasRainDropsChangedChanged = false;
         }
-        CreateRandomIndices();
+        switch (myErosionConfiguration.WaterSource)
+        {
+            case WaterSourceTypes.Rain:
+                CreateRandomIndices();
+                break;
+            case WaterSourceTypes.Spring:
+                CreateIndices(new IntVector2(myErosionConfiguration.WaterSourceXCoordinate, myErosionConfiguration.WaterSourceYCoordinate), myErosionConfiguration.WaterSourceRadius);
+                break;
+        }
 
         Rlgl.EnableShader(myRainComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myGridHydraulicErosionConfiguration.RainDrops / 64.0f), 1, 1);
@@ -174,6 +182,20 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
         for (uint rainDrop = 0; rainDrop < myGridHydraulicErosionConfiguration.RainDrops; rainDrop++)
         {
             randomRainDropIndices[rainDrop] = (uint)myRandom.Next((int)myMapGenerationConfiguration.HeightMapPlaneSize);
+        }
+        fixed (void* randomRainDropIndicesPointer = randomRainDropIndices)
+        {
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HydraulicErosionHeightMapIndices], randomRainDropIndicesPointer, myGridHydraulicErosionConfiguration.RainDrops * sizeof(uint), 0);
+        }
+        Rlgl.MemoryBarrier();
+    }
+
+    private unsafe void CreateIndices(IntVector2 position, uint radius)
+    {
+        uint[] randomRainDropIndices = new uint[myGridHydraulicErosionConfiguration.RainDrops];
+        for (uint rainDrop = 0; rainDrop < myGridHydraulicErosionConfiguration.RainDrops; rainDrop++)
+        {
+            randomRainDropIndices[rainDrop] = myMapGenerationConfiguration.GetIndex((uint)(position.X + myRandom.Next(-(int)radius, (int)radius)), (uint)(position.Y + myRandom.Next(-(int)radius, (int)radius)));
         }
         fixed (void* randomRainDropIndicesPointer = randomRainDropIndices)
         {

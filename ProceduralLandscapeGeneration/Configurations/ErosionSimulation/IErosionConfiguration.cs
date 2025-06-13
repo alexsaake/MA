@@ -9,6 +9,10 @@ internal interface IErosionConfiguration : IDisposable
     bool IsSimulationRunning { get; set; }
     bool IsHydraulicErosionEnabled { get; set; }
     HydraulicErosionModeTypes HydraulicErosionMode { get; set; }
+    WaterSourceTypes WaterSource { get; set; }
+    uint WaterSourceXCoordinate { get; set; }
+    uint WaterSourceYCoordinate { get; set; }
+    uint WaterSourceRadius { get; set; }
     bool IsWindErosionEnabled { get; set; }
     WindErosionModeTypes WindErosionMode { get; set; }
     bool IsThermalErosionEnabled { get; set; }

@@ -2,6 +2,7 @@
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalErosion;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion;
+using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
 
@@ -16,6 +17,10 @@ internal class ErosionConfiguration : IErosionConfiguration
     public bool IsSimulationRunning { get; set; }
     public bool IsHydraulicErosionEnabled { get; set; }
     public HydraulicErosionModeTypes HydraulicErosionMode { get; set; }
+    public WaterSourceTypes WaterSource { get; set; }
+    public uint WaterSourceXCoordinate { get; set; }
+    public uint WaterSourceYCoordinate { get; set; }
+    public uint WaterSourceRadius { get; set; }
     public bool IsWindErosionEnabled { get; set; }
     public WindErosionModeTypes WindErosionMode { get; set; }
     public bool IsThermalErosionEnabled { get; set; }
@@ -58,12 +63,16 @@ internal class ErosionConfiguration : IErosionConfiguration
         }
     }
 
-    public ErosionConfiguration(IShaderBuffers shaderBuffers)
+    public ErosionConfiguration(IShaderBuffers shaderBuffers, IMapGenerationConfiguration mapGenerationConfiguration)
     {
         myShaderBuffers = shaderBuffers;
 
         IsHydraulicErosionEnabled = false;
         HydraulicErosionMode = HydraulicErosionModeTypes.GridHydraulic;
+        WaterSource = WaterSourceTypes.Rain;
+        WaterSourceXCoordinate = mapGenerationConfiguration.HeightMapSideLength / 2;
+        WaterSourceYCoordinate = mapGenerationConfiguration.HeightMapSideLength / 10;
+        WaterSourceRadius = 5;
         IsThermalErosionEnabled = false;
         ThermalErosionMode = ThermalErosionModeTypes.GridThermal;
         IsWindErosionEnabled = false;

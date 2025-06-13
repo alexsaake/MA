@@ -45,8 +45,8 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
 
         Mesh mesh = new Mesh();
         int cubes = (int)(myMapGenerationConfiguration.HeightMapPlaneSize * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount);
-        int vertexCount = cubes * 20;
-        int triangleCount = cubes * 10;
+        int vertexCount = cubes * 24;
+        int triangleCount = cubes * 12;
         AllocateMeshData(&mesh, vertexCount, triangleCount);
 
         int indicesIndex = 0;

@@ -79,7 +79,15 @@ internal class ParticleHydraulicErosion : IParticleHydraulicErosion
             ResetHydraulicErosionShaderBuffers();
             myHasParticlesChanged = false;
         }
-        CreateRandomIndices();
+        switch (myErosionConfiguration.WaterSource)
+        {
+            case WaterSourceTypes.Rain:
+                CreateRandomIndices();
+                break;
+            case WaterSourceTypes.Spring:
+                CreateIndices(new IntVector2(myErosionConfiguration.WaterSourceXCoordinate, myErosionConfiguration.WaterSourceYCoordinate), myErosionConfiguration.WaterSourceRadius);
+                break;
+        }        
 
         for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
         {
@@ -102,6 +110,20 @@ internal class ParticleHydraulicErosion : IParticleHydraulicErosion
         for (uint particle = 0; particle < myParticleHydraulicErosionConfiguration.Particles; particle++)
         {
             randomParticleIndices[particle] = (uint)myRandom.Next((int)myMapGenerationConfiguration.HeightMapPlaneSize);
+        }
+        fixed (uint* randomHeightMapIndicesPointer = randomParticleIndices)
+        {
+            Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HydraulicErosionHeightMapIndices], randomHeightMapIndicesPointer, myParticleHydraulicErosionConfiguration.Particles * sizeof(uint), 0);
+        }
+        Rlgl.MemoryBarrier();
+    }
+
+    private unsafe void CreateIndices(IntVector2 position, uint radius)
+    {
+        uint[] randomParticleIndices = new uint[myParticleHydraulicErosionConfiguration.Particles];
+        for (uint particle = 0; particle < myParticleHydraulicErosionConfiguration.Particles; particle++)
+        {
+            randomParticleIndices[particle] = myMapGenerationConfiguration.GetIndex((uint)(position.X + myRandom.Next(-(int)radius, (int)radius)), (uint)(position.Y + myRandom.Next(-(int)radius, (int)radius)));
         }
         fixed (uint* randomHeightMapIndicesPointer = randomParticleIndices)
         {
