@@ -105,7 +105,8 @@ uint LayerHydraulicErosionCellsOffset(uint layer)
 
 float LayerHeightMapFloorHeight(uint index, uint layer)
 {
-    if(layer < 1)
+    if(layer < 1
+        || layer >= mapGenerationConfiguration.LayerCount)
     {
         return 0.0;
     }
@@ -145,17 +146,15 @@ float ReachableNeighborHeightMapHeight(uint neighborIndex, float heightMapHeight
 {
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        float neigborLayerHeightMapFloorHeight = LayerHeightMapFloorHeight(neighborIndex, layer);
-        if(layer == 0
-            || (neigborLayerHeightMapFloorHeight > 0
-                && neigborLayerHeightMapFloorHeight < heightMapHeight))
+        float neighborTotalLayerHeightMapHeight = TotalLayerHeightMapHeight(neighborIndex, layer);
+        float neighborAboveLayerHeightMapFloorHeight = LayerHeightMapFloorHeight(neighborIndex, layer + 1);
+        if(layer > 0 && neighborTotalLayerHeightMapHeight > 0 && neighborTotalLayerHeightMapHeight < heightMapAndWaterHeight && (neighborAboveLayerHeightMapFloorHeight == 0 || neighborAboveLayerHeightMapFloorHeight > heightMapHeight))
         {
-            float neighborTotalLayerHeightMapHeight = TotalLayerHeightMapHeight(neighborIndex, layer);
-            if(neighborTotalLayerHeightMapHeight <= heightMapAndWaterHeight)
-            {
-                return neighborTotalLayerHeightMapHeight;
-            }
-            return 100;
+            return neighborTotalLayerHeightMapHeight;
+        }
+        else if(layer == 0 && neighborTotalLayerHeightMapHeight >= 0 && neighborTotalLayerHeightMapHeight < heightMapAndWaterHeight && (neighborAboveLayerHeightMapFloorHeight == 0 || neighborAboveLayerHeightMapFloorHeight > heightMapHeight))
+        {
+            return neighborTotalLayerHeightMapHeight;
         }
     }
     return 100;
