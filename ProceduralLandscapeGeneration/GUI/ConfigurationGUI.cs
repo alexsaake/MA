@@ -147,7 +147,7 @@ internal class ConfigurationGUI : IConfigurationGUI
         myMapGenerationPanel = new PanelWithElements("Map Generation");
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Rock Types", (value) => mapGenerationConfiguration.RockTypeCount = (uint)value, (int)mapGenerationConfiguration.RockTypeCount, 1, 3));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Layers", (value) => mapGenerationConfiguration.LayerCount = (uint)value, (int)mapGenerationConfiguration.LayerCount, 1, 2));
-        myMapGenerationPanel.Add(new ComboBox("Noise;Tectonics;Cubes;Canyon;Coastline Cliff", (value) => mapGenerationConfiguration.MapGeneration = (MapGenerationTypes)value, (int)mapGenerationConfiguration.MapGeneration));
+        myMapGenerationPanel.Add(new ComboBox("Noise;Tectonics;Cubes;Canyon;Coastline Cliff;Channel", (value) => mapGenerationConfiguration.MapGeneration = (MapGenerationTypes)value, (int)mapGenerationConfiguration.MapGeneration));
         myMapGenerationPanel.Add(new ToggleSliderWithLabel("Generation", "CPU;GPU", (value) => mapGenerationConfiguration.HeightMapGeneration = (ProcessorTypes)value, (int)mapGenerationConfiguration.HeightMapGeneration));
         myMapGenerationPanel.Add(new Button("Reset", () => MapResetRequired?.Invoke(this, EventArgs.Empty)));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Side Length", (value) => mapGenerationConfiguration.HeightMapSideLength = (uint)value, (int)mapGenerationConfiguration.HeightMapSideLength, 32, 8192));

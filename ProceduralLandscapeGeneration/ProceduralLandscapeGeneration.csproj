@@ -63,6 +63,9 @@
 	  <None Update="MapGeneration\GPU\Shaders\GenerateCoastlineCliffHeightMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
+	  <None Update="MapGeneration\GPU\Shaders\GenerateSlopedChannelHeightMapComputeShader.glsl">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	  <None Update="MapGeneration\GPU\Shaders\GenerateSlopedCanyonHeightMapComputeShader.glsl">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>

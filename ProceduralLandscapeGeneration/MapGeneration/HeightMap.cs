@@ -41,6 +41,9 @@ internal class HeightMap : IHeightMap
             case MapGenerationTypes.CoastlineCliff:
                 myHeightMapGenerator.GenerateCoastlineCliffHeightMap();
                 break;
+            case MapGenerationTypes.SlopedChannel:
+                myHeightMapGenerator.GenerateSlopedChannelHeightMap();
+                break;
         }
 
         myIsDisposed = false;

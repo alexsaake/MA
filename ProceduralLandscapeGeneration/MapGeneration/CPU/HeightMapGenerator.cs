@@ -152,6 +152,11 @@ internal class HeightMapGenerator : IHeightMapGenerator
         throw new NotImplementedException();
     }
 
+    public void GenerateSlopedChannelHeightMap()
+    {
+        throw new NotImplementedException();
+    }
+
     private void AddCube(float[] map, uint x, uint y, uint rockTypes, uint size)
     {
         for (uint j = 0; j < size; j++)

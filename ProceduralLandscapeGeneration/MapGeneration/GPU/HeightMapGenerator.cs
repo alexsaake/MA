@@ -167,6 +167,20 @@ internal class HeightMapGenerator : IHeightMapGenerator
         myIsDisposed = false;
     }
 
+    public unsafe void GenerateSlopedChannelHeightMap()
+    {
+        uint heightMapBufferSize = myMapGenerationConfiguration.HeightMapPlaneSize * (myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration.LayerCount + myMapGenerationConfiguration.LayerCount - 1) * sizeof(float);
+        myShaderBuffers.Add(ShaderBufferTypes.HeightMap, heightMapBufferSize);
+
+        ComputeShaderProgram generateSlopedChannelHeightMapComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}GenerateSlopedChannelHeightMapComputeShader.glsl");
+        Rlgl.EnableShader(generateSlopedChannelHeightMapComputeShaderProgram.Id);
+        Rlgl.ComputeShaderDispatch(myMapGenerationConfiguration.HeightMapPlaneSize, 1, 1);
+        Rlgl.DisableShader();
+        generateSlopedChannelHeightMapComputeShaderProgram.Dispose();
+
+        myIsDisposed = false;
+    }
+
     public void Dispose()
     {
         if (myIsDisposed)

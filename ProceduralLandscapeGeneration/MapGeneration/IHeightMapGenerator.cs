@@ -7,4 +7,5 @@ internal interface IHeightMapGenerator : IDisposable
     void GenerateCubeHeightMap();
     void GenerateSlopedCanyonHeightMap();
     void GenerateCoastlineCliffHeightMap();
+    void GenerateSlopedChannelHeightMap();
 }
