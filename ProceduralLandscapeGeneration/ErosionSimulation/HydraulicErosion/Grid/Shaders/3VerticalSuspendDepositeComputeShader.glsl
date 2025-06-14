@@ -192,7 +192,7 @@ float SuspendFromLayerBottom(uint index, uint layer, float requiredSediment)
             heightMap[rockTypeIndex] -= toBeSuspendedSediment;
             heightMap[layerFloorIndex] += toBeSuspendedSediment;
             suspendedSediment += toBeSuspendedSediment;
-            break;
+            return suspendedSediment;
         }
         else
         {
@@ -210,8 +210,8 @@ void DepositeOnLayerTop(uint index, uint startLayer, float sediment)
 {
     for(int layer = int(startLayer); layer >= 0; layer--)
     {
-        if(LayerHeightMapFloorHeight(index, layer) == 0
-            && layer > 0)
+        if(layer > 0
+            && LayerHeightMapFloorHeight(index, layer) == 0)
         {
             continue;
         }
@@ -253,11 +253,7 @@ void main()
         }
 
         uint layerIndex = index + LayerHydraulicErosionCellsOffset(layer);
-        GridHydraulicErosionCell gridHydraulicErosionCell  = gridHydraulicErosionCells[layerIndex];
-        if(gridHydraulicErosionCell.WaterHeight == 0)
-        {
-            continue;
-        }
+        GridHydraulicErosionCell gridHydraulicErosionCell  = gridHydraulicErosionCells[layerIndex];s
 
         float totalHeightMapHeight = TotalHeightMapHeight(index);
         float heightLeft;
@@ -305,7 +301,7 @@ void main()
         float alpha = acos(dotProd);
         float tiltAngle = sin(alpha);
 
-	    float sedimentCapacity = gridHydraulicErosionConfiguration.SedimentCapacity * tiltAngle * length(gridHydraulicErosionCell.WaterVelocity);
+	    float sedimentCapacity = gridHydraulicErosionConfiguration.SedimentCapacity * max(tiltAngle, 0.1) * length(gridHydraulicErosionCell.WaterVelocity);
         
         bool isSuspended = false;
 	    if (sedimentCapacity > gridHydraulicErosionCell.SuspendedSediment)

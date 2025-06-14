@@ -22,26 +22,27 @@ public class GridThermalErosionTests
     private IContainer? myContainer;
     private IMapGenerationConfiguration? myMapGenerationConfiguration;
 
-    private uint CenterIndex => myMapGenerationConfiguration!.GetIndex(1, 1);
-    private uint LeftIndex => myMapGenerationConfiguration!.GetIndex(0, 1);
-    private uint RightIndex => myMapGenerationConfiguration!.GetIndex(2, 1);
-    private uint UpIndex => myMapGenerationConfiguration!.GetIndex(1, 2);
-    private uint DownIndex => myMapGenerationConfiguration!.GetIndex(1, 0);
+    private uint mySideLength => myMapGenerationConfiguration!.HeightMapSideLength - 1;
+    private uint CenterIndex => myMapGenerationConfiguration!.GetIndex((uint)(mySideLength / 2.0f), (uint)(mySideLength / 2.0f));
+    private uint LeftIndex => myMapGenerationConfiguration!.GetIndex((uint)(mySideLength / 2.0f) - 1, (uint)(mySideLength / 2.0f));
+    private uint RightIndex => myMapGenerationConfiguration!.GetIndex((uint)(mySideLength / 2.0f) + 1, (uint)(mySideLength / 2.0f));
+    private uint UpIndex => myMapGenerationConfiguration!.GetIndex((uint)(mySideLength / 2.0f), (uint)(mySideLength / 2.0f) + 1);
+    private uint DownIndex => myMapGenerationConfiguration!.GetIndex((uint)(mySideLength / 2.0f), (uint)(mySideLength / 2.0f) - 1);
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
         myContainer = Container.Create();
         Raylib.InitWindow(1, 1, nameof(GridThermalErosionTests));
-        SetUpMapGenerationConfiguration();
-        SetUpRockTypesConfiguration();
-        SetUpThermalErosionConfiguration();
     }
 
     [SetUp]
     public void SetUp()
     {
-        SetUpErosionConfiguration(1);
+        SetUpMapGenerationConfiguration();
+        SetUpRockTypesConfiguration();
+        SetUpThermalErosionConfiguration();
+        SetUpErosionConfiguration();
     }
 
     [OneTimeTearDown]
@@ -116,7 +117,7 @@ public class GridThermalErosionTests
     }
 
     [Test]
-    public void Simulate_3x3HeightMapWithGivenRockTypesInMiddle_VolumeStaysTheSame([Values(1u, 2u, 3u)] uint rockTypeCount, [Values(0u, 1u)] uint layers, [Values(10u, 100u, 1000u)] uint iterations)
+    public void Simulate_HeightMapWithGivenSizeLayersIterationsAndRockTypesInMiddle_VolumeStaysTheSame([Values(3u, 9u, 27u)] uint sideLength, [Values(1u, 2u, 3u)] uint rockTypeCount, [Values(0u, 1u)] uint layers, [Values(1u, 100u, 10000u)] uint iterations)
     {
         SetUpErosionConfiguration(iterations);
         uint layerCount = layers + 1u;
@@ -145,22 +146,27 @@ public class GridThermalErosionTests
 
     private void SetUpMapGenerationConfiguration()
     {
-        SetUpMapGenerationConfiguration(1u, 1u, 0f);
+        SetUpMapGenerationConfiguration(1u, 1u);
     }
 
     private void SetUpMapGenerationConfiguration(uint layerCount, uint rockType)
     {
-        SetUpMapGenerationConfiguration(layerCount, rockType, 0f);
+        SetUpMapGenerationConfiguration(layerCount, 3u, rockType);
     }
 
-    private void SetUpMapGenerationConfiguration(uint layerCount, uint rockTypeCount, float seaLevel)
+    private void SetUpMapGenerationConfiguration(uint layerCount, uint heightMapSideLength, uint rockTypeCount)
     {
         myMapGenerationConfiguration = myContainer!.Resolve<IMapGenerationConfiguration>();
-        myMapGenerationConfiguration!.HeightMapSideLength = 3;
+        myMapGenerationConfiguration!.HeightMapSideLength = heightMapSideLength;
         myMapGenerationConfiguration!.HeightMultiplier = 10;
         myMapGenerationConfiguration!.RockTypeCount = rockTypeCount;
         myMapGenerationConfiguration!.LayerCount = layerCount;
-        myMapGenerationConfiguration!.SeaLevel = seaLevel;
+        myMapGenerationConfiguration!.SeaLevel = 0f;
+    }
+
+    private void SetUpErosionConfiguration()
+    {
+        SetUpErosionConfiguration(1);
     }
 
     private void SetUpErosionConfiguration(uint iterationsPerStep)
@@ -206,7 +212,7 @@ public class GridThermalErosionTests
         IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
         float[] heightMap = new float[myMapGenerationConfiguration!.HeightMapSize];
         shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
-        for(int rockType = 0; rockType < rockTypes; rockType++)
+        for (int rockType = 0; rockType < rockTypes; rockType++)
         {
             heightMap[CenterIndex + rockType * myMapGenerationConfiguration!.HeightMapPlaneSize + (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
         }

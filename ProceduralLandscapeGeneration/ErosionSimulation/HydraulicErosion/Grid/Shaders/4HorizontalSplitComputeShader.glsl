@@ -213,7 +213,7 @@ float SuspendFromLayerZeroTop(uint index, float requiredSediment)
         {
             heightMap[rockTypeIndex] -= toBeSuspendedSediment;
             suspendedSediment += toBeSuspendedSediment;
-            break;
+            return suspendedSediment;
         }
         else
         {

@@ -103,8 +103,28 @@ void main()
     {
 		uint gridThermalErosionCellsIndexOffset = rockType * myHeightMapPlaneSize;
         GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[index + gridThermalErosionCellsIndexOffset];
-    
-        float flowIn = gridThermalErosionCells[GetIndex(x - 1, y) + gridThermalErosionCellsIndexOffset].SedimentFlowRight + gridThermalErosionCells[GetIndex(x + 1, y) + gridThermalErosionCellsIndexOffset].SedimentFlowLeft + gridThermalErosionCells[GetIndex(x, y - 1) + gridThermalErosionCellsIndexOffset].SedimentFlowUp + gridThermalErosionCells[GetIndex(x, y + 1) + gridThermalErosionCellsIndexOffset].SedimentFlowDown;
+        
+        float sedimentFlowRight = 0.0;
+        if(x > 0)
+        {
+            sedimentFlowRight = gridThermalErosionCells[GetIndex(x - 1, y) + gridThermalErosionCellsIndexOffset].SedimentFlowRight;
+        }
+        float sedimentFlowLeft  = 0.0;
+		if(x < myHeightMapSideLength - 1)
+        {
+            sedimentFlowLeft = gridThermalErosionCells[GetIndex(x + 1, y) + gridThermalErosionCellsIndexOffset].SedimentFlowLeft;
+        }
+        float sedimentFlowUp = 0.0;
+        if(y > 0)
+        {
+            sedimentFlowUp = gridThermalErosionCells[GetIndex(x, y - 1) + gridThermalErosionCellsIndexOffset].SedimentFlowUp;
+        }
+        float sedimentFlowDown  = 0.0;
+		if(y < myHeightMapSideLength - 1)
+        {
+            sedimentFlowDown = gridThermalErosionCells[GetIndex(x, y + 1) + gridThermalErosionCellsIndexOffset].SedimentFlowDown;
+        }
+        float flowIn = sedimentFlowRight + sedimentFlowLeft + sedimentFlowUp + sedimentFlowDown;
         float flowOut = gridThermalErosionCell.SedimentFlowRight + gridThermalErosionCell.SedimentFlowLeft + gridThermalErosionCell.SedimentFlowUp + gridThermalErosionCell.SedimentFlowDown;
     
 	    float volumeDelta = (flowIn - flowOut) * erosionConfiguration.TimeDelta;

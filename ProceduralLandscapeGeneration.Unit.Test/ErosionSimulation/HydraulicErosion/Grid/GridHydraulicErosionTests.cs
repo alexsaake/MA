@@ -8,7 +8,6 @@ using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.DependencyInjection;
 using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
-using ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion.Grid;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.HydraulicErosion.Grid;
@@ -22,26 +21,27 @@ public class GridHydraulicErosionTests
     private IContainer? myContainer;
     private IMapGenerationConfiguration? myMapGenerationConfiguration;
 
-    private uint CenterIndex => myMapGenerationConfiguration!.GetIndex(1, 1);
-    private uint LeftIndex => myMapGenerationConfiguration!.GetIndex(0, 1);
-    private uint RightIndex => myMapGenerationConfiguration!.GetIndex(2, 1);
-    private uint UpIndex => myMapGenerationConfiguration!.GetIndex(1, 2);
-    private uint DownIndex => myMapGenerationConfiguration!.GetIndex(1, 0);
+    private uint mySideLength => myMapGenerationConfiguration!.HeightMapSideLength - 1;
+    private uint CenterIndex => myMapGenerationConfiguration!.GetIndex((uint)(mySideLength / 2.0f), (uint)(mySideLength / 2.0f));
+    private uint LeftIndex => myMapGenerationConfiguration!.GetIndex((uint)(mySideLength / 2.0f) - 1, (uint)(mySideLength / 2.0f));
+    private uint RightIndex => myMapGenerationConfiguration!.GetIndex((uint)(mySideLength / 2.0f) + 1, (uint)(mySideLength / 2.0f));
+    private uint UpIndex => myMapGenerationConfiguration!.GetIndex((uint)(mySideLength / 2.0f), (uint)(mySideLength / 2.0f) + 1);
+    private uint DownIndex => myMapGenerationConfiguration!.GetIndex((uint)(mySideLength / 2.0f), (uint)(mySideLength / 2.0f) - 1);
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
         myContainer = Container.Create();
         Raylib.InitWindow(1, 1, nameof(GridHydraulicErosionTests));
-        SetUpMapGenerationConfiguration();
-        SetUpRockTypesConfiguration();
-        SetUpHydraulicErosionConfiguration();
     }
 
     [SetUp]
     public void SetUp()
     {
-        SetUpErosionConfiguration(1);
+        SetUpMapGenerationConfiguration();
+        SetUpRockTypesConfiguration();
+        SetUpHydraulicErosionConfiguration();
+        SetUpErosionConfiguration();
     }
 
     [OneTimeTearDown]
@@ -406,13 +406,13 @@ public class GridHydraulicErosionTests
     }
 
     [Test]
-    public void Simulate_3x3HeightMapWithGivenRockTypesInMiddle_VolumeStaysTheSame([Values(1u, 2u, 3u)] uint rockTypeCount, [Values(0u, 1u)] uint layers, [Values(10u, 100u, 1000u)] uint iterations)
+    public void Simulate_HeightMapWithGivenSizeLayersIterationsAndRockTypesInMiddle_VolumeStaysTheSame([Values(3u, 9u, 27u)] uint sideLength, [Values(1u, 2u, 3u)] uint rockTypeCount, [Values(1u, 100u, 10000u)] uint iterations)
     {
         SetUpErosionConfiguration(iterations, true);
-        uint layerCount = layers + 1u;
-        SetUpMapGenerationConfiguration(layerCount, 3u, rockTypeCount, 0u);
+        uint layerCount = 1;
+        SetUpMapGenerationConfiguration(layerCount, sideLength, rockTypeCount);
         InitializeConfiguration();
-        SetUpHeightMapWithRockTypesInMiddle(layers, rockTypeCount);
+        SetUpNoneFloatingHeightMapWithRockTypesInMiddle(rockTypeCount);
         GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
 
@@ -421,13 +421,23 @@ public class GridHydraulicErosionTests
 
         testee.Simulate();
         SetUpErosionConfiguration(iterations, false);
+        SetUpHydraulicErosionConfiguration(1.0f);
+
+        float[] intermediateHeightMap = ReadHeightMapShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer[] intermediateGridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
+        float intermediateSuspendedSediment = intermediateGridHydraulicErosionCellsShaderBuffers.Sum(cell => cell.SuspendedSediment);
+        float intermediateVolume = intermediateHeightMap.Sum(cell => cell) + intermediateSuspendedSediment;
+
         testee.Simulate();
 
         float[] endHeightMap = ReadHeightMapShaderBuffer();
-        float endVolume = endHeightMap.Sum(cell => cell);
-        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer[] endGridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
+        float endVolume = intermediateHeightMap.Sum(cell => cell);
+        float endSuspendedSediment = endGridHydraulicErosionCellsShaderBuffers.Sum(cell => cell.SuspendedSediment);
 
+        Assert.That(startVolume, Is.EqualTo(intermediateVolume).Within(0.0001f));
         Assert.That(startVolume, Is.EqualTo(endVolume).Within(0.0001f));
+        Assert.That(endSuspendedSediment, Is.Zero);
     }
 
     private void InitializeConfiguration()
@@ -438,32 +448,32 @@ public class GridHydraulicErosionTests
 
     private void SetUpMapGenerationConfiguration()
     {
-        SetUpMapGenerationConfiguration(1u, 3u, 1u, 0f);
+        SetUpMapGenerationConfiguration(1u, 3u, 1u);
     }
 
     private void SetUpMapGenerationConfiguration(uint layerCount)
     {
-        SetUpMapGenerationConfiguration(layerCount, 3u, 1u, 0f);
+        SetUpMapGenerationConfiguration(layerCount, 3u, 1u);
     }
 
     private void SetUpMapGenerationConfiguration(uint layerCount, uint heightMapSideLength)
     {
-        SetUpMapGenerationConfiguration(layerCount, heightMapSideLength, 1u, 0f);
+        SetUpMapGenerationConfiguration(layerCount, heightMapSideLength, 1u);
     }
 
-    private void SetUpMapGenerationConfiguration(uint layerCount, uint heightMapSideLength, uint rockTypeCount, float seaLevel)
+    private void SetUpMapGenerationConfiguration(uint layerCount, uint heightMapSideLength, uint rockTypeCount)
     {
         myMapGenerationConfiguration = myContainer!.Resolve<IMapGenerationConfiguration>();
         myMapGenerationConfiguration!.HeightMapSideLength = heightMapSideLength;
         myMapGenerationConfiguration!.HeightMultiplier = 10;
         myMapGenerationConfiguration!.RockTypeCount = rockTypeCount;
         myMapGenerationConfiguration!.LayerCount = layerCount;
-        myMapGenerationConfiguration!.SeaLevel = seaLevel;
+        myMapGenerationConfiguration!.SeaLevel = 0f;
     }
 
-    private void SetUpErosionConfiguration(uint iterationsPerStep)
+    private void SetUpErosionConfiguration()
     {
-        SetUpErosionConfiguration(iterationsPerStep, false);
+        SetUpErosionConfiguration(1, false);
     }
 
     private void SetUpErosionConfiguration(uint iterationsPerStep, bool isWaterAdded)
@@ -476,9 +486,14 @@ public class GridHydraulicErosionTests
 
     private void SetUpHydraulicErosionConfiguration()
     {
+        SetUpHydraulicErosionConfiguration(0.0f);
+    }
+
+    private void SetUpHydraulicErosionConfiguration(float evaporationRate)
+    {
         IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration = myContainer!.Resolve<IGridHydraulicErosionConfiguration>();
-        gridHydraulicErosionConfiguration.MaximalErosionDepth = 10.0f;
-        gridHydraulicErosionConfiguration.EvaporationRate = 0.0f;
+        gridHydraulicErosionConfiguration.MaximalErosionDepth = 20.0f;
+        gridHydraulicErosionConfiguration.EvaporationRate = evaporationRate;
     }
 
     private void SetUpRockTypesConfiguration()
@@ -560,7 +575,7 @@ public class GridHydraulicErosionTests
         {
             for (uint x = 0; x < myMapGenerationConfiguration!.HeightMapSideLength; x++)
             {
-                if(y == 1)
+                if (y == 1)
                 {
                     heightMap[myMapGenerationConfiguration.GetIndex(x, y)] = x;
                 }
@@ -587,6 +602,23 @@ public class GridHydraulicErosionTests
             heightMap[CenterIndex + rockType * myMapGenerationConfiguration!.HeightMapPlaneSize + (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
         }
         heightMap[CenterIndex + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
+        fixed (void* heightMapPointer = heightMap)
+        {
+            Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);
+        }
+        Rlgl.MemoryBarrier();
+    }
+
+    private unsafe void SetUpNoneFloatingHeightMapWithRockTypesInMiddle(uint rockTypes)
+    {
+        IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
+        float[] heightMap = new float[myMapGenerationConfiguration!.HeightMapSize];
+        shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
+        for (int rockType = 0; rockType < rockTypes; rockType++)
+        {
+            heightMap[CenterIndex + rockType * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
+        }
+        heightMap[CenterIndex] = 1.0f;
         fixed (void* heightMapPointer = heightMap)
         {
             Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);
