@@ -105,6 +105,8 @@ void main()
         && layerOneFloorHeight > 0)
     {
         SetLayerHeightMapFloorHeight(index, 1, 0.0);
+        memoryBarrier();
+        return;
     }
 
     if(LayerHeightMapRockTypeHeight(index, 0) > layerOneFloorHeight)

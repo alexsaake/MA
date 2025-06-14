@@ -615,7 +615,7 @@ public class GridHydraulicErosionTests
         float intermediateVolume = SumUpVolume(intermediateHeightMap) + intermediateSuspendedSediment;
 
         SetUpErosionConfiguration(iterations, false);
-        SetUpHydraulicErosionConfiguration(1.0f);
+        SetUpHydraulicErosionConfiguration(1.0f, true);
         testee.Simulate();
 
         float[] endHeightMap = ReadHeightMapShaderBuffer();
@@ -661,7 +661,7 @@ public class GridHydraulicErosionTests
         float intermediateVolume = SumUpVolume(intermediateHeightMap) + intermediateSuspendedSediment;
 
         SetUpErosionConfiguration(iterations, false);
-        SetUpHydraulicErosionConfiguration(1.0f);
+        SetUpHydraulicErosionConfiguration(1.0f, true);
         testee.Simulate();
 
         float[] endHeightMap = ReadHeightMapShaderBuffer();

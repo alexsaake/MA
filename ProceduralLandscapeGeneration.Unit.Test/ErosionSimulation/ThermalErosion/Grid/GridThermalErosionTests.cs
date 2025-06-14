@@ -11,7 +11,7 @@ using ProceduralLandscapeGeneration.DependencyInjection;
 using ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion.Grid;
 using Raylib_cs;
 
-namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.HydraulicErosion.Grid;
+namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.ThermalErosion.Grid;
 
 [TestFixture]
 [SingleThreaded]
