@@ -249,7 +249,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
                 return;
             }
             myHeightMapSideLength = value;
-            ResetRequired?.Invoke(this, EventArgs.Empty);
+            HeightMapSideLengthChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -290,6 +290,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
     public event EventHandler? ResetRequired;
     public event EventHandler? RendererChanged;
     public event EventHandler? HeightMultiplierChanged;
+    public event EventHandler? HeightMapSideLengthChanged;
 
     public MapGenerationConfiguration(IShaderBuffers shaderBuffers)
     {

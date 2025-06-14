@@ -33,6 +33,7 @@ internal interface IMapGenerationConfiguration : IDisposable
     event EventHandler? ResetRequired;
     event EventHandler? RendererChanged;
     event EventHandler? HeightMultiplierChanged;
+    event EventHandler? HeightMapSideLengthChanged;
 
     void Initialize();
     uint GetIndex(uint x, uint y);

@@ -25,8 +25,9 @@ internal class Application : IApplication
     private IRenderer? myRenderer;
 
     private bool myIsResetRequired;
-    private bool myIsRendererResetRequired;
     private bool myIsErosionResetRequired;
+    private bool myIsRendererResetRequired;
+    private bool myIsCameraResetRequired;
     private bool myShowUI = true;
 
     public Application(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IConfigurationGUI configurationGUI, ICamera camera, IHeightMap heightMap, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
@@ -53,11 +54,13 @@ internal class Application : IApplication
 
         myMapGenerationConfiguration.ResetRequired += OnResetRequired;
         myMapGenerationConfiguration.RendererChanged += OnRendererChanged;
+        myMapGenerationConfiguration.HeightMapSideLengthChanged += OnHeightMapSideLengthChanged;
         myConfigurationGUI.MapResetRequired += OnResetRequired;
         myConfigurationGUI.ErosionResetRequired += OnErosionResetRequired;
         myConfigurationGUI.ErosionModeChanged += OnErosionModeChanged;
 
         InitializeModules();
+        myCamera!.Initialize();
 
         Rlgl.SetClipPlanes(5, myMapGenerationConfiguration.HeightMapPlaneSize);
         Raylib.SetTargetFPS(60);
@@ -82,6 +85,11 @@ internal class Application : IApplication
                 ResolveRenderer();
                 myRenderer!.Initialize();
                 myIsRendererResetRequired = false;
+            }
+            if (myIsCameraResetRequired)
+            {
+                myCamera!.Initialize();
+                myIsCameraResetRequired = false;
             }
 
             if (myMapGenerationConfiguration.IsPlateTectonicsRunning)
@@ -112,6 +120,7 @@ internal class Application : IApplication
 
         myMapGenerationConfiguration.ResetRequired -= OnResetRequired;
         myMapGenerationConfiguration.RendererChanged -= OnRendererChanged;
+        myMapGenerationConfiguration.HeightMapSideLengthChanged -= OnHeightMapSideLengthChanged;
         myConfigurationGUI.MapResetRequired -= OnResetRequired;
         myConfigurationGUI.ErosionResetRequired -= OnErosionResetRequired;
         myConfigurationGUI.ErosionModeChanged -= OnErosionModeChanged;
@@ -141,10 +150,15 @@ internal class Application : IApplication
         myIsErosionResetRequired = true;
     }
 
+    private void OnHeightMapSideLengthChanged(object? sender, EventArgs e)
+    {
+        myIsResetRequired = true;
+        myIsCameraResetRequired = true;
+    }
+
     private void InitializeModules()
     {
         myConfiguration.Initialize();
-        myCamera!.Initialize();
         myHeightMap.Initialize();
         myErosionSimulator.Initialize();
         myRenderer!.Initialize();
