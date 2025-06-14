@@ -64,12 +64,12 @@ public class GridHydraulicAndThermalErosionTests
     }
 
     [Test]
-    public void Simulate_LayerOneHeightMapWithGivenSizeIterationsSeaLevelAndRockTypesInMiddleAndHorizontalErosionWithoutRain_VolumeStaysTheSame([Values(3u, 9u, 27u)] uint sideLength,
+    public void Simulate_LayerOneHeightMapWithGivenSizeIterationsSeaLevelAndRockTypesInMiddleAndHorizontalErosionWithRain_VolumeStaysTheSame([Values(3u, 9u, 27u)] uint sideLength,
                                                                                                                                         [Values(1u, 2u, 3u)] uint rockTypeCount,
                                                                                                                                         [Values(1u, 100u, 10000u)] uint iterations,
                                                                                                                                         [Values(0.0f, 1.0f, 2.0f)] float seaLevel)
     {
-        SetUpErosionConfiguration(iterations, false);
+        SetUpErosionConfiguration(iterations, true);
         SetUpHydraulicErosionConfiguration(true);
         uint layer = 1;
         uint layerCount = layer + 1;
