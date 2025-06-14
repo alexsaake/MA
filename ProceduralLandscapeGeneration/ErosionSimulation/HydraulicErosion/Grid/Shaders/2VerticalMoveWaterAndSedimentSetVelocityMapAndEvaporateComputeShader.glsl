@@ -145,6 +145,17 @@ float TotalLayerHeightMapAndWaterHeight(uint index, uint layer)
     return TotalLayerHeightMapHeight(index, layer) + TotalLayerWaterHeight(index, layer);
 }
 
+float SeaLevel(uint index, uint layer)
+{
+    float seaLevel = mapGenerationConfiguration.SeaLevel;
+    float totalLayerHeightMapHeight = TotalLayerHeightMapHeight(index, layer);
+    if(totalLayerHeightMapHeight < seaLevel)
+    {
+        return seaLevel - totalLayerHeightMapHeight;
+    }
+    return 0.0;
+}
+
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
@@ -244,6 +255,8 @@ void main()
         float sedimentFlowOut = gridHydraulicErosionCell.SedimentFlowRight + gridHydraulicErosionCell.SedimentFlowLeft + gridHydraulicErosionCell.SedimentFlowUp + gridHydraulicErosionCell.SedimentFlowDown;
 	    float sedimentVolumeDelta = (sedimentFlowIn - sedimentFlowOut) * erosionConfiguration.TimeDelta;
 	    gridHydraulicErosionCell.SuspendedSediment = max(gridHydraulicErosionCell.SuspendedSediment + sedimentVolumeDelta, 0.0);
+        
+        gridHydraulicErosionCell.WaterHeight = max(max(gridHydraulicErosionCell.WaterHeight * (1.0 - gridHydraulicErosionConfiguration.EvaporationRate * erosionConfiguration.TimeDelta), 0.0), SeaLevel(index, layer));
 
         if(gridHydraulicErosionCell.WaterHeight > 0.0)
         {
@@ -254,7 +267,6 @@ void main()
         {
             gridHydraulicErosionCell.WaterVelocity = vec2(0.0);
         }
-        gridHydraulicErosionCell.WaterHeight = max(gridHydraulicErosionCell.WaterHeight * (1.0 - gridHydraulicErosionConfiguration.EvaporationRate * erosionConfiguration.TimeDelta), 0.0);
     
         gridHydraulicErosionCells[layerIndex] = gridHydraulicErosionCell;
     }

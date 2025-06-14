@@ -18,6 +18,7 @@ namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.HydraulicEros
 public class GridThermalErosionTests
 {
     private const int AngleOfRepose = 45;
+    private const float Tolerance = 0.00001f;
 
     private IContainer? myContainer;
     private IMapGenerationConfiguration? myMapGenerationConfiguration;
@@ -98,7 +99,7 @@ public class GridThermalErosionTests
             Is.EqualTo(centerCell.SedimentFlowLeft).Within(0.0001f)
             .And.EqualTo(centerCell.SedimentFlowRight).Within(0.0001f)
             .And.EqualTo(centerCell.SedimentFlowDown).Within(0.0001f)
-            .And.EqualTo(centerCell.SedimentFlowUp).Within(0.0001f));
+            .And.EqualTo(centerCell.SedimentFlowUp).Within(Tolerance));
 
         testee.Deposite();
 
@@ -135,7 +136,9 @@ public class GridThermalErosionTests
         float[] endHeightMap = ReadHeightMapShaderBuffer();
         float endVolume = endHeightMap.Sum(cell => cell);
 
-        Assert.That(startVolume, Is.EqualTo(endVolume).Within(0.0001f));
+        Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
+        Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
+        Assert.That(startVolume, Is.EqualTo(endVolume).Within(Tolerance));
     }
 
     private void InitializeConfiguration()

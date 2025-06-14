@@ -197,6 +197,7 @@ void main()
     if(index >= myHeightMapPlaneSize
         || mapGenerationConfiguration.LayerCount < 2)
     {
+        memoryBarrier();
         return;
     }
     myHeightMapSideLength = uint(sqrt(myHeightMapPlaneSize));
@@ -208,6 +209,7 @@ void main()
         && isSplitOpen
         && max(layerOneFloorHeight - layerZeroHeightMapHeight, 0.0) < LayerFloorCollapseThreshold(index, 1))
     {
+        memoryBarrier();
         return;
     }
 
