@@ -228,6 +228,7 @@ float SuspendFromLayerZeroTop(uint index, float requiredSediment)
 
 float SuspendFromLayerOneBottom(uint index, float requiredSediment)
 {
+    uint layer = 1;
     if(layer < 1
         || (LayerHeightMapFloorHeight(index, layer) == 0
             && layer > 0))
