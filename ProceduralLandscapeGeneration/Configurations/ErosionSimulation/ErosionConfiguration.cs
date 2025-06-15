@@ -14,6 +14,7 @@ internal class ErosionConfiguration : IErosionConfiguration
 
     private bool myIsDisposed;
 
+    public ulong IterationCount { get; set; }
     public bool IsSimulationRunning { get; set; }
     public bool IsHydraulicErosionEnabled { get; set; }
     public HydraulicErosionModeTypes HydraulicErosionMode { get; set; }

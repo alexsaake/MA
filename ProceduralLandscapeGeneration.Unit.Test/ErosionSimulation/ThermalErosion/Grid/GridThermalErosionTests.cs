@@ -18,7 +18,7 @@ namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.ThermalErosio
 public class GridThermalErosionTests
 {
     private const int AngleOfRepose = 45;
-    private const float Tolerance = 0.00001f;
+    private const float TolerancePercentage = 0.0001f;
 
     private IContainer? myContainer;
     private IMapGenerationConfiguration? myMapGenerationConfiguration;
@@ -95,11 +95,10 @@ public class GridThermalErosionTests
         float expectedFlow = 0.05f;
         GridThermalErosionCellShaderBuffer[] gridThermalErosionCells = ReadGridThermalErosionCellShaderBuffer();
         GridThermalErosionCellShaderBuffer centerCell = gridThermalErosionCells[CenterIndex];
-        Assert.That(expectedFlow,
-            Is.EqualTo(centerCell.SedimentFlowLeft).Within(0.0001f)
-            .And.EqualTo(centerCell.SedimentFlowRight).Within(0.0001f)
-            .And.EqualTo(centerCell.SedimentFlowDown).Within(0.0001f)
-            .And.EqualTo(centerCell.SedimentFlowUp).Within(Tolerance));
+        Assert.That(centerCell.SedimentFlowLeft, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.SedimentFlowRight, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.SedimentFlowDown, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.SedimentFlowUp, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
 
         testee.Deposite();
 
@@ -138,7 +137,7 @@ public class GridThermalErosionTests
 
         Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
-        Assert.That(startVolume, Is.EqualTo(endVolume).Within(Tolerance));
+        Assert.That(startVolume, Is.EqualTo(endVolume).Within(endVolume * TolerancePercentage));
     }
 
     private void InitializeConfiguration()

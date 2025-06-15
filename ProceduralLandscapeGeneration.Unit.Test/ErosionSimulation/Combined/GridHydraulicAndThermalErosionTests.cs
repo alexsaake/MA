@@ -18,7 +18,7 @@ namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.Combined;
 public class GridHydraulicAndThermalErosionTests
 {
     private const int AngleOfRepose = 45;
-    private const float Tolerance = 0.0001f;
+    private const float TolerancePercentage = 0.0001f;
 
     private IContainer? myContainer;
     private IMapGenerationConfiguration? myMapGenerationConfiguration;
@@ -105,8 +105,8 @@ public class GridHydraulicAndThermalErosionTests
         Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(intermediateHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
-        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
-        Assert.That(endVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
+        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         if (seaLevel == 0)
         {
             Assert.That(endSuspendedSediment, Is.Zero);

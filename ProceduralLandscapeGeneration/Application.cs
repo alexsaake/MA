@@ -25,7 +25,7 @@ internal class Application : IApplication
     private IRenderer? myRenderer;
 
     private bool myIsResetRequired;
-    private bool myIsErosionResetRequired;
+    private bool myIsErosionShaderBuffersResetRequired;
     private bool myIsRendererResetRequired;
     private bool myIsCameraResetRequired;
     private bool myShowUI = true;
@@ -56,7 +56,7 @@ internal class Application : IApplication
         myMapGenerationConfiguration.RendererChanged += OnRendererChanged;
         myMapGenerationConfiguration.HeightMapSideLengthChanged += OnHeightMapSideLengthChanged;
         myConfigurationGUI.MapResetRequired += OnResetRequired;
-        myConfigurationGUI.ErosionResetRequired += OnErosionResetRequired;
+        myConfigurationGUI.ErosionShaderBuffersResetRequired += OnErosionShaderBuffersResetRequired;
         myConfigurationGUI.ErosionModeChanged += OnErosionModeChanged;
 
         InitializeModules();
@@ -69,15 +69,16 @@ internal class Application : IApplication
         {
             if (myIsResetRequired)
             {
+                myErosionConfiguration.IterationCount = 0;
                 DisposeModules();
                 ResolveRenderer();
                 InitializeModules();
                 myIsResetRequired = false;
             }
-            if (myIsErosionResetRequired)
+            if (myIsErosionShaderBuffersResetRequired)
             {
                 myErosionSimulator.ResetShaderBuffers();
-                myIsErosionResetRequired = false;
+                myIsErosionShaderBuffersResetRequired = false;
             }
             if (myIsRendererResetRequired)
             {
@@ -122,7 +123,7 @@ internal class Application : IApplication
         myMapGenerationConfiguration.RendererChanged -= OnRendererChanged;
         myMapGenerationConfiguration.HeightMapSideLengthChanged -= OnHeightMapSideLengthChanged;
         myConfigurationGUI.MapResetRequired -= OnResetRequired;
-        myConfigurationGUI.ErosionResetRequired -= OnErosionResetRequired;
+        myConfigurationGUI.ErosionShaderBuffersResetRequired -= OnErosionShaderBuffersResetRequired;
         myConfigurationGUI.ErosionModeChanged -= OnErosionModeChanged;
 
         DisposeModules();
@@ -140,14 +141,14 @@ internal class Application : IApplication
         myIsRendererResetRequired = true;
     }
 
-    private void OnErosionResetRequired(object? sender, EventArgs e)
+    private void OnErosionShaderBuffersResetRequired(object? sender, EventArgs e)
     {
-        myIsErosionResetRequired = true;
+        myIsErosionShaderBuffersResetRequired = true;
     }
 
     private void OnErosionModeChanged(object? sender, EventArgs e)
     {
-        myIsErosionResetRequired = true;
+        myIsErosionShaderBuffersResetRequired = true;
     }
 
     private void OnHeightMapSideLengthChanged(object? sender, EventArgs e)

@@ -156,19 +156,14 @@ void MoveRockToAboveLayer(uint index, float splitHeight)
     }
 }
 
-uint LayerHydraulicErosionCellsOffset(uint layer)
-{
-    return layer * myHeightMapPlaneSize;
-}
-
-void MoveWaterAndSuspendedSedimentToAboveLayer(uint index, uint layer)
+void MoveWaterAndSuspendedSedimentToAboveLayer(uint index)
 {
     if(layer >= mapGenerationConfiguration.LayerCount - 1)
     {
         return;
     }
-    uint currentLayerGridHydraulicErosionCellIndex = index + LayerHydraulicErosionCellsOffset(layer);
-    uint aboveLayerGridHydraulicErosionCellIndex = index + LayerHydraulicErosionCellsOffset(layer + 1);
+    uint currentLayerGridHydraulicErosionCellIndex = index;
+    uint aboveLayerGridHydraulicErosionCellIndex = index + myHeightMapPlaneSize;
     
     gridHydraulicErosionCells[aboveLayerGridHydraulicErosionCellIndex].WaterHeight += gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellIndex].WaterHeight;
     gridHydraulicErosionCells[currentLayerGridHydraulicErosionCellIndex].WaterHeight = 0.0;
@@ -207,11 +202,6 @@ float SuspendFromLayerZeroTop(uint index, float requiredSediment)
     return suspendedSediment;
 }
 
-void AddLayerHeightMapFloorHeight(uint index, uint layer, float value)
-{
-    heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] += value;
-}
-
 float LayerHeightMapRockTypeHeight(uint index, uint layer)
 {
     float layerHeightMapRockTypeHeight = 0.0;
@@ -222,49 +212,6 @@ float LayerHeightMapRockTypeHeight(uint index, uint layer)
     return layerHeightMapRockTypeHeight;
 }
 
-void TryCollapse(uint index, uint layer)
-{
-    if(LayerHeightMapRockTypeHeight(index, layer) == 0)
-    {
-        SetLayerHeightMapFloorHeight(index, layer, 0);
-    }
-}
-
-float SuspendFromLayerBottom(uint index, uint layer, float requiredSediment)
-{
-    if(layer < 1
-        || (LayerHeightMapFloorHeight(index, layer) == 0
-            && layer > 0))
-    {
-        return 0.0;
-    }
-    float suspendedSediment = 0;
-    for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
-    {
-        uint rockTypeIndex = index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer);
-        float height = heightMap[rockTypeIndex];
-        float hardness = (1.0 - rockTypesConfiguration[rockType].Hardness);
-        float toBeSuspendedSediment = requiredSediment * hardness;
-        if(height >= toBeSuspendedSediment)
-        {
-            heightMap[rockTypeIndex] -= toBeSuspendedSediment;
-            AddLayerHeightMapFloorHeight(index, layer, toBeSuspendedSediment);
-            suspendedSediment += toBeSuspendedSediment;
-            return suspendedSediment;
-        }
-        else if(height > 0)
-        {
-            float toBeSuspendedHeight = height;
-            heightMap[rockTypeIndex] = 0;
-            AddLayerHeightMapFloorHeight(index, layer, toBeSuspendedHeight);
-            TryCollapse(index, layer);
-            requiredSediment -= toBeSuspendedHeight;
-            suspendedSediment += toBeSuspendedHeight;
-        }
-    }
-    return suspendedSediment;
-}
-
 void SplitAt(uint index, float splitHeight)
 {
     if(LayerHeightMapFloorHeight(index, 1) > 0)
@@ -273,7 +220,7 @@ void SplitAt(uint index, float splitHeight)
     }
     SetLayerHeightMapFloorHeight(index, 1, splitHeight);
     MoveRockToAboveLayer(index, splitHeight);
-    MoveWaterAndSuspendedSedimentToAboveLayer(index, 0);
+    MoveWaterAndSuspendedSedimentToAboveLayer(index);
 }
 
 bool TrySplit(uint index, uint neighborIndex, vec2 direction)
@@ -288,45 +235,25 @@ bool TrySplit(uint index, uint neighborIndex, vec2 direction)
             float neighborTotalTerrainAndWaterHeight = neighborTotalHeight + gridHydraulicErosionCell.WaterHeight;
             float totalheight = TotalHeightMapHeight(index);
             if(neighborTotalTerrainAndWaterHeight < totalheight)
-            {
-                bool isEroded = false;
-
-                float sedimentCapacity = min(gridHydraulicErosionConfiguration.SedimentCapacity * length(gridHydraulicErosionCell.WaterVelocity), 1.0);
-
+            {                
                 float layerZeroHeight = LayerHeightMapRockTypeHeight(index, 0);
                 float layerZeroHeightBelowSeaLevel = max(neighborTotalTerrainAndWaterHeight - layerZeroHeight, 0.0);
-	            float erosionDepthLimit = (gridHydraulicErosionConfiguration.MaximalErosionDepth - min(gridHydraulicErosionConfiguration.MaximalErosionDepth, layerZeroHeightBelowSeaLevel)) * 1.0 / gridHydraulicErosionConfiguration.MaximalErosionDepth;
-                float sedimentCapacityBottom = sedimentCapacity * erosionDepthLimit;
+	            float erosionDepthLimit = (gridHydraulicErosionConfiguration.MaximalErosionDepth - min(gridHydraulicErosionConfiguration.MaximalErosionDepth, layerZeroHeightBelowSeaLevel)) / gridHydraulicErosionConfiguration.MaximalErosionDepth;
+
+                float sedimentCapacity = min(gridHydraulicErosionConfiguration.SedimentCapacity * length(gridHydraulicErosionCell.WaterVelocity) * erosionDepthLimit, 1.0);
             
-                if(sedimentCapacityBottom > gridHydraulicErosionCell.SuspendedSediment)
+                if(sedimentCapacity > gridHydraulicErosionCell.SuspendedSediment)
 	            {
-		            float soilSuspendedBottom = max(gridHydraulicErosionConfiguration.HorizontalSuspensionRate * (sedimentCapacityBottom - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
+		            float soilSuspendedBottom = max(gridHydraulicErosionConfiguration.HorizontalSuspensionRate * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
 
 		            SplitAt(index, neighborTotalHeight);
-		            float suspendedSedimentBottom = SuspendFromLayerZeroTop(index, soilSuspendedBottom);
-		            gridHydraulicErosionCell.SuspendedSediment += suspendedSedimentBottom;
-
-                    isEroded = true;
-	            }
-                
-                float layerOneFloorHeight = LayerHeightMapFloorHeight(index, 1);
-                float layerOneHeightAboveSeaLevel = max(layerOneFloorHeight - neighborTotalTerrainAndWaterHeight, 0.0);
-	            float erosionHeightLimit = (gridHydraulicErosionConfiguration.MaximalErosionHeight - min(gridHydraulicErosionConfiguration.MaximalErosionHeight, layerOneHeightAboveSeaLevel)) * 1.0 / gridHydraulicErosionConfiguration.MaximalErosionHeight;
-                float sedimentCapacityTop = sedimentCapacity * erosionHeightLimit;
-
-                if(sedimentCapacityTop > gridHydraulicErosionCell.SuspendedSediment)
-	            {
-		            float soilSuspendedTop = max(gridHydraulicErosionConfiguration.HorizontalSuspensionRate * (sedimentCapacityTop - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
-
-                    float suspendedSedimentTop = SuspendFromLayerBottom(index, 1, soilSuspendedTop);
-		            gridHydraulicErosionCell.SuspendedSediment += suspendedSedimentTop;
-
-                    isEroded = true;
+		            float suspendedSediment = SuspendFromLayerZeroTop(index, soilSuspendedBottom);
+		            gridHydraulicErosionCell.SuspendedSediment += suspendedSediment;
 	            }
                 
                 gridHydraulicErosionCells[neighborIndex] = gridHydraulicErosionCell;
 
-                return isEroded;
+                return true;
             }
         }
     }

@@ -10,6 +10,7 @@ using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.GUI.Elements;
 using Raylib_cs;
+using System.Globalization;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.GUI;
@@ -38,6 +39,9 @@ internal class ConfigurationGUI : IConfigurationGUI
     private readonly PanelWithElements myCoarseSedimentRockTypePanel;
     private readonly PanelWithElements myFineSedimentRockTypePanel;
 
+    private Vector2 myLeftPanel3Position;
+    private readonly PanelWithElements myIterationsCounterPanel;
+
     private Vector2 myRightPanelPosition;
     private readonly PanelWithElements myMapGenerationPanel;
     private readonly PanelWithElements myNoiseMapGenerationPanel;
@@ -48,7 +52,7 @@ internal class ConfigurationGUI : IConfigurationGUI
     private readonly PanelWithElements myDisplayPanel;
 
     public event EventHandler? MapResetRequired;
-    public event EventHandler? ErosionResetRequired;
+    public event EventHandler? ErosionShaderBuffersResetRequired;
     public event EventHandler? ErosionModeChanged;
 
     public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IRockTypesConfiguration rockTypesConfiguration)
@@ -84,7 +88,7 @@ internal class ConfigurationGUI : IConfigurationGUI
             erosionConfiguration.WindErosionMode = (WindErosionModeTypes)value;
             ErosionModeChanged?.Invoke(this, EventArgs.Empty);
         }, (int)erosionConfiguration.WindErosionMode));
-        myErosionPanel.Add(new Button("Reset", () => ErosionResetRequired?.Invoke(this, EventArgs.Empty)));
+        myErosionPanel.Add(new Button("Reset", () => ErosionShaderBuffersResetRequired?.Invoke(this, EventArgs.Empty)));
         myErosionPanel.Add(new ValueBoxIntWithLabel("Iterations per Step", (value) => erosionConfiguration.IterationsPerStep = (uint)value, (int)erosionConfiguration.IterationsPerStep, 1, 1000));
         myErosionPanel.Add(new ToggleSliderWithLabel("Water Kept In Boundaries", "Off;On", (value) => erosionConfiguration.IsWaterKeptInBoundaries = value == 1, erosionConfiguration.IsWaterKeptInBoundaries ? 1 : 0));
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => erosionConfiguration.TimeDelta = value, erosionConfiguration.TimeDelta));
@@ -149,6 +153,10 @@ internal class ConfigurationGUI : IConfigurationGUI
         myFineSedimentRockTypePanel.Add(new ValueBoxIntWithLabel("Angle Of Repose", (value) => rockTypesConfiguration.FineSedimentAngleOfRepose = (uint)value, (int)rockTypesConfiguration.FineSedimentAngleOfRepose, 1, 89));
         myFineSedimentRockTypePanel.Add(new ValueBoxFloatWithLabel("Collapse Threshold", (value) => rockTypesConfiguration.FineSedimentCollapseThreshold = value, rockTypesConfiguration.FineSedimentCollapseThreshold));
 
+        myLeftPanel3Position = new Vector2((PanelSize.X + 2) * 2, 0);
+
+        myIterationsCounterPanel = new PanelWithElements("Iterations");
+        myIterationsCounterPanel.Add(new Label(() => myErosionConfiguration.IterationCount.ToString(CultureInfo.InvariantCulture)));
 
         myRightPanelPosition = new Vector2(configuration.ScreenWidth - PanelSize.X, 0);
 
@@ -197,6 +205,7 @@ internal class ConfigurationGUI : IConfigurationGUI
     {
         DrawErosionPanels();
         DrawRockTypesPanels();
+        DrawIterationCounterPanel();
         DrawMapGenerationPanels();
         DrawDisplayPanels();
     }
@@ -205,7 +214,7 @@ internal class ConfigurationGUI : IConfigurationGUI
     {
         myErosionPanel.Draw(myLeftPanel1Position);
         Vector2 springOffset = myErosionPanel.BottomLeft;
-        if(myErosionConfiguration.WaterSource == WaterSourceTypes.Spring)
+        if (myErosionConfiguration.WaterSource == WaterSourceTypes.Spring)
         {
             mySpringPanel.Draw(myErosionPanel.BottomLeft);
             springOffset = mySpringPanel.BottomLeft;
@@ -262,6 +271,11 @@ internal class ConfigurationGUI : IConfigurationGUI
                 myFineSedimentRockTypePanel.Draw(myCoarseSedimentRockTypePanel.BottomLeft);
                 break;
         }
+    }
+
+    private void DrawIterationCounterPanel()
+    {
+        myIterationsCounterPanel.Draw(myLeftPanel3Position);
     }
 
     private void DrawMapGenerationPanels()

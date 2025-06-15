@@ -6,6 +6,7 @@ namespace ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 
 internal interface IErosionConfiguration : IDisposable
 {
+    ulong IterationCount { get; set; }
     bool IsSimulationRunning { get; set; }
     bool IsHydraulicErosionEnabled { get; set; }
     HydraulicErosionModeTypes HydraulicErosionMode { get; set; }

@@ -17,7 +17,7 @@ namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.HydraulicEros
 public class GridHydraulicErosionTests
 {
     private const int AngleOfRepose = 45;
-    private const float TolerancePercentage = 0.01f;
+    private const float TolerancePercentage = 0.0001f;
 
     private IContainer? myContainer;
     private IMapGenerationConfiguration? myMapGenerationConfiguration;
