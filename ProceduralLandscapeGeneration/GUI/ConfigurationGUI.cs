@@ -44,6 +44,7 @@ internal class ConfigurationGUI : IConfigurationGUI
 
     private Vector2 myRightPanelPosition;
     private readonly PanelWithElements myMapGenerationPanel;
+    private readonly PanelWithElements myLayersPanel;
     private readonly PanelWithElements myNoiseMapGenerationPanel;
     private readonly PanelWithElements myHeatMapGenerationPanel;
     private readonly PanelWithElements myPlateTectonicsMapGenerationPanel;
@@ -168,6 +169,9 @@ internal class ConfigurationGUI : IConfigurationGUI
         myMapGenerationPanel.Add(new Button("Reset", () => MapResetRequired?.Invoke(this, EventArgs.Empty)));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Side Length", (value) => mapGenerationConfiguration.HeightMapSideLength = (uint)value, (int)mapGenerationConfiguration.HeightMapSideLength, 32, 8192));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => mapGenerationConfiguration.HeightMultiplier = (uint)value, (int)mapGenerationConfiguration.HeightMultiplier, 1, 512));
+        
+        myLayersPanel = new PanelWithElements("Layers");
+        myLayersPanel.Add(new ToggleSliderWithLabel("Layer Colors", "Off;On", (value) => mapGenerationConfiguration.AreLayerColorsEnabled = value == 1, mapGenerationConfiguration.AreLayerColorsEnabled ? 1 : 0));
 
         myNoiseMapGenerationPanel = new PanelWithElements("Noise Map Generation");
         myNoiseMapGenerationPanel.Add(new ValueBoxIntWithLabel("Seed", (value) => mapGenerationConfiguration.Seed = value, mapGenerationConfiguration.Seed, int.MinValue, int.MaxValue));
@@ -281,13 +285,19 @@ internal class ConfigurationGUI : IConfigurationGUI
     private void DrawMapGenerationPanels()
     {
         myMapGenerationPanel.Draw(myRightPanelPosition);
+        Vector2 layersOffset = myMapGenerationPanel.BottomLeft;
+        if (myMapGenerationConfiguration.LayerCount > 1)
+        {
+            myLayersPanel.Draw(myMapGenerationPanel.BottomLeft);
+            layersOffset = myLayersPanel.BottomLeft;
+        }
         switch (myMapGenerationConfiguration.MapGeneration)
         {
             case MapGenerationTypes.Noise:
-                myNoiseMapGenerationPanel.Draw(myMapGenerationPanel.BottomLeft);
+                myNoiseMapGenerationPanel.Draw(layersOffset);
                 break;
             case MapGenerationTypes.Tectonics:
-                myPlateTectonicsMapGenerationPanel.Draw(myMapGenerationPanel.BottomLeft);
+                myPlateTectonicsMapGenerationPanel.Draw(layersOffset);
                 myHeatMapGenerationPanel.Draw(myPlateTectonicsMapGenerationPanel.BottomLeft);
                 break;
         }

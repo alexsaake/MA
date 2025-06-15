@@ -56,6 +56,21 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
+    private bool myAreLayerColorsEnabled;
+    public bool AreLayerColorsEnabled
+    {
+        get => myAreLayerColorsEnabled;
+        set
+        {
+            if (myAreLayerColorsEnabled == value)
+            {
+                return;
+            }
+            myAreLayerColorsEnabled = value;
+            UpdateShaderBuffer();
+        }
+    }
+
     private float mySeaLevel;
     public float SeaLevel
     {
@@ -298,6 +313,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
 
         myRockTypeCount = 3;
         myLayerCount = 1;
+        myAreLayerColorsEnabled = false;
         mySeaLevel = 0.2f;
 
         myRenderType = RenderTypes.HeightMap;
@@ -341,7 +357,8 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
             LayerCount = LayerCount,
             SeaLevel = SeaLevel,
             AreTerrainColorsEnabled = AreTerrainColorsEnabled,
-            ArePlateTectonicsPlateColorsEnabled = ArePlateTectonicsPlateColorsEnabled
+            ArePlateTectonicsPlateColorsEnabled = ArePlateTectonicsPlateColorsEnabled,
+            AreLayerColorsEnabled = AreLayerColorsEnabled
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.MapGenerationConfiguration], &mapGenerationConfigurationShaderBuffer, (uint)sizeof(MapGenerationConfigurationShaderBuffer), 0);
     }

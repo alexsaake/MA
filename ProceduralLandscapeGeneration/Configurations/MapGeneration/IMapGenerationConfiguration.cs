@@ -8,6 +8,7 @@ internal interface IMapGenerationConfiguration : IDisposable
     uint HeightMultiplier { get; set; }
     uint RockTypeCount { get; set; }
     uint LayerCount { get; set; }
+    bool AreLayerColorsEnabled { get; set; }
     float SeaLevel { get; set; }
     RenderTypes RenderType { get; set; }
     MapGenerationTypes MapGeneration { get; set; }

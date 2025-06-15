@@ -11,4 +11,8 @@ internal struct MapGenerationConfigurationShaderBuffer
     private readonly bool padding2;
     private readonly bool padding3;
     public bool ArePlateTectonicsPlateColorsEnabled;
+    private readonly bool padding4;
+    private readonly bool padding5;
+    private readonly bool padding6;
+    public bool AreLayerColorsEnabled;
 }

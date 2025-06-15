@@ -15,6 +15,7 @@ struct MapGenerationConfiguration
     float SeaLevel;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
+    bool AreLayerColorsEnabled;
 };
 
 layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer

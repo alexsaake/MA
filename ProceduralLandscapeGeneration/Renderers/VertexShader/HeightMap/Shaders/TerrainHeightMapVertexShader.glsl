@@ -13,6 +13,7 @@ struct MapGenerationConfiguration
     float SeaLevel;
     bool AreTerrainColorsEnabled;
     bool ArePlateTectonicsPlateColorsEnabled;
+    bool AreLayerColorsEnabled;
 };
 
 layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationShaderBuffer
@@ -189,8 +190,25 @@ void main()
     vec3 normal = GetScaledNormal(x, y);
     fragNormal = transpose(inverse(mat3(matModel))) * normal;
     
-    vec3 terrainColor = vec3(1.0);
-    if(plateTectonicsSegments.length() > 0
+    vec3 terrainColor = vec3(1.0);    
+    if(mapGenerationConfiguration.LayerCount > 1
+        && mapGenerationConfiguration.AreLayerColorsEnabled)
+    {
+        uint layer = 0;
+        if(LayerHeightMapFloorHeight(index, 1) > 0)
+        {
+            layer = 1;
+        }
+        if(layer == 0)
+        {
+            terrainColor = vec3(1, 0, 0);
+        }
+        if(layer == 1)
+        {
+            terrainColor = vec3(0, 1, 0);
+        }
+    }
+    else if(plateTectonicsSegments.length() > 0
         && mapGenerationConfiguration.ArePlateTectonicsPlateColorsEnabled)
     {
         int plate = plateTectonicsSegments[index].Plate;
