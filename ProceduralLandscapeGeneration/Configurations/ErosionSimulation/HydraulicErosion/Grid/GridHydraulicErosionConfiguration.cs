@@ -195,7 +195,7 @@ internal class GridHydraulicErosionConfiguration : IGridHydraulicErosionConfigur
         myWaterIncrease = 0.001f;
         myGravity = 9.81f;
         myDampening = 0.8f;
-        myMaximalErosionHeight = 0.02f;
+        myMaximalErosionHeight = 0.1f;
         myMaximalErosionDepth = 0.01f;
         mySedimentCapacity = 0.1f;
         myVerticalSuspensionRate = 0.05f;

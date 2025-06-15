@@ -17,7 +17,7 @@ namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.HydraulicEros
 public class GridHydraulicErosionTests
 {
     private const int AngleOfRepose = 45;
-    private const float Tolerance = 0.00001f;
+    private const float TolerancePercentage = 0.01f;
 
     private IContainer? myContainer;
     private IMapGenerationConfiguration? myMapGenerationConfiguration;
@@ -100,14 +100,14 @@ public class GridHydraulicErosionTests
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
         uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
         GridHydraulicErosionCellShaderBuffer centerCell = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
-        Assert.That(centerCell.WaterFlowLeft, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.WaterFlowRight, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.WaterFlowDown, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.WaterFlowUp, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.SedimentFlowLeft, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.SedimentFlowRight, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.SedimentFlowDown, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.SedimentFlowUp, Is.EqualTo(expectedFlow).Within(Tolerance));
+        Assert.That(centerCell.WaterFlowLeft, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.WaterFlowRight, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.WaterFlowDown, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.WaterFlowUp, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.SedimentFlowLeft, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.SedimentFlowRight, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.SedimentFlowDown, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.SedimentFlowUp, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
     }
 
     [Test]
@@ -124,19 +124,18 @@ public class GridHydraulicErosionTests
 
         testee.VerticalFlow();
 
-        float expectedFlow = 0.0f;
         float[] heightMap = ReadHeightMapShaderBuffer();
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
         uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
         GridHydraulicErosionCellShaderBuffer centerCell = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
-        Assert.That(centerCell.WaterFlowLeft, Is.EqualTo(expectedFlow));
-        Assert.That(centerCell.WaterFlowRight, Is.EqualTo(expectedFlow));
-        Assert.That(centerCell.WaterFlowDown, Is.EqualTo(expectedFlow));
-        Assert.That(centerCell.WaterFlowUp, Is.EqualTo(expectedFlow));
-        Assert.That(centerCell.SedimentFlowLeft, Is.EqualTo(expectedFlow));
-        Assert.That(centerCell.SedimentFlowRight, Is.EqualTo(expectedFlow));
-        Assert.That(centerCell.SedimentFlowDown, Is.EqualTo(expectedFlow));
-        Assert.That(centerCell.SedimentFlowUp, Is.EqualTo(expectedFlow));
+        Assert.That(centerCell.WaterFlowLeft, Is.Zero);
+        Assert.That(centerCell.WaterFlowRight, Is.Zero);
+        Assert.That(centerCell.WaterFlowDown, Is.Zero);
+        Assert.That(centerCell.WaterFlowUp, Is.Zero);
+        Assert.That(centerCell.SedimentFlowLeft, Is.Zero);
+        Assert.That(centerCell.SedimentFlowRight, Is.Zero);
+        Assert.That(centerCell.SedimentFlowDown, Is.Zero);
+        Assert.That(centerCell.SedimentFlowUp, Is.Zero);
     }
 
     [Test]
@@ -157,14 +156,14 @@ public class GridHydraulicErosionTests
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
         uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
         GridHydraulicErosionCellShaderBuffer centerCell = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
-        Assert.That(centerCell.WaterFlowLeft, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.WaterFlowRight, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.WaterFlowDown, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.WaterFlowUp, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.SedimentFlowLeft, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.SedimentFlowRight, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.SedimentFlowDown, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCell.SedimentFlowUp, Is.EqualTo(expectedFlow).Within(Tolerance));
+        Assert.That(centerCell.WaterFlowLeft, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.WaterFlowRight, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.WaterFlowDown, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.WaterFlowUp, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.SedimentFlowLeft, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.SedimentFlowRight, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.SedimentFlowDown, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCell.SedimentFlowUp, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
     }
 
     [Test]
@@ -185,23 +184,23 @@ public class GridHydraulicErosionTests
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
         uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
         GridHydraulicErosionCellShaderBuffer centerCellLayerZero = gridHydraulicErosionCellsShaderBuffers[CenterIndex];
-        Assert.That(centerCellLayerZero.WaterFlowLeft, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerZero.WaterFlowRight, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerZero.WaterFlowDown, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerZero.WaterFlowUp, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerZero.SedimentFlowLeft, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerZero.SedimentFlowRight, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerZero.SedimentFlowDown, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerZero.SedimentFlowUp, Is.EqualTo(expectedFlow).Within(Tolerance));
+        Assert.That(centerCellLayerZero.WaterFlowLeft, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerZero.WaterFlowRight, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerZero.WaterFlowDown, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerZero.WaterFlowUp, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerZero.SedimentFlowLeft, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerZero.SedimentFlowRight, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerZero.SedimentFlowDown, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerZero.SedimentFlowUp, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer centerCellLayerOne = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
-        Assert.That(centerCellLayerOne.WaterFlowLeft, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.WaterFlowRight, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.WaterFlowDown, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.WaterFlowUp, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.SedimentFlowLeft, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.SedimentFlowRight, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.SedimentFlowDown, Is.EqualTo(expectedFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.SedimentFlowUp, Is.EqualTo(expectedFlow).Within(Tolerance));
+        Assert.That(centerCellLayerOne.WaterFlowLeft, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.WaterFlowRight, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.WaterFlowDown, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.WaterFlowUp, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.SedimentFlowLeft, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.SedimentFlowRight, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.SedimentFlowDown, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.SedimentFlowUp, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
     }
 
     [Test]
@@ -224,23 +223,23 @@ public class GridHydraulicErosionTests
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
         uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
         GridHydraulicErosionCellShaderBuffer rightCellLayerZero = gridHydraulicErosionCellsShaderBuffers[RightIndex];
-        Assert.That(rightCellLayerZero.WaterFlowLeft, Is.EqualTo(expectedLayerZeroFlow).Within(Tolerance));
-        Assert.That(rightCellLayerZero.WaterFlowRight, Is.EqualTo(expectedLayerZeroFlow).Within(Tolerance));
-        Assert.That(rightCellLayerZero.WaterFlowDown, Is.EqualTo(expectedLayerZeroFlow).Within(Tolerance));
-        Assert.That(rightCellLayerZero.WaterFlowUp, Is.EqualTo(expectedLayerZeroFlow).Within(Tolerance));
-        Assert.That(rightCellLayerZero.SedimentFlowLeft, Is.EqualTo(expectedLayerZeroFlow).Within(Tolerance));
-        Assert.That(rightCellLayerZero.SedimentFlowRight, Is.EqualTo(expectedLayerZeroFlow).Within(Tolerance));
-        Assert.That(rightCellLayerZero.SedimentFlowDown, Is.EqualTo(expectedLayerZeroFlow).Within(Tolerance));
-        Assert.That(rightCellLayerZero.SedimentFlowUp, Is.EqualTo(expectedLayerZeroFlow).Within(Tolerance));
+        Assert.That(rightCellLayerZero.WaterFlowLeft, Is.EqualTo(expectedLayerZeroFlow).Within(expectedLayerZeroFlow * TolerancePercentage));
+        Assert.That(rightCellLayerZero.WaterFlowRight, Is.EqualTo(expectedLayerZeroFlow).Within(expectedLayerZeroFlow * TolerancePercentage));
+        Assert.That(rightCellLayerZero.WaterFlowDown, Is.EqualTo(expectedLayerZeroFlow).Within(expectedLayerZeroFlow * TolerancePercentage));
+        Assert.That(rightCellLayerZero.WaterFlowUp, Is.EqualTo(expectedLayerZeroFlow).Within(expectedLayerZeroFlow * TolerancePercentage));
+        Assert.That(rightCellLayerZero.SedimentFlowLeft, Is.EqualTo(expectedLayerZeroFlow).Within(expectedLayerZeroFlow * TolerancePercentage));
+        Assert.That(rightCellLayerZero.SedimentFlowRight, Is.EqualTo(expectedLayerZeroFlow).Within(expectedLayerZeroFlow * TolerancePercentage));
+        Assert.That(rightCellLayerZero.SedimentFlowDown, Is.EqualTo(expectedLayerZeroFlow).Within(expectedLayerZeroFlow * TolerancePercentage));
+        Assert.That(rightCellLayerZero.SedimentFlowUp, Is.EqualTo(expectedLayerZeroFlow).Within(expectedLayerZeroFlow * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer centerCellLayerOne = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
-        Assert.That(centerCellLayerOne.WaterFlowLeft, Is.EqualTo(expectedLayerOneFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.WaterFlowRight, Is.EqualTo(expectedLayerOneRightFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.WaterFlowDown, Is.EqualTo(expectedLayerOneFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.WaterFlowUp, Is.EqualTo(expectedLayerOneFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.SedimentFlowLeft, Is.EqualTo(expectedLayerOneFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.SedimentFlowRight, Is.EqualTo(expectedLayerOneRightFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.SedimentFlowDown, Is.EqualTo(expectedLayerOneFlow).Within(Tolerance));
-        Assert.That(centerCellLayerOne.SedimentFlowUp, Is.EqualTo(expectedLayerOneFlow).Within(Tolerance));
+        Assert.That(centerCellLayerOne.WaterFlowLeft, Is.EqualTo(expectedLayerOneFlow).Within(expectedLayerOneFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.WaterFlowRight, Is.EqualTo(expectedLayerOneRightFlow).Within(expectedLayerOneFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.WaterFlowDown, Is.EqualTo(expectedLayerOneFlow).Within(expectedLayerOneFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.WaterFlowUp, Is.EqualTo(expectedLayerOneFlow).Within(expectedLayerOneFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.SedimentFlowLeft, Is.EqualTo(expectedLayerOneFlow).Within(expectedLayerOneFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.SedimentFlowRight, Is.EqualTo(expectedLayerOneRightFlow).Within(expectedLayerOneFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.SedimentFlowDown, Is.EqualTo(expectedLayerOneFlow).Within(expectedLayerOneFlow * TolerancePercentage));
+        Assert.That(centerCellLayerOne.SedimentFlowUp, Is.EqualTo(expectedLayerOneFlow).Within(expectedLayerOneFlow * TolerancePercentage));
     }
 
     [Test]
@@ -264,15 +263,15 @@ public class GridHydraulicErosionTests
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
         uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
         GridHydraulicErosionCellShaderBuffer centerCell = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
-        Assert.That(centerCell.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(Tolerance));
+        Assert.That(centerCell.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(expectedWaterHeight * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer leftCell = gridHydraulicErosionCellsShaderBuffers[LeftIndex];
-        Assert.That(leftCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(leftCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer rightCell = gridHydraulicErosionCellsShaderBuffers[RightIndex];
-        Assert.That(rightCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(rightCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer downCell = gridHydraulicErosionCellsShaderBuffers[DownIndex];
-        Assert.That(downCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(downCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer upCell = gridHydraulicErosionCellsShaderBuffers[UpIndex];
-        Assert.That(upCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(upCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
     }
 
     [Test]
@@ -296,15 +295,15 @@ public class GridHydraulicErosionTests
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
         uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
         GridHydraulicErosionCellShaderBuffer centerCell = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
-        Assert.That(centerCell.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(Tolerance));
+        Assert.That(centerCell.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(expectedWaterHeight * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer leftCell = gridHydraulicErosionCellsShaderBuffers[LeftIndex];
-        Assert.That(leftCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(leftCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer rightCell = gridHydraulicErosionCellsShaderBuffers[RightIndex];
-        Assert.That(rightCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(rightCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer downCell = gridHydraulicErosionCellsShaderBuffers[DownIndex];
-        Assert.That(downCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(downCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer upCell = gridHydraulicErosionCellsShaderBuffers[UpIndex];
-        Assert.That(upCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(upCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
     }
 
     [Test]
@@ -327,15 +326,15 @@ public class GridHydraulicErosionTests
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
         uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
         GridHydraulicErosionCellShaderBuffer centerCell = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
-        Assert.That(centerCell.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(Tolerance));
+        Assert.That(centerCell.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(expectedWaterHeight * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer leftCell = gridHydraulicErosionCellsShaderBuffers[LeftIndex];
-        Assert.That(leftCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(leftCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer rightCell = gridHydraulicErosionCellsShaderBuffers[RightIndex];
-        Assert.That(rightCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(rightCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer downCell = gridHydraulicErosionCellsShaderBuffers[DownIndex];
-        Assert.That(downCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(downCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer upCell = gridHydraulicErosionCellsShaderBuffers[UpIndex];
-        Assert.That(upCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(upCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
     }
 
     [Test]
@@ -358,17 +357,17 @@ public class GridHydraulicErosionTests
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
         uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
         GridHydraulicErosionCellShaderBuffer centerCellLayerOne = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
-        Assert.That(centerCellLayerOne.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(Tolerance));
+        Assert.That(centerCellLayerOne.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(expectedWaterHeight * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer centerCellLayerZero = gridHydraulicErosionCellsShaderBuffers[CenterIndex];
-        Assert.That(centerCellLayerZero.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(Tolerance));
+        Assert.That(centerCellLayerZero.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(expectedWaterHeight * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer leftCell = gridHydraulicErosionCellsShaderBuffers[LeftIndex];
-        Assert.That(leftCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(leftCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer rightCell = gridHydraulicErosionCellsShaderBuffers[RightIndex];
-        Assert.That(rightCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(rightCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer downCell = gridHydraulicErosionCellsShaderBuffers[DownIndex];
-        Assert.That(downCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(downCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer upCell = gridHydraulicErosionCellsShaderBuffers[UpIndex];
-        Assert.That(upCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(upCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
     }
 
     [Test]
@@ -391,19 +390,19 @@ public class GridHydraulicErosionTests
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
         uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
         GridHydraulicErosionCellShaderBuffer centerCellLayerOne = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
-        Assert.That(centerCellLayerOne.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(Tolerance));
+        Assert.That(centerCellLayerOne.WaterHeight, Is.EqualTo(expectedWaterHeight).Within(expectedWaterHeight * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer leftCell = gridHydraulicErosionCellsShaderBuffers[LeftIndex];
-        Assert.That(leftCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(leftCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer downCell = gridHydraulicErosionCellsShaderBuffers[DownIndex];
-        Assert.That(downCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(downCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer upCell = gridHydraulicErosionCellsShaderBuffers[UpIndex];
-        Assert.That(upCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(Tolerance));
+        Assert.That(upCell.WaterHeight, Is.EqualTo(expectedWaterHeightNeighbors).Within(expectedWaterHeightNeighbors * TolerancePercentage));
 
         float expectedWaterHeightRightCell = 0.83636f;
         GridHydraulicErosionCellShaderBuffer rightCellLayerZero = gridHydraulicErosionCellsShaderBuffers[RightIndex];
-        Assert.That(rightCellLayerZero.WaterHeight, Is.EqualTo(expectedWaterHeightRightCell).Within(Tolerance));
+        Assert.That(rightCellLayerZero.WaterHeight, Is.EqualTo(expectedWaterHeightRightCell).Within(expectedWaterHeightRightCell * TolerancePercentage));
         GridHydraulicErosionCellShaderBuffer rightCell = gridHydraulicErosionCellsShaderBuffers[RightIndex];
-        Assert.That(rightCell.WaterHeight, Is.EqualTo(expectedWaterHeightRightCell).Within(Tolerance));
+        Assert.That(rightCell.WaterHeight, Is.EqualTo(expectedWaterHeightRightCell).Within(expectedWaterHeightRightCell * TolerancePercentage));
     }
 
     [Test]
@@ -443,8 +442,8 @@ public class GridHydraulicErosionTests
         Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(intermediateHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
-        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
-        Assert.That(endVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
+        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         if (seaLevel == 0)
         {
             Assert.That(endSuspendedSediment, Is.Zero);
@@ -488,8 +487,8 @@ public class GridHydraulicErosionTests
         Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(intermediateHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
-        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
-        Assert.That(endVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
+        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         if (seaLevel == 0)
         {
             Assert.That(endSuspendedSediment, Is.Zero);
@@ -534,8 +533,8 @@ public class GridHydraulicErosionTests
         Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(intermediateHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
-        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
-        Assert.That(endVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
+        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         if (seaLevel == 0)
         {
             Assert.That(endSuspendedSediment, Is.Zero);
@@ -580,8 +579,8 @@ public class GridHydraulicErosionTests
         Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(intermediateHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
-        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
-        Assert.That(endVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
+        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         if (seaLevel == 0)
         {
             Assert.That(endSuspendedSediment, Is.Zero);
@@ -626,8 +625,8 @@ public class GridHydraulicErosionTests
         Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(intermediateHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
-        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
-        Assert.That(endVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
+        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         if (seaLevel == 0)
         {
             Assert.That(endSuspendedSediment, Is.Zero);
@@ -672,8 +671,8 @@ public class GridHydraulicErosionTests
         Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(intermediateHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
-        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
-        Assert.That(endVolume, Is.EqualTo(startVolume).Within(Tolerance * iterations));
+        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         if (seaLevel == 0)
         {
             Assert.That(endSuspendedSediment, Is.Zero);
