@@ -25,7 +25,7 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 struct ErosionConfiguration
 {
-    float TimeDelta;
+    float DeltaTime;
 	bool IsWaterKeptInBoundaries;
 };
 
@@ -208,7 +208,7 @@ void main()
 		float totalTotalSedimentHeightDifference = totalSedimentHeightDifferenceLeft + totalSedimentHeightDifferenceRight + totalSedimentHeightDifferenceDown + totalSedimentHeightDifferenceUp;
 		if(x > 0)
 		{
-			gridThermalErosionCell.SedimentFlowLeft = max(sedimentVolumeToBeMoved * flowLeft / totalTotalSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.SedimentFlowLeft = max(sedimentVolumeToBeMoved * flowLeft / totalTotalSedimentHeightDifference * erosionConfiguration.DeltaTime, 0.0);
 		}
 		else
 		{
@@ -217,7 +217,7 @@ void main()
 		
 		if(x < myHeightMapSideLength - 1)
 		{
-			gridThermalErosionCell.SedimentFlowRight = max(sedimentVolumeToBeMoved * flowRight / totalTotalSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.SedimentFlowRight = max(sedimentVolumeToBeMoved * flowRight / totalTotalSedimentHeightDifference * erosionConfiguration.DeltaTime, 0.0);
 		}
 		else
 		{
@@ -226,7 +226,7 @@ void main()
 
 		if(y > 0)
 		{
-			gridThermalErosionCell.SedimentFlowDown = max(sedimentVolumeToBeMoved * flowDown / totalTotalSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.SedimentFlowDown = max(sedimentVolumeToBeMoved * flowDown / totalTotalSedimentHeightDifference * erosionConfiguration.DeltaTime, 0.0);
 		}
 		else
 		{
@@ -235,7 +235,7 @@ void main()
 		
 		if(y < myHeightMapSideLength - 1)
 		{
-			gridThermalErosionCell.SedimentFlowUp = max(sedimentVolumeToBeMoved * flowUp / totalTotalSedimentHeightDifference * erosionConfiguration.TimeDelta, 0.0);
+			gridThermalErosionCell.SedimentFlowUp = max(sedimentVolumeToBeMoved * flowUp / totalTotalSedimentHeightDifference * erosionConfiguration.DeltaTime, 0.0);
 		}
 		else
 		{

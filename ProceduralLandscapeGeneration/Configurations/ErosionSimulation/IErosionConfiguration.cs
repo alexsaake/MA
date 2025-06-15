@@ -25,7 +25,7 @@ internal interface IErosionConfiguration : IDisposable
     bool IsSeaLevelDisplayed { get; set; }
 
     bool IsWaterKeptInBoundaries { get; set; }
-    float TimeDelta { get; set; }
+    float DeltaTime { get; set; }
 
     void Initialize();
 }

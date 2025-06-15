@@ -41,6 +41,23 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
     PlateTectonicsSegment[] plateTectonicsSegments;
 };
 
+struct PlateTectonicsConfiguration
+{
+    float TransferRate;
+    float SubductionHeating;
+    float GenerationCooling;
+    float GrowthRate;
+    float DissolutionRate;
+    float AccelerationConvection;
+    float TorqueConvection;
+    float DeltaTime;
+};
+
+layout(std430, binding = 19) buffer plateTectonicsConfigurationShaderBuffer
+{
+    PlateTectonicsConfiguration plateTectonicsConfiguration;
+};
+
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 uint myHeightMapSideLength;
 
@@ -100,12 +117,11 @@ void main()
             }
 
             float massDifference = heightDifference * plateTectonicsSegment.Density;
-            float transferRate = 0.2;
 
-            float transferedHeight = transferRate * heightDifference;
+            float transferedHeight = plateTectonicsConfiguration.TransferRate * heightDifference;
             cascadingSegment.Thickness += transferedHeight;
             plateTectonicsSegment.Thickness -= transferedHeight;
-            float transferedMass = transferRate * massDifference;
+            float transferedMass = plateTectonicsConfiguration.TransferRate * massDifference;
             cascadingSegment.Mass += transferedMass;
             plateTectonicsSegment.Mass -= transferedMass;
 

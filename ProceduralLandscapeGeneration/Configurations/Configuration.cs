@@ -16,6 +16,7 @@ internal class Configuration : IConfiguration
     private readonly IParticleHydraulicErosionConfiguration myParticleHydraulicErosionConfiguration;
     private readonly IThermalErosionConfiguration myThermalErosionConfiguration;
     private readonly IParticleWindErosionConfiguration myParticleWindErosionConfiguration;
+    private readonly IPlateTectonicsConfiguration myPlateTectonicsConfiguration;
 
     private bool myIsDisposed;
 
@@ -23,7 +24,7 @@ internal class Configuration : IConfiguration
     public int ScreenHeight { get; set; }
     public int ShadowMapResolution { get; set; }
 
-    public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IRockTypesConfiguration rockTypesConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration)
+    public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IRockTypesConfiguration rockTypesConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IPlateTectonicsConfiguration plateTectonicsConfiguration)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
@@ -32,6 +33,7 @@ internal class Configuration : IConfiguration
         myParticleHydraulicErosionConfiguration = particleHydraulicErosionConfiguration;
         myThermalErosionConfiguration = thermalErosionConfiguration;
         myParticleWindErosionConfiguration = particleWindErosionConfiguration;
+        myPlateTectonicsConfiguration = plateTectonicsConfiguration;
 
         ScreenWidth = 1920;
         ScreenHeight = 1080;
@@ -47,6 +49,7 @@ internal class Configuration : IConfiguration
         myParticleHydraulicErosionConfiguration.Initialize();
         myThermalErosionConfiguration.Initialize();
         myParticleWindErosionConfiguration.Initialize();
+        myPlateTectonicsConfiguration.Initialize();
 
         myIsDisposed = false;
     }
@@ -65,6 +68,7 @@ internal class Configuration : IConfiguration
         myParticleHydraulicErosionConfiguration.Dispose();
         myThermalErosionConfiguration.Dispose();
         myParticleWindErosionConfiguration.Dispose();
+        myPlateTectonicsConfiguration.Dispose();
 
         myIsDisposed = true;
     }

@@ -49,17 +49,17 @@ internal class ErosionConfiguration : IErosionConfiguration
         }
     }
 
-    private float myTimeDelta;
-    public float TimeDelta
+    private float myDeltaTime;
+    public float DeltaTime
     {
-        get => myTimeDelta;
+        get => myDeltaTime;
         set
         {
-            if (myTimeDelta == value)
+            if (myDeltaTime == value)
             {
                 return;
             }
-            myTimeDelta = value;
+            myDeltaTime = value;
             UpdateShaderBuffer();
         }
     }
@@ -89,7 +89,7 @@ internal class ErosionConfiguration : IErosionConfiguration
 
         myIsWaterKeptInBoundaries = false;
 
-        myTimeDelta = 1.0f;
+        myDeltaTime = 1.0f;
     }
 
     public void Initialize()
@@ -107,7 +107,7 @@ internal class ErosionConfiguration : IErosionConfiguration
         }
         ErosionConfigurationShaderBuffer erosionConfigurationShaderBuffer = new ErosionConfigurationShaderBuffer()
         {
-            TimeDelta = TimeDelta,
+            DeltaTime = DeltaTime,
             IsWaterKeptInBoundaries = IsWaterKeptInBoundaries
         };
         Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.ErosionConfiguration], &erosionConfigurationShaderBuffer, (uint)sizeof(ErosionConfigurationShaderBuffer), 0);

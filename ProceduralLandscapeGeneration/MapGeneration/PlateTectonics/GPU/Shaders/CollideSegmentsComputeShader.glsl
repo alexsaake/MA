@@ -46,10 +46,26 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
     PlateTectonicsSegment[] plateTectonicsSegments;
 };
 
+struct PlateTectonicsConfiguration
+{
+    float TransferRate;
+    float SubductionHeating;
+    float GenerationCooling;
+    float GrowthRate;
+    float DissolutionRate;
+    float AccelerationConvection;
+    float TorqueConvection;
+    float DeltaTime;
+};
+
+layout(std430, binding = 19) buffer plateTectonicsConfigurationShaderBuffer
+{
+    PlateTectonicsConfiguration plateTectonicsConfiguration;
+};
+
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 //https://github.com/weigert/SimpleTectonics/blob/master/source/tectonics.h
 uint myHeightMapSideLength;
-float subductionHeating = 0.1;
 
 PlateTectonicsSegment Buoyancy(PlateTectonicsSegment segment)
 {
@@ -132,7 +148,7 @@ void main()
                     for(int i = -2; i <= 2; i++)
                     {
                         uint subductionHeatingIndex = GetIndexVector(scanPosition + ivec2(i, j));
-                        heatMap[subductionHeatingIndex] = clamp(heatMap[subductionHeatingIndex] + subductionHeating, 0.0, 1.0);
+                        heatMap[subductionHeatingIndex] = clamp(heatMap[subductionHeatingIndex] + plateTectonicsConfiguration.SubductionHeating, 0.0, 1.0);
                     }
                 }
 

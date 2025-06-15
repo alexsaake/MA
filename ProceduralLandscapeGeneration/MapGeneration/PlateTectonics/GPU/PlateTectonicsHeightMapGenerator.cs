@@ -16,6 +16,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private const string ShaderDirectory = "MapGeneration/PlateTectonics/GPU/Shaders/";
 
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
+    private readonly IPlateTectonicsConfiguration myPlateTectonicsConfiguration;
     private readonly IRandom myRandom;
     private readonly IShaderBuffers myShaderBuffers;
     private readonly ILifetimeScope myLifetimeScope;
@@ -38,9 +39,10 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     private bool myIsDisposed;
 
-    public PlateTectonicsHeightMapGenerator(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IRandom random, IShaderBuffers shaderBuffers, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory)
+    public PlateTectonicsHeightMapGenerator(IMapGenerationConfiguration mapGenerationConfiguration, IPlateTectonicsConfiguration plateTectonicsConfiguration, IRandom random, IShaderBuffers shaderBuffers, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
+        myPlateTectonicsConfiguration = plateTectonicsConfiguration;
         myRandom = random;
         myShaderBuffers = shaderBuffers;
         myLifetimeScope = lifetimeScope;
@@ -83,10 +85,10 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     private unsafe void AddPlateTectonicsPlatesShaderBuffer()
     {
-        uint plateTectonicsPlatesSize = (uint)(myMapGenerationConfiguration.PlateCount * sizeof(PlateTectonicsPlateShaderBuffer));
+        uint plateTectonicsPlatesSize = (uint)(myPlateTectonicsConfiguration.PlateCount * sizeof(PlateTectonicsPlateShaderBuffer));
         myShaderBuffers.Add(ShaderBufferTypes.PlateTectonicsPlates, plateTectonicsPlatesSize);
-        PlateTectonicsPlateShaderBuffer[] plateTectonicsPlates = new PlateTectonicsPlateShaderBuffer[myMapGenerationConfiguration.PlateCount];
-        for (int plate = 0; plate < myMapGenerationConfiguration.PlateCount; plate++)
+        PlateTectonicsPlateShaderBuffer[] plateTectonicsPlates = new PlateTectonicsPlateShaderBuffer[myPlateTectonicsConfiguration.PlateCount];
+        for (int plate = 0; plate < myPlateTectonicsConfiguration.PlateCount; plate++)
         {
             plateTectonicsPlates[plate].Position = new Vector2(myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength), myRandom.Next((int)myMapGenerationConfiguration.HeightMapSideLength));
         }
@@ -129,7 +131,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private void PrepareRecenterPlates()
     {
         Rlgl.EnableShader(myPrepareRecenterPlatesComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.PlateCount / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myPlateTectonicsConfiguration.PlateCount / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -145,7 +147,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private void RecenterPlatesPosition()
     {
         Rlgl.EnableShader(myRecenterPlatesPositionComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.PlateCount / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myPlateTectonicsConfiguration.PlateCount / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
@@ -220,7 +222,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     private void UpdatePlatesPosition()
     {
         Rlgl.EnableShader(myUpdatePlatesPositionComputeShaderProgram!.Id);
-        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.PlateCount / 64.0f), 1, 1);
+        Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myPlateTectonicsConfiguration.PlateCount / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }

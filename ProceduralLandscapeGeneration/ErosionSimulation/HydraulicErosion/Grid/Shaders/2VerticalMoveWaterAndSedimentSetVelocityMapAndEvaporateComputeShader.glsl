@@ -49,7 +49,7 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 struct ErosionConfiguration
 {
-    float TimeDelta;
+    float DeltaTime;
 	bool IsWaterKeptInBoundaries;
 };
 
@@ -238,15 +238,15 @@ void main()
 
         float waterFlowIn = waterFlowRight + waterFlowLeft + waterFlowUp + waterFlowDown;
         float waterFlowOut = gridHydraulicErosionCell.WaterFlowRight + gridHydraulicErosionCell.WaterFlowLeft + gridHydraulicErosionCell.WaterFlowUp + gridHydraulicErosionCell.WaterFlowDown;
-	    float waterVolumeDelta = (waterFlowIn - waterFlowOut) * erosionConfiguration.TimeDelta;
+	    float waterVolumeDelta = (waterFlowIn - waterFlowOut) * erosionConfiguration.DeltaTime;
 	    gridHydraulicErosionCell.WaterHeight = max(gridHydraulicErosionCell.WaterHeight + waterVolumeDelta, 0.0);
     
         float sedimentFlowIn = sedimentFlowRight + sedimentFlowLeft + sedimentFlowUp + sedimentFlowDown;
         float sedimentFlowOut = gridHydraulicErosionCell.SedimentFlowRight + gridHydraulicErosionCell.SedimentFlowLeft + gridHydraulicErosionCell.SedimentFlowUp + gridHydraulicErosionCell.SedimentFlowDown;
-	    float sedimentVolumeDelta = (sedimentFlowIn - sedimentFlowOut) * erosionConfiguration.TimeDelta;
+	    float sedimentVolumeDelta = (sedimentFlowIn - sedimentFlowOut) * erosionConfiguration.DeltaTime;
 	    gridHydraulicErosionCell.SuspendedSediment = max(gridHydraulicErosionCell.SuspendedSediment + sedimentVolumeDelta, 0.0);
         
-        gridHydraulicErosionCell.WaterHeight = max(gridHydraulicErosionCell.WaterHeight * (1.0 - gridHydraulicErosionConfiguration.EvaporationRate * erosionConfiguration.TimeDelta), 0.0);
+        gridHydraulicErosionCell.WaterHeight = max(gridHydraulicErosionCell.WaterHeight * (1.0 - gridHydraulicErosionConfiguration.EvaporationRate * erosionConfiguration.DeltaTime), 0.0);
 
         if(gridHydraulicErosionCell.WaterHeight > 0.0)
         {

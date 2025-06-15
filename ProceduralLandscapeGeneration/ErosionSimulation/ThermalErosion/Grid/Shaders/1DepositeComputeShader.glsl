@@ -25,7 +25,7 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 struct ErosionConfiguration
 {
-    float TimeDelta;
+    float DeltaTime;
 	bool IsWaterKeptInBoundaries;
 };
 
@@ -128,7 +128,7 @@ void main()
         float flowIn = sedimentFlowRight + sedimentFlowLeft + sedimentFlowUp + sedimentFlowDown;
         float flowOut = gridThermalErosionCell.SedimentFlowRight + gridThermalErosionCell.SedimentFlowLeft + gridThermalErosionCell.SedimentFlowUp + gridThermalErosionCell.SedimentFlowDown;
     
-	    float volumeDelta = (flowIn - flowOut) * erosionConfiguration.TimeDelta;
+	    float volumeDelta = (flowIn - flowOut) * erosionConfiguration.DeltaTime;
         if(volumeDelta < 0)
         {
             RemoveFromTop(index, rockType, abs(volumeDelta));

@@ -21,9 +21,25 @@ layout(std430, binding = 16) buffer plateTectonicsPlatesShaderBuffer
     PlateTectonicsPlate[] plateTectonicsPlates;
 };
 
+struct PlateTectonicsConfiguration
+{
+    float TransferRate;
+    float SubductionHeating;
+    float GenerationCooling;
+    float GrowthRate;
+    float DissolutionRate;
+    float AccelerationConvection;
+    float TorqueConvection;
+    float DeltaTime;
+};
+
+layout(std430, binding = 19) buffer plateTectonicsConfigurationShaderBuffer
+{
+    PlateTectonicsConfiguration plateTectonicsConfiguration;
+};
+
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 #define PI 3.1415926535897932384626433832795
-float DT = 0.025;
 
 void main()
 {
@@ -39,14 +55,14 @@ void main()
     {
         return;
     }
-    plateTectonicsPlate.Speed += DT * plateTectonicsPlate.Acceleration / plateTectonicsPlate.Mass;
+    plateTectonicsPlate.Speed += plateTectonicsConfiguration.DeltaTime * plateTectonicsPlate.Acceleration / plateTectonicsPlate.Mass;
     if (plateTectonicsPlate.Inertia == 0)
     {
         return;
     }
-    plateTectonicsPlate.AngularVelocity += DT * plateTectonicsPlate.Torque / plateTectonicsPlate.Inertia;
-    plateTectonicsPlate.Position += DT * plateTectonicsPlate.Speed;
-    plateTectonicsPlate.Rotation += DT * plateTectonicsPlate.AngularVelocity;
+    plateTectonicsPlate.AngularVelocity += plateTectonicsConfiguration.DeltaTime * plateTectonicsPlate.Torque / plateTectonicsPlate.Inertia;
+    plateTectonicsPlate.Position += plateTectonicsConfiguration.DeltaTime * plateTectonicsPlate.Speed;
+    plateTectonicsPlate.Rotation += plateTectonicsConfiguration.DeltaTime * plateTectonicsPlate.AngularVelocity;
 
     if (plateTectonicsPlate.Rotation > 2 * PI) plateTectonicsPlate.Rotation -= 2 * PI;
     if (plateTectonicsPlate.Rotation < 0) plateTectonicsPlate.Rotation += 2 * PI;

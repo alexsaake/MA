@@ -49,7 +49,7 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 struct ErosionConfiguration
 {
-    float TimeDelta;
+    float DeltaTime;
 	bool IsWaterKeptInBoundaries;
 };
 
@@ -339,7 +339,7 @@ void main()
             
             if(sedimentCapacityBottom > gridHydraulicErosionCell.SuspendedSediment)
 	        {
-		        float soilSuspendedBottom = max(gridHydraulicErosionConfiguration.VerticalSuspensionRate * (sedimentCapacityBottom - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
+		        float soilSuspendedBottom = max(gridHydraulicErosionConfiguration.VerticalSuspensionRate * (sedimentCapacityBottom - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.DeltaTime, 0.0);
                 float suspendedSedimentBottom = SuspendFromLayerTop(index, layer, soilSuspendedBottom);
 		        gridHydraulicErosionCell.SuspendedSediment += suspendedSedimentBottom;
 	        }
@@ -355,7 +355,7 @@ void main()
 
                 if(sedimentCapacityTop > gridHydraulicErosionCell.SuspendedSediment)
 	            {
-		            float soilSuspendedTop = max(gridHydraulicErosionConfiguration.HorizontalSuspensionRate * (sedimentCapacityTop - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
+		            float soilSuspendedTop = max(gridHydraulicErosionConfiguration.HorizontalSuspensionRate * (sedimentCapacityTop - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.DeltaTime, 0.0);
                     float suspendedSedimentTop = SuspendFromLayerBottom(index, layer + 1, soilSuspendedTop);
 		            gridHydraulicErosionCell.SuspendedSediment += suspendedSedimentTop;
 	            }
@@ -370,7 +370,7 @@ void main()
             }
             else
             {
-                soilDeposited = min(gridHydraulicErosionConfiguration.DepositionRate * (gridHydraulicErosionCell.SuspendedSediment - sedimentCapacity) * erosionConfiguration.TimeDelta, gridHydraulicErosionCell.SuspendedSediment);
+                soilDeposited = min(gridHydraulicErosionConfiguration.DepositionRate * (gridHydraulicErosionCell.SuspendedSediment - sedimentCapacity) * erosionConfiguration.DeltaTime, gridHydraulicErosionCell.SuspendedSediment);
             }
 		    DepositeOnLayerTop(index, layer, soilDeposited);
 		    gridHydraulicErosionCell.SuspendedSediment -= soilDeposited;

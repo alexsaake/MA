@@ -25,7 +25,7 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 struct ErosionConfiguration
 {
-    float TimeDelta;
+    float DeltaTime;
 	bool IsWaterKeptInBoundaries;
 };
 
@@ -213,7 +213,7 @@ void main()
         return;
     }
 
-    float heightChange = heightDifference * thermalErosionConfiguration.ErosionRate * erosionConfiguration.TimeDelta;
+    float heightChange = heightDifference * thermalErosionConfiguration.ErosionRate * erosionConfiguration.DeltaTime;
 
     RemoveFromTop(index, heightChange);
     DepositeOnTop(neighborIndex, heightChange);

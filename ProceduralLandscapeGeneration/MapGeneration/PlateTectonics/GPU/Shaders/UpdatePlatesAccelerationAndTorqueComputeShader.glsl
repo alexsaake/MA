@@ -65,9 +65,25 @@ layout(std430, binding = 16) buffer plateTectonicsPlatesShaderBuffer
     PlateTectonicsPlate[] plateTectonicsPlates;
 };
 
+struct PlateTectonicsConfiguration
+{
+    float TransferRate;
+    float SubductionHeating;
+    float GenerationCooling;
+    float GrowthRate;
+    float DissolutionRate;
+    float AccelerationConvection;
+    float TorqueConvection;
+    float DeltaTime;
+};
+
+layout(std430, binding = 19) buffer plateTectonicsConfigurationShaderBuffer
+{
+    PlateTectonicsConfiguration plateTectonicsConfiguration;
+};
+
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 uint myHeightMapSideLength;
-float Convection = 10.0f;
 
 #define PI 3.1415926535897932384626433832795
 
@@ -120,8 +136,8 @@ void main()
     vec2 force = Force(ivec2(plateTectonicsSegment.Position));
     vec2 direction = plateTectonicsSegment.Position - plateTectonicsPlate.Position;
 
-    plateTectonicsPlate.Acceleration -= Convection * force;
-    plateTectonicsPlate.Torque -= Convection * length(direction) * length(force) * sin(Angle(force) - Angle(direction));
+    plateTectonicsPlate.Acceleration -= plateTectonicsConfiguration.AccelerationConvection * force;
+    plateTectonicsPlate.Torque -= plateTectonicsConfiguration.TorqueConvection * length(direction) * length(force) * sin(Angle(force) - Angle(direction));
 
     plateTectonicsPlates[plateTectonicsSegment.Plate] = plateTectonicsPlate;
 

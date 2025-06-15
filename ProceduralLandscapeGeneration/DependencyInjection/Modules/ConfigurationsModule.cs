@@ -22,5 +22,6 @@ internal class ConfigurationsModule : Module
         containerBuilder.RegisterType<ParticleHydraulicErosionConfiguration>().As<IParticleHydraulicErosionConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ParticleWindErosionConfiguration>().As<IParticleWindErosionConfiguration>().SingleInstance();
         containerBuilder.RegisterType<ThermalErosionConfiguration>().As<IThermalErosionConfiguration>().SingleInstance();
+        containerBuilder.RegisterType<PlateTectonicsConfiguration>().As<IPlateTectonicsConfiguration>().SingleInstance();
     }
 }

@@ -2,6 +2,6 @@
 
 internal struct ErosionConfigurationShaderBuffer
 {
-    public float TimeDelta;
+    public float DeltaTime;
     public bool IsWaterKeptInBoundaries;
 }

@@ -65,9 +65,25 @@ layout(std430, binding = 16) readonly restrict buffer plateTectonicsPlatesShader
     PlateTectonicsPlate[] plateTectonicsPlates;
 };
 
+struct PlateTectonicsConfiguration
+{
+    float TransferRate;
+    float SubductionHeating;
+    float GenerationCooling;
+    float GrowthRate;
+    float DissolutionRate;
+    float AccelerationConvection;
+    float TorqueConvection;
+    float DeltaTime;
+};
+
+layout(std430, binding = 19) buffer plateTectonicsConfigurationShaderBuffer
+{
+    PlateTectonicsConfiguration plateTectonicsConfiguration;
+};
+
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 uint myHeightMapSideLength;
-float generationCooling = -0.1;
 
 uint GetIndexVector(ivec2 position)
 {
@@ -122,7 +138,7 @@ void main()
         for(int i = -2; i <= 2; i++)
         {
             uint generationCoolingIndex = GetIndexVector(ivec2(deadSegment.Position) + ivec2(i, j));
-            heatMap[generationCoolingIndex] = clamp(heatMap[generationCoolingIndex] + generationCooling, 0.0, 1.0);
+            heatMap[generationCoolingIndex] = clamp(heatMap[generationCoolingIndex] - plateTectonicsConfiguration.GenerationCooling, 0.0, 1.0);
         }
     }
 

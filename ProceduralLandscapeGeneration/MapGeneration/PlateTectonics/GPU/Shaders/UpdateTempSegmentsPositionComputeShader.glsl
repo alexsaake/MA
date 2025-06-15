@@ -65,10 +65,26 @@ layout(std430, binding = 17) buffer plateTectonicsTempSegmentsShaderBuffer
     PlateTectonicsSegment[] plateTectonicsTempSegments;
 };
 
+struct PlateTectonicsConfiguration
+{
+    float TransferRate;
+    float SubductionHeating;
+    float GenerationCooling;
+    float GrowthRate;
+    float DissolutionRate;
+    float AccelerationConvection;
+    float TorqueConvection;
+    float DeltaTime;
+};
+
+layout(std430, binding = 19) buffer plateTectonicsConfigurationShaderBuffer
+{
+    PlateTectonicsConfiguration plateTectonicsConfiguration;
+};
+
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 uint myHeightMapSideLength;
 #define PI 3.1415926535897932384626433832795
-float DT = 0.025;
 
 uint GetIndexVector(ivec2 position)
 {
@@ -107,8 +123,8 @@ void main()
     PlateTectonicsSegment plateTectonicsSegment = plateTectonicsSegments[id];
     PlateTectonicsPlate plateTectonicsPlate = plateTectonicsPlates[plateTectonicsSegment.Plate];
     
-    vec2 direction = plateTectonicsSegment.Position - (plateTectonicsPlate.Position - DT * plateTectonicsPlate.Speed);
-    float angle = Angle(direction) - (plateTectonicsPlate.Rotation - DT * plateTectonicsPlate.AngularVelocity);
+    vec2 direction = plateTectonicsSegment.Position - (plateTectonicsPlate.Position - plateTectonicsConfiguration.DeltaTime * plateTectonicsPlate.Speed);
+    float angle = Angle(direction) - (plateTectonicsPlate.Rotation - plateTectonicsConfiguration.DeltaTime * plateTectonicsPlate.AngularVelocity);
 
     vec2 newPosition = plateTectonicsPlate.Position + length(direction) * vec2(cos(plateTectonicsPlate.Rotation + angle), sin(plateTectonicsPlate.Rotation + angle));
     if(IsOutOfBounds(ivec2(newPosition)))

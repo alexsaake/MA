@@ -49,7 +49,7 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 struct ErosionConfiguration
 {
-    float TimeDelta;
+    float DeltaTime;
 	bool IsWaterKeptInBoundaries;
 };
 
@@ -241,7 +241,7 @@ bool TrySplit(uint index, uint neighborIndex, vec2 direction)
             
                 if(sedimentCapacity > gridHydraulicErosionCell.SuspendedSediment)
 	            {
-		            float soilSuspendedBottom = max(gridHydraulicErosionConfiguration.HorizontalSuspensionRate * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.TimeDelta, 0.0);
+		            float soilSuspendedBottom = max(gridHydraulicErosionConfiguration.HorizontalSuspensionRate * (sedimentCapacity - gridHydraulicErosionCell.SuspendedSediment) * erosionConfiguration.DeltaTime, 0.0);
 
 		            SplitAt(index, neighborTotalHeight);
 		            float suspendedSediment = SuspendFromLayerZeroTop(index, soilSuspendedBottom);

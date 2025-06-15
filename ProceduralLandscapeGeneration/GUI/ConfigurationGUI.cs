@@ -44,19 +44,19 @@ internal class ConfigurationGUI : IConfigurationGUI
 
     private Vector2 myRightPanelPosition;
     private readonly PanelWithElements myMapGenerationPanel;
-    private readonly PanelWithElements myLayersPanel;
     private readonly PanelWithElements myNoiseMapGenerationPanel;
     private readonly PanelWithElements myHeatMapGenerationPanel;
     private readonly PanelWithElements myPlateTectonicsMapGenerationPanel;
 
     private Vector2 myRightPanel2Position;
     private readonly PanelWithElements myDisplayPanel;
+    private readonly PanelWithElements myLayersPanel;
 
     public event EventHandler? MapResetRequired;
     public event EventHandler? ErosionShaderBuffersResetRequired;
     public event EventHandler? ErosionModeChanged;
 
-    public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IRockTypesConfiguration rockTypesConfiguration)
+    public ConfigurationGUI(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IRockTypesConfiguration rockTypesConfiguration, IPlateTectonicsConfiguration plateTectonicsConfiguration)
     {
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
@@ -92,7 +92,7 @@ internal class ConfigurationGUI : IConfigurationGUI
         myErosionPanel.Add(new Button("Reset", () => ErosionShaderBuffersResetRequired?.Invoke(this, EventArgs.Empty)));
         myErosionPanel.Add(new ValueBoxIntWithLabel("Iterations per Step", (value) => erosionConfiguration.IterationsPerStep = (uint)value, (int)erosionConfiguration.IterationsPerStep, 1, 1000));
         myErosionPanel.Add(new ToggleSliderWithLabel("Water Kept In Boundaries", "Off;On", (value) => erosionConfiguration.IsWaterKeptInBoundaries = value == 1, erosionConfiguration.IsWaterKeptInBoundaries ? 1 : 0));
-        myErosionPanel.Add(new ValueBoxFloatWithLabel("Time Delta", (value) => erosionConfiguration.TimeDelta = value, erosionConfiguration.TimeDelta));
+        myErosionPanel.Add(new ValueBoxFloatWithLabel("Delta Time", (value) => erosionConfiguration.DeltaTime = value, erosionConfiguration.DeltaTime));
         myErosionPanel.Add(new ValueBoxFloatWithLabel("Sea Level", (value) => mapGenerationConfiguration.SeaLevel = value, mapGenerationConfiguration.SeaLevel));
         myErosionPanel.Add(new ComboBox("Rain;Spring", (value) => erosionConfiguration.WaterSource = (WaterSourceTypes)value, (int)erosionConfiguration.WaterSource));
 
@@ -169,9 +169,6 @@ internal class ConfigurationGUI : IConfigurationGUI
         myMapGenerationPanel.Add(new Button("Reset", () => MapResetRequired?.Invoke(this, EventArgs.Empty)));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Side Length", (value) => mapGenerationConfiguration.HeightMapSideLength = (uint)value, (int)mapGenerationConfiguration.HeightMapSideLength, 32, 8192));
         myMapGenerationPanel.Add(new ValueBoxIntWithLabel("Height Multiplier", (value) => mapGenerationConfiguration.HeightMultiplier = (uint)value, (int)mapGenerationConfiguration.HeightMultiplier, 1, 512));
-        
-        myLayersPanel = new PanelWithElements("Layers");
-        myLayersPanel.Add(new ToggleSliderWithLabel("Layer Colors", "Off;On", (value) => mapGenerationConfiguration.AreLayerColorsEnabled = value == 1, mapGenerationConfiguration.AreLayerColorsEnabled ? 1 : 0));
 
         myNoiseMapGenerationPanel = new PanelWithElements("Noise Map Generation");
         myNoiseMapGenerationPanel.Add(new ValueBoxIntWithLabel("Seed", (value) => mapGenerationConfiguration.Seed = value, mapGenerationConfiguration.Seed, int.MinValue, int.MaxValue));
@@ -188,9 +185,17 @@ internal class ConfigurationGUI : IConfigurationGUI
         myHeatMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Lacunarity", (value) => mapGenerationConfiguration.NoiseLacunarity = value, mapGenerationConfiguration.NoiseLacunarity));
 
         myPlateTectonicsMapGenerationPanel = new PanelWithElements("Plate Tectonics");
-        myPlateTectonicsMapGenerationPanel.Add(new ToggleSliderWithLabel("Running", "Off;On", (value) => mapGenerationConfiguration.IsPlateTectonicsRunning = value == 1, mapGenerationConfiguration.IsPlateTectonicsRunning ? 1 : 0));
+        myPlateTectonicsMapGenerationPanel.Add(new ToggleSliderWithLabel("Running", "Off;On", (value) => plateTectonicsConfiguration.IsPlateTectonicsRunning = value == 1, plateTectonicsConfiguration.IsPlateTectonicsRunning ? 1 : 0));
+        myPlateTectonicsMapGenerationPanel.Add(new ValueBoxIntWithLabel("Plate Count", (value) => plateTectonicsConfiguration.PlateCount = value, plateTectonicsConfiguration.PlateCount, 0, 10));
+        myPlateTectonicsMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Transfer Rate", (value) => plateTectonicsConfiguration.TransferRate = value, plateTectonicsConfiguration.TransferRate));
+        myPlateTectonicsMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Subduction Heating", (value) => plateTectonicsConfiguration.SubductionHeating = value, plateTectonicsConfiguration.SubductionHeating));
+        myPlateTectonicsMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Generation Cooling", (value) => plateTectonicsConfiguration.GenerationCooling = value, plateTectonicsConfiguration.GenerationCooling));
+        myPlateTectonicsMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Growth Rate", (value) => plateTectonicsConfiguration.GrowthRate = value, plateTectonicsConfiguration.GrowthRate));
+        myPlateTectonicsMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Dissolution Rate", (value) => plateTectonicsConfiguration.DissolutionRate = value, plateTectonicsConfiguration.DissolutionRate));
+        myPlateTectonicsMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Acceleration Convection", (value) => plateTectonicsConfiguration.AccelerationConvection = value, plateTectonicsConfiguration.AccelerationConvection));
+        myPlateTectonicsMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Torque Convection", (value) => plateTectonicsConfiguration.TorqueConvection = value, plateTectonicsConfiguration.TorqueConvection));
+        myPlateTectonicsMapGenerationPanel.Add(new ValueBoxFloatWithLabel("Delta Time", (value) => plateTectonicsConfiguration.DeltaTime = value, plateTectonicsConfiguration.DeltaTime));
         myPlateTectonicsMapGenerationPanel.Add(new ToggleSliderWithLabel("Plate Colors", "Off;On", (value) => mapGenerationConfiguration.ArePlateTectonicsPlateColorsEnabled = value == 1, mapGenerationConfiguration.ArePlateTectonicsPlateColorsEnabled ? 1 : 0));
-        myPlateTectonicsMapGenerationPanel.Add(new ValueBoxIntWithLabel("Plate Count", (value) => mapGenerationConfiguration.PlateCount = value, mapGenerationConfiguration.PlateCount, 0, 10));
 
 
         myRightPanel2Position = new Vector2(configuration.ScreenWidth - (PanelSize.X * 2 + 2), 0);
@@ -203,6 +208,9 @@ internal class ConfigurationGUI : IConfigurationGUI
         myDisplayPanel.Add(new ToggleSliderWithLabel("Sea Level Displayed", "Off;On", (value) => erosionConfiguration.IsSeaLevelDisplayed = value == 1, erosionConfiguration.IsSeaLevelDisplayed ? 1 : 0));
         myDisplayPanel.Add(new ToggleSliderWithLabel("Camera Mode", "Still;Orbital", (value) => mapGenerationConfiguration.CameraMode = value == 0 ? CameraMode.Custom : CameraMode.Orbital, (int)mapGenerationConfiguration.CameraMode));
         myDisplayPanel.Add(new ToggleSliderWithLabel("Terrain Colors", "Off;On", (value) => mapGenerationConfiguration.AreTerrainColorsEnabled = value == 1, mapGenerationConfiguration.AreTerrainColorsEnabled ? 1 : 0));
+
+        myLayersPanel = new PanelWithElements("Layers");
+        myLayersPanel.Add(new ToggleSliderWithLabel("Layer Colors", "Off;On", (value) => mapGenerationConfiguration.AreLayerColorsEnabled = value == 1, mapGenerationConfiguration.AreLayerColorsEnabled ? 1 : 0));
     }
 
     public void Draw()
@@ -285,19 +293,13 @@ internal class ConfigurationGUI : IConfigurationGUI
     private void DrawMapGenerationPanels()
     {
         myMapGenerationPanel.Draw(myRightPanelPosition);
-        Vector2 layersOffset = myMapGenerationPanel.BottomLeft;
-        if (myMapGenerationConfiguration.LayerCount > 1)
-        {
-            myLayersPanel.Draw(myMapGenerationPanel.BottomLeft);
-            layersOffset = myLayersPanel.BottomLeft;
-        }
         switch (myMapGenerationConfiguration.MapGeneration)
         {
             case MapGenerationTypes.Noise:
-                myNoiseMapGenerationPanel.Draw(layersOffset);
+                myNoiseMapGenerationPanel.Draw(myMapGenerationPanel.BottomLeft);
                 break;
             case MapGenerationTypes.Tectonics:
-                myPlateTectonicsMapGenerationPanel.Draw(layersOffset);
+                myPlateTectonicsMapGenerationPanel.Draw(myMapGenerationPanel.BottomLeft);
                 myHeatMapGenerationPanel.Draw(myPlateTectonicsMapGenerationPanel.BottomLeft);
                 break;
         }
@@ -306,5 +308,9 @@ internal class ConfigurationGUI : IConfigurationGUI
     private void DrawDisplayPanels()
     {
         myDisplayPanel.Draw(myRightPanel2Position);
+        if (myMapGenerationConfiguration.LayerCount > 1)
+        {
+            myLayersPanel.Draw(myDisplayPanel.BottomLeft);
+        }
     }
 }

@@ -46,6 +46,23 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
     PlateTectonicsSegment[] plateTectonicsSegments;
 };
 
+struct PlateTectonicsConfiguration
+{
+    float TransferRate;
+    float SubductionHeating;
+    float GenerationCooling;
+    float GrowthRate;
+    float DissolutionRate;
+    float AccelerationConvection;
+    float TorqueConvection;
+    float DeltaTime;
+};
+
+layout(std430, binding = 19) buffer plateTectonicsConfigurationShaderBuffer
+{
+    PlateTectonicsConfiguration plateTectonicsConfiguration;
+};
+
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
 uint myHeightMapSideLength;
 
@@ -59,8 +76,6 @@ bool IsOutOfBounds(ivec2 position)
     return position.x < 0 || position.x >= myHeightMapSideLength
         || position.y < 0 || position.y >= myHeightMapSideLength;
 }
-
-const float Growth = 0.05;
 
 float Langmuir(float k, float x)
 {
@@ -87,8 +102,8 @@ void main()
     float nd = heatMap[id];
 
     //LINEAR GROWTH RATE [m / s]
-    float G = Growth * (1.0 - nd) * (1.0 - nd - plateTectonicsSegment.Density * plateTectonicsSegment.Thickness);
-    if (G < 0.0) G *= 0.05;  //Dissolution Rate
+    float G = plateTectonicsConfiguration.GrowthRate * (1.0 - nd) * (1.0 - nd - plateTectonicsSegment.Density * plateTectonicsSegment.Thickness);
+    if (G < 0.0) G *= plateTectonicsConfiguration.DissolutionRate;
 
     //COMPUTE EQUILIBRIUM DENSITY (PER-VOLUME)
     float D = Langmuir(3.0, 1.0 - nd);

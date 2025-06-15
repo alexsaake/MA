@@ -49,7 +49,7 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 struct ErosionConfiguration
 {
-    float TimeDelta;
+    float DeltaTime;
 	bool IsWaterKeptInBoundaries;
 };
 
@@ -131,7 +131,7 @@ void main()
         uint layerIndex = index + LayerHeightMapOffset(layer);
         GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[layerIndex];
 
-        gridHydraulicErosionCell.WaterHeight += gridHydraulicErosionConfiguration.WaterIncrease * erosionConfiguration.TimeDelta;
+        gridHydraulicErosionCell.WaterHeight += gridHydraulicErosionConfiguration.WaterIncrease * erosionConfiguration.DeltaTime;
 
         gridHydraulicErosionCells[layerIndex] = gridHydraulicErosionCell;
 

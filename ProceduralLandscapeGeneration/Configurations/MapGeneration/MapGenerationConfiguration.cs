@@ -221,23 +221,6 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         }
     }
 
-    public bool IsPlateTectonicsRunning { get; set; }
-
-    private int myPlateCount;
-    public int PlateCount
-    {
-        get => myPlateCount;
-        set
-        {
-            if (myPlateCount == value)
-            {
-                return;
-            }
-            myPlateCount = value;
-            ResetRequired?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
     private bool myArePlateTectonicsPlateColorsEnabled;
     public bool ArePlateTectonicsPlateColorsEnabled
     {
@@ -327,9 +310,7 @@ internal class MapGenerationConfiguration : IMapGenerationConfiguration
         NoisePersistence = 0.5f;
         NoiseLacunarity = 2.0f;
 
-        IsPlateTectonicsRunning = false;
         myArePlateTectonicsPlateColorsEnabled = true;
-        PlateCount = 3;
 
         HeightMapSideLength = 256;
         myHeightMultiplier = 32;

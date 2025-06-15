@@ -41,6 +41,7 @@ class ShaderBuffers : IDictionary<ShaderBufferTypes, uint>, IShaderBuffers
         myIndices.Add(ShaderBufferTypes.PlateTectonicsPlates, 16);
         myIndices.Add(ShaderBufferTypes.PlateTectonicsTempSegments, 17);
         myIndices.Add(ShaderBufferTypes.RockTypeConfiguration, 18);
+        myIndices.Add(ShaderBufferTypes.PlateTectonicsConfiguration, 19);
     }
 
     public unsafe void Add(ShaderBufferTypes key, uint size)

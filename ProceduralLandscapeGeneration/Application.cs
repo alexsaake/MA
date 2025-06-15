@@ -17,6 +17,7 @@ internal class Application : IApplication
     private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
+    private readonly IPlateTectonicsConfiguration myPlateTectonicsConfiguration;
     private readonly IConfigurationGUI myConfigurationGUI;
     private readonly ICamera myCamera;
     private readonly IHeightMap myHeightMap;
@@ -30,11 +31,12 @@ internal class Application : IApplication
     private bool myIsCameraResetRequired;
     private bool myShowUI = true;
 
-    public Application(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IConfigurationGUI configurationGUI, ICamera camera, IHeightMap heightMap, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
+    public Application(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, IPlateTectonicsConfiguration plateTectonicsConfiguration, IConfigurationGUI configurationGUI, ICamera camera, IHeightMap heightMap, IErosionSimulator erosionSimulator, ILifetimeScope lifetimeScope)
     {
         myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
+        myPlateTectonicsConfiguration = plateTectonicsConfiguration;
         myConfigurationGUI = configurationGUI;
         myCamera = camera;
         myHeightMap = heightMap;
@@ -93,7 +95,7 @@ internal class Application : IApplication
                 myIsCameraResetRequired = false;
             }
 
-            if (myMapGenerationConfiguration.IsPlateTectonicsRunning)
+            if (myPlateTectonicsConfiguration.IsPlateTectonicsRunning)
             {
                 myHeightMap.SimulatePlateTectonics();
             }

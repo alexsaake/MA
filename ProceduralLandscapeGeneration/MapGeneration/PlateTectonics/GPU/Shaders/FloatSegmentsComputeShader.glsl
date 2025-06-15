@@ -25,8 +25,24 @@ layout(std430, binding = 15) buffer plateTectonicsSegmentsShaderBuffer
     PlateTectonicsSegment[] plateTectonicsSegments;
 };
 
+struct PlateTectonicsConfiguration
+{
+    float TransferRate;
+    float SubductionHeating;
+    float GenerationCooling;
+    float GrowthRate;
+    float DissolutionRate;
+    float AccelerationConvection;
+    float TorqueConvection;
+    float DeltaTime;
+};
+
+layout(std430, binding = 19) buffer plateTectonicsConfigurationShaderBuffer
+{
+    PlateTectonicsConfiguration plateTectonicsConfiguration;
+};
+
 //https://nickmcd.me/2020/12/03/clustered-convection-for-simulating-plate-tectonics/
-float Growth = 0.05f;
 
 float Langmuir(float k, float x)
 {
@@ -59,7 +75,7 @@ void main()
 
     float heatValue = heatMap[id];
 
-    float rate = Growth * (1.0 - heatValue);
+    float rate = plateTectonicsConfiguration.GrowthRate * (1.0 - heatValue);
     float G = rate * (1.0 - heatValue - plateTectonicsSegment.Density * plateTectonicsSegment.Thickness);
     if (G < 0.0) G *= 0.05;
 

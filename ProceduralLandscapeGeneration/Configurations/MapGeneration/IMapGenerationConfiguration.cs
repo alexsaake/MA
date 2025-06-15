@@ -21,9 +21,7 @@ internal interface IMapGenerationConfiguration : IDisposable
     float NoisePersistence { get; set; }
     float NoiseLacunarity { get; set; }
 
-    bool IsPlateTectonicsRunning { get; set; }
     bool ArePlateTectonicsPlateColorsEnabled { get; set; }
-    int PlateCount { get; set; }
 
     uint HeightMapSideLength { get; set; }
     uint HeightMapPlaneSize { get; }
