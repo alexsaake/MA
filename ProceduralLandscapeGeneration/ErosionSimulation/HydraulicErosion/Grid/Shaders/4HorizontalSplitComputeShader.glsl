@@ -158,10 +158,6 @@ void MoveRockToAboveLayer(uint index, float splitHeight)
 
 void MoveWaterAndSuspendedSedimentToAboveLayer(uint index)
 {
-    if(layer >= mapGenerationConfiguration.LayerCount - 1)
-    {
-        return;
-    }
     uint currentLayerGridHydraulicErosionCellIndex = index;
     uint aboveLayerGridHydraulicErosionCellIndex = index + myHeightMapPlaneSize;
     
