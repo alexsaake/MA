@@ -19,8 +19,8 @@ internal class GridThermalErosion : IGridThermalErosion
     private readonly IShaderBuffers myShaderBuffers;
 
     private ComputeShaderProgram? myVerticalFlowComputeShaderProgram;
-    private ComputeShaderProgram? myDepositeComputeShaderProgram;
-    private ComputeShaderProgram? myCollapseComputeShaderProgram;
+    private ComputeShaderProgram? myLimitVerticalInflowComputeShaderProgram;
+    private ComputeShaderProgram? myDepositeAndCloseSplitComputeShaderProgram;
 
     private bool myIsDisposed;
 
@@ -36,8 +36,8 @@ internal class GridThermalErosion : IGridThermalErosion
     public void Initialize()
     {
         myVerticalFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}0VerticalFlowComputeShader.glsl");
-        myDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}1DepositeComputeShader.glsl");
-        myCollapseComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}2CollapseComputeShader.glsl");
+        myLimitVerticalInflowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}1LimitVerticalInflowComputeShader.glsl");
+        myDepositeAndCloseSplitComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}2DepositeAndCloseSplitComputeShader.glsl");
 
         AddGridThermalErosionCellShaderBuffer();
 
@@ -60,11 +60,11 @@ internal class GridThermalErosion : IGridThermalErosion
         for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
         {
             VerticalFlow();
-            Deposite();
             if (myMapGenerationConfiguration.LayerCount > 1)
             {
-                Collapse();
+                LimitVerticalInflow();
             }
+            DepositeAndCloseSplit();
         }
     }
 
@@ -76,17 +76,17 @@ internal class GridThermalErosion : IGridThermalErosion
         Rlgl.MemoryBarrier();
     }
 
-    internal void Deposite()
+    internal void LimitVerticalInflow()
     {
-        Rlgl.EnableShader(myDepositeComputeShaderProgram!.Id);
+        Rlgl.EnableShader(myLimitVerticalInflowComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
     }
 
-    internal void Collapse()
+    internal void DepositeAndCloseSplit()
     {
-        Rlgl.EnableShader(myCollapseComputeShaderProgram!.Id);
+        Rlgl.EnableShader(myDepositeAndCloseSplitComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
@@ -100,8 +100,8 @@ internal class GridThermalErosion : IGridThermalErosion
         }
 
         myVerticalFlowComputeShaderProgram?.Dispose();
-        myDepositeComputeShaderProgram?.Dispose();
-        myCollapseComputeShaderProgram?.Dispose();
+        myLimitVerticalInflowComputeShaderProgram?.Dispose();
+        myDepositeAndCloseSplitComputeShaderProgram?.Dispose();
 
         RemoveGridThermalErosionCellShaderBuffer();
 

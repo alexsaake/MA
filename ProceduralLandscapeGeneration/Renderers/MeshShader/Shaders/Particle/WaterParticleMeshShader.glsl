@@ -64,30 +64,34 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
     MapGenerationConfiguration mapGenerationConfiguration;
 };
 
-uniform mat4 mvp;
-
 uint myHeightMapSideLength;
+uint myHeightMapPlaneSize;
 
 uint GetIndex(uint x, uint y)
 {
     return (y * myHeightMapSideLength) + x;
 }
 
-vec4 waterColor = vec4(0.0, 0.0, 1.0, 0.25);
-
-uint myHeightMapPlaneSize;
+uint HeightMapRockTypeOffset(uint rockType)
+{
+    return rockType * myHeightMapPlaneSize;
+}
 
 float totalHeight(uint index)
 {
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapPlaneSize];
+        height += heightMap[index + HeightMapRockTypeOffset(rockType)];
     }
     return height;
 }
 
-void addVertex(uint vertex, uint x, uint y)
+uniform mat4 mvp;
+
+vec4 waterColor = vec4(0.0, 0.0, 1.0, 0.25);
+
+void AddVertex(uint vertex, uint x, uint y)
 {
     uint index = GetIndex(x, y);
     float zOffset = 0.00004;
@@ -124,10 +128,10 @@ void main()
     {
         for(uint x = 0; x < meshletSize - 1; x+=2)
         {
-            addVertex(vertex + 0, x + xOffset, y + yOffset);
-            addVertex(vertex + 1, x + 1 + xOffset, y + yOffset);
-            addVertex(vertex + 2, x + xOffset, y + 1 + yOffset);
-            addVertex(vertex + 3, x + 1 + xOffset, y + 1 + yOffset);
+            AddVertex(vertex + 0, x + xOffset, y + yOffset);
+            AddVertex(vertex + 1, x + 1 + xOffset, y + yOffset);
+            AddVertex(vertex + 2, x + xOffset, y + 1 + yOffset);
+            AddVertex(vertex + 3, x + 1 + xOffset, y + 1 + yOffset);
             
             gl_PrimitiveIndicesNV[index + 0] = vertex + 0;
             gl_PrimitiveIndicesNV[index + 1] = vertex + 1;

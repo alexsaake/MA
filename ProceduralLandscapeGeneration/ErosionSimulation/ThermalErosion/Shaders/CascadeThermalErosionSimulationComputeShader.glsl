@@ -59,11 +59,16 @@ layout(std430, binding = 18) buffer rockTypesConfigurationShaderBuffer
 uint myHeightMapSideLength;
 uint myHeightMapPlaneSize;
 
+uint HeightMapRockTypeOffset(uint rockType)
+{
+    return rockType * myHeightMapPlaneSize;
+}
+
 float TangensAngleOfRepose(uint index)
 {
 	for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
 	{
-		if(heightMap[index + rockType * myHeightMapPlaneSize] > 0)
+		if(heightMap[index + HeightMapRockTypeOffset(rockType)] > 0)
 		{
 			return rockTypesConfiguration[rockType].TangensAngleOfRepose;
 		}
@@ -75,7 +80,7 @@ void RemoveFromTop(uint index, float sediment)
 {
     for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
     {
-        uint offsetIndex = index + rockType * myHeightMapPlaneSize;
+        uint offsetIndex = index + HeightMapRockTypeOffset(rockType);
         float height = heightMap[offsetIndex];
         if(height > 0)
         {
@@ -101,7 +106,7 @@ float TotalHeight(uint index)
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapPlaneSize];
+        height += heightMap[index + HeightMapRockTypeOffset(rockType)];
     }
     return height;
 }

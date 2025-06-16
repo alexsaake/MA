@@ -100,7 +100,7 @@ public class GridThermalErosionTests
         Assert.That(centerCell.SedimentFlowDown, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
         Assert.That(centerCell.SedimentFlowUp, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
 
-        testee.Deposite();
+        testee.DepositeAndCloseSplit();
 
         float expectedHeight = expectedFlow;
         float[] heightMap = ReadHeightMapShaderBuffer();

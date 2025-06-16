@@ -78,50 +78,60 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
     MapGenerationConfiguration mapGenerationConfiguration;
 };
 
-uniform mat4 mvp;
-
 uint myHeightMapSideLength;
 uint myHeightMapPlaneSize;
 
-float LayerHeightMapFloorHeight(uint index, uint layer)
+float HeightMapLayerFloorHeight(uint index, uint layer)
 {
-    if(layer < 1)
+    if(layer < 1
+        || layer >= mapGenerationConfiguration.LayerCount)
     {
         return 0.0;
     }
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-uint LayerHeightMapOffset(uint layer)
+uint HeightMapLayerOffset(uint layer)
 {
     return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 }
 
+uint HeightMapRockTypeOffset(uint rockType)
+{
+    return rockType * myHeightMapPlaneSize;
+}
+
+float HeightMapLayerHeight(uint index, uint layer)
+{
+    float heightMapLayerHeight = 0.0;
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    {
+        heightMapLayerHeight += heightMap[index + HeightMapRockTypeOffset(rockType) + HeightMapLayerOffset(layer)];
+    }
+    return heightMapLayerHeight;
+}
+
 float TotalHeightMapHeight(uint index)
 {
-    float heightMapFloorHeight = 0.0;
-    float rockTypeHeight = 0.0;
+    float heightMapLayerFloorHeight = 0.0;
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-		heightMapFloorHeight = 0.0;
+        heightMapLayerFloorHeight = 0.0;
         if(layer > 0)
         {
-            heightMapFloorHeight = LayerHeightMapFloorHeight(index, layer);
-            if(heightMapFloorHeight == 0)
+            heightMapLayerFloorHeight = HeightMapLayerFloorHeight(index, layer);
+            if(heightMapLayerFloorHeight == 0)
             {
-                continue;
+                return 0.0;
             }
         }
-        for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+        float heightMapLayerHeight = HeightMapLayerHeight(index, layer);
+        if(heightMapLayerHeight > 0)
         {
-            rockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
-        }
-        if(rockTypeHeight > 0)
-        {
-            return heightMapFloorHeight + rockTypeHeight;
+            return heightMapLayerFloorHeight + heightMapLayerHeight;
         }
     }
-    return heightMapFloorHeight + rockTypeHeight;
+    return 0.0;
 }
 
 uint GetIndex(uint x, uint y)
@@ -129,9 +139,11 @@ uint GetIndex(uint x, uint y)
     return (y * myHeightMapSideLength) + x;
 }
 
+uniform mat4 mvp;
+
 vec4 waterColor = vec4(0.0, 0.0, 1.0, 0.25);
 
-void addVertex(uint vertex, uint x, uint y)
+void AddVertex(uint vertex, uint x, uint y)
 {
     uint index = GetIndex(x, y);
     float waterHeight = gridHydraulicErosionCells[index].WaterHeight;
@@ -179,10 +191,10 @@ void main()
     {
         for(uint x = 0; x < meshletSize - 1; x+=2)
         {
-            addVertex(vertex + 0, x + xOffset, y + yOffset);
-            addVertex(vertex + 1, x + 1 + xOffset, y + yOffset);
-            addVertex(vertex + 2, x + xOffset, y + 1 + yOffset);
-            addVertex(vertex + 3, x + 1 + xOffset, y + 1 + yOffset);
+            AddVertex(vertex + 0, x + xOffset, y + yOffset);
+            AddVertex(vertex + 1, x + 1 + xOffset, y + yOffset);
+            AddVertex(vertex + 2, x + xOffset, y + 1 + yOffset);
+            AddVertex(vertex + 3, x + 1 + xOffset, y + 1 + yOffset);
             
             gl_PrimitiveIndicesNV[index + 0] = vertex + 0;
             gl_PrimitiveIndicesNV[index + 1] = vertex + 1;

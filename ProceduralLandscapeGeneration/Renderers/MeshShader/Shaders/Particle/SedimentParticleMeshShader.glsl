@@ -64,8 +64,7 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
     MapGenerationConfiguration mapGenerationConfiguration;
 };
 
-uniform mat4 mvp;
-
+uint myHeightMapPlaneSize;
 uint myHeightMapSideLength;
 
 uint GetIndex(uint x, uint y)
@@ -73,25 +72,83 @@ uint GetIndex(uint x, uint y)
     return (y * myHeightMapSideLength) + x;
 }
 
-vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
-
-uint myHeightMapPlaneSize;
-
-float totalHeight(uint index)
+uint LayerHydraulicErosionCellsOffset(uint layer)
 {
-    float height = 0;
-    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
-    {
-        height += heightMap[index + rockType * myHeightMapPlaneSize];
-    }
-    return height;
+    return layer * myHeightMapPlaneSize;
 }
 
-void addVertex(uint vertex, uint x, uint y)
+float TotalSuspendedSediment(uint index)
+{    
+    float suspendedSediment = 0.0;
+    for(int layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    {
+        suspendedSediment += gridHydraulicErosionCells[index + LayerHydraulicErosionCellsOffset(layer)].SuspendedSediment;
+    }
+    return suspendedSediment;
+}
+
+float HeightMapLayerFloorHeight(uint index, uint layer)
+{
+    if(layer < 1
+        || layer >= mapGenerationConfiguration.LayerCount)
+    {
+        return 0.0;
+    }
+    return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
+}
+
+uint HeightMapLayerOffset(uint layer)
+{
+    return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+}
+
+uint HeightMapRockTypeOffset(uint rockType)
+{
+    return rockType * myHeightMapPlaneSize;
+}
+
+float HeightMapLayerHeight(uint index, uint layer)
+{
+    float heightMapLayerHeight = 0.0;
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    {
+        heightMapLayerHeight += heightMap[index + HeightMapRockTypeOffset(rockType) + HeightMapLayerOffset(layer)];
+    }
+    return heightMapLayerHeight;
+}
+
+float TotalHeightMapHeight(uint index)
+{
+    float heightMapLayerFloorHeight = 0.0;
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    {
+        heightMapLayerFloorHeight = 0.0;
+        if(layer > 0)
+        {
+            heightMapLayerFloorHeight = HeightMapLayerFloorHeight(index, layer);
+            if(heightMapLayerFloorHeight == 0)
+            {
+                return 0.0;
+            }
+        }
+        float heightMapLayerHeight = HeightMapLayerHeight(index, layer);
+        if(heightMapLayerHeight > 0)
+        {
+            return heightMapLayerFloorHeight + heightMapLayerHeight;
+        }
+    }
+    return 0.0;
+}
+
+uniform mat4 mvp;
+
+vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
+
+void AddVertex(uint vertex, uint x, uint y)
 {
     uint index = GetIndex(x, y);
     float zOffset = 0.00004;
-    vec4 position = mvp * vec4(x, y, (totalHeight(index) - zOffset + gridHydraulicErosionCells[index].SuspendedSediment) * mapGenerationConfiguration.HeightMultiplier, 1.0);
+    vec4 position = mvp * vec4(x, y, (TotalHeightMapHeight(index) - zOffset + TotalSuspendedSediment(index)) * mapGenerationConfiguration.HeightMultiplier, 1.0);
 
     gl_MeshVerticesNV[vertex].gl_Position = position;
     v_out[vertex].position = position;
@@ -124,10 +181,10 @@ void main()
     {
         for(uint x = 0; x < meshletSize - 1; x+=2)
         {
-            addVertex(vertex + 0, x + xOffset, y + yOffset);
-            addVertex(vertex + 1, x + 1 + xOffset, y + yOffset);
-            addVertex(vertex + 2, x + xOffset, y + 1 + yOffset);
-            addVertex(vertex + 3, x + 1 + xOffset, y + 1 + yOffset);
+            AddVertex(vertex + 0, x + xOffset, y + yOffset);
+            AddVertex(vertex + 1, x + 1 + xOffset, y + yOffset);
+            AddVertex(vertex + 2, x + xOffset, y + 1 + yOffset);
+            AddVertex(vertex + 3, x + 1 + xOffset, y + 1 + yOffset);
             
             gl_PrimitiveIndicesNV[index + 0] = vertex + 0;
             gl_PrimitiveIndicesNV[index + 1] = vertex + 1;

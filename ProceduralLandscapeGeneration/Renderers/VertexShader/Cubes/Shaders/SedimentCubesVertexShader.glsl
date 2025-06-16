@@ -58,7 +58,7 @@ vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
 
 uint myHeightMapPlaneSize;
 
-float LayerHeightMapFloorHeight(uint index, uint layer)
+float HeightMapLayerFloorHeight(uint index, uint layer)
 {
     if(layer < 1)
     {
@@ -67,33 +67,38 @@ float LayerHeightMapFloorHeight(uint index, uint layer)
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-uint LayerHeightMapOffset(uint layer)
+uint HeightMapLayerOffset(uint layer)
 {
     return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 }
 
-float LayerHeightMapRockTypeHeight(uint index, uint layer)
+uint HeightMapRockTypeOffset(uint rockType)
 {
-    float layerHeightMapRockTypeHeight = 0.0;
-    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
-    {
-        layerHeightMapRockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
-    }
-    return layerHeightMapRockTypeHeight;
+    return rockType * myHeightMapPlaneSize;
 }
 
-float TotalLayerHeightMapHeight(uint index, uint layer)
+float HeightMapLayerHeight(uint index, uint layer)
 {
-    float layerHeightMapFloorHeight = 0.0;
+    float heightMapLayerHeight = 0.0;
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    {
+        heightMapLayerHeight += heightMap[index + HeightMapRockTypeOffset(rockType) + HeightMapLayerOffset(layer)];
+    }
+    return heightMapLayerHeight;
+}
+
+float TotalHeightMapLayerHeight(uint index, uint layer)
+{
+    float heightMapLayerFloorHeight = 0.0;
     if(layer > 0)
     {
-        layerHeightMapFloorHeight = LayerHeightMapFloorHeight(index, layer);
-        if(layerHeightMapFloorHeight == 0)
+        heightMapLayerFloorHeight = HeightMapLayerFloorHeight(index, layer);
+        if(heightMapLayerFloorHeight == 0)
         {
             return 0.0;
         }
     }
-    return layerHeightMapFloorHeight + LayerHeightMapRockTypeHeight(index, layer);
+    return heightMapLayerFloorHeight + HeightMapLayerHeight(index, layer);
 }
 
 void main()
@@ -106,16 +111,16 @@ void main()
     uint layer = uint(gridHydraulicErosionCellIndex * 1.0 / layerOffset);
     uint baseIndex = gridHydraulicErosionCellIndex - layer * layerOffset;
     float height = 0.0;
-    float totalLayerHeightMapHeight = TotalLayerHeightMapHeight(baseIndex, layer);
+    float totalHeightMapLayerHeight = TotalHeightMapLayerHeight(baseIndex, layer);
     if(gridHydraulicErosionCells[gridHydraulicErosionCellIndex].SuspendedSediment > 0.00001)
     {
         if(topBottom == 0)
         {
-            height = totalLayerHeightMapHeight + gridHydraulicErosionCells[gridHydraulicErosionCellIndex].SuspendedSediment;
+            height = totalHeightMapLayerHeight + gridHydraulicErosionCells[gridHydraulicErosionCellIndex].SuspendedSediment;
         }
         else
         {
-            height = totalLayerHeightMapHeight;
+            height = totalHeightMapLayerHeight;
         }
     }
     float suspendedSediment = height * mapGenerationConfiguration.HeightMultiplier;

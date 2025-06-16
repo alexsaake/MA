@@ -25,7 +25,7 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
 
 uint myHeightMapPlaneSize;
 
-uint LayerHeightMapOffset(uint layer)
+uint HeightMapLayerOffset(uint layer)
 {
     return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 }
@@ -64,7 +64,7 @@ void main()
         }
         
         uint layer = 1;
-        heightMap[index + LayerHeightMapOffset(layer)] = layerOneBedrockHeight;
+        heightMap[index + HeightMapLayerOffset(layer)] = layerOneBedrockHeight;
         heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = layerOneFloorHeight;
     }
 

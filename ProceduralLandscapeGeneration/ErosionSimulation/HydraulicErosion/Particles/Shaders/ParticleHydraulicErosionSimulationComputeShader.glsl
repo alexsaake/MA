@@ -105,12 +105,17 @@ ParticleHydraulicErosion myParticleHydraulicErosion;
 vec2 myOriginalPosition;
 uint myHeightMapPlaneSize;
 
+uint HeightMapRockTypeOffset(uint rockType)
+{
+    return rockType * myHeightMapPlaneSize;
+}
+
 float SuspendFromTop(uint index, float requiredSediment)
 {
     float suspendedSediment = 0;
     for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
     {
-        uint offsetIndex = index + rockType * myHeightMapPlaneSize;
+        uint offsetIndex = index + HeightMapRockTypeOffset(rockType);
         float height = heightMap[offsetIndex];
         float hardness = (1.0 - rockTypesConfiguration[rockType].Hardness);
         float toBeSuspendedSediment = requiredSediment * hardness;
@@ -135,7 +140,7 @@ void DepositeOnTop(uint index, float sediment)
     heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize] += sediment;
 }
 
-uint LayerHeightMapOffset(uint layer)
+uint HeightMapLayerOffset(uint layer)
 {
     return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 }
@@ -145,7 +150,7 @@ float TotalHeight(uint index, uint layer)
     float height = 0;
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        height += heightMap[index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
+        height += heightMap[index + HeightMapRockTypeOffset(rockType) + HeightMapLayerOffset(layer)];
     }
     return height;
 }

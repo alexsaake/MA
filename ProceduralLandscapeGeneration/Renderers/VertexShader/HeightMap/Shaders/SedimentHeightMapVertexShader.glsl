@@ -72,13 +72,6 @@ layout(std430, binding = 5) readonly restrict buffer mapGenerationConfigurationS
     MapGenerationConfiguration mapGenerationConfiguration;
 };
 
-in vec3 vertexPosition;
-
-uniform mat4 mvp;
-
-out vec4 fragColor;
-
-vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
 
 uint myHeightMapPlaneSize;
 
@@ -97,46 +90,66 @@ float TotalSuspendedSediment(uint index)
     return suspendedSediment;
 }
 
-float LayerHeightMapFloorHeight(uint index, uint layer)
+float HeightMapLayerFloorHeight(uint index, uint layer)
 {
-    if(layer < 1)
+    if(layer < 1
+        || layer >= mapGenerationConfiguration.LayerCount)
     {
         return 0.0;
     }
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-uint LayerHeightMapOffset(uint layer)
+uint HeightMapLayerOffset(uint layer)
 {
     return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 }
 
+uint HeightMapRockTypeOffset(uint rockType)
+{
+    return rockType * myHeightMapPlaneSize;
+}
+
+float HeightMapLayerHeight(uint index, uint layer)
+{
+    float heightMapLayerHeight = 0.0;
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    {
+        heightMapLayerHeight += heightMap[index + HeightMapRockTypeOffset(rockType) + HeightMapLayerOffset(layer)];
+    }
+    return heightMapLayerHeight;
+}
+
 float TotalHeightMapHeight(uint index)
 {
-    float heightMapFloorHeight = 0.0;
-    float rockTypeHeight = 0.0;
+    float heightMapLayerFloorHeight = 0.0;
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-		heightMapFloorHeight = 0.0;
+        heightMapLayerFloorHeight = 0.0;
         if(layer > 0)
         {
-            heightMapFloorHeight = LayerHeightMapFloorHeight(index, layer);
-            if(heightMapFloorHeight == 0)
+            heightMapLayerFloorHeight = HeightMapLayerFloorHeight(index, layer);
+            if(heightMapLayerFloorHeight == 0)
             {
-                continue;
+                return 0.0;
             }
         }
-        for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+        float heightMapLayerHeight = HeightMapLayerHeight(index, layer);
+        if(heightMapLayerHeight > 0)
         {
-            rockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
-        }
-        if(rockTypeHeight > 0)
-        {
-            return heightMapFloorHeight + rockTypeHeight;
+            return heightMapLayerFloorHeight + heightMapLayerHeight;
         }
     }
-    return heightMapFloorHeight + rockTypeHeight;
+    return 0.0;
 }
+
+in vec3 vertexPosition;
+
+uniform mat4 mvp;
+
+out vec4 fragColor;
+
+vec4 sedimentColor = vec4(0.3, 0.2, 0.1, 0.5);
 
 void main()
 {

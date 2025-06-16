@@ -47,27 +47,32 @@ bool IsFloorIndex(uint index)
     return tempIndex >= 0 && tempIndex < myHeightMapPlaneSize;
 }
 
-uint LayerHeightMapOffset(uint layer)
+uint HeightMapLayerOffset(uint layer)
 {
     return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 }
 
+uint HeightMapRockTypeOffset(uint rockType)
+{
+    return rockType * myHeightMapPlaneSize;
+}
+
 float FineSedimentHeight(uint index, uint layer)
 {
-    return heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
+    return heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + HeightMapLayerOffset(layer)];
 }
 
 float CoarseSedimentHeight(uint index, uint layer)
 {
-    return heightMap[index + 1 * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
+    return heightMap[index + 1 * myHeightMapPlaneSize + HeightMapLayerOffset(layer)];
 }
 
 float BedrockHeight(uint index, uint layer)
 {
-    return heightMap[index + LayerHeightMapOffset(layer)];
+    return heightMap[index + HeightMapLayerOffset(layer)];
 }
 
-float LayerHeightMapFloorHeight(uint index, uint layer)
+float HeightMapLayerFloorHeight(uint index, uint layer)
 {
     if(layer < 1)
     {
@@ -76,13 +81,13 @@ float LayerHeightMapFloorHeight(uint index, uint layer)
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-float LayerHeightMapHeight(uint index, uint totalIndex, uint layer)
+float HeightMapLayerHeight(uint index, uint totalIndex, uint layer)
 {
     float height = 0.0;
     float heightMapFloorHeight = 0.0;
     if(layer > 0)
     {
-        heightMapFloorHeight = LayerHeightMapFloorHeight(index, layer);
+        heightMapFloorHeight = HeightMapLayerFloorHeight(index, layer);
             if(heightMapFloorHeight == 0)
             {
                 return 0.0;
@@ -90,7 +95,7 @@ float LayerHeightMapHeight(uint index, uint totalIndex, uint layer)
     }
     for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
-        uint currentRockTypeIndex = index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer);
+        uint currentRockTypeIndex = index + HeightMapRockTypeOffset(rockType) + HeightMapLayerOffset(layer);
         if(totalIndex < currentRockTypeIndex)
         {
             return heightMapFloorHeight + height;
@@ -130,9 +135,9 @@ void main()
     uint heightMapIndex = uint(vertexTexCoords.x);
     uint layerOffset = (mapGenerationConfiguration.RockTypeCount + 1) * myHeightMapPlaneSize;
     uint layer = uint(heightMapIndex * 1.0 / layerOffset);
-    uint rockTypeIndex = heightMapIndex - LayerHeightMapOffset(layer);
+    uint rockTypeIndex = heightMapIndex - HeightMapLayerOffset(layer);
     uint rockType = uint(rockTypeIndex * 1.0 / myHeightMapPlaneSize);
-    uint baseIndex = rockTypeIndex - rockType * myHeightMapPlaneSize;
+    uint baseIndex = rockTypeIndex - HeightMapRockTypeOffset(rockType);
     float height = 0.0;
     if(heightMapIndex > 0)
     {
@@ -143,7 +148,7 @@ void main()
         }
         else
         {
-            height = LayerHeightMapHeight(baseIndex, heightMapIndex, layer);
+            height = HeightMapLayerHeight(baseIndex, heightMapIndex, layer);
         }
     }
     float terrainHeight = height * mapGenerationConfiguration.HeightMultiplier;

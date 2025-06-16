@@ -83,6 +83,7 @@ layout(std430, binding = 9) buffer gridHydraulicErosionConfigurationShaderBuffer
 //https://github.com/karhu/terrain-erosion/blob/master/Simulation/FluidSimulation.cpp
 //fixing
 //https://github.com/Clocktown/CUDA-3D-Hydraulic-Erosion-Simulation-with-Layered-Stacks/blob/main/core/geo/device/transport.cu
+
 uint myHeightMapSideLength;
 uint myHeightMapPlaneSize;
 
@@ -96,7 +97,7 @@ uint LayerHydraulicErosionCellsOffset(uint layer)
     return layer * myHeightMapPlaneSize;
 }
 
-float LayerHeightMapFloorHeight(uint index, uint layer)
+float HeightMapLayerFloorHeight(uint index, uint layer)
 {
     if(layer < 1
         || layer >= mapGenerationConfiguration.LayerCount)
@@ -106,33 +107,38 @@ float LayerHeightMapFloorHeight(uint index, uint layer)
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-uint LayerHeightMapOffset(uint layer)
+uint HeightMapLayerOffset(uint layer)
 {
     return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
 }
 
-float LayerHeightMapRockTypeHeight(uint index, uint layer)
+uint HeightMapRockTypeOffset(uint rockType)
 {
-    float layerHeightMapRockTypeHeight = 0.0;
-    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
-    {
-        layerHeightMapRockTypeHeight += heightMap[index + rockType * myHeightMapPlaneSize + LayerHeightMapOffset(layer)];
-    }
-    return layerHeightMapRockTypeHeight;
+    return rockType * myHeightMapPlaneSize;
 }
 
-float TotalLayerHeightMapHeight(uint index, uint layer)
+float HeightMapLayerHeight(uint index, uint layer)
 {
-    float layerHeightMapFloorHeight = 0.0;
+    float heightMapLayerHeight = 0.0;
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    {
+        heightMapLayerHeight += heightMap[index + HeightMapRockTypeOffset(rockType) + HeightMapLayerOffset(layer)];
+    }
+    return heightMapLayerHeight;
+}
+
+float TotalHeightMapLayerHeight(uint index, uint layer)
+{
+    float heightMapLayerFloorHeight = 0.0;
     if(layer > 0)
     {
-        layerHeightMapFloorHeight = LayerHeightMapFloorHeight(index, layer);
-        if(layerHeightMapFloorHeight == 0)
+        heightMapLayerFloorHeight = HeightMapLayerFloorHeight(index, layer);
+        if(heightMapLayerFloorHeight == 0)
         {
             return 0.0;
         }
     }
-    return layerHeightMapFloorHeight + LayerHeightMapRockTypeHeight(index, layer);
+    return heightMapLayerFloorHeight + HeightMapLayerHeight(index, layer);
 }
 
 float TotalLayerWaterHeight(uint index, uint layer)
@@ -143,17 +149,17 @@ float TotalLayerWaterHeight(uint index, uint layer)
 
 float TotalLayerHeightMapAndWaterHeight(uint index, uint layer)
 {
-    return TotalLayerHeightMapHeight(index, layer) + TotalLayerWaterHeight(index, layer);
+    return TotalHeightMapLayerHeight(index, layer) + TotalLayerWaterHeight(index, layer);
 }
 
 float LayerSplitSize(uint index, uint layer)
 {
-    float aboveLayerHeightMapFloorHeight = LayerHeightMapFloorHeight(index, layer + 1);
+    float aboveHeightMapLayerFloorHeight = HeightMapLayerFloorHeight(index, layer + 1);
     if(layer == 0
-        && aboveLayerHeightMapFloorHeight > 0.0)
+        && aboveHeightMapLayerFloorHeight > 0.0)
     {
-        float totalLayerHeightMapHeight = TotalLayerHeightMapHeight(index, layer);
-        return aboveLayerHeightMapFloorHeight - totalLayerHeightMapHeight;
+        float totalHeightMapLayerHeight = TotalHeightMapLayerHeight(index, layer);
+        return aboveHeightMapLayerFloorHeight - totalHeightMapLayerHeight;
     }
     return 100.0;
 }
@@ -171,7 +177,7 @@ void main()
 
     uint x = index % myHeightMapSideLength;
     uint y = index / myHeightMapSideLength;
-        
+    
     uint indexLeft = GetIndex(x - 1, y);
     uint indexRight = GetIndex(x + 1, y);
     uint indexDown = GetIndex(x, y - 1);
@@ -179,21 +185,24 @@ void main()
     
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        if(layer > 0
-            && LayerHeightMapFloorHeight(index, layer) == 0)
+        float layerSplitSize = LayerSplitSize(index, layer);
+        if(layerSplitSize == 100.0
+            || (layer > 0
+                && HeightMapLayerFloorHeight(index, layer) == 0))
         {
             continue;
         }
 
         float totalLayerHeightMapAndWaterHeight = TotalLayerHeightMapAndWaterHeight(index, layer);
-        float aboveLayerHeightMapFloorHeight = LayerHeightMapFloorHeight(index, layer + 1);
+        float aboveHeightMapLayerFloorHeight = HeightMapLayerFloorHeight(index, layer + 1);
         float layerWaterInflow = 0.0;
+
         for(int layer2 = int(mapGenerationConfiguration.LayerCount) - 1; layer2 >= 0; layer2--)
         {
             if(TotalLayerWaterHeight(indexLeft, layer2) > 0
                 && TotalLayerHeightMapAndWaterHeight(indexLeft, layer2) > totalLayerHeightMapAndWaterHeight
-                && (aboveLayerHeightMapFloorHeight == 0
-                    || TotalLayerHeightMapHeight(indexLeft, layer2) < aboveLayerHeightMapFloorHeight))
+                && (aboveHeightMapLayerFloorHeight == 0
+                    || TotalHeightMapLayerHeight(indexLeft, layer2) < aboveHeightMapLayerFloorHeight))
             {
                 if(x > 0)
                 {
@@ -203,8 +212,8 @@ void main()
 
             if(TotalLayerWaterHeight(indexRight, layer2) > 0
                 && TotalLayerHeightMapAndWaterHeight(indexRight, layer2) > totalLayerHeightMapAndWaterHeight
-                && (aboveLayerHeightMapFloorHeight == 0
-                    || TotalLayerHeightMapHeight(indexRight, layer2) < aboveLayerHeightMapFloorHeight))
+                && (aboveHeightMapLayerFloorHeight == 0
+                    || TotalHeightMapLayerHeight(indexRight, layer2) < aboveHeightMapLayerFloorHeight))
             {
 		        if(x < myHeightMapSideLength - 1)
                 {
@@ -214,8 +223,8 @@ void main()
 
             if(TotalLayerWaterHeight(indexDown, layer2) > 0
                 && TotalLayerHeightMapAndWaterHeight(indexDown, layer2) > totalLayerHeightMapAndWaterHeight
-                && (aboveLayerHeightMapFloorHeight == 0
-                    || TotalLayerHeightMapHeight(indexDown, layer2) < aboveLayerHeightMapFloorHeight))
+                && (aboveHeightMapLayerFloorHeight == 0
+                    || TotalHeightMapLayerHeight(indexDown, layer2) < aboveHeightMapLayerFloorHeight))
             {
                 if(y > 0)
                 {
@@ -225,8 +234,8 @@ void main()
 
             if(TotalLayerWaterHeight(indexUp, layer2) > 0
                 && TotalLayerHeightMapAndWaterHeight(indexUp, layer2) > totalLayerHeightMapAndWaterHeight
-                && (aboveLayerHeightMapFloorHeight == 0
-                    || TotalLayerHeightMapHeight(indexUp, layer2) < aboveLayerHeightMapFloorHeight))
+                && (aboveHeightMapLayerFloorHeight == 0
+                    || TotalHeightMapLayerHeight(indexUp, layer2) < aboveHeightMapLayerFloorHeight))
             {
 		        if(y < myHeightMapSideLength - 1)
                 {
@@ -235,8 +244,6 @@ void main()
             }
         }
 
-        float layerSplitSize = LayerSplitSize(index, layer);
-
         if(layerWaterInflow > layerSplitSize)
         {
             float scale = min(layerSplitSize / layerWaterInflow, 1.0);
@@ -244,8 +251,8 @@ void main()
             {
                 if(TotalLayerWaterHeight(indexLeft, layer2) > 0
                     && TotalLayerHeightMapAndWaterHeight(indexLeft, layer2) > totalLayerHeightMapAndWaterHeight
-                    && (aboveLayerHeightMapFloorHeight == 0
-                        || TotalLayerHeightMapHeight(indexLeft, layer2) < aboveLayerHeightMapFloorHeight))
+                    && (aboveHeightMapLayerFloorHeight == 0
+                        || TotalHeightMapLayerHeight(indexLeft, layer2) < aboveHeightMapLayerFloorHeight))
                 {
                     if(x > 0)
                     {
@@ -256,8 +263,8 @@ void main()
 
                 if(TotalLayerWaterHeight(indexRight, layer2) > 0
                     && TotalLayerHeightMapAndWaterHeight(indexRight, layer2) > totalLayerHeightMapAndWaterHeight
-                    && (aboveLayerHeightMapFloorHeight == 0
-                        || TotalLayerHeightMapHeight(indexRight, layer2) < aboveLayerHeightMapFloorHeight))
+                    && (aboveHeightMapLayerFloorHeight == 0
+                        || TotalHeightMapLayerHeight(indexRight, layer2) < aboveHeightMapLayerFloorHeight))
                 {
 		            if(x < myHeightMapSideLength - 1)
                     {
@@ -268,8 +275,8 @@ void main()
 
                 if(TotalLayerWaterHeight(indexDown, layer2) > 0
                     && TotalLayerHeightMapAndWaterHeight(indexDown, layer2) > totalLayerHeightMapAndWaterHeight
-                    && (aboveLayerHeightMapFloorHeight == 0
-                        || TotalLayerHeightMapHeight(indexDown, layer2) < aboveLayerHeightMapFloorHeight))
+                    && (aboveHeightMapLayerFloorHeight == 0
+                        || TotalHeightMapLayerHeight(indexDown, layer2) < aboveHeightMapLayerFloorHeight))
                 {
                     if(y > 0)
                     {
@@ -280,8 +287,8 @@ void main()
 
                 if(TotalLayerWaterHeight(indexUp, layer2) > 0
                     && TotalLayerHeightMapAndWaterHeight(indexUp, layer2) > totalLayerHeightMapAndWaterHeight
-                    && (aboveLayerHeightMapFloorHeight == 0
-                        || TotalLayerHeightMapHeight(indexUp, layer2) < aboveLayerHeightMapFloorHeight))
+                    && (aboveHeightMapLayerFloorHeight == 0
+                        || TotalHeightMapLayerHeight(indexUp, layer2) < aboveHeightMapLayerFloorHeight))
                 {
 		            if(y < myHeightMapSideLength - 1)
                     {
