@@ -23,6 +23,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
 
     private ComputeShaderProgram? myRainComputeShaderProgram;
     private ComputeShaderProgram? myVerticalFlowComputeShaderProgram;
+    private ComputeShaderProgram? myLimitVerticalInflowComputeShaderProgram;
     private ComputeShaderProgram? myVerticalMoveWaterAndSedimentSetVelocityMapAndEvaporateComputeShaderrProgram;
     private ComputeShaderProgram? myVerticalSuspendDepositeComputeShaderProgram;
     private ComputeShaderProgram? myHorizontalSplitComputeShaderProgram;
@@ -47,10 +48,11 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
 
         myRainComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}0RainComputeShader.glsl");
         myVerticalFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}1VerticalFlowComputeShader.glsl");
-        myVerticalMoveWaterAndSedimentSetVelocityMapAndEvaporateComputeShaderrProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}2VerticalMoveWaterAndSedimentSetVelocityMapAndEvaporateComputeShader.glsl");
-        myVerticalSuspendDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}3VerticalSuspendDepositeComputeShader.glsl");
-        myHorizontalSplitComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}4HorizontalSplitComputeShader.glsl");
-        myCollapseOrCloseSplitComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}5CollapseOrCloseSplitComputeShader.glsl");
+        myLimitVerticalInflowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}2LimitVerticalInflowComputeShader.glsl");
+        myVerticalMoveWaterAndSedimentSetVelocityMapAndEvaporateComputeShaderrProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}3VerticalMoveWaterAndSedimentSetVelocityMapAndEvaporateComputeShader.glsl");
+        myVerticalSuspendDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}4VerticalSuspendDepositeComputeShader.glsl");
+        myHorizontalSplitComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}5HorizontalSplitComputeShader.glsl");
+        myCollapseOrCloseSplitComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}6CollapseOrCloseSplitComputeShader.glsl");
 
         AddGridHydraulicErosionCellShaderBuffer();
         AddHeightMapIndicesShaderBuffer();
@@ -100,6 +102,11 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
                 AddWater();
             }
             VerticalFlow();
+            if (myMapGenerationConfiguration.LayerCount > 1)
+            {
+                LimitVerticalInflow();
+            }
+            LimitVerticalInflow();
             VerticalMoveWaterAndSedimentSetVelocityMapAndEvaporate();
             VerticalSuspendDeposite();
             if (myMapGenerationConfiguration.LayerCount > 1)
@@ -139,6 +146,14 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     internal void VerticalFlow()
     {
         Rlgl.EnableShader(myVerticalFlowComputeShaderProgram!.Id);
+        Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
+        Rlgl.DisableShader();
+        Rlgl.MemoryBarrier();
+    }
+
+    internal void LimitVerticalInflow()
+    {
+        Rlgl.EnableShader(myLimitVerticalInflowComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
@@ -215,6 +230,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
 
         myRainComputeShaderProgram?.Dispose();
         myVerticalFlowComputeShaderProgram?.Dispose();
+        myLimitVerticalInflowComputeShaderProgram?.Dispose();
         myVerticalMoveWaterAndSedimentSetVelocityMapAndEvaporateComputeShaderrProgram?.Dispose();
         myVerticalSuspendDepositeComputeShaderProgram?.Dispose();
         myHorizontalSplitComputeShaderProgram?.Dispose();
