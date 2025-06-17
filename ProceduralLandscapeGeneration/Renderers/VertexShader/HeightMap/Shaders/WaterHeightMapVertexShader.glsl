@@ -109,18 +109,18 @@ float HeightMapLayerHeight(uint index, uint layer)
 float TotalHeightMapHeight(uint index)
 {
     float heightMapLayerFloorHeight = 0.0;
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
         heightMapLayerFloorHeight = 0.0;
         if(layer > 0)
         {
-            heightMapLayerFloorHeight = HeightMapLayerFloorHeight(index, layer);
+            heightMapLayerFloorHeight = HeightMapLayerFloorHeight(index, uint(layer));
             if(heightMapLayerFloorHeight == 0)
             {
-                return 0.0;
+                continue;
             }
         }
-        float heightMapLayerHeight = HeightMapLayerHeight(index, layer);
+        float heightMapLayerHeight = HeightMapLayerHeight(index, uint(layer));
         if(heightMapLayerHeight > 0)
         {
             return heightMapLayerFloorHeight + heightMapLayerHeight;

@@ -152,9 +152,9 @@ float TotalHeightMapLayerRockTypeHeight(uint index, uint layer, int stopRockType
 
 float ReachableNeighborHeightMapHeight(uint neighborIndex, float heightMapWithoutCurrentRockTypeHeight, float heightMapWithCurrentRockTypeHeight)
 {
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
-        float neighborTotalHeightMapLayerHeight = TotalHeightMapLayerHeight(neighborIndex, layer);
+        float neighborTotalHeightMapLayerHeight = TotalHeightMapLayerHeight(neighborIndex, uint(layer));
         float neighborAboveHeightMapLayerFloorHeight = HeightMapLayerFloorHeight(neighborIndex, uint(layer + 1));
         if(layer > 0 && neighborTotalHeightMapLayerHeight > 0 && neighborTotalHeightMapLayerHeight < heightMapWithCurrentRockTypeHeight && (neighborAboveHeightMapLayerFloorHeight == 0 || neighborAboveHeightMapLayerFloorHeight > heightMapWithoutCurrentRockTypeHeight))
         {

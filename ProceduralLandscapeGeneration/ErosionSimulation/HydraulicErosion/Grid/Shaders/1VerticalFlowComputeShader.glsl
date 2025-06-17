@@ -136,15 +136,15 @@ float TotalHeightMapLayerHeight(uint index, uint layer)
 
 float ReachableNeighborHeightMapHeight(uint neighborIndex, float heightMapHeight, float heightMapAndWaterHeight)
 {
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
         if(layer > 0
-            && HeightMapLayerFloorHeight(neighborIndex, layer) == 0)
+            && HeightMapLayerFloorHeight(neighborIndex, uint(layer)) == 0)
         {
             continue;
         }
-        float neighborTotalHeightMapLayerHeight = TotalHeightMapLayerHeight(neighborIndex, layer);
-        float neighborAboveHeightMapLayerFloorHeight = HeightMapLayerFloorHeight(neighborIndex, layer + 1);
+        float neighborTotalHeightMapLayerHeight = TotalHeightMapLayerHeight(neighborIndex, uint(layer));
+        float neighborAboveHeightMapLayerFloorHeight = HeightMapLayerFloorHeight(neighborIndex, uint(layer) + 1);
         if(layer > 0 && neighborTotalHeightMapLayerHeight > 0 && neighborTotalHeightMapLayerHeight < heightMapAndWaterHeight && (neighborAboveHeightMapLayerFloorHeight == 0 || neighborAboveHeightMapLayerFloorHeight > heightMapHeight))
         {
             return neighborTotalHeightMapLayerHeight;

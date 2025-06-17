@@ -120,15 +120,15 @@ void main()
     }
     hydraulicErosionHeightMapIndices[id] = -1;
 
-    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
         if(layer > 0
-            && HeightMapLayerFloorHeight(index, layer) == 0)
+            && HeightMapLayerFloorHeight(index, uint(layer)) == 0)
         {
             continue;
         }
 
-        uint layerIndex = index + HeightMapLayerOffset(layer);
+        uint layerIndex = index + HeightMapLayerOffset(uint(layer));
         GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[layerIndex];
 
         gridHydraulicErosionCell.WaterHeight += gridHydraulicErosionConfiguration.WaterIncrease * erosionConfiguration.DeltaTime;
