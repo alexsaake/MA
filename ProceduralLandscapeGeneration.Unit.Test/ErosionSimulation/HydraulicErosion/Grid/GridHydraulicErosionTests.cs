@@ -243,21 +243,21 @@ public class GridHydraulicErosionTests
     }
 
     [Test]
+    [TestCase(0u, 0.0f, 0.0f, 0.0f, 0.0f)]
+    [TestCase(0u, 1.0f, 0.0f, 0.0f, 0.0f)]
+    [TestCase(0u, 1.0f, 0.0f, 1.0f, 0.0f)]
+    [TestCase(0u, 0.0f, 0.0f, 1.0f, 1.0f)]
+    [TestCase(0u, 1.0f, 0.0f, 2.0f, 1.0f)]
     [TestCase(1u, 0.0f, 0.0f, 0.0f, 0.0f)]
     [TestCase(1u, 1.0f, 0.0f, 0.0f, 0.0f)]
     [TestCase(1u, 1.0f, 0.0f, 1.0f, 0.0f)]
     [TestCase(1u, 0.0f, 0.0f, 1.0f, 1.0f)]
     [TestCase(1u, 1.0f, 0.0f, 2.0f, 1.0f)]
-    [TestCase(2u, 0.0f, 0.0f, 0.0f, 0.0f)]
-    [TestCase(2u, 1.0f, 0.0f, 0.0f, 0.0f)]
-    [TestCase(2u, 1.0f, 0.0f, 1.0f, 0.0f)]
-    [TestCase(2u, 0.0f, 0.0f, 1.0f, 1.0f)]
-    [TestCase(2u, 1.0f, 0.0f, 2.0f, 1.0f)]
-    [TestCase(2u, 0.0f, 1.0f, 0.0f, 0.0f)]
-    [TestCase(2u, 1.0f, 1.0f, 0.0f, 0.0f)]
-    [TestCase(2u, 1.0f, 1.0f, 1.0f, 1.0f)]
-    [TestCase(2u, 0.0f, 1.0f, 1.0f, 1.0f)]
-    [TestCase(2u, 1.0f, 1.0f, 2.0f, 1.0f)]
+    [TestCase(1u, 0.0f, 1.0f, 0.0f, 0.0f)]
+    [TestCase(1u, 1.0f, 1.0f, 0.0f, 0.0f)]
+    [TestCase(1u, 1.0f, 1.0f, 1.0f, 1.0f)]
+    [TestCase(1u, 0.0f, 1.0f, 1.0f, 1.0f)]
+    [TestCase(1u, 1.0f, 1.0f, 2.0f, 1.0f)]
     public void VerticalFlow_1x1HeightMapWithSeaLevel_WaterHeightAsExpected(uint layerCount, float bedRockHeight, float floorHeight, float seaLevel, float expectedWaterHeight)
     {
         uint layer = layerCount - 1;
