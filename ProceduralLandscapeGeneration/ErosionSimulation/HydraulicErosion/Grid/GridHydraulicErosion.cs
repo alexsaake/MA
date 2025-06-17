@@ -106,7 +106,6 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
             {
                 LimitVerticalInflow();
             }
-            LimitVerticalInflow();
             VerticalMoveWaterAndSedimentSetVelocityMapAndEvaporate();
             VerticalSuspendDeposite();
             if (myMapGenerationConfiguration.LayerCount > 1)
