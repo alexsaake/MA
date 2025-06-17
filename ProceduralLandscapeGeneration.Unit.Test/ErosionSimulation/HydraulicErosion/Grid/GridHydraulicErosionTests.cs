@@ -270,9 +270,9 @@ public class GridHydraulicErosionTests
 
         testee.VerticalFlow();
 
+        float[] heightMap = ReadHeightMapShaderBuffer();
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
-        uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
-        GridHydraulicErosionCellShaderBuffer centerCell = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
+        GridHydraulicErosionCellShaderBuffer centerCell = gridHydraulicErosionCellsShaderBuffers[CenterIndex];
         Assert.That(centerCell.WaterHeight, Is.EqualTo(expectedWaterHeight));
     }
 
@@ -813,7 +813,10 @@ public class GridHydraulicErosionTests
         float[] heightMap = new float[myMapGenerationConfiguration!.HeightMapSize];
         shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
         heightMap[CenterIndex + layer * myMapGenerationConfiguration!.HeightMapPlaneSize] = bedRockHeight;
-        heightMap[CenterIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = floorHeight;
+        if (layer > 0)
+        {
+            heightMap[CenterIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = floorHeight;
+        }
         fixed (void* heightMapPointer = heightMap)
         {
             Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);
@@ -827,15 +830,18 @@ public class GridHydraulicErosionTests
         float[] heightMap = new float[myMapGenerationConfiguration!.HeightMapSize];
         shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
         heightMap[CenterIndex + layer * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
-        heightMap[CenterIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
         heightMap[LeftIndex + layer * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.0f;
-        heightMap[LeftIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.0f;
         heightMap[RightIndex + layer * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.0f;
-        heightMap[RightIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.0f;
         heightMap[UpIndex + layer * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.0f;
-        heightMap[UpIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.0f;
         heightMap[DownIndex + layer * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.0f;
-        heightMap[DownIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.0f;
+        if (layer > 0)
+        {
+            heightMap[CenterIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
+            heightMap[LeftIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.0f;
+            heightMap[RightIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.0f;
+            heightMap[UpIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.0f;
+            heightMap[DownIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.0f;
+        }
         fixed (void* heightMapPointer = heightMap)
         {
             Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);
@@ -849,15 +855,18 @@ public class GridHydraulicErosionTests
         float[] heightMap = new float[myMapGenerationConfiguration!.HeightMapSize];
         shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
         heightMap[CenterIndex + layer * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
-        heightMap[CenterIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
         heightMap[LeftIndex + layer * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.1f;
-        heightMap[LeftIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.1f;
         heightMap[RightIndex + layer * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.1f;
-        heightMap[RightIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.1f;
         heightMap[UpIndex + layer * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.1f;
-        heightMap[UpIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.1f;
         heightMap[DownIndex + layer * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.1f;
-        heightMap[DownIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.1f;
+        if (layer > 0)
+        {
+            heightMap[CenterIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
+            heightMap[LeftIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.1f;
+            heightMap[RightIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.1f;
+            heightMap[UpIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.1f;
+            heightMap[DownIndex + layer * 2 * myMapGenerationConfiguration!.HeightMapPlaneSize] = 2.1f;
+        }
         fixed (void* heightMapPointer = heightMap)
         {
             Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);
@@ -900,7 +909,10 @@ public class GridHydraulicErosionTests
         {
             heightMap[CenterIndex + rockType * myMapGenerationConfiguration!.HeightMapPlaneSize + (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
         }
-        heightMap[CenterIndex + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
+        if (layer > 0)
+        {
+            heightMap[CenterIndex + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
+        }
         fixed (void* heightMapPointer = heightMap)
         {
             Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);
@@ -917,7 +929,10 @@ public class GridHydraulicErosionTests
         {
             heightMap[CenterIndex + rockType * myMapGenerationConfiguration!.HeightMapPlaneSize + (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
         }
-        heightMap[CenterIndex + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
+        if (layer > 0)
+        {
+            heightMap[CenterIndex + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
+        }
         heightMap[LeftIndex] = 2.0f;
         heightMap[DownIndex] = 2.0f;
         fixed (void* heightMapPointer = heightMap)

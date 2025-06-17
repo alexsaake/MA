@@ -190,7 +190,10 @@ public class GridHydraulicAndThermalErosionTests
         {
             heightMap[CenterIndex + rockType * myMapGenerationConfiguration!.HeightMapPlaneSize + (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
         }
-        heightMap[CenterIndex + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
+        if (layer > 0)
+        {
+            heightMap[CenterIndex + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
+        }
         heightMap[LeftIndex] = 2.0f;
         heightMap[DownIndex] = 2.0f;
         fixed (void* heightMapPointer = heightMap)

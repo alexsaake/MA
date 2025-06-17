@@ -205,7 +205,7 @@ void main()
         }
 
         uint layerIndex = index + LayerHydraulicErosionCellsOffset(layer);
-        GridHydraulicErosionCell gridHydraulicErosionCell  = gridHydraulicErosionCells[layerIndex];
+        GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[layerIndex];
     
         float totalHeightMapLayerHeight = TotalHeightMapLayerHeight(index, layer);
         if(totalHeightMapLayerHeight < mapGenerationConfiguration.SeaLevel)
