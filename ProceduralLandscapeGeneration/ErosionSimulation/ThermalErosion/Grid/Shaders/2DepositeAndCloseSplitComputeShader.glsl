@@ -135,17 +135,17 @@ float TotalHeightMapLayerHeight(uint index, uint layer)
     return heightMapLayerFloorHeight + HeightMapLayerHeight(index, layer);
 }
 
-float HeightMapLayerRockTypeHeight(uint index, uint layer, uint stopRockType)
+float HeightMapLayerRockTypeHeight(uint index, uint layer, int stopRockType)
 {
     float heightMapLayerRockTypeHeight = 0.0;
-    for(uint rockType = 0; rockType <= stopRockType; rockType++)
+    for(int rockType = 0; rockType <= stopRockType; rockType++)
     {
         heightMapLayerRockTypeHeight += heightMap[index + HeightMapRockTypeOffset(rockType) + HeightMapLayerOffset(layer)];
     }
     return heightMapLayerRockTypeHeight;
 }
 
-float TotalHeightMapLayerRockTypeHeight(uint index, uint layer, uint stopRockType)
+float TotalHeightMapLayerRockTypeHeight(uint index, uint layer, int stopRockType)
 {
     float heightMapLayerFloorHeight = 0.0;
     if(layer > 0)
@@ -196,7 +196,7 @@ void main()
     uint indexDown = GetIndex(x, y - 1);
     uint indexUp = GetIndex(x, y + 1);
 
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
         if(layer > 0
             && HeightMapLayerFloorHeight(index, layer) == 0)
@@ -207,10 +207,10 @@ void main()
         float totalHeightMapLayerHeight = TotalHeightMapLayerHeight(index, layer);
         float aboveHeightMapLayerFloorHeight = HeightMapLayerFloorHeight(index, layer + 1);
         
-	    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+	    for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
 	    {
             float layerRockTypeInflow = 0.0;
-            for(int layer2 = int(mapGenerationConfiguration.LayerCount) - 1; layer2 >= 0; layer2--)
+            for(uint layer2 = 0; layer2 < mapGenerationConfiguration.LayerCount; layer2++)
             {
                 uint layerThermalErosionCellsOffset2 = layer2 * myHeightMapPlaneSize;
                 if(TotalHeightMapLayerRockTypeHeight(indexLeft, layer2, rockType) > totalHeightMapLayerHeight

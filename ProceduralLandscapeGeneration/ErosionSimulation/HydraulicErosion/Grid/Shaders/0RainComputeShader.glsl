@@ -120,7 +120,7 @@ void main()
     }
     hydraulicErosionHeightMapIndices[id] = -1;
 
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
         if(layer > 0
             && HeightMapLayerFloorHeight(index, layer) == 0)

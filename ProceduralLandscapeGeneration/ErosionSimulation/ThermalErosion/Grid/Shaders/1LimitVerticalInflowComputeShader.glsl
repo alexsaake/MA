@@ -180,7 +180,7 @@ void main()
     uint indexDown = GetIndex(x, y - 1);
     uint indexUp = GetIndex(x, y + 1);
     
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
         float layerSplitSize = LayerSplitSize(index, layer);
         if(layerSplitSize == 100.0
@@ -194,7 +194,7 @@ void main()
         float aboveHeightMapLayerFloorHeight = HeightMapLayerFloorHeight(index, layer + 1);
         float layerRockTypeInflow = 0.0;
 
-        for(int layer2 = int(mapGenerationConfiguration.LayerCount) - 1; layer2 >= 0; layer2--)
+        for(uint layer2 = 0; layer2 < mapGenerationConfiguration.LayerCount; layer2++)
         {
 	        for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
 	        {
@@ -247,7 +247,7 @@ void main()
             {
                 return;
             }
-            for(int layer2 = int(mapGenerationConfiguration.LayerCount) - 1; layer2 >= 0; layer2--)
+            for(uint layer2 = 0; layer2 < mapGenerationConfiguration.LayerCount; layer2++)
             {
 	            for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
 	            {

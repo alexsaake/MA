@@ -136,7 +136,7 @@ float TotalHeightMapLayerHeight(uint index, uint layer)
 
 float ReachableNeighborHeightMapHeight(uint neighborIndex, float heightMapHeight, float heightMapAndWaterHeight)
 {
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
         if(layer > 0
             && HeightMapLayerFloorHeight(neighborIndex, layer) == 0)
@@ -196,7 +196,7 @@ void main()
     uint indexDown = GetIndex(x, y - 1);
     uint indexUp = GetIndex(x, y + 1);
     
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
         if(layer > 0
             && HeightMapLayerFloorHeight(index, layer) == 0)

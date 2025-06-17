@@ -51,7 +51,7 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
 
         int indicesIndex = 0;
         int verticesIndex = 0;
-        for (int layer = 0; layer < myMapGenerationConfiguration.LayerCount; layer++)
+        for (uint layer = 0; layer < myMapGenerationConfiguration.LayerCount; layer++)
         {
             for (uint y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
             {
@@ -66,7 +66,7 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
 
         return mesh;
     }
-    private void AddLayerCubes(Mesh mesh, ref int verticesIndex, ref int indicesIndex, uint x, uint y, int layer)
+    private void AddLayerCubes(Mesh mesh, ref int verticesIndex, ref int indicesIndex, uint x, uint y, uint layer)
     {
         uint index = myMapGenerationConfiguration.GetIndex(x, y);
         for (int rockType = 0; rockType < myMapGenerationConfiguration.RockTypeCount; rockType++)
@@ -149,7 +149,7 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
 
         int indicesIndex = 0;
         int verticesIndex = 0;
-        for (int layer = 0; layer < myMapGenerationConfiguration.LayerCount; layer++)
+        for (uint layer = 0; layer < myMapGenerationConfiguration.LayerCount; layer++)
         {
             for (uint y = 0; y < myMapGenerationConfiguration.HeightMapSideLength; y++)
             {

@@ -169,7 +169,7 @@ void main()
     uint indexDown = GetIndex(x, y - 1);
     uint indexUp = GetIndex(x, y + 1);
     
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
         if(layer > 0
             && HeightMapLayerFloorHeight(index, layer) == 0)
@@ -187,7 +187,7 @@ void main()
         float sedimentFlowLeft = 0.0;
         float sedimentFlowUp = 0.0;
         float sedimentFlowDown = 0.0;
-        for(int layer2 = int(mapGenerationConfiguration.LayerCount) - 1; layer2 >= 0; layer2--)
+        for(uint layer2 = 0; layer2 < mapGenerationConfiguration.LayerCount; layer2++)
         {
             uint layerHydraulicErosionCellsOffset2 = layer2 * myHeightMapPlaneSize;
             if(TotalLayerWaterHeight(indexLeft, layer2) > 0

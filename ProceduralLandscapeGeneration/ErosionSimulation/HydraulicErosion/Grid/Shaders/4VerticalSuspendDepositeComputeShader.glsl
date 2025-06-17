@@ -149,7 +149,7 @@ float TotalHeightMapLayerHeight(uint index, uint layer)
 float TotalHeightMapHeight(uint index)
 {
     float heightMapLayerFloorHeight = 0.0;
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
         heightMapLayerFloorHeight = 0.0;
         if(layer > 0)
@@ -218,7 +218,7 @@ float SuspendFromLayerBottom(uint index, uint layer, float requiredSediment)
     {
         return 0.0;
     }
-    for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
         uint rockTypeIndex = index + HeightMapRockTypeOffset(rockType) + HeightMapLayerOffset(layer);
         float height = heightMap[rockTypeIndex];
@@ -272,7 +272,7 @@ void main()
     uint indexDown = GetIndex(x, y - 1);
     uint indexUp = GetIndex(x, y + 1);
     
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
         if(layer > 0
             && HeightMapLayerFloorHeight(index, layer) == 0)

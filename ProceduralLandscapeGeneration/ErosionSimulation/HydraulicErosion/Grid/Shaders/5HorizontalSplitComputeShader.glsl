@@ -130,7 +130,7 @@ float HeightMapLayerHeight(uint index, uint layer)
 float TotalHeightMapHeight(uint index)
 {
     float heightMapLayerFloorHeight = 0.0;
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
         heightMapLayerFloorHeight = 0.0;
         if(layer > 0)
@@ -153,7 +153,7 @@ float TotalHeightMapHeight(uint index)
 void MoveRockToAboveLayer(uint index, float splitHeight)
 {
     float sedimentToFill = splitHeight;
-    for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
         uint currentLayerRockTypeHeightMapIndex = index + HeightMapRockTypeOffset(rockType);
         uint aboveLayerRockTypeHeightMapIndex = index + HeightMapRockTypeOffset(rockType) + (mapGenerationConfiguration.RockTypeCount + 1) * myHeightMapPlaneSize;

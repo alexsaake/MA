@@ -124,7 +124,7 @@ bool IsFloating(uint index, float floorHeight)
     uint indexDown = GetIndex(x, y - 1);
     uint indexUp = GetIndex(x, y + 1);
     
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
         if(TotalHeightMapLayerHeight(indexLeft, layer) > floorHeight
             || TotalHeightMapLayerHeight(indexRight, layer) > floorHeight
@@ -152,7 +152,7 @@ float LayerFloorCollapseThreshold(uint index, uint layer)
 
 void MoveRockToBelowLayer(uint index, bool isSplitOpen)
 {
-    for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
+    for(uint rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
     {
         uint layerOneRockTypeHeightMapIndex = index + HeightMapRockTypeOffset(rockType) + (mapGenerationConfiguration.RockTypeCount + 1) * myHeightMapPlaneSize;
         uint layerZeroRockTypeHeightMapIndex = index + HeightMapRockTypeOffset(rockType);
