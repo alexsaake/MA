@@ -117,7 +117,10 @@ public class GridThermalErosionTests
     }
 
     [Test]
-    public void Simulate_HeightMapWithGivenSizeLayersIterationsAndRockTypesInMiddle_VolumeStaysTheSame([Values(3u, 9u, 27u)] uint sideLength, [Values(1u, 2u, 3u)] uint rockTypeCount, [Values(0u, 1u)] uint layers, [Values(1u, 100u, 10000u)] uint iterations)
+    public void Simulate_HeightMapWithGivenSizeLayersIterationsAndRockTypesInMiddle_VolumeStaysTheSame([Values(3u, 9u, 27u)] uint sideLength,
+                                                                                                    [Values(1u, 2u, 3u)] uint rockTypeCount,
+                                                                                                    [Values(0u, 1u)] uint layers,
+                                                                                                    [Values(1u, 100u, 10000u)] uint iterations)
     {
         SetUpErosionConfiguration(iterations);
         uint layerCount = layers + 1u;
@@ -138,6 +141,52 @@ public class GridThermalErosionTests
         Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+    }
+
+    [Test]
+    public void Simulate_LayerOneHeightMapWithGivenSizeIterationsSeaLevelAndRockTypesInMiddleAndHorizontalErosion_VolumeStaysTheSame([Values(3u, 9u, 27u)] uint sideLength,
+                                                                                                                                        [Values(1u, 2u, 3u)] uint rockTypeCount,
+                                                                                                                                        [Values(1u, 100u, 10000u)] uint iterations)
+    {
+        SetUpErosionConfiguration(iterations);
+        uint layer = 1;
+        uint layerCount = layer + 1;
+        SetUpMapGenerationConfiguration(layerCount, sideLength, rockTypeCount);
+        InitializeConfiguration();
+        SetUpNoneFloatingHeightMapWithRockTypesInMiddle(layer, rockTypeCount);
+        GridThermalErosion gridThermalErosionTestee = (GridThermalErosion)myContainer!.Resolve<IGridThermalErosion>();
+        gridThermalErosionTestee.Initialize();
+
+        float[] startHeightMap = ReadHeightMapShaderBuffer();
+        float startVolume = SumUpVolume(startHeightMap);
+
+        gridThermalErosionTestee.Simulate();
+
+        float[] intermediateHeightMap = ReadHeightMapShaderBuffer();
+        GridThermalErosionCellShaderBuffer[] intermediateGridThermalErosionCellsShaderBuffers = ReadGridThermalErosionCellShaderBuffer();
+        float intermediateVolume = SumUpVolume(intermediateHeightMap);
+
+        gridThermalErosionTestee.Simulate();
+
+        float[] endHeightMap = ReadHeightMapShaderBuffer();
+        GridThermalErosionCellShaderBuffer[] endGridThermalErosionCellsShaderBuffers = ReadGridThermalErosionCellShaderBuffer();
+        float endVolume = SumUpVolume(endHeightMap);
+
+        Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
+        Assert.That(intermediateHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
+        Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
+        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+    }
+
+    private float SumUpVolume(float[] heightMap)
+    {
+        if (myMapGenerationConfiguration!.LayerCount == 1)
+        {
+            return heightMap.Sum(cell => cell);
+        }
+        float floorHeights = heightMap.Where((_, index) => index >= myMapGenerationConfiguration!.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize && index < myMapGenerationConfiguration!.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize + myMapGenerationConfiguration!.HeightMapPlaneSize).Sum(cell => cell);
+        return heightMap.Sum(cell => cell) - floorHeights;
     }
 
     private void InitializeConfiguration()
@@ -163,7 +212,7 @@ public class GridThermalErosionTests
         myMapGenerationConfiguration!.HeightMultiplier = 10;
         myMapGenerationConfiguration!.RockTypeCount = rockTypeCount;
         myMapGenerationConfiguration!.LayerCount = layerCount;
-        myMapGenerationConfiguration!.SeaLevel = 0f;
+        myMapGenerationConfiguration!.SeaLevel = 0.0f;
     }
 
     private void SetUpErosionConfiguration()
@@ -225,6 +274,28 @@ public class GridThermalErosionTests
         {
             heightMap[CenterIndex + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
         }
+        fixed (void* heightMapPointer = heightMap)
+        {
+            Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);
+        }
+        Rlgl.MemoryBarrier();
+    }
+
+    private unsafe void SetUpNoneFloatingHeightMapWithRockTypesInMiddle(uint layer, uint rockTypes)
+    {
+        IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
+        float[] heightMap = new float[myMapGenerationConfiguration!.HeightMapSize];
+        shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
+        for (int rockType = 0; rockType < rockTypes; rockType++)
+        {
+            heightMap[CenterIndex + rockType * myMapGenerationConfiguration!.HeightMapPlaneSize + (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
+        }
+        if (layer > 0)
+        {
+            heightMap[CenterIndex + layer * myMapGenerationConfiguration.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
+        }
+        heightMap[LeftIndex] = 2.0f;
+        heightMap[DownIndex] = 2.0f;
         fixed (void* heightMapPointer = heightMap)
         {
             Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);

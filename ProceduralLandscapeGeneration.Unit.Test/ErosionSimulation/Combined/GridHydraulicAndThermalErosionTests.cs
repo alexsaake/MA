@@ -4,6 +4,7 @@ using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalErosion;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.DependencyInjection;
@@ -73,7 +74,7 @@ public class GridHydraulicAndThermalErosionTests
         SetUpHydraulicErosionConfiguration(true);
         uint layer = 1;
         uint layerCount = layer + 1;
-        SetUpMapGenerationConfiguration(layerCount, sideLength, rockTypeCount, seaLevel * rockTypeCount);
+        SetUpMapGenerationConfiguration(layerCount, sideLength, rockTypeCount, seaLevel);
         InitializeConfiguration();
         SetUpNoneFloatingHeightMapWithRockTypesInMiddle(layer, rockTypeCount);
         GridHydraulicErosion gridHydraulicErosionTestee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
@@ -214,6 +215,19 @@ public class GridHydraulicAndThermalErosionTests
             Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridHydraulicErosionCell], gridHydraulicErosionCellsShaderBufferPointer, (uint)(gridHydraulicErosionConfiguration.GridCellsSize * sizeof(GridHydraulicErosionCellShaderBuffer)), 0);
         }
         return gridHydraulicErosionCellsShaderBuffer;
+    }
+
+    private unsafe GridThermalErosionCellShaderBuffer[] ReadGridThermalErosionCellShaderBuffer()
+    {
+        IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
+        IThermalErosionConfiguration thermalErosionConfiguration = myContainer!.Resolve<IThermalErosionConfiguration>();
+        GridThermalErosionCellShaderBuffer[] gridThermalErosionCellsShaderBuffer = new GridThermalErosionCellShaderBuffer[thermalErosionConfiguration.GridCellsSize];
+        Rlgl.MemoryBarrier();
+        fixed (void* gridThermalErosionCellsShaderBufferPointer = gridThermalErosionCellsShaderBuffer)
+        {
+            Rlgl.ReadShaderBuffer(shaderBuffers[ShaderBufferTypes.GridThermalErosionCells], gridThermalErosionCellsShaderBufferPointer, (uint)(thermalErosionConfiguration.GridCellsSize * sizeof(GridThermalErosionCellShaderBuffer)), 0);
+        }
+        return gridThermalErosionCellsShaderBuffer;
     }
 
     private unsafe float[] ReadHeightMapShaderBuffer()
