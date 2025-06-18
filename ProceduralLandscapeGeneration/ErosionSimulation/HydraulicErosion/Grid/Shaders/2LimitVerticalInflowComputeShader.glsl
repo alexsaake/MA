@@ -199,45 +199,45 @@ void main()
 
         for(uint layer2 = 0; layer2 < mapGenerationConfiguration.LayerCount; layer2++)
         {
-            if(TotalLayerWaterHeight(indexLeft, layer2) > 0
-                && TotalLayerHeightMapAndWaterHeight(indexLeft, layer2) > totalLayerHeightMapAndWaterHeight
-                && (aboveHeightMapLayerFloorHeight == 0
-                    || TotalHeightMapLayerHeight(indexLeft, layer2) < aboveHeightMapLayerFloorHeight))
+            if(x > 0)
             {
-                if(x > 0)
+                if(TotalLayerWaterHeight(indexLeft, layer2) > 0
+                    && TotalLayerHeightMapAndWaterHeight(indexLeft, layer2) > totalLayerHeightMapAndWaterHeight
+                    && (aboveHeightMapLayerFloorHeight == 0
+                        || TotalHeightMapLayerHeight(indexLeft, layer2) < aboveHeightMapLayerFloorHeight))
                 {
                     layerWaterInflow += gridHydraulicErosionCells[indexLeft + LayerHydraulicErosionCellsOffset(layer2)].WaterFlowRight;
                 }
             }
-
-            if(TotalLayerWaterHeight(indexRight, layer2) > 0
-                && TotalLayerHeightMapAndWaterHeight(indexRight, layer2) > totalLayerHeightMapAndWaterHeight
-                && (aboveHeightMapLayerFloorHeight == 0
-                    || TotalHeightMapLayerHeight(indexRight, layer2) < aboveHeightMapLayerFloorHeight))
+            
+		    if(x < myHeightMapSideLength - 1)
             {
-		        if(x < myHeightMapSideLength - 1)
+                if(TotalLayerWaterHeight(indexRight, layer2) > 0
+                    && TotalLayerHeightMapAndWaterHeight(indexRight, layer2) > totalLayerHeightMapAndWaterHeight
+                    && (aboveHeightMapLayerFloorHeight == 0
+                        || TotalHeightMapLayerHeight(indexRight, layer2) < aboveHeightMapLayerFloorHeight))
                 {
                     layerWaterInflow += gridHydraulicErosionCells[indexRight + LayerHydraulicErosionCellsOffset(layer2)].WaterFlowLeft;
                 }
             }
-
-            if(TotalLayerWaterHeight(indexDown, layer2) > 0
-                && TotalLayerHeightMapAndWaterHeight(indexDown, layer2) > totalLayerHeightMapAndWaterHeight
-                && (aboveHeightMapLayerFloorHeight == 0
-                    || TotalHeightMapLayerHeight(indexDown, layer2) < aboveHeightMapLayerFloorHeight))
+            
+            if(y > 0)
             {
-                if(y > 0)
+                if(TotalLayerWaterHeight(indexDown, layer2) > 0
+                    && TotalLayerHeightMapAndWaterHeight(indexDown, layer2) > totalLayerHeightMapAndWaterHeight
+                    && (aboveHeightMapLayerFloorHeight == 0
+                        || TotalHeightMapLayerHeight(indexDown, layer2) < aboveHeightMapLayerFloorHeight))
                 {
                     layerWaterInflow += gridHydraulicErosionCells[indexDown + LayerHydraulicErosionCellsOffset(layer2)].WaterFlowUp;
                 }
             }
-
-            if(TotalLayerWaterHeight(indexUp, layer2) > 0
-                && TotalLayerHeightMapAndWaterHeight(indexUp, layer2) > totalLayerHeightMapAndWaterHeight
-                && (aboveHeightMapLayerFloorHeight == 0
-                    || TotalHeightMapLayerHeight(indexUp, layer2) < aboveHeightMapLayerFloorHeight))
+            
+		    if(y < myHeightMapSideLength - 1)
             {
-		        if(y < myHeightMapSideLength - 1)
+                if(TotalLayerWaterHeight(indexUp, layer2) > 0
+                    && TotalLayerHeightMapAndWaterHeight(indexUp, layer2) > totalLayerHeightMapAndWaterHeight
+                    && (aboveHeightMapLayerFloorHeight == 0
+                        || TotalHeightMapLayerHeight(indexUp, layer2) < aboveHeightMapLayerFloorHeight))
                 {
                     layerWaterInflow += gridHydraulicErosionCells[indexUp + LayerHydraulicErosionCellsOffset(layer2)].WaterFlowDown;
                 }
@@ -249,48 +249,48 @@ void main()
             float scale = min(layerSplitSize / layerWaterInflow, 1.0);
             for(uint layer2 = 0; layer2 < mapGenerationConfiguration.LayerCount; layer2++)
             {
-                if(TotalLayerWaterHeight(indexLeft, layer2) > 0
-                    && TotalLayerHeightMapAndWaterHeight(indexLeft, layer2) > totalLayerHeightMapAndWaterHeight
-                    && (aboveHeightMapLayerFloorHeight == 0
-                        || TotalHeightMapLayerHeight(indexLeft, layer2) < aboveHeightMapLayerFloorHeight))
+                if(x > 0)
                 {
-                    if(x > 0)
+                    if(TotalLayerWaterHeight(indexLeft, layer2) > 0
+                        && TotalLayerHeightMapAndWaterHeight(indexLeft, layer2) > totalLayerHeightMapAndWaterHeight
+                        && (aboveHeightMapLayerFloorHeight == 0
+                            || TotalHeightMapLayerHeight(indexLeft, layer2) < aboveHeightMapLayerFloorHeight))
                     {
                         gridHydraulicErosionCells[indexLeft + LayerHydraulicErosionCellsOffset(layer2)].WaterFlowRight *= scale;
                         gridHydraulicErosionCells[indexLeft + LayerHydraulicErosionCellsOffset(layer2)].SedimentFlowRight *= scale;
                     }
                 }
-
-                if(TotalLayerWaterHeight(indexRight, layer2) > 0
-                    && TotalLayerHeightMapAndWaterHeight(indexRight, layer2) > totalLayerHeightMapAndWaterHeight
-                    && (aboveHeightMapLayerFloorHeight == 0
-                        || TotalHeightMapLayerHeight(indexRight, layer2) < aboveHeightMapLayerFloorHeight))
+                
+		        if(x < myHeightMapSideLength - 1)
                 {
-		            if(x < myHeightMapSideLength - 1)
+                    if(TotalLayerWaterHeight(indexRight, layer2) > 0
+                        && TotalLayerHeightMapAndWaterHeight(indexRight, layer2) > totalLayerHeightMapAndWaterHeight
+                        && (aboveHeightMapLayerFloorHeight == 0
+                            || TotalHeightMapLayerHeight(indexRight, layer2) < aboveHeightMapLayerFloorHeight))
                     {
                         gridHydraulicErosionCells[indexRight + LayerHydraulicErosionCellsOffset(layer2)].WaterFlowLeft *= scale;
                         gridHydraulicErosionCells[indexRight + LayerHydraulicErosionCellsOffset(layer2)].SedimentFlowLeft *= scale;
                     }
                 }
-
-                if(TotalLayerWaterHeight(indexDown, layer2) > 0
-                    && TotalLayerHeightMapAndWaterHeight(indexDown, layer2) > totalLayerHeightMapAndWaterHeight
-                    && (aboveHeightMapLayerFloorHeight == 0
-                        || TotalHeightMapLayerHeight(indexDown, layer2) < aboveHeightMapLayerFloorHeight))
+                
+                if(y > 0)
                 {
-                    if(y > 0)
+                    if(TotalLayerWaterHeight(indexDown, layer2) > 0
+                        && TotalLayerHeightMapAndWaterHeight(indexDown, layer2) > totalLayerHeightMapAndWaterHeight
+                        && (aboveHeightMapLayerFloorHeight == 0
+                            || TotalHeightMapLayerHeight(indexDown, layer2) < aboveHeightMapLayerFloorHeight))
                     {
                         gridHydraulicErosionCells[indexDown + LayerHydraulicErosionCellsOffset(layer2)].WaterFlowUp *= scale;
                         gridHydraulicErosionCells[indexDown + LayerHydraulicErosionCellsOffset(layer2)].SedimentFlowUp *= scale;
                     }
                 }
-
-                if(TotalLayerWaterHeight(indexUp, layer2) > 0
-                    && TotalLayerHeightMapAndWaterHeight(indexUp, layer2) > totalLayerHeightMapAndWaterHeight
-                    && (aboveHeightMapLayerFloorHeight == 0
-                        || TotalHeightMapLayerHeight(indexUp, layer2) < aboveHeightMapLayerFloorHeight))
+                
+		        if(y < myHeightMapSideLength - 1)
                 {
-		            if(y < myHeightMapSideLength - 1)
+                    if(TotalLayerWaterHeight(indexUp, layer2) > 0
+                        && TotalLayerHeightMapAndWaterHeight(indexUp, layer2) > totalLayerHeightMapAndWaterHeight
+                        && (aboveHeightMapLayerFloorHeight == 0
+                            || TotalHeightMapLayerHeight(indexUp, layer2) < aboveHeightMapLayerFloorHeight))
                     {
                         gridHydraulicErosionCells[indexUp + LayerHydraulicErosionCellsOffset(layer2)].WaterFlowDown *= scale;
                         gridHydraulicErosionCells[indexUp + LayerHydraulicErosionCellsOffset(layer2)].SedimentFlowDown *= scale;

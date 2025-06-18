@@ -131,7 +131,7 @@ float HeightMapLayerRockTypeHeight(uint index, uint layer, int stopRockType)
     float heightMapLayerRockTypeHeight = 0.0;
     for(int rockType = 0; rockType <= stopRockType; rockType++)
     {
-        heightMapLayerRockTypeHeight += heightMap[index + HeightMapRockTypeOffset(rockType) + HeightMapLayerOffset(layer)];
+        heightMapLayerRockTypeHeight += heightMap[index + HeightMapRockTypeOffset(uint(rockType)) + HeightMapLayerOffset(layer)];
     }
     return heightMapLayerRockTypeHeight;
 }
@@ -203,7 +203,7 @@ void main()
 		    float totalHeightMapLayerHeightDifferenceUp = max(totalHeightMapLayerRockTypeHeight - ReachableNeighborHeightMapHeight(indexUp, totalLayerHeightMapBelowRockTypeHeight, totalHeightMapLayerRockTypeHeight), 0.0);
 		    float maxTotalHeightMapLayerHeightDifference = max(max(totalHeightMapLayerHeightDifferenceLeft, totalHeightMapLayerHeightDifferenceRight), max(totalHeightMapLayerHeightDifferenceDown, totalHeightMapLayerHeightDifferenceUp));
 		
-		    float heightMapLayerRockTypeAmount = HeightMapLayerRockTypeAmount(index, layer, rockType);
+		    float heightMapLayerRockTypeAmount = HeightMapLayerRockTypeAmount(index, layer, uint(rockType));
 		    float rockTypeVolumeToBeMoved = 0;
 		    if(maxTotalHeightMapLayerHeightDifference > 0)
 		    {

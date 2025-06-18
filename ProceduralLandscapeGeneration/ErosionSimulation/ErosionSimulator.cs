@@ -86,13 +86,18 @@ internal class ErosionSimulator : IErosionSimulator
             }
         }
 
-        if(myErosionConfiguration.IterationCount == ulong.MaxValue)
+        IncrementIterationCounter();
+
+        IterationFinished?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void IncrementIterationCounter()
+    {
+        if (myErosionConfiguration.IterationCount == ulong.MaxValue)
         {
             myErosionConfiguration.IterationCount = 0;
         }
         myErosionConfiguration.IterationCount += myErosionConfiguration.IterationsPerStep;
-
-        IterationFinished?.Invoke(this, EventArgs.Empty);
     }
 
     public void ResetShaderBuffers()

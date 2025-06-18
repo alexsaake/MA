@@ -68,7 +68,7 @@ float TangensAngleOfRepose(uint index)
 {
 	for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
 	{
-		if(heightMap[index + HeightMapRockTypeOffset(rockType)] > 0)
+		if(heightMap[index + HeightMapRockTypeOffset(uint(rockType))] > 0)
 		{
 			return rockTypesConfiguration[rockType].TangensAngleOfRepose;
 		}
@@ -80,7 +80,7 @@ void RemoveFromTop(uint index, float sediment)
 {
     for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
     {
-        uint offsetIndex = index + HeightMapRockTypeOffset(rockType);
+        uint offsetIndex = index + HeightMapRockTypeOffset(uint(rockType));
         float height = heightMap[offsetIndex];
         if(height > 0)
         {

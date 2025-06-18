@@ -189,7 +189,7 @@ float SuspendFromLayerZeroTop(uint index, float requiredSediment)
     float suspendedSediment = 0;
     for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
     {
-        uint rockTypeIndex = index + HeightMapRockTypeOffset(rockType);
+        uint rockTypeIndex = index + HeightMapRockTypeOffset(uint(rockType));
         float height = heightMap[rockTypeIndex];
         float hardness = (1.0 - rockTypesConfiguration[rockType].Hardness);
         float toBeSuspendedSediment = requiredSediment * hardness;

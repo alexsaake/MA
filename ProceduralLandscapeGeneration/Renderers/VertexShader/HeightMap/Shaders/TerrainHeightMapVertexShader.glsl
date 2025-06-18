@@ -63,30 +63,24 @@ uint HeightMapRockTypeOffset(uint rockType)
     return rockType * myHeightMapPlaneSize;
 }
 
-float FineSedimentHeight(uint index)
+float TotalFineSedimentHeight(uint index)
 {
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
-        float height = heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + HeightMapLayerOffset(uint(layer))];
-        if(height > 0)
-        {
-            return height;
-        }
+        height += heightMap[index + (mapGenerationConfiguration.RockTypeCount - 1) * myHeightMapPlaneSize + HeightMapLayerOffset(uint(layer))];
     }
-    return 0;
+    return height;
 }
 
-float CoarseSedimentHeight(uint index)
+float TotalCoarseSedimentHeight(uint index)
 {
-    for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
+    float height = 0;
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
-        float height = heightMap[index + 1 * myHeightMapPlaneSize + HeightMapLayerOffset(uint(layer))];
-        if(height > 0)
-        {
-            return height;
-        }
+        height += heightMap[index + 1 * myHeightMapPlaneSize + HeightMapLayerOffset(uint(layer))];
     }
-    return 0;
+    return height;
 }
 
 float HeightMapLayerFloorHeight(uint index, uint layer)
@@ -269,12 +263,12 @@ void main()
     {
         if(mapGenerationConfiguration.RockTypeCount > 1)
         {
-            if(FineSedimentHeight(index) > 0.00001)
+            if(TotalFineSedimentHeight(index) > 0.00001)
             {
                 terrainColor = fineSedimentColor;
             }
             else if(mapGenerationConfiguration.RockTypeCount > 2
-                && CoarseSedimentHeight(index) > 0.00001)
+                && TotalCoarseSedimentHeight(index) > 0.00001)
             {
                 terrainColor = coarseSedimentColor;
             }

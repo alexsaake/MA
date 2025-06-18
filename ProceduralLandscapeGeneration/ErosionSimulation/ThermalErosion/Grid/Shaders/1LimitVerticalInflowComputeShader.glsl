@@ -128,7 +128,7 @@ float HeightMapLayerRockTypeHeight(uint index, uint layer, int stopRockType)
     float heightMapLayerRockTypeHeight = 0.0;
     for(int rockType = 0; rockType <= stopRockType; rockType++)
     {
-        heightMapLayerRockTypeHeight += heightMap[index + HeightMapRockTypeOffset(rockType) + HeightMapLayerOffset(layer)];
+        heightMapLayerRockTypeHeight += heightMap[index + HeightMapRockTypeOffset(uint(rockType)) + HeightMapLayerOffset(layer)];
     }
     return heightMapLayerRockTypeHeight;
 }
@@ -199,38 +199,38 @@ void main()
 	        for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
 	        {
 		        uint gridThermalErosionCellsIndexOffset = (rockType + layer2 * mapGenerationConfiguration.LayerCount) * myHeightMapPlaneSize;
-                if(TotalHeightMapLayerRockTypeHeight(indexLeft, layer2, rockType) > totalHeightMapLayerHeight
-                    && (aboveHeightMapLayerFloorHeight == 0
-                        || TotalHeightMapLayerRockTypeHeight(indexLeft, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
+                if(x > 0)
                 {
-                    if(x > 0)
+                    if(TotalHeightMapLayerRockTypeHeight(indexLeft, layer2, rockType) > totalHeightMapLayerHeight
+                        && (aboveHeightMapLayerFloorHeight == 0
+                            || TotalHeightMapLayerRockTypeHeight(indexLeft, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
                     {
                         layerRockTypeInflow += gridThermalErosionCells[indexLeft + gridThermalErosionCellsIndexOffset].RockTypeFlowRight;
                     }
                 }
-                if(TotalHeightMapLayerRockTypeHeight(indexRight, layer2, rockType) > totalHeightMapLayerHeight
-                    && (aboveHeightMapLayerFloorHeight == 0
-                        || TotalHeightMapLayerRockTypeHeight(indexRight, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
+                if(x < myHeightMapSideLength - 1)
                 {
-                    if(x < myHeightMapSideLength - 1)
+                    if(TotalHeightMapLayerRockTypeHeight(indexRight, layer2, rockType) > totalHeightMapLayerHeight
+                        && (aboveHeightMapLayerFloorHeight == 0
+                            || TotalHeightMapLayerRockTypeHeight(indexRight, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
                     {
                         layerRockTypeInflow += gridThermalErosionCells[indexRight + gridThermalErosionCellsIndexOffset].RockTypeFlowLeft;
                     }
                 }
-                if(TotalHeightMapLayerRockTypeHeight(indexDown, layer2, rockType) > totalHeightMapLayerHeight
-                    && (aboveHeightMapLayerFloorHeight == 0
-                        || TotalHeightMapLayerRockTypeHeight(indexDown, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
+                if(y > 0)
                 {
-                    if(y > 0)
+                    if(TotalHeightMapLayerRockTypeHeight(indexDown, layer2, rockType) > totalHeightMapLayerHeight
+                        && (aboveHeightMapLayerFloorHeight == 0
+                            || TotalHeightMapLayerRockTypeHeight(indexDown, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
                     {
                         layerRockTypeInflow += gridThermalErosionCells[indexDown + gridThermalErosionCellsIndexOffset].RockTypeFlowUp;
                     }
                 }
-                if(TotalHeightMapLayerRockTypeHeight(indexUp, layer2, rockType) > totalHeightMapLayerHeight
-                    && (aboveHeightMapLayerFloorHeight == 0
-                        || TotalHeightMapLayerRockTypeHeight(indexUp, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
+                if(y < myHeightMapSideLength - 1)
                 {
-                    if(y < myHeightMapSideLength - 1)
+                    if(TotalHeightMapLayerRockTypeHeight(indexUp, layer2, rockType) > totalHeightMapLayerHeight
+                        && (aboveHeightMapLayerFloorHeight == 0
+                            || TotalHeightMapLayerRockTypeHeight(indexUp, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
                     {
                         layerRockTypeInflow += gridThermalErosionCells[indexUp + gridThermalErosionCellsIndexOffset].RockTypeFlowDown;
                     }
@@ -252,38 +252,38 @@ void main()
 	            for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
 	            {
 		            uint gridThermalErosionCellsIndexOffset = (rockType + layer2 * mapGenerationConfiguration.LayerCount) * myHeightMapPlaneSize;
-                    if(TotalHeightMapLayerRockTypeHeight(indexLeft, layer2, rockType) > totalHeightMapLayerHeight
-                        && (aboveHeightMapLayerFloorHeight == 0
-                            || TotalHeightMapLayerRockTypeHeight(indexLeft, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
+                    if(x > 0)
                     {
-                        if(x > 0)
+                        if(TotalHeightMapLayerRockTypeHeight(indexLeft, layer2, rockType) > totalHeightMapLayerHeight
+                            && (aboveHeightMapLayerFloorHeight == 0
+                                || TotalHeightMapLayerRockTypeHeight(indexLeft, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
                         {
                             gridThermalErosionCells[indexLeft + gridThermalErosionCellsIndexOffset].RockTypeFlowRight *= scale;
                         }
                     }
-                    if(TotalHeightMapLayerRockTypeHeight(indexRight, layer2, rockType) > totalHeightMapLayerHeight
-                        && (aboveHeightMapLayerFloorHeight == 0
-                            || TotalHeightMapLayerRockTypeHeight(indexRight, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
+                    if(x < myHeightMapSideLength - 1)
                     {
-                        if(x < myHeightMapSideLength - 1)
+                        if(TotalHeightMapLayerRockTypeHeight(indexRight, layer2, rockType) > totalHeightMapLayerHeight
+                            && (aboveHeightMapLayerFloorHeight == 0
+                                || TotalHeightMapLayerRockTypeHeight(indexRight, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
                         {
                             gridThermalErosionCells[indexRight + gridThermalErosionCellsIndexOffset].RockTypeFlowLeft *= scale;
                         }
                     }
-                    if(TotalHeightMapLayerRockTypeHeight(indexDown, layer2, rockType) > totalHeightMapLayerHeight
-                        && (aboveHeightMapLayerFloorHeight == 0
-                            || TotalHeightMapLayerRockTypeHeight(indexDown, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
+                    if(y > 0)
                     {
-                        if(y > 0)
+                        if(TotalHeightMapLayerRockTypeHeight(indexDown, layer2, rockType) > totalHeightMapLayerHeight
+                            && (aboveHeightMapLayerFloorHeight == 0
+                                || TotalHeightMapLayerRockTypeHeight(indexDown, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
                         {
                             gridThermalErosionCells[indexDown + gridThermalErosionCellsIndexOffset].RockTypeFlowUp *= scale;
                         }
                     }
-                    if(TotalHeightMapLayerRockTypeHeight(indexUp, layer2, rockType) > totalHeightMapLayerHeight
-                        && (aboveHeightMapLayerFloorHeight == 0
-                            || TotalHeightMapLayerRockTypeHeight(indexUp, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
+                    if(y < myHeightMapSideLength - 1)
                     {
-                        if(y < myHeightMapSideLength - 1)
+                        if(TotalHeightMapLayerRockTypeHeight(indexUp, layer2, rockType) > totalHeightMapLayerHeight
+                            && (aboveHeightMapLayerFloorHeight == 0
+                                || TotalHeightMapLayerRockTypeHeight(indexUp, layer2, rockType - 1) < aboveHeightMapLayerFloorHeight))
                         {
                             gridThermalErosionCells[indexUp + gridThermalErosionCellsIndexOffset].RockTypeFlowDown *= scale;
                         }

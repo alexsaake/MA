@@ -80,7 +80,7 @@ float SuspendFromTop(uint index, float requiredSediment)
     float suspendedSediment = 0;
     for(int rockType = int(mapGenerationConfiguration.RockTypeCount) - 1; rockType >= 0; rockType--)
     {
-        uint offsetIndex = index + HeightMapRockTypeOffset(rockType);
+        uint offsetIndex = index + HeightMapRockTypeOffset(uint(rockType));
         float height = heightMap[offsetIndex];
         float hardness = (1.0 - rockTypesConfiguration[rockType].Hardness);
         float toBeSuspendedSediment = requiredSediment * hardness;
