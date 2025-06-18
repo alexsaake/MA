@@ -208,10 +208,20 @@ void main()
         GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[layerIndex];
     
         float totalHeightMapLayerHeight = TotalHeightMapLayerHeight(index, layer);
-        if(totalHeightMapLayerHeight < mapGenerationConfiguration.SeaLevel)
+        float seaLevel = mapGenerationConfiguration.SeaLevel;
+        if(seaLevel > 0
+            && totalHeightMapLayerHeight < seaLevel)
         {
             float layerSplitSize = LayerSplitSize(index, layer);
-            gridHydraulicErosionCell.WaterHeight = min(mapGenerationConfiguration.SeaLevel - totalHeightMapLayerHeight, layerSplitSize);
+            if(layerSplitSize > 0
+                && layerSplitSize < 100)
+            {
+                gridHydraulicErosionCell.WaterHeight = min(seaLevel - totalHeightMapLayerHeight, layerSplitSize);
+            }
+            else
+            {
+                gridHydraulicErosionCell.WaterHeight = seaLevel - totalHeightMapLayerHeight;
+            }
         }
 
         if(gridHydraulicErosionCell.WaterHeight == 0)

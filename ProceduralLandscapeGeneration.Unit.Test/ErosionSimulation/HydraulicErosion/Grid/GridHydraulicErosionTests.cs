@@ -243,37 +243,45 @@ public class GridHydraulicErosionTests
     }
 
     [Test]
-    [TestCase(0u, 0.0f, 0.0f, 0.0f, 0.0f)]
-    [TestCase(0u, 1.0f, 0.0f, 0.0f, 0.0f)]
-    [TestCase(0u, 1.0f, 0.0f, 1.0f, 0.0f)]
-    [TestCase(0u, 0.0f, 0.0f, 1.0f, 1.0f)]
-    [TestCase(0u, 1.0f, 0.0f, 2.0f, 1.0f)]
-    [TestCase(1u, 0.0f, 0.0f, 0.0f, 0.0f)]
-    [TestCase(1u, 1.0f, 0.0f, 0.0f, 0.0f)]
-    [TestCase(1u, 1.0f, 0.0f, 1.0f, 0.0f)]
-    [TestCase(1u, 0.0f, 0.0f, 1.0f, 1.0f)]
-    [TestCase(1u, 1.0f, 0.0f, 2.0f, 1.0f)]
-    [TestCase(1u, 0.0f, 1.0f, 0.0f, 0.0f)]
-    [TestCase(1u, 1.0f, 1.0f, 0.0f, 0.0f)]
-    [TestCase(1u, 1.0f, 1.0f, 1.0f, 1.0f)]
-    [TestCase(1u, 0.0f, 1.0f, 1.0f, 1.0f)]
-    [TestCase(1u, 1.0f, 1.0f, 2.0f, 1.0f)]
-    public void VerticalFlow_1x1HeightMapWithSeaLevel_WaterHeightAsExpected(uint layers, float bedRockHeight, float floorHeight, float seaLevel, float expectedWaterHeight)
+    [TestCase(0u, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)]
+    [TestCase(0u, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f)]
+    [TestCase(0u, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f)]
+    [TestCase(0u, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f)]
+    [TestCase(0u, 1.0f, 0.0f, 2.0f, 1.0f, 0.0f)]
+    [TestCase(0u, 0.0f, 0.0f, 3.0f, 3.0f, 0.0f)]
+    [TestCase(0u, 1.0f, 0.0f, 3.0f, 2.0f, 0.0f)]
+    [TestCase(1u, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)]
+    [TestCase(1u, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f)]
+    [TestCase(1u, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f)]
+    [TestCase(1u, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f)]
+    [TestCase(1u, 1.0f, 1.0f, 2.0f, 1.0f, 0.0f)]
+    [TestCase(1u, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f)]
+    [TestCase(1u, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f)]
+    [TestCase(1u, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f)]
+    [TestCase(1u, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f)]
+    [TestCase(1u, 1.0f, 1.0f, 2.0f, 1.0f, 0.0f)]
+    [TestCase(1u, 1.0f, 1.0f, 3.0f, 1.0f, 1.0f)]
+    public void VerticalFlow_1x1HeightMapWithSeaLevel_WaterHeightAsExpected(uint layer, float bedRockHeight, float floorHeight, float seaLevel, float expectedWaterHeightLayerZero, float expectedWaterHeightLayerOne)
     {
-        uint layerCount = layers + 1;
+        uint layerCount = layer + 1;
         SetUpMapGenerationConfiguration(layerCount, 1u, 1u, seaLevel);
         InitializeConfiguration();
-        SetUpHeightMapWithBedrockInMiddle(layers, bedRockHeight, floorHeight);
+        SetUpHeightMapWithBedrockInMiddle(layer, bedRockHeight, floorHeight);
         GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
-        SetUpHydraulicErosionCellsWithWaterInMiddle(layers);
 
         testee.VerticalFlow();
 
         float[] heightMap = ReadHeightMapShaderBuffer();
         GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
-        GridHydraulicErosionCellShaderBuffer centerCell = gridHydraulicErosionCellsShaderBuffers[CenterIndex];
-        Assert.That(centerCell.WaterHeight, Is.EqualTo(expectedWaterHeight));
+        GridHydraulicErosionCellShaderBuffer centerCellLayerZero = gridHydraulicErosionCellsShaderBuffers[CenterIndex];
+        Assert.That(centerCellLayerZero.WaterHeight, Is.EqualTo(expectedWaterHeightLayerZero));
+        if(layer > 0)
+        {
+            uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
+            GridHydraulicErosionCellShaderBuffer centerCellLayerOne = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
+            Assert.That(centerCellLayerOne.WaterHeight, Is.EqualTo(expectedWaterHeightLayerOne));
+        }
     }
 
     [Test]
