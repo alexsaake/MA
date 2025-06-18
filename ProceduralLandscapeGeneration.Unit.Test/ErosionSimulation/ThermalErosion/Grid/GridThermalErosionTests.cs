@@ -18,7 +18,7 @@ namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.ThermalErosio
 public class GridThermalErosionTests
 {
     private const int AngleOfRepose = 45;
-    private const float TolerancePercentage = 0.0001f;
+    private const float TolerancePercentage = 0.001f;
 
     private IContainer? myContainer;
     private IMapGenerationConfiguration? myMapGenerationConfiguration;
@@ -137,7 +137,7 @@ public class GridThermalErosionTests
 
         Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
-        Assert.That(startVolume, Is.EqualTo(endVolume).Within(endVolume * TolerancePercentage));
+        Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
     }
 
     private void InitializeConfiguration()

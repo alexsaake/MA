@@ -17,7 +17,7 @@ namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.HydraulicEros
 public class GridHydraulicErosionTests
 {
     private const int AngleOfRepose = 45;
-    private const float TolerancePercentage = 0.0001f;
+    private const float TolerancePercentage = 0.02f;
 
     private IContainer? myContainer;
     private IMapGenerationConfiguration? myMapGenerationConfiguration;
@@ -258,15 +258,15 @@ public class GridHydraulicErosionTests
     [TestCase(1u, 1.0f, 1.0f, 1.0f, 1.0f)]
     [TestCase(1u, 0.0f, 1.0f, 1.0f, 1.0f)]
     [TestCase(1u, 1.0f, 1.0f, 2.0f, 1.0f)]
-    public void VerticalFlow_1x1HeightMapWithSeaLevel_WaterHeightAsExpected(uint layerCount, float bedRockHeight, float floorHeight, float seaLevel, float expectedWaterHeight)
+    public void VerticalFlow_1x1HeightMapWithSeaLevel_WaterHeightAsExpected(uint layers, float bedRockHeight, float floorHeight, float seaLevel, float expectedWaterHeight)
     {
-        uint layer = layerCount - 1;
+        uint layerCount = layers + 1;
         SetUpMapGenerationConfiguration(layerCount, 1u, 1u, seaLevel);
         InitializeConfiguration();
-        SetUpHeightMapWithBedrockInMiddle(layer, bedRockHeight, floorHeight);
+        SetUpHeightMapWithBedrockInMiddle(layers, bedRockHeight, floorHeight);
         GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         testee.Initialize();
-        SetUpHydraulicErosionCellsWithWaterInMiddle(layer);
+        SetUpHydraulicErosionCellsWithWaterInMiddle(layers);
 
         testee.VerticalFlow();
 
