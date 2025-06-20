@@ -106,6 +106,61 @@ public class GridThermalErosionTests
     }
 
     [Test]
+    public void VerticalFlow_3x3HeightMapWithRockTypesInMiddle_FlowIsEqualToAllFourNeighbors([Values(0u, 1u)] uint layer,
+                                                                                        [Values(1u, 2u, 3u)] uint rockTypeCount)
+    {
+        uint layerCount = layer + 1;
+        SetUpMapGenerationConfiguration(layerCount, rockTypeCount);
+        InitializeConfiguration();
+        SetUpHeightMapWithRockTypesInMiddle(layer, rockTypeCount);
+        GridThermalErosion testee = (GridThermalErosion)myContainer!.Resolve<IGridThermalErosion>();
+        testee.Initialize();
+
+        testee.VerticalFlow();
+
+        float expectedFlow = 0.05f;
+        GridThermalErosionCellShaderBuffer[] gridThermalErosionCells = ReadGridThermalErosionCellShaderBuffer();
+        for (uint rockType = 0; rockType < rockTypeCount; rockType++)
+        {
+            uint gridThermalErosionCellsOffset = rockType * myMapGenerationConfiguration!.HeightMapPlaneSize + layer * myMapGenerationConfiguration!.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize;
+            GridThermalErosionCellShaderBuffer centerCell = gridThermalErosionCells[CenterIndex + gridThermalErosionCellsOffset];
+            Assert.That(centerCell.SedimentFlowLeft, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+            Assert.That(centerCell.SedimentFlowRight, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+            Assert.That(centerCell.SedimentFlowDown, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+            Assert.That(centerCell.SedimentFlowUp, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        }
+    }
+
+    [Test]
+    public void VerticalFlow_3x3HeightMapWithRockTypesInMiddleSurroundedByBedrockWithGapAndSplitSize_FlowIsEqualToAllFourNeighbors([Values(0u, 1u)] uint centerLayer,
+                                                                                                                                [Values(1u, 2u, 3u)] uint rockTypeCount)
+    {
+        uint layer = 1;
+        uint layerCount = layer + 1;
+        float aboveLayerFloorHeight = 1.0f + rockTypeCount - 0.5f;
+        SetUpMapGenerationConfiguration(layerCount, rockTypeCount);
+        InitializeConfiguration();
+        SetUpHeightMapWithRockTypesInMiddleSurroundedByBedrockWithGapAndAboveLayerFloorHeight(layer, centerLayer, rockTypeCount, aboveLayerFloorHeight);
+        GridThermalErosion testee = (GridThermalErosion)myContainer!.Resolve<IGridThermalErosion>();
+        testee.Initialize();
+
+        testee.VerticalFlow();
+
+        float expectedFlow = 0.05f;
+        float[] heightMap = ReadHeightMapShaderBuffer();
+        GridThermalErosionCellShaderBuffer[] gridThermalErosionCells = ReadGridThermalErosionCellShaderBuffer();
+        for (uint rockType = 0; rockType < rockTypeCount; rockType++)
+        {
+            uint gridThermalErosionCellsOffset = rockType * myMapGenerationConfiguration!.HeightMapPlaneSize + centerLayer * myMapGenerationConfiguration!.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize;
+            GridThermalErosionCellShaderBuffer centerCell = gridThermalErosionCells[CenterIndex + gridThermalErosionCellsOffset];
+            Assert.That(centerCell.SedimentFlowLeft, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+            Assert.That(centerCell.SedimentFlowRight, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+            Assert.That(centerCell.SedimentFlowDown, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+            Assert.That(centerCell.SedimentFlowUp, Is.EqualTo(expectedFlow).Within(expectedFlow * TolerancePercentage));
+        }
+    }
+
+    [Test]
     public void VerticalFlow_3x3HeightMapWithRockTypeInMiddleSurroundedByBedrockWithoutGap_FlowIsZeroToAllFourNeighbors([Values(0u, 1u, 2u)] uint rockType)
     {
         uint layer = 1;
@@ -458,12 +513,48 @@ public class GridThermalErosionTests
         Rlgl.MemoryBarrier();
     }
 
-    private unsafe void SetUpNoneFloatingHeightMapWithRockTypesInMiddle(uint layer, uint rockTypes)
+    private unsafe void SetUpHeightMapWithRockTypesInMiddleSurroundedByBedrockWithGapAndAboveLayerFloorHeight(uint layer, uint centerLayer, uint rockTypeCount, float aboveLayerFloorHeight)
     {
         IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
         float[] heightMap = new float[myMapGenerationConfiguration!.HeightMapSize];
         shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
-        for (int rockType = 0; rockType < rockTypes; rockType++)
+        uint layerOffset = (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration!.HeightMapPlaneSize;
+        uint centerLayerOffset = (centerLayer * myMapGenerationConfiguration.RockTypeCount + centerLayer) * myMapGenerationConfiguration!.HeightMapPlaneSize;
+        for (uint rockType = 0; rockType < rockTypeCount; rockType++)
+        {
+            uint rockTypeOffset = rockType * myMapGenerationConfiguration!.HeightMapPlaneSize;
+            heightMap[CenterIndex + rockTypeOffset + centerLayerOffset] = 1.0f;
+        }
+        heightMap[LeftIndex + layerOffset] = 2.0f;
+        heightMap[RightIndex + layerOffset] = 2.0f;
+        heightMap[UpIndex + layerOffset] = 2.0f;
+        heightMap[DownIndex + layerOffset] = 2.0f;
+        if (centerLayer > 0)
+        {
+            uint centerLayerFloorOffset = (centerLayer * myMapGenerationConfiguration.RockTypeCount) * myMapGenerationConfiguration!.HeightMapPlaneSize;
+            heightMap[CenterIndex + centerLayerFloorOffset] = 1.0f;
+        }
+        if (layer > 0)
+        {
+            uint layerFloorOffset = (layer * myMapGenerationConfiguration.RockTypeCount) * myMapGenerationConfiguration!.HeightMapPlaneSize;
+            heightMap[LeftIndex + layerFloorOffset] = aboveLayerFloorHeight;
+            heightMap[RightIndex + layerFloorOffset] = aboveLayerFloorHeight;
+            heightMap[UpIndex + layerFloorOffset] = aboveLayerFloorHeight;
+            heightMap[DownIndex + layerFloorOffset] = aboveLayerFloorHeight;
+        }
+        fixed (void* heightMapPointer = heightMap)
+        {
+            Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);
+        }
+        Rlgl.MemoryBarrier();
+    }
+
+    private unsafe void SetUpNoneFloatingHeightMapWithRockTypesInMiddle(uint layer, uint rockTypeCount)
+    {
+        IShaderBuffers shaderBuffers = myContainer!.Resolve<IShaderBuffers>();
+        float[] heightMap = new float[myMapGenerationConfiguration!.HeightMapSize];
+        shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
+        for (int rockType = 0; rockType < rockTypeCount; rockType++)
         {
             heightMap[CenterIndex + rockType * myMapGenerationConfiguration!.HeightMapPlaneSize + (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration!.HeightMapPlaneSize] = 1.0f;
         }
