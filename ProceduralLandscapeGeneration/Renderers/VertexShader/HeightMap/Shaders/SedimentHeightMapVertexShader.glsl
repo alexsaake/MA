@@ -83,7 +83,7 @@ uint LayerHydraulicErosionCellsOffset(uint layer)
 float TotalSuspendedSediment(uint index)
 {    
     float suspendedSediment = 0.0;
-    for(int layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
         suspendedSediment += gridHydraulicErosionCells[index + LayerHydraulicErosionCellsOffset(layer)].SuspendedSediment;
     }

@@ -69,7 +69,7 @@ uint LayerHydraulicErosionCellsOffset(uint layer)
 float TotalWaterHeight(uint index)
 {    
     float totalWaterHeight = 0.0;
-    for(int layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
+    for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
         totalWaterHeight += gridHydraulicErosionCells[index + LayerHydraulicErosionCellsOffset(layer)].WaterHeight;
     }

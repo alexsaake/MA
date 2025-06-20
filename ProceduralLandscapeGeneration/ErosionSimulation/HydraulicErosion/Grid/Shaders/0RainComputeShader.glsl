@@ -91,16 +91,17 @@ uint myHeightMapPlaneSize;
 
 float HeightMapLayerFloorHeight(uint index, uint layer)
 {
-    if(layer < 1)
+    if(layer < 1
+        || layer >= mapGenerationConfiguration.LayerCount)
     {
         return 0.0;
     }
     return heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize];
 }
 
-uint HeightMapLayerOffset(uint layer)
+uint LayerHydraulicErosionCellsOffset(uint layer)
 {
-    return (layer * mapGenerationConfiguration.RockTypeCount + layer) * myHeightMapPlaneSize;
+    return layer * myHeightMapPlaneSize;
 }
 
 void main()
@@ -119,7 +120,7 @@ void main()
         return;
     }
     hydraulicErosionHeightMapIndices[id] = -1;
-
+    
     for(int layer = int(mapGenerationConfiguration.LayerCount) - 1; layer >= 0; layer--)
     {
         if(layer > 0
@@ -128,12 +129,8 @@ void main()
             continue;
         }
 
-        uint layerIndex = index + HeightMapLayerOffset(uint(layer));
-        GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[layerIndex];
-
-        gridHydraulicErosionCell.WaterHeight += gridHydraulicErosionConfiguration.WaterIncrease * erosionConfiguration.DeltaTime;
-
-        gridHydraulicErosionCells[layerIndex] = gridHydraulicErosionCell;
+        uint layerIndex = index + LayerHydraulicErosionCellsOffset(uint(layer));
+        gridHydraulicErosionCells[layerIndex].WaterHeight += gridHydraulicErosionConfiguration.WaterIncrease * erosionConfiguration.DeltaTime;
 
         return;
     }
