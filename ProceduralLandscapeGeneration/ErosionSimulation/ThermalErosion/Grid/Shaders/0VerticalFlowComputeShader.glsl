@@ -192,7 +192,7 @@ void main()
     {
 	    for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
 	    {
-		    uint gridThermalErosionCellsIndexOffset = (rockType + layer * mapGenerationConfiguration.LayerCount) * myHeightMapPlaneSize;
+		    uint gridThermalErosionCellsIndexOffset = (rockType + layer * mapGenerationConfiguration.RockTypeCount) * myHeightMapPlaneSize;
 		    GridThermalErosionCell gridThermalErosionCell = gridThermalErosionCells[index + gridThermalErosionCellsIndexOffset];
 
 		    float totalHeightMapLayerRockTypeHeight = TotalHeightMapLayerRockTypeHeight(index, layer, rockType);

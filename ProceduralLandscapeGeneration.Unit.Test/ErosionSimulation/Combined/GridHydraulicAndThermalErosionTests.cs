@@ -103,9 +103,9 @@ public class GridHydraulicAndThermalErosionTests
         float endSuspendedSediment = endGridHydraulicErosionCellsShaderBuffers.Sum(cell => cell.SuspendedSediment);
         float endVolume = SumUpVolume(endHeightMap) + endSuspendedSediment;
 
-        Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
-        Assert.That(intermediateHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
-        Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0));
+        Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
+        Assert.That(intermediateHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
+        Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
         Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         if (seaLevel == 0)

@@ -198,7 +198,7 @@ void main()
         {
 	        for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
 	        {
-		        uint gridThermalErosionCellsIndexOffset = (rockType + layer2 * mapGenerationConfiguration.LayerCount) * myHeightMapPlaneSize;
+		        uint gridThermalErosionCellsIndexOffset = rockType * myHeightMapPlaneSize + layer2 * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize;
                 if(x > 0)
                 {
                     if(TotalHeightMapLayerRockTypeHeight(indexLeft, layer2, rockType) > totalHeightMapLayerHeight
@@ -245,13 +245,13 @@ void main()
             float scale = min(layerSplitSize / layerRockTypeInflow, 1.0);
             if(scale == 1.0)
             {
-                return;
+                continue;
             }
             for(uint layer2 = 0; layer2 < mapGenerationConfiguration.LayerCount; layer2++)
             {
 	            for(int rockType = 0; rockType < mapGenerationConfiguration.RockTypeCount; rockType++)
 	            {
-		            uint gridThermalErosionCellsIndexOffset = (rockType + layer2 * mapGenerationConfiguration.LayerCount) * myHeightMapPlaneSize;
+		            uint gridThermalErosionCellsIndexOffset = rockType * myHeightMapPlaneSize + layer2 * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize;
                     if(x > 0)
                     {
                         if(TotalHeightMapLayerRockTypeHeight(indexLeft, layer2, rockType) > totalHeightMapLayerHeight
