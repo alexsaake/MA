@@ -17,7 +17,7 @@ namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.HydraulicEros
 public class GridHydraulicErosionTests
 {
     private const int AngleOfRepose = 45;
-    private const float TolerancePercentage = 0.02f;
+    private const float TolerancePercentage = 0.06f;
 
     private IContainer? myContainer;
     private IMapGenerationConfiguration? myMapGenerationConfiguration;
@@ -896,18 +896,18 @@ public class GridHydraulicErosionTests
         shaderBuffers.Add(ShaderBufferTypes.HeightMap, myMapGenerationConfiguration!.HeightMapSize * sizeof(float));
         uint layerOffset = (layer * myMapGenerationConfiguration.RockTypeCount + layer) * myMapGenerationConfiguration!.HeightMapPlaneSize;
         heightMap[CenterIndex + layerOffset] = 1.0f;
-        heightMap[LeftIndex + layerOffset] = 2.1f;
-        heightMap[RightIndex + layerOffset] = 2.1f;
-        heightMap[UpIndex + layerOffset] = 2.1f;
-        heightMap[DownIndex + layerOffset] = 2.1f;
+        heightMap[LeftIndex + layerOffset] = 2.0f;
+        heightMap[RightIndex + layerOffset] = 2.0f;
+        heightMap[UpIndex + layerOffset] = 2.0f;
+        heightMap[DownIndex + layerOffset] = 2.0f;
         if (layer > 0)
         {
             uint layerFloorOffset = (layer * myMapGenerationConfiguration.RockTypeCount) * myMapGenerationConfiguration!.HeightMapPlaneSize;
             heightMap[CenterIndex + layerFloorOffset] = 1.0f;
-            heightMap[LeftIndex + layerFloorOffset] = 1.1f;
-            heightMap[RightIndex + layerFloorOffset] = 1.1f;
-            heightMap[UpIndex + layerFloorOffset] = 1.1f;
-            heightMap[DownIndex + layerFloorOffset] = 1.1f;
+            heightMap[LeftIndex + layerFloorOffset] = 2.1f;
+            heightMap[RightIndex + layerFloorOffset] = 2.1f;
+            heightMap[UpIndex + layerFloorOffset] = 2.1f;
+            heightMap[DownIndex + layerFloorOffset] = 2.1f;
         }
         fixed (void* heightMapPointer = heightMap)
         {

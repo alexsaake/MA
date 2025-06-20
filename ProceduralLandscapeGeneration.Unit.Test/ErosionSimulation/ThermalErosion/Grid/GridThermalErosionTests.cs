@@ -468,10 +468,10 @@ public class GridThermalErosionTests
         {
             uint layerFloorOffset = (layer * myMapGenerationConfiguration.RockTypeCount) * myMapGenerationConfiguration!.HeightMapPlaneSize;
             heightMap[CenterIndex + layerFloorOffset] = 1.0f;
-            heightMap[LeftIndex + layerFloorOffset] = 1.1f;
-            heightMap[RightIndex + layerFloorOffset] = 1.1f;
-            heightMap[UpIndex + layerFloorOffset] = 1.1f;
-            heightMap[DownIndex + layerFloorOffset] = 1.1f;
+            heightMap[LeftIndex + layerFloorOffset] = 2.1f;
+            heightMap[RightIndex + layerFloorOffset] = 2.1f;
+            heightMap[UpIndex + layerFloorOffset] = 2.1f;
+            heightMap[DownIndex + layerFloorOffset] = 2.1f;
         }
         fixed (void* heightMapPointer = heightMap)
         {
