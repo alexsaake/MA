@@ -285,17 +285,25 @@ void main()
     uint indexDown = GetIndex(x, y - 1);
     uint indexUp = GetIndex(x, y + 1);
 	
-    if(TrySplit(index, indexLeft, vec2(-1, 0)))
+    bool isSplit = false;
+    if(x > 0)
     {
+        isSplit = TrySplit(index, indexLeft, vec2(-1, 0));
     }
-    else if(TrySplit(index, indexRight, vec2(1, 0)))
+    if(!isSplit
+        && x < myHeightMapSideLength - 1)
     {
+        isSplit = TrySplit(index, indexRight, vec2(1, 0));
     }
-    else if(TrySplit(index, indexDown, vec2(0, -1)))
+    if(!isSplit
+        && y > 0)
     {
+        isSplit = TrySplit(index, indexDown, vec2(0, -1));
     }
-    else if(TrySplit(index, indexUp, vec2(0, 1)))
+    if(!isSplit
+        && y < myHeightMapSideLength - 1)
     {
+        isSplit = TrySplit(index, indexUp, vec2(0, 1));
     }
     
     memoryBarrier();

@@ -224,11 +224,6 @@ void main()
             }
         }
 
-        if(gridHydraulicErosionCell.WaterHeight == 0)
-        {
-            continue;
-        }
-
         float totalLayerHeightMapAndWaterHeight = totalHeightMapLayerHeight + gridHydraulicErosionCell.WaterHeight;
         float outOfBoundsHeight = 0.0;
         if(x > 0)

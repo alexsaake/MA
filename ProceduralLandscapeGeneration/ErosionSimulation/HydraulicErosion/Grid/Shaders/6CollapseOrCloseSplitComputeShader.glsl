@@ -126,10 +126,46 @@ bool IsFloating(uint index, float floorHeight)
     
     for(uint layer = 0; layer < mapGenerationConfiguration.LayerCount; layer++)
     {
-        if(TotalHeightMapLayerHeight(indexLeft, layer) > floorHeight
-            || TotalHeightMapLayerHeight(indexRight, layer) > floorHeight
-            || TotalHeightMapLayerHeight(indexDown, layer) > floorHeight
-            || TotalHeightMapLayerHeight(indexUp, layer) > floorHeight)
+        float totalHeightMapLayerHeightLeft = 0.0;
+        if(x > 0)
+        {
+            totalHeightMapLayerHeightLeft = TotalHeightMapLayerHeight(indexLeft, layer);
+        }
+        else
+        {
+            totalHeightMapLayerHeightLeft = floorHeight;
+        }
+        float totalHeightMapLayerHeightRight = 0.0;
+        if(x < myHeightMapSideLength - 1)
+        {
+            totalHeightMapLayerHeightRight = TotalHeightMapLayerHeight(indexRight, layer);
+        }
+        else
+        {
+            totalHeightMapLayerHeightRight = floorHeight;
+        }
+        float totalHeightMapLayerHeightDown = 0.0;
+        if(y > 0)
+        {
+            totalHeightMapLayerHeightDown = TotalHeightMapLayerHeight(indexDown, layer);
+        }
+        else
+        {
+            totalHeightMapLayerHeightDown = floorHeight;
+        }
+        float totalHeightMapLayerHeightUp = 0.0;
+        if(y < myHeightMapSideLength - 1)
+        {
+            totalHeightMapLayerHeightUp = TotalHeightMapLayerHeight(indexUp, layer);
+        }
+        else
+        {
+            totalHeightMapLayerHeightUp = floorHeight;
+        }
+        if(totalHeightMapLayerHeightLeft > floorHeight
+            || totalHeightMapLayerHeightRight > floorHeight
+            || totalHeightMapLayerHeightDown > floorHeight
+            || totalHeightMapLayerHeightUp > floorHeight)
         {
             return false;
         }
