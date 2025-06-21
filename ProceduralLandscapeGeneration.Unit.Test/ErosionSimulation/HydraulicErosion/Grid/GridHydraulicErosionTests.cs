@@ -17,7 +17,7 @@ namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.HydraulicEros
 public class GridHydraulicErosionTests
 {
     private const int AngleOfRepose = 45;
-    private const float TolerancePercentage = 0.06f;
+    private const float TolerancePercentage = 0.0001f;
 
     private IContainer? myContainer;
     private IMapGenerationConfiguration? myMapGenerationConfiguration;
@@ -62,9 +62,28 @@ public class GridHydraulicErosionTests
     }
 
     [Test]
-    public void AddWater_Flat3x3HeightMap_RainIsAddedOnyLayer([Values(0u, 1u)] uint layer)
+    public void AddWater_Flat3x3HeightMapGivenLayer_RainIsAddedOnGivenLayer([Values(0u, 1u)] uint layer)
     {
         uint layerCount = 2;
+        SetUpMapGenerationConfiguration(layerCount);
+        InitializeConfiguration();
+        SetUpFlatHeightMap(layer);
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
+        testee.Initialize();
+
+        testee.AddWater();
+
+        GridHydraulicErosionCellShaderBuffer[] gridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
+        uint gridHydraulicErosionCellOffset = layer * myMapGenerationConfiguration!.HeightMapPlaneSize;
+        GridHydraulicErosionCellShaderBuffer cell = gridHydraulicErosionCellsShaderBuffers[CenterIndex + gridHydraulicErosionCellOffset];
+        Assert.That(cell.WaterHeight, Is.GreaterThan(0.0f));
+    }
+
+    [Test]
+    public void AddWater_Flat3x3HeightMapLayerOne_RainIsAddedOnLayerOne()
+    {
+        uint layer = 0;
+        uint layerCount = layer + 1;
         SetUpMapGenerationConfiguration(layerCount);
         InitializeConfiguration();
         SetUpFlatHeightMap(layer);

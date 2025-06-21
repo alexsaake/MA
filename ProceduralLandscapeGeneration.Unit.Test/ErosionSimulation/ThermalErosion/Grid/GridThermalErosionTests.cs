@@ -18,7 +18,7 @@ namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.ThermalErosio
 public class GridThermalErosionTests
 {
     private const int AngleOfRepose = 45;
-    private const float TolerancePercentage = 0.001f;
+    private const float TolerancePercentage = 0.00001f;
 
     private IContainer? myContainer;
     private IMapGenerationConfiguration? myMapGenerationConfiguration;
