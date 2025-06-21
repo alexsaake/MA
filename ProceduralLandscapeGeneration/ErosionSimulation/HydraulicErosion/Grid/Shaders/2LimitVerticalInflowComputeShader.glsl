@@ -246,7 +246,7 @@ void main()
 
         if(layerWaterInflow > layerSplitSize)
         {
-            float scale = min(layerSplitSize / layerWaterInflow, 1.0);
+            float scale = min(max(layerSplitSize / layerWaterInflow, 0.0), 1.0);
             for(uint layer2 = 0; layer2 < mapGenerationConfiguration.LayerCount; layer2++)
             {
                 if(x > 0)

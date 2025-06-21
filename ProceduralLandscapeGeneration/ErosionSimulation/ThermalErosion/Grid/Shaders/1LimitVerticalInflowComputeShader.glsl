@@ -242,7 +242,7 @@ void main()
         layerRockTypeInflow += gridHydraulicErosionCells[index + gridHydraulicErosionCellsIndexOffset].SuspendedSediment;
         if(layerRockTypeInflow > layerSplitSize)
         {
-            float scale = min(layerSplitSize / layerRockTypeInflow, 1.0);
+            float scale = min(max(layerSplitSize / layerRockTypeInflow, 0.0), 1.0);
             if(scale == 1.0)
             {
                 continue;
