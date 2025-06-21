@@ -116,10 +116,10 @@ public class GridHydraulicAndThermalErosionTests
     }
 
     [Test]
-    public void Simulate_NoiseHeightMapWithGivenSizeIterationsSeaLevelAndHorizontalErosionWithRain_VolumeStaysTheSame([Values(3u, 9u, 27u)] uint sideLength,
-                                                                                                                                        [Values(1u, 2u, 3u)] uint rockTypeCount,
-                                                                                                                                        [Values(1u, 100u, 10000u)] uint iterations,
-                                                                                                                                        [Values(0.0f, 1.0f, 2.0f)] float seaLevel)
+    public void Simulate_NoiseHeightMapWithGivenSizeIterationsSeaLevelAndHorizontalErosionWithRain_VolumeStaysTheSame([Values(3u, 9u, 27u, 256u)] uint sideLength,
+                                                                                                                    [Values(1u, 2u, 3u)] uint rockTypeCount,
+                                                                                                                    [Values(1u, 100u, 10000u)] uint iterations,
+                                                                                                                    [Values(0.0f, 1.0f, 2.0f)] float seaLevel)
     {
         SetUpErosionConfiguration(iterations, true);
         SetUpHydraulicErosionConfiguration(true);
@@ -127,7 +127,7 @@ public class GridHydraulicAndThermalErosionTests
         uint layerCount = layer + 1;
         SetUpMapGenerationConfiguration(layerCount, sideLength, rockTypeCount, seaLevel);
         InitializeConfiguration();
-        SetUpNoneFloatingHeightMapWithRockTypesInMiddle(layer, rockTypeCount);
+        SetUpNoiseHeightMap();
         GridHydraulicErosion gridHydraulicErosionTestee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
         GridThermalErosion gridThermalErosionTestee = (GridThermalErosion)myContainer!.Resolve<IGridThermalErosion>();
         gridHydraulicErosionTestee.Initialize();

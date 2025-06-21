@@ -30,11 +30,11 @@ float inverseLerp(float lower, float upper, float value)
 
 void main()
 {
-    uint id = gl_GlobalInvocationID.x;
-    if(id >= heatMap.length())
+    uint index = gl_GlobalInvocationID.x;
+    if(index >= heatMap.length())
     {
         return;
     }
 
-    heatMap[id] = inverseLerp(float(heightMapParameters.Min) / 100000, float(heightMapParameters.Max) / 100000, heatMap[id]);
+    heatMap[index] = clamp(inverseLerp(float(heightMapParameters.Min) / 100000, float(heightMapParameters.Max) / 100000, heatMap[index]), 0.0, 1.0);
 }

@@ -324,10 +324,10 @@ public class GridThermalErosionTests
     }
 
     [Test]
-    public void Simulate_NoiseHeightMapWithGivenSizeIterationsSeaLevelAndHorizontalErosion_VolumeStaysTheSame([Values(3u, 9u, 27u)] uint sideLength,
-                                                                                                                                    [Values(1u, 2u, 3u)] uint rockTypeCount,
-                                                                                                                                    [Values(0u, 1u)] uint layer,
-                                                                                                                                    [Values(1u, 100u, 10000u)] uint iterations)
+    public void Simulate_NoiseHeightMapWithGivenSizeIterationsSeaLevelAndHorizontalErosion_VolumeStaysTheSame([Values(3u, 9u, 27u, 256u)] uint sideLength,
+                                                                                                            [Values(1u, 2u, 3u)] uint rockTypeCount,
+                                                                                                            [Values(0u, 1u)] uint layer,
+                                                                                                            [Values(1u, 100u, 10000u)] uint iterations)
     {
         SetUpErosionConfiguration(iterations);
         uint layerCount = layer + 1;

@@ -53,5 +53,5 @@ void main()
         return;
     }
 
-    heightMap[index] = inverseLerp(float(heightMapParameters.Min) / 100000, float(heightMapParameters.Max) / 100000, heightMap[index]);
+    heightMap[index] = clamp(inverseLerp(float(heightMapParameters.Min) / 100000, float(heightMapParameters.Max) / 100000, heightMap[index]), 0.0, 1.0);
 }
