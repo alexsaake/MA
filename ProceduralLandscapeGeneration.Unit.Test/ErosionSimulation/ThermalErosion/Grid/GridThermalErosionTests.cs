@@ -9,6 +9,7 @@ using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.DependencyInjection;
 using ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion.Grid;
+using ProceduralLandscapeGeneration.MapGeneration;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.ThermalErosion.Grid;
@@ -290,6 +291,7 @@ public class GridThermalErosionTests
         Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
         Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        AssertZeroFloorHasNoHeightAboveAndAboveZeroFloorHasHeightAbove(endHeightMap);
     }
 
     [Test]
@@ -318,6 +320,36 @@ public class GridThermalErosionTests
         Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
         Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        AssertZeroFloorHasNoHeightAboveAndAboveZeroFloorHasHeightAbove(endHeightMap);
+    }
+
+    [Test]
+    public void Simulate_NoiseHeightMapWithGivenSizeIterationsSeaLevelAndHorizontalErosion_VolumeStaysTheSame([Values(3u, 9u, 27u)] uint sideLength,
+                                                                                                                                    [Values(1u, 2u, 3u)] uint rockTypeCount,
+                                                                                                                                    [Values(0u, 1u)] uint layer,
+                                                                                                                                    [Values(1u, 100u, 10000u)] uint iterations)
+    {
+        SetUpErosionConfiguration(iterations);
+        uint layerCount = layer + 1;
+        SetUpMapGenerationConfiguration(layerCount, sideLength, rockTypeCount);
+        InitializeConfiguration();
+        SetUpNoiseHeightMap();
+        GridThermalErosion gridThermalErosionTestee = (GridThermalErosion)myContainer!.Resolve<IGridThermalErosion>();
+        gridThermalErosionTestee.Initialize();
+
+        float[] startHeightMap = ReadHeightMapShaderBuffer();
+        float startVolume = SumUpVolume(startHeightMap);
+
+        gridThermalErosionTestee.Simulate();
+
+        float[] endHeightMap = ReadHeightMapShaderBuffer();
+        GridThermalErosionCellShaderBuffer[] endGridThermalErosionCellsShaderBuffers = ReadGridThermalErosionCellShaderBuffer();
+        float endVolume = SumUpVolume(endHeightMap);
+
+        Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
+        Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
+        Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        AssertZeroFloorHasNoHeightAboveAndAboveZeroFloorHasHeightAbove(endHeightMap);
     }
 
     private float SumUpVolume(float[] heightMap)
@@ -328,6 +360,40 @@ public class GridThermalErosionTests
         }
         float floorHeights = heightMap.Where((_, index) => index >= myMapGenerationConfiguration!.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize && index < myMapGenerationConfiguration!.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize + myMapGenerationConfiguration!.HeightMapPlaneSize).Sum(cell => cell);
         return heightMap.Sum(cell => cell) - floorHeights;
+    }
+    private void AssertZeroFloorHasNoHeightAboveAndAboveZeroFloorHasHeightAbove(float[] heightMap)
+    {
+        if (myMapGenerationConfiguration!.LayerCount > 1)
+        {
+            uint heightMapFloorOffset = myMapGenerationConfiguration!.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize;
+            uint heightMapLayerOffset = (myMapGenerationConfiguration!.RockTypeCount + 1) * myMapGenerationConfiguration!.HeightMapPlaneSize;
+            uint heightMapRockTypeOffset = myMapGenerationConfiguration!.HeightMapPlaneSize;
+            for (uint y = 0; y < myMapGenerationConfiguration!.HeightMapSideLength; y++)
+            {
+                for (uint x = 0; x < myMapGenerationConfiguration!.HeightMapSideLength; x++)
+                {
+                    uint index = myMapGenerationConfiguration!.GetIndex(x, y);
+                    if (heightMap[index + heightMapFloorOffset] > 0.0f)
+                    {
+                        float heightMapLayerHeight = 0.0f;
+                        for (uint rockType = 0; rockType < myMapGenerationConfiguration!.RockTypeCount; rockType++)
+                        {
+                            heightMapLayerHeight += heightMap[index + rockType * heightMapRockTypeOffset + heightMapLayerOffset];
+                        }
+                        Assert.That(heightMapLayerHeight, Is.GreaterThan(0.0f));
+                    }
+                    else
+                    {
+                        float heightMapLayerHeight = 0.0f;
+                        for (uint rockType = 0; rockType < myMapGenerationConfiguration!.RockTypeCount; rockType++)
+                        {
+                            heightMapLayerHeight += heightMap[index + rockType * heightMapRockTypeOffset + heightMapLayerOffset];
+                        }
+                        Assert.That(heightMapLayerHeight, Is.Zero);
+                    }
+                }
+            }
+        }
     }
 
     private void InitializeConfiguration()
@@ -569,6 +635,12 @@ public class GridThermalErosionTests
             Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);
         }
         Rlgl.MemoryBarrier();
+    }
+
+    private unsafe void SetUpNoiseHeightMap()
+    {
+        IHeightMapGenerator heightMapGenerator = myContainer!.ResolveKeyed<IHeightMapGenerator>(ProcessorTypes.GPU);
+        heightMapGenerator.GenerateNoiseHeightMap();
     }
 
     private unsafe GridThermalErosionCellShaderBuffer[] ReadGridThermalErosionCellShaderBuffer()

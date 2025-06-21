@@ -8,6 +8,7 @@ using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using ProceduralLandscapeGeneration.DependencyInjection;
 using ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
+using ProceduralLandscapeGeneration.MapGeneration;
 using Raylib_cs;
 
 namespace ProceduralLandscapeGeneration.Int.Test.ErosionSimulation.HydraulicErosion.Grid;
@@ -512,6 +513,7 @@ public class GridHydraulicErosionTests
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
         Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        AssertZeroFloorHasNoHeightAboveAndAboveZeroFloorHasHeightAbove(endHeightMap);
         if (seaLevel == 0)
         {
             Assert.That(endSuspendedSediment, Is.Zero);
@@ -557,6 +559,7 @@ public class GridHydraulicErosionTests
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
         Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        AssertZeroFloorHasNoHeightAboveAndAboveZeroFloorHasHeightAbove(endHeightMap);
         if (seaLevel == 0)
         {
             Assert.That(endSuspendedSediment, Is.Zero);
@@ -603,6 +606,7 @@ public class GridHydraulicErosionTests
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
         Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        AssertZeroFloorHasNoHeightAboveAndAboveZeroFloorHasHeightAbove(endHeightMap);
         if (seaLevel == 0)
         {
             Assert.That(endSuspendedSediment, Is.Zero);
@@ -649,6 +653,54 @@ public class GridHydraulicErosionTests
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
         Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        AssertZeroFloorHasNoHeightAboveAndAboveZeroFloorHasHeightAbove(endHeightMap);
+        if (seaLevel == 0)
+        {
+            Assert.That(endSuspendedSediment, Is.Zero);
+        }
+    }
+
+    [Test]
+    public void Simulate_NoiseHeightMapWithGivenSizeIterationsSeaLevelAndHorizontalErosionWithRain_VolumeStaysTheSame([Values(3u, 9u, 27u)] uint sideLength,
+                                                                                                                                        [Values(1u, 2u, 3u)] uint rockTypeCount,
+                                                                                                                                        [Values(1u, 100u, 10000u)] uint iterations,
+                                                                                                                                        [Values(0.0f, 1.0f, 2.0f)] float seaLevel)
+    {
+        SetUpErosionConfiguration(iterations, true);
+        SetUpHydraulicErosionConfiguration(true);
+        uint layer = 1;
+        uint layerCount = layer + 1;
+        SetUpMapGenerationConfiguration(layerCount, sideLength, rockTypeCount, seaLevel * rockTypeCount);
+        InitializeConfiguration();
+        SetUpNoiseHeightMap();
+        GridHydraulicErosion testee = (GridHydraulicErosion)myContainer!.Resolve<IGridHydraulicErosion>();
+        testee.Initialize();
+
+        float[] startHeightMap = ReadHeightMapShaderBuffer();
+        float startVolume = SumUpVolume(startHeightMap);
+
+        testee.Simulate();
+
+        float[] intermediateHeightMap = ReadHeightMapShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer[] intermediateGridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
+        float intermediateSuspendedSediment = intermediateGridHydraulicErosionCellsShaderBuffers.Sum(cell => cell.SuspendedSediment);
+        float intermediateVolume = SumUpVolume(intermediateHeightMap) + intermediateSuspendedSediment;
+
+        SetUpErosionConfiguration(iterations, false);
+        SetUpHydraulicErosionConfiguration(1.0f);
+        testee.Simulate();
+
+        float[] endHeightMap = ReadHeightMapShaderBuffer();
+        GridHydraulicErosionCellShaderBuffer[] endGridHydraulicErosionCellsShaderBuffers = ReadGridHydraulicErosionCellShaderBuffer();
+        float endSuspendedSediment = endGridHydraulicErosionCellsShaderBuffers.Sum(cell => cell.SuspendedSediment);
+        float endVolume = SumUpVolume(endHeightMap) + endSuspendedSediment;
+
+        Assert.That(startHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
+        Assert.That(intermediateHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
+        Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
+        Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        AssertZeroFloorHasNoHeightAboveAndAboveZeroFloorHasHeightAbove(endHeightMap);
         if (seaLevel == 0)
         {
             Assert.That(endSuspendedSediment, Is.Zero);
@@ -695,6 +747,7 @@ public class GridHydraulicErosionTests
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
         Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        AssertZeroFloorHasNoHeightAboveAndAboveZeroFloorHasHeightAbove(endHeightMap);
         if (seaLevel == 0)
         {
             Assert.That(endSuspendedSediment, Is.Zero);
@@ -741,6 +794,7 @@ public class GridHydraulicErosionTests
         Assert.That(endHeightMap.Min(), Is.GreaterThanOrEqualTo(0.0f));
         Assert.That(intermediateVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
         Assert.That(endVolume, Is.EqualTo(startVolume).Within(startVolume * TolerancePercentage));
+        AssertZeroFloorHasNoHeightAboveAndAboveZeroFloorHasHeightAbove(endHeightMap);
         if (seaLevel == 0)
         {
             Assert.That(endSuspendedSediment, Is.Zero);
@@ -755,6 +809,41 @@ public class GridHydraulicErosionTests
         }
         float floorHeights = heightMap.Where((_, index) => index >= myMapGenerationConfiguration!.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize && index < myMapGenerationConfiguration!.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize + myMapGenerationConfiguration!.HeightMapPlaneSize).Sum(cell => cell);
         return heightMap.Sum(cell => cell) - floorHeights;
+    }
+
+    private void AssertZeroFloorHasNoHeightAboveAndAboveZeroFloorHasHeightAbove(float[] heightMap)
+    {
+        if (myMapGenerationConfiguration!.LayerCount > 1)
+        {
+            uint heightMapFloorOffset = myMapGenerationConfiguration!.RockTypeCount * myMapGenerationConfiguration!.HeightMapPlaneSize;
+            uint heightMapLayerOffset = (myMapGenerationConfiguration!.RockTypeCount + 1) * myMapGenerationConfiguration!.HeightMapPlaneSize;
+            uint heightMapRockTypeOffset = myMapGenerationConfiguration!.HeightMapPlaneSize;
+            for (uint y = 0; y < myMapGenerationConfiguration!.HeightMapSideLength; y++)
+            {
+                for (uint x = 0; x < myMapGenerationConfiguration!.HeightMapSideLength; x++)
+                {
+                    uint index = myMapGenerationConfiguration!.GetIndex(x, y);
+                    if (heightMap[index + heightMapFloorOffset] > 0.0f)
+                    {
+                        float heightMapLayerHeight = 0.0f;
+                        for (uint rockType = 0; rockType < myMapGenerationConfiguration!.RockTypeCount; rockType++)
+                        {
+                            heightMapLayerHeight += heightMap[index + rockType * heightMapRockTypeOffset + heightMapLayerOffset];
+                        }
+                        Assert.That(heightMapLayerHeight, Is.GreaterThan(0.0f));
+                    }
+                    else
+                    {
+                        float heightMapLayerHeight = 0.0f;
+                        for (uint rockType = 0; rockType < myMapGenerationConfiguration!.RockTypeCount; rockType++)
+                        {
+                            heightMapLayerHeight += heightMap[index + rockType * heightMapRockTypeOffset + heightMapLayerOffset];
+                        }
+                        Assert.That(heightMapLayerHeight, Is.Zero);
+                    }
+                }
+            }
+        }
     }
 
     private void InitializeConfiguration()
@@ -1001,6 +1090,12 @@ public class GridHydraulicErosionTests
             Rlgl.UpdateShaderBuffer(shaderBuffers[ShaderBufferTypes.HeightMap], heightMapPointer, myMapGenerationConfiguration!.HeightMapSize * sizeof(float), 0);
         }
         Rlgl.MemoryBarrier();
+    }
+
+    private unsafe void SetUpNoiseHeightMap()
+    {
+        IHeightMapGenerator heightMapGenerator = myContainer!.ResolveKeyed<IHeightMapGenerator>(ProcessorTypes.GPU);
+        heightMapGenerator.GenerateNoiseHeightMap();
     }
 
     private unsafe void SetUpHydraulicErosionCellsWithWaterAndSuspendedSedimentInMiddle(uint layer)
