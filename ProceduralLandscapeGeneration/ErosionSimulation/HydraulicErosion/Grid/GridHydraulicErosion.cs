@@ -27,7 +27,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     private ComputeShaderProgram? myVerticalMoveWaterAndSedimentSetVelocityMapAndEvaporateComputeShaderrProgram;
     private ComputeShaderProgram? myVerticalSuspendDepositeComputeShaderProgram;
     private ComputeShaderProgram? myHorizontalSplitComputeShaderProgram;
-    private ComputeShaderProgram? myCollapseOrCloseSplitComputeShaderProgram;
+    private ComputeShaderProgram? myCollapseComputeShaderProgram;
 
     private bool myHasRainDropsChangedChanged;
     private bool myIsDisposed;
@@ -52,7 +52,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
         myVerticalMoveWaterAndSedimentSetVelocityMapAndEvaporateComputeShaderrProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}3VerticalMoveWaterAndSedimentSetVelocityMapAndEvaporateComputeShader.glsl");
         myVerticalSuspendDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}4VerticalSuspendDepositeComputeShader.glsl");
         myHorizontalSplitComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}5HorizontalSplitComputeShader.glsl");
-        myCollapseOrCloseSplitComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}6CollapseOrCloseSplitComputeShader.glsl");
+        myCollapseComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}6CollapseComputeShader.glsl");
 
         AddGridHydraulicErosionCellShaderBuffer();
         AddHeightMapIndicesShaderBuffer();
@@ -114,7 +114,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
                 {
                     HorizontalSplit();
                 }
-                CollapseOrCloseSplit();
+                Collapse();
             }
         }
     }
@@ -182,9 +182,9 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
         Rlgl.MemoryBarrier();
     }
 
-    internal void CollapseOrCloseSplit()
+    internal void Collapse()
     {
-        Rlgl.EnableShader(myCollapseOrCloseSplitComputeShaderProgram!.Id);
+        Rlgl.EnableShader(myCollapseComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
@@ -233,7 +233,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
         myVerticalMoveWaterAndSedimentSetVelocityMapAndEvaporateComputeShaderrProgram?.Dispose();
         myVerticalSuspendDepositeComputeShaderProgram?.Dispose();
         myHorizontalSplitComputeShaderProgram?.Dispose();
-        myCollapseOrCloseSplitComputeShaderProgram?.Dispose();
+        myCollapseComputeShaderProgram?.Dispose();
 
         RemoveHeightMapIndicesShaderBuffer();
         RemoveGridHydraulicErosionCellShaderBuffer();

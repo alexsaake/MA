@@ -159,28 +159,6 @@ float TotalHeightMapLayerRockTypeHeight(uint index, uint layer, int stopRockType
     return heightMapLayerFloorHeight + HeightMapLayerRockTypeHeight(index, layer, stopRockType);
 }
 
-float LayerSplitSize(uint index, uint layer)
-{
-    float aboveHeightMapLayerFloorHeight = HeightMapLayerFloorHeight(index, layer + 1);
-    if(layer == 0
-        && aboveHeightMapLayerFloorHeight > 0.0)
-    {
-        float totalHeightMapLayerHeight = TotalHeightMapLayerHeight(index, layer);
-        return aboveHeightMapLayerFloorHeight - totalHeightMapLayerHeight;
-    }
-    return 100.0;
-}
-
-void SetHeightMapLayerFloorHeight(uint index, uint layer, float value)
-{
-    if(layer < 1
-        || layer >= mapGenerationConfiguration.LayerCount)
-    {
-        return;
-    }
-    heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = value;
-}
-
 //https://github.com/bshishov/UnityTerrainErosionGPU/blob/master/Assets/Shaders/Erosion.compute
 
 void main()
@@ -277,21 +255,6 @@ void main()
                     DepositeOn(index, layer, uint(rockType), volumeDelta);
                 }
             }
-        }
-
-        float layerSplitSize = LayerSplitSize(index, layer);
-        uint gridHydraulicErosionCellsIndexOffset = layer * myHeightMapPlaneSize;
-        GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[index + gridHydraulicErosionCellsIndexOffset];
-
-        if(layerSplitSize > 0.0
-            && layerSplitSize < 100.0
-            && layerSplitSize <= gridHydraulicErosionCell.SuspendedSediment)
-        {
-            DepositeOn(index, layer, mapGenerationConfiguration.RockTypeCount - 1, gridHydraulicErosionCell.SuspendedSediment);
-            SetHeightMapLayerFloorHeight(index, layer + 1, 0.0);
-            gridHydraulicErosionCell.WaterHeight = 0.0;
-            gridHydraulicErosionCell.SuspendedSediment = 0.0;
-            gridHydraulicErosionCells[index + gridHydraulicErosionCellsIndexOffset] = gridHydraulicErosionCell;
         }
     }
 

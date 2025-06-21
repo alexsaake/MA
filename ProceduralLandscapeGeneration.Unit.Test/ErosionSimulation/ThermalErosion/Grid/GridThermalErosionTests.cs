@@ -247,7 +247,7 @@ public class GridThermalErosionTests
         testee.Initialize();
         testee.VerticalFlow();
 
-        testee.DepositeAndCloseSplit();
+        testee.Deposite();
 
         float expectedHeight = 0.05f;
         float[] heightMap = ReadHeightMapShaderBuffer();

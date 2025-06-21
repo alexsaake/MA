@@ -20,7 +20,7 @@ internal class GridThermalErosion : IGridThermalErosion
 
     private ComputeShaderProgram? myVerticalFlowComputeShaderProgram;
     private ComputeShaderProgram? myLimitVerticalInflowComputeShaderProgram;
-    private ComputeShaderProgram? myDepositeAndCloseSplitComputeShaderProgram;
+    private ComputeShaderProgram? myDepositeComputeShaderProgram;
 
     private bool myIsDisposed;
 
@@ -37,7 +37,7 @@ internal class GridThermalErosion : IGridThermalErosion
     {
         myVerticalFlowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}0VerticalFlowComputeShader.glsl");
         myLimitVerticalInflowComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}1LimitVerticalInflowComputeShader.glsl");
-        myDepositeAndCloseSplitComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}2DepositeAndCloseSplitComputeShader.glsl");
+        myDepositeComputeShaderProgram = myComputeShaderProgramFactory.CreateComputeShaderProgram($"{ShaderDirectory}2DepositeComputeShader.glsl");
 
         AddGridThermalErosionCellShaderBuffer();
 
@@ -64,7 +64,7 @@ internal class GridThermalErosion : IGridThermalErosion
             {
                 LimitVerticalInflow();
             }
-            DepositeAndCloseSplit();
+            Deposite();
         }
     }
 
@@ -84,9 +84,9 @@ internal class GridThermalErosion : IGridThermalErosion
         Rlgl.MemoryBarrier();
     }
 
-    internal void DepositeAndCloseSplit()
+    internal void Deposite()
     {
-        Rlgl.EnableShader(myDepositeAndCloseSplitComputeShaderProgram!.Id);
+        Rlgl.EnableShader(myDepositeComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)MathF.Ceiling(myMapGenerationConfiguration.HeightMapPlaneSize / 64.0f), 1, 1);
         Rlgl.DisableShader();
         Rlgl.MemoryBarrier();
@@ -101,7 +101,7 @@ internal class GridThermalErosion : IGridThermalErosion
 
         myVerticalFlowComputeShaderProgram?.Dispose();
         myLimitVerticalInflowComputeShaderProgram?.Dispose();
-        myDepositeAndCloseSplitComputeShaderProgram?.Dispose();
+        myDepositeComputeShaderProgram?.Dispose();
 
         RemoveGridThermalErosionCellShaderBuffer();
 
