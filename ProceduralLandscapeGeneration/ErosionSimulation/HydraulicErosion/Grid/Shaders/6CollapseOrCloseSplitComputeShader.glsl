@@ -233,6 +233,11 @@ void MoveWaterAndSuspendedSedimentToBelowLayer(uint index, uint layer)
 
 void SetHeightMapLayerFloorHeight(uint index, uint layer, float value)
 {
+    if(layer < 1
+        || layer >= mapGenerationConfiguration.LayerCount)
+    {
+        return;
+    }
     heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = value;
 }
 
@@ -253,6 +258,10 @@ void main()
 
     float layerZeroHeightMapHeight = HeightMapLayerHeight(index, 0);
     float layerOneFloorHeight = HeightMapLayerFloorHeight(index, 1);
+    if(layerOneFloorHeight == 0)
+    {
+        return;
+    }
     bool isSplitOpen = layerOneFloorHeight > layerZeroHeightMapHeight;
     if(!IsFloating(index, layerOneFloorHeight)
         && isSplitOpen

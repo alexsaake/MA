@@ -173,6 +173,11 @@ float LayerSplitSize(uint index, uint layer)
 
 void SetHeightMapLayerFloorHeight(uint index, uint layer, float value)
 {
+    if(layer < 1
+        || layer >= mapGenerationConfiguration.LayerCount)
+    {
+        return;
+    }
     heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = value;
 }
 
@@ -278,10 +283,12 @@ void main()
         uint gridHydraulicErosionCellsIndexOffset = layer * myHeightMapPlaneSize;
         GridHydraulicErosionCell gridHydraulicErosionCell = gridHydraulicErosionCells[index + gridHydraulicErosionCellsIndexOffset];
 
-        if(layerSplitSize <= gridHydraulicErosionCell.SuspendedSediment)
+        if(layerSplitSize > 0.0
+            && layerSplitSize < 100.0
+            && layerSplitSize <= gridHydraulicErosionCell.SuspendedSediment)
         {
             DepositeOn(index, layer, mapGenerationConfiguration.RockTypeCount - 1, gridHydraulicErosionCell.SuspendedSediment);
-            SetHeightMapLayerFloorHeight(index, layer, 0.0);
+            SetHeightMapLayerFloorHeight(index, layer + 1, 0.0);
             gridHydraulicErosionCell.WaterHeight = 0.0;
             gridHydraulicErosionCell.SuspendedSediment = 0.0;
             gridHydraulicErosionCells[index + gridHydraulicErosionCellsIndexOffset] = gridHydraulicErosionCell;

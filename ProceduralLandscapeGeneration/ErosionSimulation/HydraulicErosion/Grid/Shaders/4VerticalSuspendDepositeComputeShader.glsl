@@ -207,6 +207,11 @@ void AddHeightMapLayerFloorHeight(uint index, uint layer, float value)
 
 void SetHeightMapLayerFloorHeight(uint index, uint layer, float value)
 {
+    if(layer < 1
+        || layer >= mapGenerationConfiguration.LayerCount)
+    {
+        return;
+    }
     heightMap[index + layer * mapGenerationConfiguration.RockTypeCount * myHeightMapPlaneSize] = value;
 }
 
