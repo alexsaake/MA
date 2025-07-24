@@ -208,6 +208,7 @@ internal class ConfigurationGUI : IConfigurationGUI
         myDisplayPanel.Add(new ToggleSliderWithLabel("Sea Level Displayed", "Off;On", (value) => erosionConfiguration.IsSeaLevelDisplayed = value == 1, erosionConfiguration.IsSeaLevelDisplayed ? 1 : 0));
         myDisplayPanel.Add(new ToggleSliderWithLabel("Camera Mode", "Still;Orbital", (value) => mapGenerationConfiguration.CameraMode = value == 0 ? CameraMode.Custom : CameraMode.Orbital, (int)mapGenerationConfiguration.CameraMode));
         myDisplayPanel.Add(new ToggleSliderWithLabel("Terrain Colors", "Off;On", (value) => mapGenerationConfiguration.AreTerrainColorsEnabled = value == 1, mapGenerationConfiguration.AreTerrainColorsEnabled ? 1 : 0));
+        myDisplayPanel.Add(new ToggleSliderWithLabel("Shadowmap Displayed", "Off;On", (value) => configuration.IsShadowMapDisplayed = value == 1, configuration.IsShadowMapDisplayed ? 1 : 0));
 
         myLayersPanel = new PanelWithElements("Layers");
         myLayersPanel.Add(new ToggleSliderWithLabel("Layer Colors", "Off;On", (value) => mapGenerationConfiguration.AreLayerColorsEnabled = value == 1, mapGenerationConfiguration.AreLayerColorsEnabled ? 1 : 0));

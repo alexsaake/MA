@@ -23,6 +23,7 @@ internal class Configuration : IConfiguration
     public int ScreenWidth { get; set; }
     public int ScreenHeight { get; set; }
     public int ShadowMapResolution { get; set; }
+    public bool IsShadowMapDisplayed { get; set; }
 
     public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IRockTypesConfiguration rockTypesConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IPlateTectonicsConfiguration plateTectonicsConfiguration)
     {
@@ -38,6 +39,7 @@ internal class Configuration : IConfiguration
         ScreenWidth = 1920;
         ScreenHeight = 1080;
         ShadowMapResolution = 1028;
+        IsShadowMapDisplayed = true;
     }
 
     public void Initialize()

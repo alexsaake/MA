@@ -164,21 +164,25 @@ internal class HeightMapVertexShaderRenderer : IRenderer
         if (myIsUpdateAvailable)
         {
             UpdateShadowMap();
-            myIsUpdateAvailable = false;
         }
+        myIsUpdateAvailable = false;
     }
 
     private unsafe void UpdateShadowMap()
     {
+        if (!myConfiguration.IsShadowMapDisplayed)
+        {
+            return;
+        }
         Matrix4x4 lightProjection;
         Matrix4x4 lightView;
         Raylib.BeginTextureMode(myShadowMap);
-            Raylib.ClearBackground(Color.White);
-            Raylib.BeginMode3D(myLightCamera);
-                lightProjection = Rlgl.GetMatrixProjection();
-                lightView = Rlgl.GetMatrixModelview();
-                DrawTerrainHeightMap();
-            Raylib.EndMode3D();
+        Raylib.ClearBackground(Color.White);
+        Raylib.BeginMode3D(myLightCamera);
+        lightProjection = Rlgl.GetMatrixProjection();
+        lightView = Rlgl.GetMatrixModelview();
+        DrawTerrainHeightMap();
+        Raylib.EndMode3D();
         Raylib.EndTextureMode();
         Matrix4x4 lightSpaceMatrix = Matrix4x4.Multiply(lightProjection, lightView);
         Raylib.SetShaderValueMatrix(myTerrainHeightMapShader, myLightSpaceMatrixLocation, lightSpaceMatrix);
@@ -198,22 +202,22 @@ internal class HeightMapVertexShaderRenderer : IRenderer
     public void Draw()
     {
         Raylib.BeginMode3D(myCamera.Instance);
-            DrawTerrainHeightMap();
-            if ((myErosionConfiguration.IsHydraulicErosionEnabled
-                || myErosionConfiguration.IsWindErosionEnabled)
-                    && myErosionConfiguration.IsSedimentDisplayed)
-            {
-                Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
-            }
-            if (myErosionConfiguration.IsHydraulicErosionEnabled
-                && myErosionConfiguration.IsWaterDisplayed)
-            {
-                Raylib.DrawModel(myWaterHeightMap, Vector3.Zero, 1.0f, Color.White);
-            }
-            if (myErosionConfiguration.IsSeaLevelDisplayed)
-            {
-                Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
-            }
+        DrawTerrainHeightMap();
+        if ((myErosionConfiguration.IsHydraulicErosionEnabled
+            || myErosionConfiguration.IsWindErosionEnabled)
+                && myErosionConfiguration.IsSedimentDisplayed)
+        {
+            Raylib.DrawModel(mySedimentHeightMap, Vector3.Zero, 1.0f, Color.White);
+        }
+        if (myErosionConfiguration.IsHydraulicErosionEnabled
+            && myErosionConfiguration.IsWaterDisplayed)
+        {
+            Raylib.DrawModel(myWaterHeightMap, Vector3.Zero, 1.0f, Color.White);
+        }
+        if (myErosionConfiguration.IsSeaLevelDisplayed)
+        {
+            Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
+        }
         Raylib.EndMode3D();
     }
 
