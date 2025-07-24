@@ -7,6 +7,7 @@ using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicEr
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
+using System.Diagnostics;
 
 namespace ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Grid;
 
@@ -97,6 +98,8 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     {
         for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             if (myErosionConfiguration.IsWaterAdded)
             {
                 AddWater();
@@ -116,6 +119,8 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
                 }
                 Collapse();
             }
+            stopwatch.Stop();
+            Console.WriteLine($"Grid Hydraulic erosion: {stopwatch.Elapsed}");
         }
     }
 

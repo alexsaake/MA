@@ -6,6 +6,7 @@ using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.MapGeneration.PlateTectonics.GPU;
@@ -161,11 +162,14 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
     public unsafe void SimulatePlateTectonics()
     {
         Console.WriteLine($"INFO: Simulating plate tectonics.");
-
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         MovePlates();
         FloatSegments();
         FillSegmentsGap();
         UpdateHeightMap();
+        stopwatch.Stop();
+        Console.WriteLine($"Plate tectonics: {stopwatch.Elapsed}");
 
         Console.WriteLine($"INFO: End of plate tectonics simulation.");
     }

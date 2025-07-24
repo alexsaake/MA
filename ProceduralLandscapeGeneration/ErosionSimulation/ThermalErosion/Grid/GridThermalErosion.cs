@@ -5,6 +5,7 @@ using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalEros
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
+using System.Diagnostics;
 
 namespace ProceduralLandscapeGeneration.ErosionSimulation.ThermalErosion.Grid;
 
@@ -57,6 +58,8 @@ internal class GridThermalErosion : IGridThermalErosion
 
     public void Simulate()
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
         {
             VerticalFlow();
@@ -66,6 +69,8 @@ internal class GridThermalErosion : IGridThermalErosion
             }
             Deposite();
         }
+        stopwatch.Stop();
+        Console.WriteLine($"Grid Thermal erosion: {stopwatch.Elapsed}");
     }
 
     internal void VerticalFlow()

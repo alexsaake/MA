@@ -6,6 +6,7 @@ using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.ErosionSimulation;
 using ProceduralLandscapeGeneration.GUI;
 using Raylib_cs;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Renderers.VertexShader.HeightMap;
@@ -201,6 +202,8 @@ internal class HeightMapVertexShaderRenderer : IRenderer
 
     public void Draw()
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         Raylib.BeginMode3D(myCamera.Instance);
         DrawTerrainHeightMap();
         if ((myErosionConfiguration.IsHydraulicErosionEnabled
@@ -219,6 +222,8 @@ internal class HeightMapVertexShaderRenderer : IRenderer
             Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
         }
         Raylib.EndMode3D();
+        stopwatch.Stop();
+        Console.WriteLine($"Vertex Heightmap renderer: {stopwatch.Elapsed}");
     }
 
     private void DrawTerrainHeightMap()

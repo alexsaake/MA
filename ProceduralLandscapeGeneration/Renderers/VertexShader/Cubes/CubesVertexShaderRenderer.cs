@@ -7,6 +7,7 @@ using ProceduralLandscapeGeneration.ErosionSimulation;
 using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.Renderers.VertexShader.Cubes;
 using Raylib_cs;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Renderers.VertexShader.HeightMap;
@@ -106,6 +107,8 @@ internal class CubesVertexShaderRenderer : IRenderer
 
     public void Draw()
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         Raylib.BeginMode3D(myCamera.Instance);
         Raylib.DrawModel(myTerrainCubes, Vector3.Zero, 1.0f, Color.White);
         if ((myErosionConfiguration.IsHydraulicErosionEnabled
@@ -124,6 +127,8 @@ internal class CubesVertexShaderRenderer : IRenderer
             Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
         }
         Raylib.EndMode3D();
+        stopwatch.Stop();
+        Console.WriteLine($"Vertex Cubes renderer: {stopwatch.Elapsed}");
     }
 
     public void Dispose()

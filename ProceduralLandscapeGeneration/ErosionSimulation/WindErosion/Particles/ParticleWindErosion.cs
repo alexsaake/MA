@@ -7,6 +7,7 @@ using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
+using System.Diagnostics;
 
 namespace ProceduralLandscapeGeneration.ErosionSimulation.WindErosion.Particles;
 
@@ -67,6 +68,8 @@ internal class ParticleWindErosion : IParticleWindErosion
 
     public void Simulate()
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         if (myParticleWindErosionConfiguration.PersistentSpeed.Length() == 0)
         {
             Console.WriteLine($"WARN: Simulation not possible. Wind speed is zero.");
@@ -88,6 +91,8 @@ internal class ParticleWindErosion : IParticleWindErosion
             Rlgl.DisableShader();
             Rlgl.MemoryBarrier();
         }
+        stopwatch.Stop();
+        Console.WriteLine($"Particle Wind erosion: {stopwatch.Elapsed}");
     }
 
     private void ResetParticlesWindErosionShaderBuffers()

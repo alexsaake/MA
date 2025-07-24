@@ -8,6 +8,7 @@ using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicEr
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
+using System.Diagnostics;
 
 namespace ProceduralLandscapeGeneration.ErosionSimulation.HydraulicErosion.Particles;
 
@@ -73,6 +74,8 @@ internal class ParticleHydraulicErosion : IParticleHydraulicErosion
 
     public void Simulate()
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         if (myHasParticlesChanged)
         {
             ResetHeightMapIndicesShaderBuffers();
@@ -96,6 +99,8 @@ internal class ParticleHydraulicErosion : IParticleHydraulicErosion
             Rlgl.DisableShader();
             Rlgl.MemoryBarrier();
         }
+        stopwatch.Stop();
+        Console.WriteLine($"Particle Hydraulic erosion: {stopwatch.Elapsed}");
     }
 
     private void ResetHydraulicErosionShaderBuffers()

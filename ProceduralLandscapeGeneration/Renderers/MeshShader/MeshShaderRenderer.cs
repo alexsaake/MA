@@ -3,6 +3,7 @@ using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicEr
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using Raylib_cs;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Renderers.MeshShader;
@@ -74,6 +75,8 @@ internal class MeshShaderRenderer : IRenderer
 
     public void Draw()
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         Raylib.BeginMode3D(myCamera.Instance);
         Rlgl.EnableShader(myTerrainHeightMapMeshShader.Id);
         Raylib.DrawMeshTasks(0, myMeshletCount);
@@ -122,6 +125,8 @@ internal class MeshShaderRenderer : IRenderer
             Rlgl.DisableShader();
         }
         Raylib.EndMode3D();
+        stopwatch.Stop();
+        Console.WriteLine($"Mesh Heightmap renderer: {stopwatch.Elapsed}");
     }
 
     public void Dispose()
