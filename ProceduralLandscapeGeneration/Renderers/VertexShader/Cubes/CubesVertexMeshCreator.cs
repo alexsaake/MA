@@ -1,6 +1,7 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using Raylib_cs;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Renderers.VertexShader.Cubes;
@@ -30,6 +31,8 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
 
     public unsafe Mesh CreateTerrainCubesMesh()
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         switch (myMapGenerationConfiguration.RockTypeCount)
         {
             case 1:
@@ -63,6 +66,8 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
         }
 
         Raylib.UploadMesh(&mesh, false);
+        stopwatch.Stop();
+        Console.WriteLine($"Cube mesh creator: {stopwatch.Elapsed}");
 
         return mesh;
     }

@@ -1,5 +1,6 @@
 ﻿using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using Raylib_cs;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.Renderers.VertexShader.HeightMap;
@@ -15,6 +16,8 @@ internal class HeightMapVertexMeshCreator : IHeightMapVertexMeshCreator
 
     public unsafe Mesh CreateTerrainHeightMapMesh()
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         Mesh mesh = new();
         int vertexCount = (int)myMapGenerationConfiguration.HeightMapPlaneSize;
         int triangleCount = (int)((myMapGenerationConfiguration.HeightMapSideLength - 1) * (myMapGenerationConfiguration.HeightMapSideLength - 1) * 2);
@@ -36,6 +39,8 @@ internal class HeightMapVertexMeshCreator : IHeightMapVertexMeshCreator
         }
 
         Raylib.UploadMesh(&mesh, false);
+        stopwatch.Stop();
+        Console.WriteLine($"Heightmap mesh creator: {stopwatch.Elapsed}");
 
         return mesh;
     }
