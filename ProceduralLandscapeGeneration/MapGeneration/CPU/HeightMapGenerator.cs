@@ -4,6 +4,7 @@ using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace ProceduralLandscapeGeneration.MapGeneration.CPU;
@@ -28,6 +29,8 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
     public unsafe void GenerateNoiseHeightMap()
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         float[] heightMap = GenerateNoiseMap(myMapGenerationConfiguration.RockTypeCount, myMapGenerationConfiguration.LayerCount);
 
         uint heightMapShaderBufferSize = (uint)heightMap.Length * sizeof(float);
@@ -36,6 +39,8 @@ internal class HeightMapGenerator : IHeightMapGenerator
         {
             Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapShaderBufferSize, 0);
         }
+        stopwatch.Stop();
+        Console.WriteLine($"CPU Noise Heightmap generator: {stopwatch.Elapsed}");
     }
 
     public unsafe void GenerateNoiseHeatMap()
