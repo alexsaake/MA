@@ -202,9 +202,9 @@ internal class HeightMapVertexShaderRenderer : IRenderer
 
     public void Draw()
     {
+        Raylib.BeginMode3D(myCamera.Instance);
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        Raylib.BeginMode3D(myCamera.Instance);
         DrawTerrainHeightMap();
         if ((myErosionConfiguration.IsHydraulicErosionEnabled
             || myErosionConfiguration.IsWindErosionEnabled)
@@ -221,9 +221,12 @@ internal class HeightMapVertexShaderRenderer : IRenderer
         {
             Raylib.DrawModel(mySeaLevelQuad, Vector3.Zero, 1.0f, Color.White);
         }
-        Raylib.EndMode3D();
         stopwatch.Stop();
-        Console.WriteLine($"Vertex Heightmap renderer: {stopwatch.Elapsed}");
+        if (myConfiguration.IsRendererTimeLogged)
+        {
+            Console.WriteLine($"Vertex Heightmap renderer: {stopwatch.Elapsed}");
+        }
+        Raylib.EndMode3D();
     }
 
     private void DrawTerrainHeightMap()

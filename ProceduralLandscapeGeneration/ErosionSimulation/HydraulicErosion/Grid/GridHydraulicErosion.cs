@@ -1,6 +1,7 @@
 ﻿using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Common.GPU.ComputeShaders;
+using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion.Grid;
@@ -15,6 +16,7 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
 {
     private const string ShaderDirectory = "ErosionSimulation/HydraulicErosion/Grid/Shaders/";
 
+    private readonly IConfiguration myConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IGridHydraulicErosionConfiguration myGridHydraulicErosionConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
@@ -33,8 +35,9 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     private bool myHasRainDropsChangedChanged;
     private bool myIsDisposed;
 
-    public GridHydraulicErosion(IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IMapGenerationConfiguration mapGenerationConfiguration, IShaderBuffers shaderBuffers, IRandom random)
+    public GridHydraulicErosion(IConfiguration configuration,IErosionConfiguration erosionConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IMapGenerationConfiguration mapGenerationConfiguration, IShaderBuffers shaderBuffers, IRandom random)
     {
+        myConfiguration = configuration;
         myErosionConfiguration = erosionConfiguration;
         myGridHydraulicErosionConfiguration = gridHydraulicErosionConfiguration;
         myComputeShaderProgramFactory = computeShaderProgramFactory;
@@ -98,6 +101,18 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
     {
         for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
         {
+            Stopwatch stopwatchIndices = new Stopwatch();
+            stopwatchIndices.Start();
+            if (myErosionConfiguration.IsWaterAdded)
+            {
+                CreateIndices();
+            }
+            stopwatchIndices.Stop();
+            if (myConfiguration.IsErosionIndicesTimeLogged)
+            {
+                Console.WriteLine($"Grid Hydraulic erosion indices: {stopwatchIndices.Elapsed}");
+            }
+
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             if (myErosionConfiguration.IsWaterAdded)
@@ -120,11 +135,14 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
                 Collapse();
             }
             stopwatch.Stop();
-            Console.WriteLine($"Grid Hydraulic erosion: {stopwatch.Elapsed}");
+            if (myConfiguration.IsErosionTimeLogged)
+            {
+                Console.WriteLine($"Grid Hydraulic erosion: {stopwatch.Elapsed}");
+            }
         }
     }
 
-    internal void AddWater()
+    internal void CreateIndices()
     {
         if (myHasRainDropsChangedChanged)
         {
@@ -140,7 +158,10 @@ internal class GridHydraulicErosion : IGridHydraulicErosion
                 CreateIndices(new IntVector2(myErosionConfiguration.WaterSourceXCoordinate, myErosionConfiguration.WaterSourceYCoordinate), myErosionConfiguration.WaterSourceRadius);
                 break;
         }
+    }
 
+    internal void AddWater()
+    {
         Rlgl.EnableShader(myRainComputeShaderProgram!.Id);
         Rlgl.ComputeShaderDispatch((uint)Math.Ceiling(myGridHydraulicErosionConfiguration.RainDrops / 64.0f), 1, 1);
         Rlgl.DisableShader();

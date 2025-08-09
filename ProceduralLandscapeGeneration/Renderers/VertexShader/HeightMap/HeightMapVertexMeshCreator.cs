@@ -1,4 +1,5 @@
-﻿using ProceduralLandscapeGeneration.Configurations.MapGeneration;
+﻿using ProceduralLandscapeGeneration.Configurations;
+using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using Raylib_cs;
 using System.Diagnostics;
 using System.Numerics;
@@ -7,10 +8,12 @@ namespace ProceduralLandscapeGeneration.Renderers.VertexShader.HeightMap;
 
 internal class HeightMapVertexMeshCreator : IHeightMapVertexMeshCreator
 {
+    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
 
-    public HeightMapVertexMeshCreator(IMapGenerationConfiguration mapGenerationConfiguration)
+    public HeightMapVertexMeshCreator(IConfiguration configuration,IMapGenerationConfiguration mapGenerationConfiguration)
     {
+        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
     }
 
@@ -40,7 +43,10 @@ internal class HeightMapVertexMeshCreator : IHeightMapVertexMeshCreator
 
         Raylib.UploadMesh(&mesh, false);
         stopwatch.Stop();
-        Console.WriteLine($"Heightmap mesh creator: {stopwatch.Elapsed}");
+        if (myConfiguration.IsMeshCreatorTimeLogged)
+        {
+            Console.WriteLine($"Heightmap mesh creator: {stopwatch.Elapsed}");
+        }
 
         return mesh;
     }

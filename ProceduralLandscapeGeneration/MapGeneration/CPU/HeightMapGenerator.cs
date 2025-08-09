@@ -1,6 +1,7 @@
 ﻿using DotnetNoise;
 using ProceduralLandscapeGeneration.Common;
 using ProceduralLandscapeGeneration.Common.GPU;
+using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
@@ -11,6 +12,7 @@ namespace ProceduralLandscapeGeneration.MapGeneration.CPU;
 
 internal class HeightMapGenerator : IHeightMapGenerator
 {
+    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IRandom myRandom;
     private readonly IShaderBuffers myShaderBuffers;
@@ -18,8 +20,9 @@ internal class HeightMapGenerator : IHeightMapGenerator
     private readonly FastNoise myNoiseGenerator;
     private bool myIsDisposed;
 
-    public HeightMapGenerator(IMapGenerationConfiguration mapGenerationConfiguration, IRandom random, IShaderBuffers shaderBuffers)
+    public HeightMapGenerator(IConfiguration configuration,IMapGenerationConfiguration mapGenerationConfiguration, IRandom random, IShaderBuffers shaderBuffers)
     {
+        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myRandom = random;
         myShaderBuffers = shaderBuffers;
@@ -40,7 +43,10 @@ internal class HeightMapGenerator : IHeightMapGenerator
             Rlgl.UpdateShaderBuffer(myShaderBuffers[ShaderBufferTypes.HeightMap], heightMapValuesPointer, heightMapShaderBufferSize, 0);
         }
         stopwatch.Stop();
-        Console.WriteLine($"CPU Noise Heightmap generator: {stopwatch.Elapsed}");
+        if (myConfiguration.IsHeightmapGeneratorTimeLogged)
+        {
+            Console.WriteLine($"CPU Noise Heightmap generator: {stopwatch.Elapsed}");
+        }
     }
 
     public unsafe void GenerateNoiseHeatMap()

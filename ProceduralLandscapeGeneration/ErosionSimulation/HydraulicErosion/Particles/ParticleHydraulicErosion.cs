@@ -74,14 +74,14 @@ internal class ParticleHydraulicErosion : IParticleHydraulicErosion
 
     public void Simulate()
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
         if (myHasParticlesChanged)
         {
             ResetHeightMapIndicesShaderBuffers();
             ResetHydraulicErosionShaderBuffers();
             myHasParticlesChanged = false;
         }
+        Stopwatch stopwatchIndices = new Stopwatch();
+        stopwatchIndices.Start();
         switch (myErosionConfiguration.WaterSource)
         {
             case WaterSourceTypes.Rain:
@@ -90,8 +90,15 @@ internal class ParticleHydraulicErosion : IParticleHydraulicErosion
             case WaterSourceTypes.Spring:
                 CreateIndices(new IntVector2(myErosionConfiguration.WaterSourceXCoordinate, myErosionConfiguration.WaterSourceYCoordinate), myErosionConfiguration.WaterSourceRadius);
                 break;
-        }        
+        }
+        stopwatchIndices.Stop();
+        if (myConfiguration.IsErosionIndicesTimeLogged)
+        {
+            Console.WriteLine($"Particle Hydraulic erosion indices: {stopwatchIndices.Elapsed}");
+        }
 
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
         {
             Rlgl.EnableShader(myHydraulicErosionParticleSimulationComputeShaderProgram!.Id);
@@ -100,7 +107,10 @@ internal class ParticleHydraulicErosion : IParticleHydraulicErosion
             Rlgl.MemoryBarrier();
         }
         stopwatch.Stop();
-        Console.WriteLine($"Particle Hydraulic erosion: {stopwatch.Elapsed}");
+        if (myConfiguration.IsErosionTimeLogged)
+        {
+            Console.WriteLine($"Particle Hydraulic erosion: {stopwatch.Elapsed}");
+        }
     }
 
     private void ResetHydraulicErosionShaderBuffers()

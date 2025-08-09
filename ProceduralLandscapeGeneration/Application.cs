@@ -7,6 +7,7 @@ using ProceduralLandscapeGeneration.GUI;
 using ProceduralLandscapeGeneration.MapGeneration;
 using ProceduralLandscapeGeneration.Renderers;
 using Raylib_cs;
+using System.Diagnostics;
 
 namespace ProceduralLandscapeGeneration;
 
@@ -69,6 +70,8 @@ internal class Application : IApplication
 
         while (!Raylib.WindowShouldClose())
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             if (myIsResetRequired)
             {
                 myErosionConfiguration.IterationCount = 0;
@@ -110,15 +113,20 @@ internal class Application : IApplication
             }
 
             Raylib.BeginDrawing();
-                myCamera!.Update();
-                myRenderer!.Update();
-                Raylib.ClearBackground(Color.SkyBlue);
-                myRenderer!.Draw();
-                if (myShowUI)
-                {
-                    myConfigurationGUI.Draw();
-                }
+            myCamera!.Update();
+            myRenderer!.Update();
+            Raylib.ClearBackground(Color.SkyBlue);
+            myRenderer!.Draw();
+            if (myShowUI)
+            {
+                myConfigurationGUI.Draw();
+            }
             Raylib.EndDrawing();
+            stopwatch.Stop();
+            if (myConfiguration.IsGameLoopPassTimeLogged)
+            {
+                Console.WriteLine($"game-loop pass: {stopwatch.Elapsed}");
+            }
         }
 
         myMapGenerationConfiguration.ResetRequired -= OnResetRequired;

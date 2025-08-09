@@ -1,4 +1,5 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
+using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using Raylib_cs;
 using System.Diagnostics;
@@ -20,11 +21,13 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
     private static Color myFineSedimentColor = new Color(1.0f, 0.9f, 0.6f, 1.0f);
     private static Color[]? myRockTypeColors;
 
+    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IShaderBuffers myShaderBuffers;
 
-    public CubesVertexMeshCreator(IMapGenerationConfiguration mapGenerationConfiguration, IShaderBuffers shaderBuffers)
+    public CubesVertexMeshCreator(IConfiguration configuration,IMapGenerationConfiguration mapGenerationConfiguration, IShaderBuffers shaderBuffers)
     {
+        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myShaderBuffers = shaderBuffers;
     }
@@ -67,7 +70,10 @@ internal class CubesVertexMeshCreator : ICubesVertexMeshCreator
 
         Raylib.UploadMesh(&mesh, false);
         stopwatch.Stop();
-        Console.WriteLine($"Cube mesh creator: {stopwatch.Elapsed}");
+        if (myConfiguration.IsMeshCreatorTimeLogged)
+        {
+            Console.WriteLine($"Cube mesh creator: {stopwatch.Elapsed}");
+        }
 
         return mesh;
     }

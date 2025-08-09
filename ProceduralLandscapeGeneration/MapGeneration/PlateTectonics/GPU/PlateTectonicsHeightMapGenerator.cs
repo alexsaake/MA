@@ -16,6 +16,7 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 {
     private const string ShaderDirectory = "MapGeneration/PlateTectonics/GPU/Shaders/";
 
+    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IPlateTectonicsConfiguration myPlateTectonicsConfiguration;
     private readonly IRandom myRandom;
@@ -40,8 +41,9 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     private bool myIsDisposed;
 
-    public PlateTectonicsHeightMapGenerator(IMapGenerationConfiguration mapGenerationConfiguration, IPlateTectonicsConfiguration plateTectonicsConfiguration, IRandom random, IShaderBuffers shaderBuffers, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory)
+    public PlateTectonicsHeightMapGenerator(IConfiguration configuration,IMapGenerationConfiguration mapGenerationConfiguration, IPlateTectonicsConfiguration plateTectonicsConfiguration, IRandom random, IShaderBuffers shaderBuffers, ILifetimeScope lifetimeScope, IComputeShaderProgramFactory computeShaderProgramFactory)
     {
+        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myPlateTectonicsConfiguration = plateTectonicsConfiguration;
         myRandom = random;
@@ -169,7 +171,10 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
         FillSegmentsGap();
         UpdateHeightMap();
         stopwatch.Stop();
-        Console.WriteLine($"Plate tectonics: {stopwatch.Elapsed}");
+        if (myConfiguration.IsHeightmapGeneratorTimeLogged)
+        {
+            Console.WriteLine($"Plate tectonics: {stopwatch.Elapsed}");
+        }
 
         Console.WriteLine($"INFO: End of plate tectonics simulation.");
     }

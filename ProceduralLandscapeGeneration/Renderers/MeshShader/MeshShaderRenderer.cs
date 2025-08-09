@@ -1,4 +1,5 @@
-﻿using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
+﻿using ProceduralLandscapeGeneration.Configurations;
+using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.HydraulicErosion;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.WindErosion;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
@@ -12,6 +13,7 @@ internal class MeshShaderRenderer : IRenderer
 {
     private const string ShaderDirectory = "Renderers/MeshShader/Shaders/";
 
+    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
     private readonly ICamera myCamera;
@@ -27,8 +29,9 @@ internal class MeshShaderRenderer : IRenderer
     private uint myMeshletCount;
     private bool myIsDisposed;
 
-    public MeshShaderRenderer(IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, ICamera camera)
+    public MeshShaderRenderer(IConfiguration configuration, IMapGenerationConfiguration mapGenerationConfiguration, IErosionConfiguration erosionConfiguration, ICamera camera)
     {
+        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
         myCamera = camera;
@@ -75,9 +78,9 @@ internal class MeshShaderRenderer : IRenderer
 
     public void Draw()
     {
+        Raylib.BeginMode3D(myCamera.Instance);
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        Raylib.BeginMode3D(myCamera.Instance);
         Rlgl.EnableShader(myTerrainHeightMapMeshShader.Id);
         Raylib.DrawMeshTasks(0, myMeshletCount);
         Rlgl.DisableShader();
@@ -124,9 +127,12 @@ internal class MeshShaderRenderer : IRenderer
             Raylib.DrawMeshTasks(0, 1);
             Rlgl.DisableShader();
         }
-        Raylib.EndMode3D();
         stopwatch.Stop();
-        Console.WriteLine($"Mesh Heightmap renderer: {stopwatch.Elapsed}");
+        if (myConfiguration.IsRendererTimeLogged)
+        {
+            Console.WriteLine($"Mesh Heightmap renderer: {stopwatch.Elapsed}");
+        }
+        Raylib.EndMode3D();
     }
 
     public void Dispose()

@@ -1,5 +1,6 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Common.GPU.ComputeShaders;
+using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
 using ProceduralLandscapeGeneration.Configurations.Types;
 using Raylib_cs;
@@ -11,14 +12,16 @@ internal class HeightMapGenerator : IHeightMapGenerator
 {
     private const string ShaderDirectory = "MapGeneration/GPU/Shaders/";
 
+    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IComputeShaderProgramFactory myComputeShaderProgramFactory;
     private readonly IShaderBuffers myShaderBuffers;
 
     private bool myIsDisposed;
 
-    public HeightMapGenerator(IMapGenerationConfiguration mapGenerationConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
+    public HeightMapGenerator(IConfiguration configuration,IMapGenerationConfiguration mapGenerationConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
     {
+        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myComputeShaderProgramFactory = computeShaderProgramFactory;
         myShaderBuffers = shaderBuffers;
@@ -59,7 +62,10 @@ internal class HeightMapGenerator : IHeightMapGenerator
 
         myIsDisposed = false;
         stopwatch.Stop();
-        Console.WriteLine($"GPU Noise Heightmap generator: {stopwatch.Elapsed}");
+        if (myConfiguration.IsHeightmapGeneratorTimeLogged)
+        {
+            Console.WriteLine($"GPU Noise Heightmap generator: {stopwatch.Elapsed}");
+        }
     }
 
     public unsafe void GenerateNoiseHeatMap()

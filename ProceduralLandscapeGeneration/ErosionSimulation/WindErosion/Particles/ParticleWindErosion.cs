@@ -68,8 +68,6 @@ internal class ParticleWindErosion : IParticleWindErosion
 
     public void Simulate()
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
         if (myParticleWindErosionConfiguration.PersistentSpeed.Length() == 0)
         {
             Console.WriteLine($"WARN: Simulation not possible. Wind speed is zero.");
@@ -82,8 +80,17 @@ internal class ParticleWindErosion : IParticleWindErosion
             myHasParticlesChanged = false;
         }
 
+        Stopwatch stopwatchIndices = new Stopwatch();
+        stopwatchIndices.Start();
         CreateRandomIndicesAlongBorder();
+        stopwatchIndices.Stop();
+        if (myConfiguration.IsErosionIndicesTimeLogged)
+        {
+            Console.WriteLine($"Particle Wind erosion indices: {stopwatchIndices.Elapsed}");
+        }
 
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         for (int iteration = 0; iteration < myErosionConfiguration.IterationsPerStep; iteration++)
         {
             Rlgl.EnableShader(myWindErosionParticleSimulationComputeShaderProgram!.Id);
@@ -92,7 +99,10 @@ internal class ParticleWindErosion : IParticleWindErosion
             Rlgl.MemoryBarrier();
         }
         stopwatch.Stop();
-        Console.WriteLine($"Particle Wind erosion: {stopwatch.Elapsed}");
+        if (myConfiguration.IsErosionTimeLogged)
+        {
+            Console.WriteLine($"Particle Wind erosion: {stopwatch.Elapsed}");
+        }
     }
 
     private void ResetParticlesWindErosionShaderBuffers()

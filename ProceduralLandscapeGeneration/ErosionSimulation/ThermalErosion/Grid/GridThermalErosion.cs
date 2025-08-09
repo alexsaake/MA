@@ -1,5 +1,6 @@
 ﻿using ProceduralLandscapeGeneration.Common.GPU;
 using ProceduralLandscapeGeneration.Common.GPU.ComputeShaders;
+using ProceduralLandscapeGeneration.Configurations;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation;
 using ProceduralLandscapeGeneration.Configurations.ErosionSimulation.ThermalErosion;
 using ProceduralLandscapeGeneration.Configurations.MapGeneration;
@@ -13,6 +14,7 @@ internal class GridThermalErosion : IGridThermalErosion
 {
     private const string ShaderDirectory = "ErosionSimulation/ThermalErosion/Grid/Shaders/";
 
+    private readonly IConfiguration myConfiguration;
     private readonly IMapGenerationConfiguration myMapGenerationConfiguration;
     private readonly IErosionConfiguration myErosionConfiguration;
     private readonly IThermalErosionConfiguration myThermalErosionConfiguration;
@@ -25,8 +27,9 @@ internal class GridThermalErosion : IGridThermalErosion
 
     private bool myIsDisposed;
 
-    public GridThermalErosion(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
+    public GridThermalErosion(IConfiguration configuration,IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IComputeShaderProgramFactory computeShaderProgramFactory, IShaderBuffers shaderBuffers)
     {
+        myConfiguration = configuration;
         myMapGenerationConfiguration = mapGenerationConfiguration;
         myErosionConfiguration = erosionConfiguration;
         myThermalErosionConfiguration = thermalErosionConfiguration;
@@ -70,7 +73,10 @@ internal class GridThermalErosion : IGridThermalErosion
             Deposite();
         }
         stopwatch.Stop();
-        Console.WriteLine($"Grid Thermal erosion: {stopwatch.Elapsed}");
+        if (myConfiguration.IsErosionTimeLogged)
+        {
+            Console.WriteLine($"Grid Thermal erosion: {stopwatch.Elapsed}");
+        }
     }
 
     internal void VerticalFlow()

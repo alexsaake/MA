@@ -24,6 +24,12 @@ internal class Configuration : IConfiguration
     public int ScreenHeight { get; set; }
     public int ShadowMapResolution { get; set; }
     public bool IsShadowMapDisplayed { get; set; }
+    public bool IsGameLoopPassTimeLogged { get; set; }
+    public bool IsMeshCreatorTimeLogged { get; set; }
+    public bool IsRendererTimeLogged { get; set; }
+    public bool IsErosionTimeLogged { get; set; }
+    public bool IsErosionIndicesTimeLogged { get; set; }
+    public bool IsHeightmapGeneratorTimeLogged { get; set; }
 
     public Configuration(IMapGenerationConfiguration mapGenerationConfiguration,IErosionConfiguration erosionConfiguration, IRockTypesConfiguration rockTypesConfiguration, IGridHydraulicErosionConfiguration gridHydraulicErosionConfiguration, IParticleHydraulicErosionConfiguration particleHydraulicErosionConfiguration, IThermalErosionConfiguration thermalErosionConfiguration, IParticleWindErosionConfiguration particleWindErosionConfiguration, IPlateTectonicsConfiguration plateTectonicsConfiguration)
     {
@@ -40,6 +46,13 @@ internal class Configuration : IConfiguration
         ScreenHeight = 1080;
         ShadowMapResolution = 1028;
         IsShadowMapDisplayed = true;
+
+        IsGameLoopPassTimeLogged = false;
+        IsMeshCreatorTimeLogged = false;
+        IsRendererTimeLogged = false;
+        IsErosionTimeLogged = false;
+        IsErosionIndicesTimeLogged = false;
+        IsHeightmapGeneratorTimeLogged = false;
     }
 
     public void Initialize()
