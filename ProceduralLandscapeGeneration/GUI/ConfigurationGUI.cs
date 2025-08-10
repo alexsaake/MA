@@ -102,7 +102,7 @@ internal class ConfigurationGUI : IConfigurationGUI
         mySpringPanel.Add(new ValueBoxIntWithLabel("Radius", (value) => erosionConfiguration.WaterSourceRadius = (uint)value, (int)erosionConfiguration.WaterSourceRadius, 0, 100));
 
         myGridErosionPanel = new PanelWithElements("Grid Hydraulic Erosion");
-        myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridHydraulicErosionConfiguration.RainDrops = (uint)value, (int)gridHydraulicErosionConfiguration.RainDrops, 1, 100000));
+        myGridErosionPanel.Add(new ValueBoxIntWithLabel("Rain Drops", (value) => gridHydraulicErosionConfiguration.RainDrops = (uint)value, (int)gridHydraulicErosionConfiguration.RainDrops, 1, 1000000));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Water Increase", (value) => gridHydraulicErosionConfiguration.WaterIncrease = value, gridHydraulicErosionConfiguration.WaterIncrease));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Gravity", (value) => gridHydraulicErosionConfiguration.Gravity = value, gridHydraulicErosionConfiguration.Gravity));
         myGridErosionPanel.Add(new ValueBoxFloatWithLabel("Dampening", (value) => gridHydraulicErosionConfiguration.Dampening = value, gridHydraulicErosionConfiguration.Dampening));

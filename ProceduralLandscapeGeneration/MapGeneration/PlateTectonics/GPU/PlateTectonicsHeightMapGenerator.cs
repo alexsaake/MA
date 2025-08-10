@@ -163,7 +163,6 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
 
     public unsafe void SimulatePlateTectonics()
     {
-        Console.WriteLine($"INFO: Simulating plate tectonics.");
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         MovePlates();
@@ -175,8 +174,6 @@ internal class PlateTectonicsHeightMapGenerator : IPlateTectonicsHeightMapGenera
         {
             Console.WriteLine($"Plate tectonics: {stopwatch.Elapsed}");
         }
-
-        Console.WriteLine($"INFO: End of plate tectonics simulation.");
     }
 
     private void MovePlates()
