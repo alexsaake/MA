@@ -1,4 +1,4 @@
-﻿#version 430
+#version 430
 
 //https://www.shadertoy.com/view/NlSGDz
 // implementation of MurmurHash (https://sites.google.com/site/murmurhash/) for a 
