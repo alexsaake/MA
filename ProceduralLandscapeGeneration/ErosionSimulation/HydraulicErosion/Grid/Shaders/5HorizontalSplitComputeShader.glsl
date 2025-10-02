@@ -232,7 +232,7 @@ bool TrySplit(uint index, uint neighborIndex, vec2 direction)
     
     if(gridHydraulicErosionCell.WaterHeight > 0)
     {
-	    if(ceil(gridHydraulicErosionCell.WaterVelocity) - direction != 0)
+	    if(ceil(gridHydraulicErosionCell.WaterVelocity) - direction != vec2(0))
         {
             float neighborTotalHeight = TotalHeightMapHeight(neighborIndex);
             float neighborTotalTerrainAndWaterHeight = neighborTotalHeight + gridHydraulicErosionCell.WaterHeight;
